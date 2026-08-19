@@ -1,39 +1,60 @@
 # Titans Command Center
 
-A mobile-first, installable Tennessee Titans intelligence PWA. The app combines durable football data, official/team information, near-live game state, social signals, weather, and derived analytics behind one normalized Neon Postgres data model.
+A mobile-first, installable Tennessee Titans fan HQ and data PWA. The project combines official/current team information, game-day context, roster and transaction snapshots, free market-data adapters, franchise history, and a Neon Postgres warehouse behind a custom Titans-focused UI.
 
-## Current build — v0.5.2
+## Current build — v0.6.1
 
-- Neon Postgres is the system of record.
-- Database-first bootstrap with verified local fallback data when Neon is unavailable.
-- 2026 Titans games, roster snapshots, official transaction history, ranked intelligence feed, source metadata, and sync history.
-- 27-table Neon warehouse covering games, players, rosters, events, plays, drives, player stats, derived team metrics, injuries, depth charts, transactions, contracts, standings, weather, detailed market odds, futures snapshots, saved filters, and ingestion provenance.
-- ESPN near-live scoreboard adapter behind a same-origin API route. ESPN remains an unofficial/replaceable source.
-- NFLverse roster + weekly stats ingestion.
-- Streaming NFLverse play-by-play importer that only writes Titans games instead of holding the full season in memory.
-- Bluesky public-search ingestion.
-- NWS kickoff-hour weather + active alert ingestion for Titans home games inside the seven-day forecast window.
-- Source confidence tiers: official → media → reporter → community.
-- Database-backed Stats Lab plus a 1999-present Titans historical explorer for offense/defense EPA, WPA, success rate, explosive rate, down/quarter/play-type splits. Unpopulated analytics show zero/awaiting-ingest rather than demo values.
-- Dedicated Transactions screen with official-source move-type and text filters.
-- Dedicated Markets screen for live/pregame moneyline, spread, total, Titans team props, Titans player props, alternate lines, best-book prices, and line movement metadata.
-- Free/no-card PropLine market adapter as the primary feed; fully integrated Odds-API.io cross-check/fallback; ESPN basic-line emergency fallback when neither free feed returns usable data.
-- Player intelligence pages combine roster context, game-stat history, injury history, and active player props.
-- Vercel Cron-compatible daily refresh plus protected manual selective sync endpoint.
-- Installable PWA manifest, icons, service worker, responsive desktop/tablet/mobile navigation.
+This release is the first **content-integrity audited** build. On 2026-08-19, current and historical claims were checked against TennesseeTitans.com, NFL.com, the Pro Football Hall of Fame, Pro Football Reference, and Wikipedia. Current team sources outrank secondary references.
+
+### Working now
+
+- GitHub `main` auto-deploys to the existing Vercel `titans-command-center` project.
+- Neon Postgres is the production data store; the UI falls back to clearly labeled local data if Neon is unavailable.
+- Production Neon contains a dated official-roster snapshot audited 2026-08-19: **91 Active + 4 Reserve/Injured = 95 player records**.
+- 2026 schedule data is source-audited. Week 9 is the bye; Week 18 at Houston remains genuinely TBD rather than using a fabricated placeholder kickoff.
+- Official Titans transaction history is stored through 2026-08-17 and linked back to the team transaction page.
+- Current personnel metadata includes controlling owner Amy Adams Strunk, GM Mike Borgonzi, President/CEO Burke Nihill, and head coach Robert Saleh.
+- The current 2026 brand treatment uses **The Shield** and Titans Blue-led UI; legacy sections separately cover the Oilers, original Titans/fireball identity, 2018 uniform era, and 2026 Shield era.
+- ESPN near-live scoreboard adapter is isolated behind a same-origin API route and treated as unofficial/replaceable.
+- PropLine is the primary free/no-card market provider; Odds-API.io is the free/no-card secondary/fallback; ESPN basic lines are an emergency no-key fallback.
+- Bluesky public search is available as a free social signal.
+- API/auth responses are never stored in the PWA cache.
+- Protected sync endpoints are POST-only where they change state.
+
+### Built but not yet fully populated/automated
+
+- The Neon warehouse has tables for play-by-play, drives, advanced metrics, injuries, depth charts, contracts, standings, weather and market snapshots, but several of these datasets are not yet populated.
+- `syncNflverseRoster`, `syncNflverseStats`, and stored NWS weather synchronization are currently explicit **skipped/stub** jobs. They must not be described as active ingestion until implemented and verified.
+- The current 95-player roster was loaded from an audited official Titans roster snapshot; automated official-roster refresh is the next data-quality task.
+- Recent official transactions are accurate as of the content audit; automated official transaction-page ingestion is still pending.
+- Play-level historical analytics remain empty until the historical importer is restored/run against the current v0.6 schema.
+
+## Source hierarchy
+
+For current/frequently changing facts:
+
+1. TennesseeTitans.com — roster, front office, coaching, schedule, transactions, brand and team news.
+2. NFL.com — official league/schedule cross-check.
+3. Open structured sources such as nflverse — data enrichment after identity/date validation.
+4. Reputable secondary references.
+5. Wikipedia — historical cross-check/discovery, not authority for live personnel.
+
+For stable historical facts, official Titans history, the Pro Football Hall of Fame and NFL historical records come first; Pro Football Reference and Wikipedia are secondary checks.
+
+See [`docs/CONTENT_INTEGRITY.md`](docs/CONTENT_INTEGRITY.md) for the full policy and audit notes.
 
 ## Local development
 
 ```bash
 npm install
 cp .env.example .env.local
-# Add DATABASE_URL and secrets to your shell/environment.
+# Put DATABASE_URL and server-only secrets in your environment.
 npm run dev
 ```
 
 Open `http://localhost:4173`.
 
-The app still opens without `DATABASE_URL`; it clearly labels the data as fallback mode instead of silently pretending a database connection exists.
+The app can open without `DATABASE_URL`; it should visibly behave as fallback data rather than silently pretending the database is connected.
 
 ## Quality checks
 
@@ -41,39 +62,48 @@ The app still opens without `DATABASE_URL`; it clearly labels the data as fallba
 npm run check
 ```
 
-To run the streaming Titans-only play-by-play import from a machine/CI runner with enough runtime for a season file:
+That runs:
 
-```bash
-DATABASE_URL='...' npm run import:pbp -- 2026
-# Full Titans era backfill:
-DATABASE_URL='...' npm run import:history -- 1999 2026
-```
+- Node regression tests
+- Titans factual-content assertions
+- credential/secret scan
+- recursive JavaScript syntax checks
 
-Do not put `DATABASE_URL`, `INGEST_SECRET`, `CRON_SECRET`, or provider keys in browser code.
+The content audit specifically protects facts such as the 1959 franchise grant vs. 1960 first season, the Week 9 bye, Week 18 TBD status, current team colors, and the fallback-roster disclosure.
 
 ## API routes
 
-- `GET /api/health` — app + Neon health/configuration.
-- `GET /api/provider-health` — **protected admin diagnostic** for the configured free odds feeds; requires the ingest/cron bearer secret and never returns credentials.
-- `GET /api/data` — normalized app bootstrap from Neon.
+- `GET /api/health` — app version, content-audit date, Neon health and provider configuration booleans.
+- `GET /api/provider-health` — protected free-provider diagnostics; never returns credentials.
+- `GET /api/data` — normalized bootstrap from Neon.
 - `GET /api/espn-scoreboard` — read-only near-live ESPN proxy.
-- `GET /api/bluesky-search?q=...` — read-only public Bluesky search.
-- `GET /api/odds` — canonical public current-Titans market refresh. PropLine is primary, Odds-API.io is quota-aware fallback, and ESPN is the no-key emergency basic-line fallback. Query parameters are rejected so cache-busting traffic cannot exhaust free quotas. Deep cross-check/period refreshes run through the protected odds sync job.
-- `GET /api/player?id=...` — player intelligence profile from Neon.
-- `GET /api/analytics?season=2026&side=offense` — historical/play-level Titans analytics explorer.
-- `POST /api/sync` — protected state-changing ingestion. Optional `?job=espn,nws-weather` selects jobs. GET is intentionally rejected.
-- `GET /api/cron-refresh` — protected Vercel Cron daily deep refresh.
+- `GET /api/bluesky-search?q=...` — read-only Bluesky public search.
+- `GET /api/odds` — canonical cached Titans odds endpoint; arbitrary query parameters are rejected to protect free quotas.
+- `GET /api/player?id=...` — player profile scaffold from Neon.
+- `GET /api/analytics?...` — analytics scaffold/coverage endpoint; meaningful play-level output depends on PBP backfill.
+- `POST /api/sync` — protected state-changing sync endpoint.
+- `GET /api/cron-refresh` — protected Vercel Cron refresh endpoint.
 
-For a server-side provider diagnostic without exposing credentials, run `npm run test:providers`.
+## Free/no-card policy
 
-Available protected sync jobs: `espn`, `bluesky`, `nflverse-roster`, `nflverse-stats`, `nws-weather`, `odds`.
+Core dependencies must remain usable at $0 without entering a payment card. Server credentials belong only in Vercel/environment configuration and must never be committed to GitHub or shipped to browser JavaScript.
 
-## Deployment
+Current data/provider strategy:
 
-The project is Vercel-ready. Set environment variables from `.env.example`, especially `DATABASE_URL`, `INGEST_SECRET`, and `CRON_SECRET`. `CRON_SECRET` is used to authenticate Vercel Cron requests. The default cron runs once per day to stay compatible with Vercel Hobby scheduling limits; live scoreboard/social reads remain available on demand.
+- Tennessee Titans / NFL public pages — official facts
+- nflverse — open football datasets
+- ESPN consumer JSON — isolated unofficial live fallback
+- Bluesky public API — social signals
+- NWS / weather.gov — weather
+- PropLine — primary free/no-card market API
+- Odds-API.io — secondary free/no-card market API
 
-See `docs/NEON.md` for database/ingestion operations, `docs/SOURCE_PLAN.md` for provider/trust strategy, `docs/ODDS.md` for live market integration, `docs/HISTORICAL_ANALYTICS.md` for the Titans-era backfill, and `docs/VERCEL_403.md` for deployment-permission diagnostics.
+## Database
 
-## Provider policy
+The repository schema is aligned to the live **Neon schema v0.6.0**. `db/seed.sql` is intentionally conservative: it seeds source metadata, the Titans team record, a clearly labeled featured fallback player sample, and a small dated official transaction snapshot rather than fabricating a complete live dataset.
 
-Official team/NFL/NWS facts outrank media reports; curated reporters are fast signals; community content is discovery/trend data only. Raw payloads are preserved alongside normalized records so conflicts and provider changes can be audited and reprocessed later.
+`db/migrations/008_content_integrity_20260819.sql` records the schedule, roster-position and official-transaction corrections from the 2026-08-19 audit.
+
+## Branding
+
+This is an unofficial fan-built project. Team/NFL marks remain property of their respective rights holders. `docs/BRAND_UI.md` separates official current-team color/identity facts from implementation-only UI accent colors and from throwback/reference artwork.
