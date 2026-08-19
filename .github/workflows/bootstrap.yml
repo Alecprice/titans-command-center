@@ -21,12 +21,12 @@ jobs:
         run: |
           set -euo pipefail
           test -f bootstrap.ready
-          test -f source.part01
+          test -f source.part00
           rm -rf .bootstrap
           mkdir -p .bootstrap
           cat source.part* > .bootstrap/archive.b64
           base64 -d .bootstrap/archive.b64 > .bootstrap/titans.zip
-          echo "6f9a6e6c94cefc3931e63ff0da006eaef3db763fa21947dc79f11cc2d07898ed  .bootstrap/titans.zip" | sha256sum -c -
+          echo "72169d85cdf45f4fcbe4a368867b8cb8a0f975f514cc926cdec45335082bd5d2  .bootstrap/titans.zip" | sha256sum -c -
           unzip -tq .bootstrap/titans.zip
           unzip -q .bootstrap/titans.zip -d .bootstrap/unpacked
           SRC="$(find .bootstrap/unpacked -mindepth 1 -maxdepth 1 -type d | head -n 1)"
