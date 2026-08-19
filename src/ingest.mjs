@@ -1,40 +1,30 @@
 import crypto from 'node:crypto';
 import { fetchFreeOdds } from './odds.mjs';
+import { getSql } from './db.mjs';
 
-const APP_VERSION='0.6.5';
+const APP_VERSION='0.6.6';
 const safeEqual=(a,b)=>{a=String(a||'');b=String(b||'');if(!a||!b)return false;const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&crypto.timingSafeEqual(x,y)};
 const bearer=req=>String(req.headers?.authorization||'').replace(/^Bearer\s+/i,'').trim();
-
-export function requireIngestAuth(req, env=process.env){const ingest=env.INGEST_SECRET,cron=env.CRON_SECRET;if(!ingest&&!cron)return {ok:false,status:503,error:'Ingestion auth is not configured'};const suppliedHeader=String(req.headers?.['x-ingest-secret']||'').trim(),suppliedBearer=bearer(req),ok=[ingest,cron].filter(Boolean).some(expected=>safeEqual(suppliedHeader,expected)||safeEqual(suppliedBearer,expected));return ok?{ok:true,status:200}:{ok:false,status:401,error:'Unauthorized'};}
-export function requireAdminAuth(req, env=process.env){const expected=env.INGEST_SECRET||env.CRON_SECRET;if(!expected)return {ok:false,status:503,error:'Admin auth is not configured'};const ok=safeEqual(String(req.headers?.['x-ingest-secret']||''),expected)||safeEqual(bearer(req),expected);return ok?{ok:true,status:200}:{ok:false,status:401,error:'Unauthorized'};}
-
+export function requireIngestAuth(req,env=process.env){const ingest=env.INGEST_SECRET,cron=env.CRON_SECRET;if(!ingest&&!cron)return {ok:false,status:503,error:'Ingestion auth is not configured'};const h=String(req.headers?.['x-ingest-secret']||'').trim(),b=bearer(req),ok=[ingest,cron].filter(Boolean).some(expected=>safeEqual(h,expected)||safeEqual(b,expected));return ok?{ok:true,status:200}:{ok:false,status:401,error:'Unauthorized'};}
+export function requireAdminAuth(req,env=process.env){const expected=env.INGEST_SECRET||env.CRON_SECRET;if(!expected)return {ok:false,status:503,error:'Admin auth is not configured'};const ok=safeEqual(String(req.headers?.['x-ingest-secret']||''),expected)||safeEqual(bearer(req),expected);return ok?{ok:true,status:200}:{ok:false,status:401,error:'Unauthorized'};}
 async function response(url,options={}){const r=await fetch(url,{...options,signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error(`Upstream returned ${r.status}`);return r;}
 async function json(url,options={}){return (await response(url,options)).json();}
 async function text(url,options={}){return (await response(url,options)).text();}
-
-export function summarizeRefreshResults(results=[]){
-  const succeeded=results.filter(r=>r?.ok&&!r?.skipped).length;
-  const skipped=results.filter(r=>r?.skipped).length;
-  const failed=results.length-succeeded-skipped;
-  return {ok:succeeded>0,partial:skipped>0||failed>0,succeeded,skipped,failed};
+export function summarizeRefreshResults(results=[]){const succeeded=results.filter(r=>r?.ok&&!r?.skipped).length,skipped=results.filter(r=>r?.skipped).length,failed=results.length-succeeded-skipped;return {ok:succeeded>0,partial:skipped>0||failed>0,succeeded,skipped,failed};}
+export function classifySyncResult(result={}){return result.skipped?'skipped':result.ok?'success':'failed';}
+function sourceSlug(result={}){const raw=String(result.source||result.provider||'titans-cc').toLowerCase();if(raw.includes('prop'))return 'propline';if(raw.includes('odds-api'))return 'odds-api-io';if(raw.includes('espn'))return 'espn';if(raw.includes('blue'))return 'bluesky';if(raw.includes('nflverse'))return 'nflverse';if(raw.includes('nws'))return 'nws';if(raw.includes('titan'))return 'titans';return 'titans-cc';}
+export async function recordSyncRun(env=process.env,job,result={},startedAt=new Date()){
+  try{
+    const sql=await getSql(env);if(!sql)return {stored:false};
+    const slug=sourceSlug(result),[source]=await sql`select id from sources where slug=${slug} limit 1`;if(!source)return {stored:false};
+    const status=classifySyncResult(result),metadata={note:result.note||'',provider:result.provider||null,skipped:Boolean(result.skipped),checks:Array.isArray(result.checks)?result.checks.map(c=>({slug:c.slug,ok:Boolean(c.ok),bytes:Number(c.bytes||0),url:c.url||''})):[]};
+    const meta=JSON.stringify(metadata),error=result.error?String(result.error).slice(0,500):null;
+    await sql`insert into sync_runs(source_id,job_type,status,started_at,finished_at,records_seen,records_written,error_message,metadata) values(${source.id},${job},${status},${startedAt},now(),${Number(result.recordsSeen||0)},${Number(result.recordsWritten||0)},${error},${meta}::jsonb)`;
+    return {stored:true,status,source:slug};
+  }catch(error){console.error('[recordSyncRun]',job,error);return {stored:false};}
 }
-
-export async function syncTitansOfficialAudit(){
-  const checks=[
-    {slug:'roster',url:'https://www.tennesseetitans.com/team/players-roster/',marker:/Titans Roster|Player\s*\|\s*#/i},
-    {slug:'transactions',url:'https://www.tennesseetitans.com/team/transactions/',marker:/TRANSACTIONS|Titans Transactions/i},
-    {slug:'schedule',url:'https://www.tennesseetitans.com/schedule/',marker:/2026 Schedule|WEEK 18|Titans 2026 Schedule/i},
-    {slug:'depth-chart',url:'https://www.tennesseetitans.com/team/depth-chart',marker:/DEPTH CHART|Depth Chart/i}
-  ];
-  const results=await Promise.all(checks.map(async check=>{
-    try{const body=await text(check.url,{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`}});return {slug:check.slug,ok:check.marker.test(body),bytes:body.length,url:check.url};}
-    catch(error){return {slug:check.slug,ok:false,bytes:0,url:check.url,error:'Official source unavailable'};}
-  }));
-  const healthy=results.filter(x=>x.ok).length;
-  return {ok:healthy===results.length,source:'titans',recordsSeen:results.length,recordsWritten:0,checks:results,note:'Official-source reachability/marker audit only; no HTML data is persisted by this job.'};
-}
-
-export async function syncEspn(){const data=await json('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`}});const events=(data.events||[]).filter(e=>/Tennessee Titans|\bTEN\b/i.test(JSON.stringify(e)));return {ok:true,source:'espn',recordsSeen:events.length,recordsWritten:0,note:'Near-live scoreboard adapter reachable; this job does not persist warehouse rows.'};}
+export async function syncTitansOfficialAudit(){const checks=[{slug:'roster',url:'https://www.tennesseetitans.com/team/players-roster/',marker:/Titans Roster|Player\s*\|\s*#/i},{slug:'transactions',url:'https://www.tennesseetitans.com/team/transactions/',marker:/TRANSACTIONS|Titans Transactions/i},{slug:'schedule',url:'https://www.tennesseetitans.com/schedule/',marker:/2026 Schedule|WEEK 18|Titans 2026 Schedule/i},{slug:'depth-chart',url:'https://www.tennesseetitans.com/team/depth-chart',marker:/DEPTH CHART|Depth Chart/i}];const results=await Promise.all(checks.map(async check=>{try{const body=await text(check.url,{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`}});return {slug:check.slug,ok:check.marker.test(body),bytes:body.length,url:check.url};}catch{return {slug:check.slug,ok:false,bytes:0,url:check.url,error:'Official source unavailable'};}})),healthy=results.filter(x=>x.ok).length;return {ok:healthy===results.length,source:'titans',recordsSeen:results.length,recordsWritten:0,checks:results,note:'Official-source reachability/marker audit only; no HTML data is persisted by this job.'};}
+export async function syncEspn(){const data=await json('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`}}),events=(data.events||[]).filter(e=>/Tennessee Titans|\bTEN\b/i.test(JSON.stringify(e)));return {ok:true,source:'espn',recordsSeen:events.length,recordsWritten:0,note:'Near-live scoreboard adapter reachable; this job does not persist warehouse rows.'};}
 export async function syncBluesky(_env=process.env,query='Tennessee Titans',limit=30){const u=new URL('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts');u.searchParams.set('q',query);u.searchParams.set('limit',String(Math.min(50,limit)));u.searchParams.set('sort','latest');const data=await json(u);return {ok:true,source:'bluesky',recordsSeen:(data.posts||[]).length,recordsWritten:0,note:'Public API reachable; this job does not persist feed rows.'};}
 export async function syncNflverseRoster(){return {ok:true,skipped:true,source:'nflverse',recordsSeen:0,recordsWritten:0,note:'Dataset is available; roster warehouse importer is not enabled in this scheduled job.'};}
 export async function syncNflverseStats(){return {ok:true,skipped:true,source:'nflverse',recordsSeen:0,recordsWritten:0,note:'Dataset is available; stats warehouse importer is not enabled in this scheduled job.'};}
