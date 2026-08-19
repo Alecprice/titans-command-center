@@ -1,6 +1,6 @@
 {
   "name": "titans-command-center",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,10 +11,6 @@
     "syntax-check": "node scripts/check-syntax.mjs",
     "check": "npm test && npm run audit:content && npm run secret-scan && npm run syntax-check"
   },
-  "dependencies": {
-    "@neondatabase/serverless": "1.0.2"
-  },
-  "engines": {
-    "node": ">=20"
-  }
+  "dependencies": {"@neondatabase/serverless": "1.0.2"},
+  "engines": {"node": ">=20"}
 }

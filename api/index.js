@@ -1,116 +1,27 @@
 import { databaseHealth, getBootstrapData, getAnalyticsExplorer, getPlayerProfile, getSql } from '../src/db.mjs';
+import { getAuditedTeamContext } from '../src/team-context.mjs';
 import { requireAdminAuth, requireIngestAuth, syncBluesky, syncEspn, syncNflverseRoster, syncNflverseStats, syncNwsNextHomeGame, syncFreeOdds } from '../src/ingest.mjs';
 import { fetchFreeOdds, probeFreeOddsProviders } from '../src/odds.mjs';
 
-const APP_VERSION='0.6.3';
+const APP_VERSION='0.6.4';
 const TITANS_QUERY='Tennessee Titans';
 let oddsCache={expiresAt:0,value:null,inflight:null};
 const requestedCacheSeconds=Number(process.env.ODDS_CACHE_SECONDS||300);
 const ODDS_CACHE_SECONDS=Number.isFinite(requestedCacheSeconds)?Math.max(300,Math.min(900,requestedCacheSeconds)):300;
-
 const routeOf=req=>String(req.query?.route||'').trim().replace(/^\/+|\/+$/g,'');
-const methodOnly=(req,res,allowed)=>{res.setHeader('Allow',allowed);if(req.method!==allowed)return res.status(405).json({ok:false,error:'Method not allowed'});return null};
+const queryOf=req=>Object.fromEntries(Object.entries(req.query||{}).filter(([key])=>key!=='route'));
+function methodOnly(req,res,allowed){res.setHeader('Allow',allowed);if(req.method!==allowed){res.status(405).json({ok:false,error:'Method not allowed'});return true}return false}
 const providerConfig=env=>({propLine:Boolean(env.PROPLINE_API_KEY),oddsApiIo:Boolean(env.ODDS_API_IO_KEY),espnFallback:true,nws:true});
-const safeQuery=req=>Object.fromEntries(Object.entries(req.query||{}).filter(([key])=>key!=='route'));
-
-async function healthRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;
-  res.setHeader('Cache-Control','no-store');
-  const db=await databaseHealth(process.env);
-  return res.status(db.ok?200:503).json({ok:db.ok,app:'titans-command-center',version:APP_VERSION,contentAudit:'2026-08-19',time:new Date().toISOString(),database:db,providers:providerConfig(process.env)});
-}
-
-async function dataRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;
-  res.setHeader('Cache-Control','public, s-maxage=30, stale-while-revalidate=120');
-  const data=await getBootstrapData(process.env);
-  if(!data.configured)return res.status(503).json({ok:false,configured:false,error:'DATABASE_URL is not configured'});
-  return res.status(data.ok?200:503).json(data);
-}
-
-async function analyticsRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;
-  const query=safeQuery(req),season=query.season?Number(query.season):null,side=String(query.side||'offense');
-  const data=await getAnalyticsExplorer({season,side},process.env);
-  if(!data.configured)return res.status(503).json({ok:false,error:'Database not configured'});
-  return res.status(data.ok?200:500).json(data);
-}
-
-async function playerRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;
-  res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=300');
-  const id=String(safeQuery(req).id||'').trim();
-  if(!/^[0-9a-f-]{36}$/i.test(id))return res.status(400).json({ok:false,error:'Valid player id required'});
-  const data=await getPlayerProfile(id,process.env);
-  if(data.ok){
-    const sql=await getSql(process.env);
-    if(sql){
-      const [detail]=await sql`select rs.raw_payload,rs.captured_at from roster_snapshots rs where rs.player_id=${id}::uuid order by rs.captured_at desc,rs.id desc limit 1`;
-      if(detail){
-        const raw=detail.raw_payload||{};
-        data.player={...data.player,college:data.player.college||raw.college||'',age:raw.age??null,height:raw.height||'',weight:raw.weight??null,sourceUrl:raw.source_url||'https://www.tennesseetitans.com/team/players-roster/',sourceLabel:raw.source||'Tennessee Titans official roster',auditedOn:raw.audited_on||null,rosterCapturedAt:detail.captured_at?new Date(detail.captured_at).toISOString():data.player.rosterCapturedAt||null};
-      }
-    }
-  }
-  return res.status(data.ok?200:data.configured?404:503).json(data);
-}
-
-async function espnRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;
-  res.setHeader('Cache-Control','s-maxage=30, stale-while-revalidate=60');
-  try{
-    const upstream=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`},signal:AbortSignal.timeout(4500)});
-    if(!upstream.ok)throw new Error(`ESPN ${upstream.status}`);
-    return res.status(200).json({ok:true,provider:'ESPN',unofficial:true,fetchedAt:new Date().toISOString(),payload:await upstream.json()});
-  }catch(error){console.error('[espn-scoreboard]',error);return res.status(502).json({ok:false,provider:'ESPN',unofficial:true,error:'Live scoreboard provider unavailable'});}
-}
-
-async function blueskyRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;
-  const query=safeQuery(req),q=String(query.q||TITANS_QUERY).slice(0,120),limit=Math.min(50,Math.max(1,Number(query.limit||20)));
-  const url=new URL('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts');url.searchParams.set('q',q);url.searchParams.set('limit',String(limit));url.searchParams.set('sort','latest');
-  try{
-    const upstream=await fetch(url,{signal:AbortSignal.timeout(5000)});if(!upstream.ok)throw new Error(`Bluesky ${upstream.status}`);const data=await upstream.json();
-    const items=(data.posts||[]).map(post=>{const text=post.record?.text||'',rkey=String(post.uri||'').split('/').pop(),handle=post.author?.handle||post.author?.displayName||'Bluesky user';return {id:`bsky:${post.uri}`,type:'social',tier:'community',source:`@${handle} · Bluesky`,title:text.length>110?`${text.slice(0,107)}…`:text||'Bluesky post',summary:`${post.likeCount||0} likes · ${post.repostCount||0} reposts · ${post.replyCount||0} replies`,publishedAt:post.record?.createdAt||post.indexedAt,topics:['social','bluesky'],url:post.author?.handle&&rkey?`https://bsky.app/profile/${post.author.handle}/post/${rkey}`:'https://bsky.app/'};});
-    res.setHeader('Cache-Control','s-maxage=30, stale-while-revalidate=60');return res.status(200).json({ok:true,provider:'Bluesky',query:q,items});
-  }catch(error){console.error('[bluesky-search]',error);return res.status(502).json({ok:false,provider:'Bluesky',query:q,error:'Bluesky search unavailable'});}
-}
-
-async function oddsRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;
-  if(Object.keys(safeQuery(req)).length){res.setHeader('Cache-Control','no-store');return res.status(400).json({ok:false,error:'Public odds endpoint does not accept query parameters'});}
-  const now=Date.now();if(oddsCache.value&&now<oddsCache.expiresAt){res.setHeader('Cache-Control',`public, s-maxage=${ODDS_CACHE_SECONDS}, stale-while-revalidate=300`);return res.status(200).json({...oddsCache.value,cache:'memory'});}
-  try{
-    if(!oddsCache.inflight)oddsCache.inflight=fetchFreeOdds(process.env,{live:null,compare:false,includePeriods:false,includePlayerProps:true,includeFutures:true,maxEvents:2}).finally(()=>{oddsCache.inflight=null});
-    const data=await oddsCache.inflight;if(!data.ok){res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=120');return res.status(503).json(data)}
-    oddsCache.value=data;oddsCache.expiresAt=Date.now()+ODDS_CACHE_SECONDS*1000;res.setHeader('Cache-Control',`public, s-maxage=${ODDS_CACHE_SECONDS}, stale-while-revalidate=300`);return res.status(200).json({...data,cache:'miss'});
-  }catch(error){console.error('[odds]',error);res.setHeader('Cache-Control','public, s-maxage=30, stale-while-revalidate=60');return res.status(502).json({ok:false,provider:'free-odds-stack',error:'Odds providers unavailable'});}
-}
-
-async function providerHealthRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;res.setHeader('Cache-Control','no-store');const auth=requireAdminAuth(req,process.env);if(!auth.ok)return res.status(auth.status).json(auth);
-  const compare=safeQuery(req).compare!=='false';const result=await probeFreeOddsProviders(process.env,{compare});return res.status(result.ok?200:503).json(result);
-}
-
+async function healthRoute(req,res){if(methodOnly(req,res,'GET'))return;res.setHeader('Cache-Control','no-store');const db=await databaseHealth(process.env);return res.status(db.ok?200:503).json({ok:db.ok,app:'titans-command-center',version:APP_VERSION,contentAudit:'2026-08-19',time:new Date().toISOString(),database:db,providers:providerConfig(process.env)});}
+async function dataRoute(req,res){if(methodOnly(req,res,'GET'))return;res.setHeader('Cache-Control','public, s-maxage=30, stale-while-revalidate=120');const data=await getBootstrapData(process.env);if(!data.configured)return res.status(503).json({ok:false,configured:false,error:'DATABASE_URL is not configured'});if(!data.ok)return res.status(503).json(data);const sql=await getSql(process.env),teamContext=await getAuditedTeamContext(sql);return res.status(200).json({...data,teamContext});}
+async function analyticsRoute(req,res){if(methodOnly(req,res,'GET'))return;const query=queryOf(req),season=query.season?Number(query.season):null,side=String(query.side||'offense'),data=await getAnalyticsExplorer({season,side},process.env);if(!data.configured)return res.status(503).json({ok:false,error:'Database not configured'});return res.status(data.ok?200:500).json(data);}
+async function playerRoute(req,res){if(methodOnly(req,res,'GET'))return;res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=300');const id=String(queryOf(req).id||'').trim();if(!/^[0-9a-f-]{36}$/i.test(id))return res.status(400).json({ok:false,error:'Valid player id required'});const data=await getPlayerProfile(id,process.env);if(data.ok){const sql=await getSql(process.env);if(sql){const [detail]=await sql`select rs.raw_payload,rs.captured_at from roster_snapshots rs where rs.player_id=${id}::uuid order by rs.captured_at desc,rs.id desc limit 1`;if(detail){const raw=detail.raw_payload||{};data.player={...data.player,college:data.player.college||raw.college||'',age:raw.age??null,height:raw.height||'',weight:raw.weight??null,sourceUrl:raw.source_url||'https://www.tennesseetitans.com/team/players-roster/',sourceLabel:raw.source||'Tennessee Titans official roster',auditedOn:raw.audited_on||null,rosterCapturedAt:detail.captured_at?new Date(detail.captured_at).toISOString():data.player.rosterCapturedAt||null};}}}return res.status(data.ok?200:data.configured?404:503).json(data);}
+async function espnRoute(req,res){if(methodOnly(req,res,'GET'))return;res.setHeader('Cache-Control','s-maxage=30, stale-while-revalidate=60');try{const upstream=await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`},signal:AbortSignal.timeout(4500)});if(!upstream.ok)throw new Error(`ESPN ${upstream.status}`);return res.status(200).json({ok:true,provider:'ESPN',unofficial:true,fetchedAt:new Date().toISOString(),payload:await upstream.json()});}catch(error){console.error('[espn-scoreboard]',error);return res.status(502).json({ok:false,provider:'ESPN',unofficial:true,error:'Live scoreboard provider unavailable'});}}
+async function blueskyRoute(req,res){if(methodOnly(req,res,'GET'))return;const query=queryOf(req),q=String(query.q||TITANS_QUERY).slice(0,120),limit=Math.min(50,Math.max(1,Number(query.limit||20))),url=new URL('https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts');url.searchParams.set('q',q);url.searchParams.set('limit',String(limit));url.searchParams.set('sort','latest');try{const upstream=await fetch(url,{signal:AbortSignal.timeout(5000)});if(!upstream.ok)throw new Error(`Bluesky ${upstream.status}`);const data=await upstream.json(),items=(data.posts||[]).map(post=>{const text=post.record?.text||'',rkey=String(post.uri||'').split('/').pop(),handle=post.author?.handle||post.author?.displayName||'Bluesky user';return {id:`bsky:${post.uri}`,type:'social',tier:'community',source:`@${handle} · Bluesky`,title:text.length>110?`${text.slice(0,107)}…`:text||'Bluesky post',summary:`${post.likeCount||0} likes · ${post.repostCount||0} reposts · ${post.replyCount||0} replies`,publishedAt:post.record?.createdAt||post.indexedAt,topics:['social','bluesky'],url:post.author?.handle&&rkey?`https://bsky.app/profile/${post.author.handle}/post/${rkey}`:'https://bsky.app/'};});res.setHeader('Cache-Control','s-maxage=30, stale-while-revalidate=60');return res.status(200).json({ok:true,provider:'Bluesky',query:q,items});}catch(error){console.error('[bluesky-search]',error);return res.status(502).json({ok:false,provider:'Bluesky',query:q,error:'Bluesky search unavailable'});}}
+async function oddsRoute(req,res){if(methodOnly(req,res,'GET'))return;if(Object.keys(queryOf(req)).length){res.setHeader('Cache-Control','no-store');return res.status(400).json({ok:false,error:'Public odds endpoint does not accept query parameters'});}const now=Date.now();if(oddsCache.value&&now<oddsCache.expiresAt){res.setHeader('Cache-Control',`public, s-maxage=${ODDS_CACHE_SECONDS}, stale-while-revalidate=300`);return res.status(200).json({...oddsCache.value,cache:'memory'});}try{if(!oddsCache.inflight)oddsCache.inflight=fetchFreeOdds(process.env,{live:null,compare:false,includePeriods:false,includePlayerProps:true,includeFutures:true,maxEvents:2}).finally(()=>{oddsCache.inflight=null});const data=await oddsCache.inflight;if(!data.ok){res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=120');return res.status(503).json(data)}oddsCache.value=data;oddsCache.expiresAt=Date.now()+ODDS_CACHE_SECONDS*1000;res.setHeader('Cache-Control',`public, s-maxage=${ODDS_CACHE_SECONDS}, stale-while-revalidate=300`);return res.status(200).json({...data,cache:'miss'});}catch(error){console.error('[odds]',error);res.setHeader('Cache-Control','public, s-maxage=30, stale-while-revalidate=60');return res.status(502).json({ok:false,provider:'free-odds-stack',error:'Odds providers unavailable'});}}
+async function providerHealthRoute(req,res){if(methodOnly(req,res,'GET'))return;res.setHeader('Cache-Control','no-store');const auth=requireAdminAuth(req,process.env);if(!auth.ok)return res.status(auth.status).json(auth);const result=await probeFreeOddsProviders(process.env,{compare:queryOf(req).compare!=='false'});return res.status(result.ok?200:503).json(result);}
 const syncJobs={espn:()=>syncEspn(process.env),bluesky:()=>syncBluesky(process.env,TITANS_QUERY,30),'nflverse-roster':()=>syncNflverseRoster(process.env,2026),'nflverse-stats':()=>syncNflverseStats(process.env,2026),'nws-weather':()=>syncNwsNextHomeGame(process.env),odds:()=>syncFreeOdds(process.env)};
-async function syncRoute(req,res){
-  if(methodOnly(req,res,'POST'))return;res.setHeader('Cache-Control','no-store');const auth=requireIngestAuth(req,process.env);if(!auth.ok)return res.status(auth.status).json(auth);
-  const requested=String(safeQuery(req).job||'').trim();if(!requested)return res.status(400).json({ok:false,error:'job query parameter is required',availableJobs:Object.keys(syncJobs)});
-  const selected=requested.split(',').map(v=>v.trim()).filter(Boolean),invalid=selected.filter(job=>!syncJobs[job]);if(invalid.length)return res.status(400).json({ok:false,error:`Unknown job(s): ${invalid.join(', ')}`,availableJobs:Object.keys(syncJobs)});
-  const results=[];for(const job of selected){try{results.push({job,...(await syncJobs[job]())})}catch(error){console.error('[sync]',job,error);results.push({job,ok:false,error:'Sync job failed'})}}
-  const ok=results.some(result=>result.ok);return res.status(ok?200:502).json({ok,fetchedAt:new Date().toISOString(),results});
-}
-
-async function cronRoute(req,res){
-  if(methodOnly(req,res,'GET'))return;res.setHeader('Cache-Control','no-store');const auth=requireIngestAuth(req,process.env);if(!auth.ok)return res.status(auth.status).json(auth);
-  const jobs=[['espn',syncJobs.espn],['nflverse-roster',syncJobs['nflverse-roster']],['nflverse-stats',syncJobs['nflverse-stats']],['nws-weather',syncJobs['nws-weather']],['bluesky',syncJobs.bluesky],['odds',()=>process.env.PROPLINE_API_KEY||process.env.ODDS_API_IO_KEY?syncJobs.odds():Promise.resolve({ok:false,skipped:true,error:'No free odds API key configured'})]];
-  const results=await Promise.all(jobs.map(async([job,run])=>{try{return {job,...(await run())}}catch(error){console.error('[cron-refresh]',job,error);return {job,ok:false,error:'Sync job failed'}}}));
-  const succeeded=results.filter(result=>result.ok).length,failed=results.length-succeeded,ok=succeeded>0;return res.status(ok?200:502).json({ok,partial:failed>0,succeeded,failed,mode:'daily-deep-refresh',fetchedAt:new Date().toISOString(),results});
-}
-
+async function syncRoute(req,res){if(methodOnly(req,res,'POST'))return;res.setHeader('Cache-Control','no-store');const auth=requireIngestAuth(req,process.env);if(!auth.ok)return res.status(auth.status).json(auth);const requested=String(queryOf(req).job||'').trim();if(!requested)return res.status(400).json({ok:false,error:'job query parameter is required',availableJobs:Object.keys(syncJobs)});const selected=requested.split(',').map(v=>v.trim()).filter(Boolean),invalid=selected.filter(job=>!syncJobs[job]);if(invalid.length)return res.status(400).json({ok:false,error:`Unknown job(s): ${invalid.join(', ')}`,availableJobs:Object.keys(syncJobs)});const results=[];for(const job of selected){try{results.push({job,...(await syncJobs[job]())})}catch(error){console.error('[sync]',job,error);results.push({job,ok:false,error:'Sync job failed'})}}const ok=results.some(result=>result.ok);return res.status(ok?200:502).json({ok,fetchedAt:new Date().toISOString(),results});}
+async function cronRoute(req,res){if(methodOnly(req,res,'GET'))return;res.setHeader('Cache-Control','no-store');const auth=requireIngestAuth(req,process.env);if(!auth.ok)return res.status(auth.status).json(auth);const jobs=[['espn',syncJobs.espn],['nflverse-roster',syncJobs['nflverse-roster']],['nflverse-stats',syncJobs['nflverse-stats']],['nws-weather',syncJobs['nws-weather']],['bluesky',syncJobs.bluesky],['odds',()=>process.env.PROPLINE_API_KEY||process.env.ODDS_API_IO_KEY?syncJobs.odds():Promise.resolve({ok:false,skipped:true,error:'No free odds API key configured'})]],results=await Promise.all(jobs.map(async([job,run])=>{try{return {job,...(await run())}}catch(error){console.error('[cron-refresh]',job,error);return {job,ok:false,error:'Sync job failed'}}})),succeeded=results.filter(result=>result.ok).length,failed=results.length-succeeded,ok=succeeded>0;return res.status(ok?200:502).json({ok,partial:failed>0,succeeded,failed,mode:'daily-deep-refresh',fetchedAt:new Date().toISOString(),results});}
 const routes=new Map([['health',healthRoute],['data',dataRoute],['analytics',analyticsRoute],['player',playerRoute],['espn-scoreboard',espnRoute],['bluesky-search',blueskyRoute],['odds',oddsRoute],['provider-health',providerHealthRoute],['sync',syncRoute],['cron-refresh',cronRoute]]);
-
-export default async function handler(req,res){
-  const route=routeOf(req),run=routes.get(route);if(!run)return res.status(404).json({ok:false,error:'Unknown API route'});
-  try{return await run(req,res)}catch(error){console.error('[api-gateway]',route,error);return res.status(500).json({ok:false,error:'API request failed'});}
-}
+export default async function handler(req,res){const route=routeOf(req),run=routes.get(route);if(!run)return res.status(404).json({ok:false,error:'Unknown API route'});try{return await run(req,res)}catch(error){console.error('[api-gateway]',route,error);return res.status(500).json({ok:false,error:'API request failed'});}}
