@@ -1,0 +1,62 @@
+name: Bootstrap Titans Command Center
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - bootstrap.b64
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Expand audited source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f bootstrap.b64
+          rm -rf .bootstrap
+          mkdir -p .bootstrap
+          base64 -d bootstrap.b64 > .bootstrap/titans.zip
+          unzip -q .bootstrap/titans.zip -d .bootstrap/unpacked
+          SRC="$(find .bootstrap/unpacked -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+          test -n "$SRC"
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/workflows/bootstrap.yml' \
+            "$SRC/" ./
+          rm -f bootstrap.b64
+          rm -rf .bootstrap
+          rm -f .github/workflows/bootstrap.yml
+
+      - name: Verify no local secret files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -f .env
+          test ! -f .env.local
+          test -f .env.example
+          node scripts/check-secrets.mjs
+
+      - name: Verify application
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --ignore-scripts
+          npm run check
+
+      - name: Commit audited source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish Titans Command Center v0.5.2 audited"
+          git push origin main
