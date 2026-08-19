@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - bootstrap.b64
+      - bootstrap.ready
 
 permissions:
   contents: write
@@ -20,10 +20,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f bootstrap.b64
+          test -f bootstrap.ready
+          test -f bootstrap.part01
           rm -rf .bootstrap
           mkdir -p .bootstrap
-          base64 -d bootstrap.b64 > .bootstrap/titans.zip
+          cat bootstrap.part* > .bootstrap/archive.b64
+          base64 -d .bootstrap/archive.b64 > .bootstrap/titans.zip
           unzip -q .bootstrap/titans.zip -d .bootstrap/unpacked
           SRC="$(find .bootstrap/unpacked -mindepth 1 -maxdepth 1 -type d | head -n 1)"
           test -n "$SRC"
@@ -31,7 +33,7 @@ jobs:
             --exclude='.git/' \
             --exclude='.github/workflows/bootstrap.yml' \
             "$SRC/" ./
-          rm -f bootstrap.b64
+          rm -f bootstrap.ready bootstrap.part*
           rm -rf .bootstrap
           rm -f .github/workflows/bootstrap.yml
 
