@@ -1,9 +1,11 @@
+import { auditedRoster20260819 } from './roster-audit-20260819.mjs';
+
 export const team = {
   name:'Tennessee Titans',shortName:'Titans',abbreviation:'TEN',city:'Nashville',conference:'AFC',division:'AFC South',
   owner:'Amy Adams Strunk',generalManager:'Mike Borgonzi',president:'Burke Nihill',coach:'Robert Saleh',coachOfficialHireDate:'2026-01-22',
   season:2026,phase:'Preseason',stadium:'Nissan Stadium',franchiseGranted:'1959-08-14',firstSeason:1960,firstSeasonInTennessee:1997,firstSeasonAsTitans:1999,byeWeek:9,
   colors:['Titans blue','red','white','navy blue'],primaryLogo:'The Shield',
-  rosterCoverage:{fallbackType:'featured-sample',fallbackPlayers:17,officialActivePlayersAtAudit:91,asOf:'2026-08-19'},auditedAt:'2026-08-19T16:30:00Z'
+  rosterCoverage:{fallbackType:'full-audited-snapshot',fallbackPlayers:95,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:4,asOf:'2026-08-19'},auditedAt:'2026-08-19T16:30:00Z'
 };
 
 export const games = [
@@ -30,10 +32,8 @@ export const games = [
   {id:'wk18',week:18,date:null,opponent:'Houston Texans',opponentAbbr:'HOU',homeAway:'away',status:'scheduled',venue:'Reliant Stadium',network:'TBD',source:'Tennessee Titans / NFL',dateTbd:true}
 ];
 
-// Verified fallback sample only. Live roster comes from Neon/current official audit.
-export const roster = [
-  {name:'Cam Ward',number:1,position:'QB',unit:'Offense',status:'Active',experience:'2'},{name:'Tony Pollard',number:20,position:'RB',unit:'Offense',status:'Active',experience:'8'},{name:'Tyjae Spears',number:2,position:'RB',unit:'Offense',status:'Active',experience:'4'},{name:'Nicholas Singleton',number:32,position:'RB',unit:'Offense',status:'Active',experience:'R'},{name:'Calvin Ridley',number:0,position:'WR',unit:'Offense',status:'Active',experience:'8'},{name:"Wan'Dale Robinson",number:4,position:'WR',unit:'Offense',status:'Active',experience:'5'},{name:'Elic Ayomanor',number:5,position:'WR',unit:'Offense',status:'Active',experience:'2'},{name:'Carnell Tate',number:14,position:'WR',unit:'Offense',status:'Active',experience:'R'},{name:'Daniel Bellinger',number:82,position:'TE',unit:'Offense',status:'Active',experience:'5'},{name:'Peter Skoronski',number:77,position:'G',unit:'Offense',status:'Active',experience:'4'},{name:'Jeffery Simmons',number:98,position:'DT',unit:'Defense',status:'Active',experience:'8'},{name:'Jermaine Johnson II',number:11,position:'DE',unit:'Defense',status:'Active',experience:'5'},{name:'Cody Barton',number:50,position:'LB',unit:'Defense',status:'Active',experience:'8'},{name:'Alontae Taylor',number:24,position:'CB',unit:'Defense',status:'Active',experience:'5'},{name:'Tony Adams',number:38,position:'S',unit:'Defense',status:'Active',experience:'5'},{name:'Kevin Winston Jr.',number:23,position:'S',unit:'Defense',status:'Active',experience:'2'},{name:'Joey Slye',number:6,position:'K',unit:'Special Teams',status:'Active',experience:'8'}
-];
+// Full source-audited fallback snapshot. Live Neon data may replace it when configured.
+export const roster = auditedRoster20260819.map(player=>({...player}));
 
 export const feed = [
   {id:'n0',type:'transaction',tier:'official',source:'Tennessee Titans',title:"Titans sign D'Ernest Johnson, waive Dominic Richardson",summary:"Tennessee's official Aug. 19 transaction log lists RB D'Ernest Johnson signed and RB Dominic Richardson waived.",publishedAt:'2026-08-19T16:00:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/team/transactions/'},
@@ -57,4 +57,4 @@ export const sources = [
   {name:'Odds-API.io',category:'Market',tier:'media',status:'Server key optional',method:'Odds-API.io v3',cost:'Free · no card',cadence:'Live / pregame',purpose:'Second free NFL odds source for cross-checks and fallback'}
 ];
 
-export const metrics=[{label:'Preseason',value:'1–0',delta:'W 19–13 at SF',tone:'good'},{label:'Next game',value:'SEA',delta:'Aug 23 · Nissan Stadium',tone:'neutral'},{label:'Fallback roster',value:'17',delta:'Featured sample · not full roster',tone:'warn'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
+export const metrics=[{label:'Preseason',value:'1–0',delta:'W 19–13 at SF',tone:'good'},{label:'Next game',value:'SEA',delta:'Aug 23 · Nissan Stadium',tone:'neutral'},{label:'Audited roster',value:'95',delta:'91 active · 4 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
