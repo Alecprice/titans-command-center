@@ -29,7 +29,11 @@ test('representative and composite art cannot masquerade as exact official logos
   const sword=knownVisualsNotPictured.find(x=>x.id==='titans-sword-alternate');
   assert.ok(sword);
   assert.match(sword.copy,/real Titans secondary\/alternate mark/i);
+  assert.match(sword.copy,/1999–2001/);
+  assert.match(sword.copy,/2002–2025/);
   assert.match(sword.copy,/legacy-sword\.webp cannot be used as proof/i);
+  assert.ok(sword.sourceKeys.includes('sportsLogosSword1999'));
+  assert.ok(sword.sourceKeys.includes('sportsLogosSword'));
 });
 
 test('2018 is treated as a uniform and wordmark change, not a new primary logo',()=>{
