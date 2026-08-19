@@ -38,10 +38,13 @@ export function relativeTime(iso, now = new Date()) {
 }
 
 export function gameStatus(game, now = new Date()) {
-  const start = new Date(game.date);
+  if (game.status === 'bye') return 'Bye';
   if (game.status === 'final') return 'Final';
   if (game.status === 'live') return game.detail || 'Live';
+  if (game.dateTbd || !game.date) return 'TBD';
+  const start = new Date(game.date);
   const diff = start - now;
+  if (!Number.isFinite(diff)) return 'TBD';
   if (diff <= 0) return 'Scheduled';
   const days = Math.floor(diff / 86400000);
   if (days >= 1) return `${days}d away`;
@@ -76,6 +79,7 @@ export function mergeLiveGames(existingGames, liveGames) {
   for (const live of liveGames) {
     const liveDate = new Date(live.date).getTime();
     const index = merged.findIndex(game =>
+      game.date &&
       game.opponentAbbr === live.opponentAbbr &&
       game.homeAway === live.homeAway &&
       Math.abs(new Date(game.date).getTime() - liveDate) <= 48 * 60 * 60 * 1000
@@ -85,5 +89,9 @@ export function mergeLiveGames(existingGames, liveGames) {
       merged[index] = { ...canonical, ...live, id: canonical.id, week: canonical.week, source: `${canonical.source || 'Neon'} + ESPN` };
     } else merged.push(live);
   }
-  return merged.sort((a, b) => new Date(a.date) - new Date(b.date));
+  return merged.sort((a, b) => {
+    const aTime = a.date ? new Date(a.date).getTime() : Number.POSITIVE_INFINITY;
+    const bTime = b.date ? new Date(b.date).getTime() : Number.POSITIVE_INFINITY;
+    return aTime - bTime;
+  });
 }
