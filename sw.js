@@ -1,4 +1,4 @@
-const CACHE = 'titans-cc-brand-2026-v3';
+const CACHE = 'titans-cc-brand-2026-v4';
 const SHELL = [
   '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css',
   '/app.js', '/legacy-polish.js', '/fact-polish.js',
