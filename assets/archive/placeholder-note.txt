@@ -1,1 +1,0 @@
-This file exists only to force archive directory visibility while binary assets are assembled. It will be removed in the cleanup commit.
