@@ -1,27 +1,58 @@
 import { getBootstrapData } from '../src/db.mjs';
+import { games as seedGames } from '../src/data.mjs';
 import { auditedRoster20260819, ROSTER_AUDIT_DATE } from '../src/roster-audit-20260819.mjs';
 import { auditedPreseasonGames, auditedPlayerPreseasonStats, auditedTeamPreseasonStats, auditedPreseasonSources, PRESEASON_GAMEBOOK_URL } from '../src/preseason-p1-20260813.mjs';
+import { aggregatePlayerStats, aggregateTeamStats, buildLeaders, positionCounts } from '../src/preseason-model.mjs';
 
 const TEAM_ID='10',SEASON=2026,TIMEOUT=5500;
 const signal=()=>typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(TIMEOUT):undefined;
 const norm=s=>String(s||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9 ]/g,'').replace(/\b(jr|sr|ii|iii|iv)\b/g,'').replace(/\s+/g,' ').trim();
 const asArray=v=>Array.isArray(v)?v:[];
-async function json(url){const r=await fetch(url,{headers:{'User-Agent':'TitansCommandCenter/0.7'},signal:signal()});if(!r.ok)throw new Error(`ESPN ${r.status}`);return r.json();}
+async function json(url){const r=await fetch(url,{headers:{'User-Agent':'TitansCommandCenter/0.8'},signal:signal()});if(!r.ok)throw new Error(`ESPN ${r.status}`);return r.json();}
 function dbRoster(data){return asArray(data?.roster).map(p=>({id:String(p.id||''),name:p.name||p.full_name||'',number:String(p.number??p.jerseyNumber??''),position:p.position||'',unit:p.unit||'',status:p.status||'Current roster',experience:p.experience||'',headshot:''})).filter(p=>p.name);}
 function isPreseasonEvent(e){return Number(e?.season?.type??e?.seasonType?.type??e?.seasonType)===1||/preseason/i.test(`${e?.seasonType?.name||''} ${e?.week?.text||''} ${e?.name||''}`)}
 function completed(e){return Boolean(e?.status?.type?.completed)||/final/i.test(e?.status?.type?.name||e?.status?.type?.description||'')}
-function parseTeamBox(summary,event){const team=asArray(summary?.boxscore?.players).find(x=>String(x?.team?.id)===TEAM_ID||/tennessee titans/i.test(x?.team?.displayName||''));if(!team)return [];const rows=[];for(const category of asArray(team.statistics)){const labels=asArray(category.labels),categoryName=category.displayName||category.name||'Stats';for(const entry of asArray(category.athletes)){const a=entry.athlete||{},values=asArray(entry.stats);rows.push({name:a.displayName||a.shortName||'',position:a.position?.abbreviation||'',category:categoryName,fields:labels.map((label,i)=>({label,value:String(values[i]??'')})),eventId:String(event.id),eventName:event.shortName||event.name||'',date:event.date||null,source:'ESPN live fallback'});}}return rows;}
+function parseTeamBox(summary,event){const team=asArray(summary?.boxscore?.players).find(x=>String(x?.team?.id)===TEAM_ID||/tennessee titans/i.test(x?.team?.displayName||''));if(!team)return [];const rows=[];for(const category of asArray(team.statistics)){const labels=asArray(category.labels),categoryName=category.displayName||category.name||'Stats';for(const entry of asArray(category.athletes)){const a=entry.athlete||{},values=asArray(entry.stats);rows.push({name:a.displayName||a.shortName||'',position:a.position?.abbreviation||'',category:categoryName,fields:labels.map((label,i)=>({label,value:String(values[i]??'')})),eventId:String(event.id),eventName:event.shortName||event.name||'',date:event.date||null,source:'ESPN public game summary'});}}return rows;}
+const teamKey=name=>{const s=String(name||'').toLowerCase().replace(/[^a-z0-9]/g,'');if(/firstdown/.test(s))return'firstDowns';if(/thirddown/.test(s))return'thirdDown';if(/totalyard/.test(s))return'totalYards';if(/rushingyard/.test(s))return'rushingYards';if(/netpassingyard/.test(s)||/passingyard/.test(s))return'netPassingYards';if(/penalt/.test(s))return'penalties';if(/fumble/.test(s))return'fumbles';if(/touchdown/.test(s))return'touchdowns';if(/fieldgoal/.test(s))return'fieldGoals';if(/possession/.test(s))return'timeOfPossession';return null};
+function parseTeamStats(summary){const team=asArray(summary?.boxscore?.teams).find(x=>String(x?.team?.id)===TEAM_ID||/tennessee titans/i.test(x?.team?.displayName||''));const out={};for(const item of asArray(team?.statistics)){const key=teamKey(item.name||item.label||item.displayName);if(key&&!out[key])out[key]=String(item.displayValue??item.value??'');}return out;}
 function auditedRows(){return Object.entries(auditedPlayerPreseasonStats).flatMap(([name,rows])=>rows.map(row=>({...row,name,source:'NFL official gamebook',sourceUrl:PRESEASON_GAMEBOOK_URL})));}
-function attach(roster,statRows){const byName=new Map();for(const row of statRows){const k=norm(row.name);if(!byName.has(k))byName.set(k,[]);byName.get(k).push(row)}const used=new Set();const players=roster.map(p=>{const k=norm(p.name),stats=byName.get(k)||[];if(stats.length)used.add(k);return {...p,stats}});const other=[];for(const [k,stats] of byName){if(used.has(k))continue;const first=stats[0];other.push({name:first.name,position:first.position||'',number:'',unit:'Preseason participant',status:'Not matched to current roster',experience:'',stats});}return {players,other};}
+function sameDay(a,b){if(!a||!b)return false;return String(a).slice(0,10)===String(b).slice(0,10)}
+function attach(roster,statRows){const byName=new Map();for(const row of statRows){const k=norm(row.name);if(!byName.has(k))byName.set(k,[]);byName.get(k).push(row)}const used=new Set();const players=roster.map(p=>{const k=norm(p.name),stats=byName.get(k)||[];if(stats.length)used.add(k);return {...p,stats,seasonStats:aggregatePlayerStats(stats)}});const other=[];for(const [k,stats] of byName){if(used.has(k))continue;const first=stats[0];other.push({name:first.name,position:first.position||'',number:'',unit:'Preseason participant',status:'Not matched to current roster',experience:'',stats,seasonStats:aggregatePlayerStats(stats)});}return {players,other};}
+function scheduleRow(g,completedGames){const done=completedGames.find(x=>sameDay(x.date,g.date));return {id:g.id,week:g.week,name:g.homeAway==='home'?`TEN vs ${g.opponentAbbr}`:`TEN @ ${g.opponentAbbr}`,opponent:g.opponent,opponentAbbr:g.opponentAbbr,date:g.date,status:done?.status||g.status,completed:Boolean(done),venue:g.venue||'',network:g.network||'',source:g.source||'Tennessee Titans'};}
+function gameBookFromAudit(){const game=auditedPreseasonGames[0];return {...game,week:'P1',teamStats:{...auditedTeamPreseasonStats},statRows:auditedRows()};}
+
 export default async function handler(req,res){
   if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({ok:false,error:'Method not allowed'})}
   res.setHeader('Cache-Control','public, s-maxage=180, stale-while-revalidate=900');
   const diagnostics=[];let roster=auditedRoster20260819.map(x=>({...x,id:'',headshot:''})),rosterSource=`Audited Titans roster snapshot · ${ROSTER_AUDIT_DATE}`;
   try{const db=await getBootstrapData(process.env);const live=db?.ok?dbRoster(db):[];if(live.length>=90){roster=live;rosterSource='Neon · latest audited Titans roster snapshot';}else diagnostics.push('Neon production connection unavailable; serving the dated 95-player audited roster snapshot.');}catch{diagnostics.push('Neon production connection unavailable; serving the dated 95-player audited roster snapshot.');}
-  let events=[...auditedPreseasonGames],statRows=auditedRows(),statsSource='NFL official gamebook · Titans at 49ers · Aug. 13, 2026';
-  try{const schedule=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/${TEAM_ID}/schedule?season=${SEASON}`);const liveEvents=asArray(schedule.events).filter(isPreseasonEvent).filter(completed).sort((a,b)=>new Date(a.date)-new Date(b.date));const liveRows=[];for(const event of liveEvents){try{liveRows.push(...parseTeamBox(await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${encodeURIComponent(event.id)}`),event));}catch{}}
-    if(liveRows.length&&liveEvents.length>events.length){events=liveEvents.map(e=>({id:String(e.id),name:e.shortName||e.name,date:e.date,status:e.status?.type?.shortDetail||'Final',source:'ESPN live fallback'}));statRows=liveRows;statsSource='ESPN public game summaries · live fallback';}
-  }catch{diagnostics.push('ESPN server-side feed is currently blocked from Vercel; official NFL gamebook fallback remains active.');}
-  const linked=attach(roster,statRows);
-  return res.status(200).json({ok:true,season:SEASON,seasonType:'preseason',rosterSource,statsSource,rosterCount:linked.players.length,completedGames:events,teamStats:auditedTeamPreseasonStats,players:linked.players,otherParticipants:linked.other,sources:auditedPreseasonSources,diagnostics,fetchedAt:new Date().toISOString()});
+
+  const gameBooks=[gameBookFromAudit()];
+  let liveAdded=0;
+  try{
+    const schedule=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/${TEAM_ID}/schedule?season=${SEASON}`);
+    const liveEvents=asArray(schedule.events).filter(isPreseasonEvent).filter(completed).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    for(const event of liveEvents){
+      if(gameBooks.some(g=>sameDay(g.date,event.date)))continue;
+      try{
+        const summary=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${encodeURIComponent(event.id)}`),statRows=parseTeamBox(summary,event);
+        if(statRows.length){gameBooks.push({id:String(event.id),week:`P${gameBooks.length+1}`,name:event.shortName||event.name,date:event.date,status:event.status?.type?.shortDetail||'Final',opponent:'',source:'ESPN public game summary',sourceUrl:`https://www.espn.com/nfl/game/_/gameId/${event.id}`,teamStats:parseTeamStats(summary),statRows});liveAdded++;}
+      }catch{}
+    }
+  }catch{diagnostics.push('ESPN server-side feed is currently unavailable from Vercel; official audited gamebook data remains active.');}
+
+  gameBooks.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const allRows=gameBooks.flatMap(g=>g.statRows||[]),linked=attach(roster,allRows),completedGames=gameBooks.map(({statRows,teamStats,...g})=>g),teamStatsByGame=Object.fromEntries(gameBooks.map(g=>[g.id,g.teamStats||{}]));
+  const seasonTeamStats=aggregateTeamStats(gameBooks.map(g=>g.teamStats||{}));
+  const preseasonSchedule=seedGames.filter(g=>String(g.week).startsWith('P')).map(g=>scheduleRow(g,completedGames));
+  const nextGame=preseasonSchedule.find(g=>!g.completed&&g.status!=='final')||null;
+  const sources=[...auditedPreseasonSources];if(liveAdded)sources.push({label:'ESPN public game summaries · newly completed preseason games',url:'https://www.espn.com/nfl/team/schedule/_/name/ten/season/2026'});
+  const statsSource=liveAdded?'NFL official gamebook + ESPN public summaries for newly completed games':'NFL official gamebook · Titans at 49ers · Aug. 13, 2026';
+
+  return res.status(200).json({
+    ok:true,season:SEASON,seasonType:'preseason',rosterSource,statsSource,rosterCount:linked.players.length,
+    completedGames,preseasonSchedule,nextGame,teamStatsByGame,seasonTeamStats,teamStats:seasonTeamStats,
+    positionCounts:positionCounts(linked.players),leaders:buildLeaders(linked.players),players:linked.players,otherParticipants:linked.other,
+    sources,diagnostics,dataMode:liveAdded?'audited-plus-live':'audited-fallback',fetchedAt:new Date().toISOString()
+  });
 }
