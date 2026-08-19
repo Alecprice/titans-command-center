@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1f36" />
+  <meta name="description" content="Tennessee Titans data, news, analytics, and game-day command center." />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/assets/icon-192.png" />
+  <link rel="stylesheet" href="/styles.css" />
+  <title>Titans Command Center</title>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="#home" class="brand" aria-label="Titans Command Center home">
+        <span class="brand-mark">T</span>
+        <span><strong>Titans</strong><small>Command Center</small></span>
+      </a>
+      <nav class="nav" id="primary-nav">
+        <a href="#home" data-route="home">⌂ <span>Home</span></a>
+        <a href="#live" data-route="live">● <span>Live</span></a>
+        <a href="#games" data-route="games">◫ <span>Games</span></a>
+        <a href="#roster" data-route="roster">◎ <span>Roster</span></a>
+        <a href="#transactions" data-route="transactions">⇄ <span>Transactions</span></a>
+        <a href="#stats" data-route="stats">↗ <span>Stats Lab</span></a>
+        <a href="#markets" data-route="markets">$ <span>Markets</span></a>
+        <a href="#feed" data-route="feed">≋ <span>Intel Feed</span></a>
+        <a href="#sources" data-route="sources">⌁ <span>Sources</span></a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="status-pill"><i></i> PWA ready</div>
+        <small>2026 season workspace</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button menu-button" id="menu-button" aria-label="Open navigation">☰</button>
+        <div class="search-wrap">
+          <span>⌕</span>
+          <input id="global-search" type="search" placeholder="Search players, reports, games, topics…" autocomplete="off" />
+          <kbd>⌘ K</kbd>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="refresh-button" aria-label="Refresh data">↻</button>
+          <button class="install-button" id="install-button" hidden>Install app</button>
+          <button class="avatar" aria-label="User menu">AP</button>
+        </div>
+      </header>
+
+      <div id="app" class="content" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="#home" data-route="home"><span>⌂</span>Home</a>
+    <a href="#games" data-route="games"><span>◫</span>Games</a>
+    <a href="#live" data-route="live"><span>●</span>Live</a>
+    <a href="#roster" data-route="roster"><span>◎</span>Roster</a>
+    <a href="#markets" data-route="markets"><span>$</span>Market</a>
+    <a href="#feed" data-route="feed"><span>≋</span>Feed</a>
+  </nav>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
