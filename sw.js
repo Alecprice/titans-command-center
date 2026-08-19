@@ -1,8 +1,9 @@
-const CACHE = 'titans-cc-brand-2026-v13';
+const CACHE = 'titans-cc-brand-2026-v14';
 const SHELL = [
   '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/source-activity.css',
   '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/fan-polish.js', '/team-room.js', '/source-activity.js',
-  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png', '/assets/brand/current-lockup.webp'
+  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',
+  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/oilers-derrick.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'
 ];
 const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});

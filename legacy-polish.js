@@ -1,6 +1,108 @@
-const legacyCatalog={timeline:[{era:'Aug. 14, 1959 / 1960',kicker:'Franchise origin',title:'Granted in 1959. Football began in 1960.',image:null,copy:'Bud Adams was granted the AFL franchise on Aug. 14, 1959. The Houston Oilers began play in 1960 as one of the American Football League’s eight charter clubs.',badge:'Origin fact',source:'https://www.profootballhof.com/teams/tennessee-titans/team-facts'},{era:'1960–1996',kicker:'Houston Oilers',title:'The Oilers era',image:'/assets/archive/oilers-derrick.webp',alt:'Representative Houston Oilers derrick reference graphic',copy:'Houston won the first two AFL championships in 1960 and 1961. The oil derrick remained the franchise symbol, but its colors, helmet background and striping changed several times. The image shown here is representative and is not labeled as every year’s exact logo variant.',badge:'Representative visual',source:'https://www.tennesseetitans.com/history/logo-history'},{era:'1997–1998',kicker:'Tennessee Oilers',title:'Two transition seasons in Tennessee',image:'/assets/archive/oilers-derrick.webp',alt:'Representative Oilers derrick reference used for the Tennessee Oilers transition era',copy:'The franchise moved to Tennessee in 1997. The Tennessee Oilers name remained for 1997 and 1998. The derrick continued as the primary identity during the transition; the graphic shown is a representative reference rather than a year-specific helmet rendering.',badge:'Representative visual',source:'https://www.tennesseetitans.com/history/historical-highlights'},{era:'1999–2017',kicker:'Tennessee Titans',title:'Titans name and the fireball identity',image:'/assets/archive/fireball-wordmark.webp',alt:'Tennessee Titans fireball mark with classic wordmark reference',copy:'The Titans name debuted for the 1999 season along with the fireball-T identity and a new Nashville stadium. Tennessee won the AFC in its first season as the Titans and advanced to Super Bowl XXXIV.',badge:'Era reference',source:'https://www.tennesseetitans.com/history/historical-highlights'},{era:'2018–2025',kicker:'Tennessee Titans',title:'2018 uniform system, fireball retained',image:'/assets/archive/fireball-on-navy.webp',alt:'Previous Tennessee Titans fireball primary-mark treatment on navy',copy:'The 2018 uniform redesign introduced a navy helmet and sword-inspired visual details while retaining the fireball primary mark. Titans Blue returned as the primary home jersey color for 2025.',badge:'Previous identity',source:'https://www.tennesseetitans.com/history/logo-history'},{era:'2026–present',kicker:'Tennessee Titans',title:'The Shield era',image:'/assets/archive/current-shield-primary.webp',alt:'Current Tennessee Titans Shield primary-logo reference',copy:'On March 12, 2026, Tennessee unveiled its new logo and uniform system. The Shield became the primary helmet logo, Titans Blue became the visual lead, and the Nashville-inspired 6-String Stripe was introduced.',badge:'Current identity',source:'https://www.tennesseetitans.com/brand/'}],archive:[{image:'/assets/archive/current-shield-primary.webp',title:'The Shield',subtitle:'Current primary-mark reference · 2026–present',kind:'Current identity',alt:'Current Tennessee Titans Shield primary-logo reference',provenance:'Label checked against Tennessee Titans 2026 brand materials'},{image:'/assets/archive/logo-transition-shield-fireball.webp',title:'Shield / fireball comparison',subtitle:'Reference graphic comparing current and previous primary marks',kind:'Reference graphic',alt:'Reference graphic comparing the current Titans Shield and previous fireball mark',provenance:'Comparison graphic — not presented as an official standalone logo'},{image:'/assets/archive/oilers-derrick.webp',title:'Oilers derrick reference',subtitle:'Representative Oilers-era visual; exact variants changed by year',kind:'Oilers reference',alt:'Representative Houston Oilers oil derrick graphic',provenance:'Era label checked against Titans logo history and SportsLogos'},{image:'/assets/archive/fireball-wordmark.webp',title:'Fireball + classic wordmark',subtitle:'Representative 1999–2017 Titans identity treatment',kind:'Fireball era',alt:'Tennessee Titans fireball mark with classic wordmark reference',provenance:'Era label cross-checked against Titans history and SportsLogos'},{image:'/assets/archive/fireball-on-navy.webp',title:'Fireball on navy',subtitle:'Previous primary-mark reference · 2002–2025',kind:'Fireball era',alt:'Previous Tennessee Titans fireball primary mark on navy',provenance:'Era label cross-checked against SportsLogos and Titans history'}]};
+import { VISUAL_AUDIT_DATE, legacyTimeline, visualArchive, knownVisualsNotPictured, visualSources, sourcesFor } from './src/visual-audit.mjs';
+
 const lEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function archiveCard(item){return `<figure class="archive-card" data-kind="${lEsc(item.kind)}"><div class="archive-image"><img src="${lEsc(item.image)}" alt="${lEsc(item.alt)}" loading="lazy"></div><figcaption><span class="archive-kind">${lEsc(item.kind)}</span><strong>${lEsc(item.title)}</strong><small>${lEsc(item.subtitle)}</small><small class="archive-provenance">${lEsc(item.provenance)}</small></figcaption></figure>`;}
-function timelineCard(item){const media=item.image?`<div class="legacy-era-media"><img src="${lEsc(item.image)}" alt="${lEsc(item.alt)}" loading="lazy"></div>`:`<div class="legacy-era-media legacy-era-origin" aria-hidden="true"><strong>1959</strong><span>FRANCHISE GRANTED</span><i>→</i><strong>1960</strong><span>FIRST SEASON</span></div>`;return `<section class="legacy-era legacy-era-polished">${media}<div class="legacy-era-copy"><div class="era-year">${lEsc(item.era)} · ${lEsc(item.kicker)}</div><h3>${lEsc(item.title)}</h3><p>${lEsc(item.copy)}</p><div class="archive-source-row"><span class="archive-kind">${lEsc(item.badge)}</span><a href="${lEsc(item.source)}" target="_blank" rel="noopener noreferrer">Source ↗</a></div></div></section>`;}
-function applyLegacyPolish(){const page=document.querySelector('.legacy-page');if(page&&!page.dataset.polished){page.dataset.polished='true';page.innerHTML=`<div class="archive-note"><strong>Fact-checked franchise timeline.</strong> Current team/brand facts use TennesseeTitans.com first. The Pro Football Hall of Fame is used for franchise milestones. SportsLogos, Pro Football Reference and Wikipedia are secondary cross-checks and do not override official current data.</div><div class="legacy-timeline-polished">${legacyCatalog.timeline.map(timelineCard).join('')}</div><div class="section-rivet">Audited visual archive</div><div class="archive-note"><strong>Image rule:</strong> an era-spanning graphic is labeled “representative” unless the exact logo/year variant has been verified. This prevents one Oilers derrick treatment from being mislabeled as every Oilers logo from 1960–98.</div><div class="archive-filters" role="group" aria-label="Filter visual archive"><button type="button" class="archive-filter active" data-filter="all">All</button><button type="button" class="archive-filter" data-filter="Current identity">Current</button><button type="button" class="archive-filter" data-filter="Oilers reference">Oilers</button><button type="button" class="archive-filter" data-filter="Fireball era">Fireball era</button><button type="button" class="archive-filter" data-filter="Reference graphic">Reference</button></div><div class="legacy-gallery archive-gallery-polished">${legacyCatalog.archive.map(archiveCard).join('')}</div><div class="legal-mark-note">Unofficial fan-built archive. Historical text and visual labels are source-audited; team/NFL marks remain the property of their respective rights holders.</div>`;page.querySelectorAll('.archive-filter').forEach(button=>button.addEventListener('click',()=>{page.querySelectorAll('.archive-filter').forEach(x=>x.classList.toggle('active',x===button));const filter=button.dataset.filter;page.querySelectorAll('.archive-card').forEach(card=>{card.hidden=filter!=='all'&&card.dataset.kind!==filter});}));}const callout=document.querySelector('.legacy-callout-art img');if(callout){callout.src='/assets/archive/oilers-derrick.webp';callout.alt='Representative Houston Oilers oil derrick reference';}const calloutCopy=document.querySelector('.legacy-callout-copy p');if(calloutCopy)calloutCopy.textContent='From the Oilers derrick to the Titans fireball and today’s Shield, the franchise identity changed through multiple verified eras and year-specific variants.';const strip=document.querySelector('.legacy-strip');if(strip&&!strip.dataset.polished){strip.dataset.polished='true';strip.innerHTML=[legacyCatalog.archive[1],legacyCatalog.archive[2],legacyCatalog.archive[3],legacyCatalog.archive[0]].map(item=>`<a class="legacy-peek" href="#legacy"><img src="${lEsc(item.image)}" alt="${lEsc(item.alt)}" loading="lazy"><span>${lEsc(item.title)}</span></a>`).join('');}}
-const observer=new MutationObserver(applyLegacyPolish),appRoot=document.querySelector('#app');if(appRoot)observer.observe(appRoot,{childList:true,subtree:true});addEventListener('hashchange',()=>queueMicrotask(applyLegacyPolish));queueMicrotask(applyLegacyPolish);
+
+function sourceLinks(keys){
+  return sourcesFor(keys).map(source=>`<a href="${lEsc(source.url)}" target="_blank" rel="noopener noreferrer" title="${lEsc(source.role)}">${lEsc(source.label)} ↗</a>`).join('');
+}
+
+function archiveCard(item){
+  return `<figure class="archive-card" data-kind="${lEsc(item.kind)}" data-verification="${lEsc(item.verificationLevel)}">
+    <div class="archive-image"><img src="${lEsc(item.image)}" alt="${lEsc(item.alt)}" loading="lazy"></div>
+    <figcaption>
+      <div class="archive-card-meta"><span class="archive-kind">${lEsc(item.kind)}</span><span class="archive-verification">${lEsc(item.verification)}</span></div>
+      <strong>${lEsc(item.title)}</strong>
+      <small class="archive-era">${lEsc(item.era)}</small>
+      <p class="archive-description">${lEsc(item.description)}</p>
+      <details class="archive-audit-detail">
+        <summary>Why this label</summary>
+        <p>${lEsc(item.provenance)}</p>
+        <div class="archive-source-list">${sourceLinks(item.sourceKeys)}</div>
+      </details>
+    </figcaption>
+  </figure>`;
+}
+
+function timelineCard(item){
+  const media=item.image
+    ? `<div class="legacy-era-media"><img src="${lEsc(item.image)}" alt="${lEsc(item.alt)}" loading="lazy"></div>`
+    : `<div class="legacy-era-media legacy-era-origin" aria-hidden="true"><strong>1959</strong><span>FRANCHISE GRANTED</span><i>→</i><strong>1960</strong><span>FIRST SEASON</span></div>`;
+  return `<section class="legacy-era legacy-era-polished" data-era="${lEsc(item.id)}">
+    ${media}
+    <div class="legacy-era-copy">
+      <div class="era-year">${lEsc(item.era)} · ${lEsc(item.kicker)}</div>
+      <h3>${lEsc(item.title)}</h3>
+      <p>${lEsc(item.copy)}</p>
+      <div class="archive-source-row">
+        <span class="archive-kind">${lEsc(item.verification)}</span>
+        <div class="archive-inline-sources">${sourceLinks(item.sourceKeys)}</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function auditSourceSummary(){
+  const ordered=['titansBrand','titansLogoHistory','hallOfFame','sportsLogos','wikipedia'];
+  return `<section class="visual-audit-banner">
+    <div>
+      <small>Visual-label audit · ${lEsc(VISUAL_AUDIT_DATE)}</small>
+      <strong>Exact when verified. Representative when it is not.</strong>
+      <p>Current branding is checked against the Tennessee Titans first. Historical image labels are then cross-checked against the official logo/helmet history, the Pro Football Hall of Fame, SportsLogos.net and Wikipedia. A project composite is never promoted into an “official logo” just because it looks plausible.</p>
+    </div>
+    <div class="visual-audit-source-chips">${ordered.map(key=>{const source=visualSources[key];return `<a href="${lEsc(source.url)}" target="_blank" rel="noopener noreferrer">${lEsc(source.label.replace(/^Tennessee Titans — /,'Titans ').replace(/^Pro Football Hall of Fame — /,'HOF ').replace(/^SportsLogos\.net — /,'SportsLogos ').replace(/^Wikipedia — /,'Wikipedia '))}</a>`}).join('')}</div>
+  </section>`;
+}
+
+function applyLegacyPolish(){
+  const page=document.querySelector('.legacy-page');
+  if(page&&!page.dataset.polished){
+    page.dataset.polished='true';
+    page.innerHTML=`${auditSourceSummary()}
+      <div class="archive-note"><strong>Reading the timeline:</strong> logo chronology and uniform chronology are not treated as the same thing. In particular, 2018 changed the helmet, uniforms and wordmark system while the fireball-T primary logo remained in use through 2025.</div>
+      <div class="legacy-timeline-polished">${legacyTimeline.map(timelineCard).join('')}</div>
+      <div class="section-rivet">Audited visual archive</div>
+      <div class="archive-note"><strong>Image rule:</strong> a historical graphic gets an exact year/title only when the asset itself is verified to that identity. Otherwise it is labeled <em>representative</em> or <em>reference</em>. This prevents one Oilers derrick rendering from being called every Oilers logo, and prevents a 2018 uniform treatment from being mislabeled as a new primary logo.</div>
+      <div class="archive-filters" role="group" aria-label="Filter visual archive">
+        <button type="button" class="archive-filter active" data-filter="all">All</button>
+        <button type="button" class="archive-filter" data-filter="Current identity">Current</button>
+        <button type="button" class="archive-filter" data-filter="Oilers reference">Oilers</button>
+        <button type="button" class="archive-filter" data-filter="Fireball era">Fireball era</button>
+        <button type="button" class="archive-filter" data-filter="Reference graphic">Reference</button>
+      </div>
+      <div class="legacy-gallery archive-gallery-polished">${visualArchive.map(archiveCard).join('')}</div>
+      <div class="section-rivet">Documented identities not pictured</div>
+      <div class="visual-gap-grid">${knownVisualsNotPictured.map(item=>`<article class="visual-gap-card"><small>${lEsc(item.status)}</small><strong>${lEsc(item.title)}</strong><p>${lEsc(item.copy)}</p><div class="archive-source-list">${sourceLinks(item.sourceKeys)}</div></article>`).join('')}</div>
+      <div class="legal-mark-note">Unofficial fan-built archive. Historical text and visual labels are source-audited; team/NFL marks remain the property of their respective rights holders.</div>`;
+    page.querySelectorAll('.archive-filter').forEach(button=>button.addEventListener('click',()=>{
+      page.querySelectorAll('.archive-filter').forEach(x=>x.classList.toggle('active',x===button));
+      const filter=button.dataset.filter;
+      page.querySelectorAll('.archive-card').forEach(card=>{card.hidden=filter!=='all'&&card.dataset.kind!==filter});
+    }));
+  }
+
+  const callout=document.querySelector('.legacy-callout');
+  if(callout){
+    callout.dataset.visualAudited='true';
+    const calloutImage=callout.querySelector('.legacy-callout-art img');
+    if(calloutImage){
+      const oilers=visualArchive.find(item=>item.id==='oilers-derrick');
+      calloutImage.src=oilers.image;
+      calloutImage.alt=oilers.alt;
+    }
+    const calloutCopy=callout.querySelector('.legacy-callout-copy p');
+    if(calloutCopy)calloutCopy.textContent='From the Oilers derrick and its many year-specific treatments, to the fireball-T, the sword-inspired details of the 2018 uniform system, and today’s Shield, the franchise identity changed in distinct, documented stages.';
+  }
+
+  const strip=document.querySelector('.legacy-strip');
+  if(strip&&!strip.dataset.polished){
+    strip.dataset.polished='true';
+    const ids=['oilers-derrick','fireball-wordmark','fireball-on-navy','shield-primary'];
+    strip.innerHTML=ids.map(id=>visualArchive.find(item=>item.id===id)).filter(Boolean).map(item=>`<a class="legacy-peek" href="#legacy"><img src="${lEsc(item.image)}" alt="${lEsc(item.alt)}" loading="lazy"><span>${lEsc(item.title)}</span></a>`).join('');
+  }
+}
+
+const observer=new MutationObserver(applyLegacyPolish);
+const appRoot=document.querySelector('#app');
+if(appRoot)observer.observe(appRoot,{childList:true,subtree:true});
+addEventListener('hashchange',()=>queueMicrotask(applyLegacyPolish));
+queueMicrotask(applyLegacyPolish);

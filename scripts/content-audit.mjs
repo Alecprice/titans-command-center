@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { team, games, roster, feed, sources } from '../src/data.mjs';
+import { legacyTimeline, visualArchive, knownVisualsNotPictured, visualSources } from '../src/visual-audit.mjs';
 
 const errors=[];
 const check=(label,fn)=>{try{fn();console.log(`✓ ${label}`)}catch(error){errors.push(`${label}: ${error.message}`);console.error(`✗ ${label}`)}};
@@ -13,5 +14,19 @@ check('Peter Skoronski fallback position matches official roster',()=>{assert.eq
 check('fallback feed carries the current Aug. 19 transaction',()=>{const item=feed.find(x=>/D'Ernest Johnson/i.test(x.title));assert.ok(item);assert.match(item.url,/tennesseetitans\.com\/team\/transactions/);});
 check('fallback feed contains sourceable links instead of placeholder social claims',()=>{assert.ok(feed.length>0);for(const item of feed){assert.match(item.url,/^https:\/\//,`${item.id} does not link to an external source`);assert.notEqual(item.source,'Reporter watchlist');}});
 check('fallback source labels distinguish API availability from active persistence',()=>{assert.match(sources.find(s=>s.name==='NFLverse')?.status||'',/importer pending/i);assert.match(sources.find(s=>s.name==='NWS')?.status||'',/persistence pending/i);assert.match(sources.find(s=>s.name==='ESPN')?.purpose||'',/not authoritative roster or injury/i);});
+check('visual labels are source-audited and active art avoids legacy aliases',()=>{
+  assert.match(visualSources.wikipedia.url,/wikipedia\.org/);
+  assert.match(visualSources.sportsLogos.url,/sportslogos\.net/);
+  for(const item of visualArchive){
+    assert.doesNotMatch(item.image,/\/assets\/legacy\//,`${item.id} uses an ambiguous legacy alias`);
+    assert.ok(item.alt.length>=35,`${item.id} needs comprehensive alt text`);
+    assert.ok(item.sourceKeys.length>=2,`${item.id} needs at least two source references`);
+  }
+  const uniform2018=legacyTimeline.find(x=>x.id==='2018-uniform-era');
+  assert.match(uniform2018?.copy||'',/fireball-T remained the primary mark through 2025/i);
+  assert.equal(visualArchive.some(item=>/Sword alternate|Vintage roundel/i.test(item.title)),false);
+  const sword=knownVisualsNotPictured.find(item=>item.id==='titans-sword-alternate');
+  assert.match(sword?.copy||'',/real Titans secondary\/alternate mark/i);
+});
 if(errors.length){console.error(`\nContent audit failed (${errors.length}):\n- ${errors.join('\n- ')}`);process.exit(1)}
-console.log(`\nContent audit passed: ${games.length} schedule rows, ${roster.length} verified fallback players, ${feed.length} sourced fallback feed items.`);
+console.log(`\nContent audit passed: ${games.length} schedule rows, ${roster.length} verified fallback players, ${feed.length} sourced fallback feed items, ${visualArchive.length} audited visual assets.`);
