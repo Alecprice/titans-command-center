@@ -26,10 +26,15 @@ export const visualSources={
     url:'https://www.sportslogos.net/logos/list_by_team/160/Tennessee-Titans-Logos/',
     role:'Specialist visual-history cross-check for primary, alternate and wordmark year ranges.'
   },
+  sportsLogosSword1999:{
+    label:'SportsLogos.net — sword alternate, 1999–2001',
+    url:'https://www.sportslogos.net/logos/view/16062041999/Tennessee-Titans-Logo/1999/Alternate-Logo',
+    role:'Specialist cross-check for the lighter-navy 1999–2001 sword alternate, first worn Sept. 12, 1999.'
+  },
   sportsLogosSword:{
-    label:'SportsLogos.net — Titans sword alternate',
+    label:'SportsLogos.net — sword alternate, 2002–2025',
     url:'https://www.sportslogos.net/logos/view/16038902002/Tennessee-Titans-Logo/2002/Alternate-Logo',
-    role:'Specialist cross-check documenting the Titans sword alternate/secondary mark; the darker-color version is cataloged as 2002–2025 and first worn in 1999.'
+    role:'Specialist cross-check for the darker-navy 2002–2025 sword alternate. The underlying sword identity was first worn Sept. 12, 1999.'
   },
   titansSword:{
     label:'Tennessee Titans — 15th-season sword reference',
@@ -214,8 +219,8 @@ export const knownVisualsNotPictured=[
     id:'titans-sword-alternate',
     title:'Titans sword alternate / secondary mark',
     status:'Documented identity · verified project asset not available',
-    copy:'The sword is a real Titans secondary/alternate mark. Official Titans material explicitly calls it the “Titans sword,” and SportsLogos catalogs the darker-color alternate version as 2002–2025 while noting it was first worn in 1999. The repo’s old legacy-sword.webp cannot be used as proof because it is one of several differently named legacy aliases that resolve to the same binary. Keep this identity text-only until a distinct, provenance-checked asset is added.',
-    sourceKeys:['titansSword','sportsLogosSword','sportsLogos']
+    copy:'The sword is a real Titans secondary/alternate mark. Official Titans material explicitly calls it the “Titans sword.” SportsLogos catalogs a lighter-navy 1999–2001 version and a darker-navy 2002–2025 version; both are the same underlying sword identity first worn Sept. 12, 1999. The repo’s old legacy-sword.webp cannot be used as proof because it is one of several differently named legacy aliases that resolve to the same binary. Keep this identity text-only until a distinct, provenance-checked asset is added.',
+    sourceKeys:['titansSword','sportsLogosSword1999','sportsLogosSword','sportsLogos']
   },
   {
     id:'tennessee-oilers-alternate',
