@@ -10,6 +10,7 @@ const normLabel=v=>String(v??'').toUpperCase().replace(/[^A-Z0-9/]/g,'');
 const field=(row,label)=>{const wanted=(labelAliases[label]||[label]).map(normLabel);return row?.fields?.find(x=>wanted.includes(normLabel(x.label)))?.value;};
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const round=(v,d=1)=>Number(v).toFixed(d).replace(/\.0$/,'');
+const canonicalCategory=v=>{const key=clean(v).toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ');return ({passing:'Passing',rushing:'Rushing',receiving:'Receiving',defense:'Defense',defensive:'Defense',kicking:'Kicking',punting:'Punting','kick return':'Kick Returns','kick returns':'Kick Returns','punt return':'Punt Returns','punt returns':'Punt Returns','special teams':'Special Teams',fumbles:'Fumbles'})[key]||clean(v)||'Stats'};
 
 export const PRESEASON_POSITION_ORDER=['QB','RB','WR','TE','C','G','T','DE','DL','DT','LB','CB','DB','S','K','P','LS'];
 
@@ -56,7 +57,7 @@ function aggregateSimple(rows){
 }
 
 export function aggregateCategory(category,rows){
-  if(!rows.length)return [];
+  category=canonicalCategory(category);if(!rows.length)return [];
   if(category==='Passing')return aggregatePassing(rows);
   if(category==='Rushing')return aggregateVolume(rows);
   if(category==='Receiving')return aggregateReceiving(rows);
@@ -68,7 +69,7 @@ export function aggregateCategory(category,rows){
 }
 
 export function aggregatePlayerStats(rows=[]){
-  const groups=new Map();for(const row of rows){const category=row.category||'Stats';if(!groups.has(category))groups.set(category,[]);groups.get(category).push(row)}
+  const groups=new Map();for(const row of rows){const category=canonicalCategory(row.category);if(!groups.has(category))groups.set(category,[]);groups.get(category).push(row)}
   return [...groups].map(([category,items])=>({category,fields:aggregateCategory(category,items),eventId:'season',eventName:'Preseason totals',date:null,source:'Aggregated from completed preseason games'}));
 }
 
