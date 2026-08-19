@@ -23,14 +23,16 @@ This audit prevents a polished UI from making stale or conflicting football data
 2. SportsLogos.net as a secondary era/variant cross-check
 3. User-supplied graphics only after their subject/era is verified
 
-A secondary source never overrides a current official team/league source simply because it is easier to parse.
+A secondary source never overrides a current official team/league source simply because it is easier to parse. Conflicting sources are recorded rather than silently blended.
 
 ## Conflicts discovered
 
 - **2026 preseason opener:** Tennessee Titans/NFL schedule = Aug. 13, 2026. Pro Football Reference currently shows Aug. 15. App uses Aug. 13.
 - **Franchise origin:** Hall of Fame = franchise granted Aug. 14, 1959; first season 1960. Some summaries say only “Est. 1960.” App displays both milestones.
-- **Week 18:** official current schedule time is TBD. Do not infer or fabricate Jan. 10 kickoff time from secondary schedule templates.
+- **Week 18:** official current schedule time is TBD. Do not infer or fabricate a kickoff time from secondary schedule templates.
 - **Injuries:** official Titans injury-report page says weekly injury reports begin in the regular season. A zero-row injury table during preseason means **not published**, not “no injuries.” Reserve/Injured roster status is separate.
+- **Jeffery Simmons 2025 tackles:** NFL.com’s individual career page currently shows 65 total tackles, but the Titans’ official 2025 team stats, an official Titans 2026 contract article, and Pro Football Reference all show **67**. The app uses 67 and records the discrepancy.
+- **Preseason TV:** the Titans’ June preseason announcement lists WKRN-TV News 2/regional affiliates for Bears-Titans, while the current NFL schedule also lists NFL Network nationally. These are complementary national/local carriage details, not treated as contradictory kickoff data.
 
 ## Current verified personnel snapshot
 - Controlling Owner: Amy Adams Strunk
@@ -48,15 +50,15 @@ The warehouse contains the official **UNOFFICIAL depth chart as of 2026-08-09**.
 - Special Teams: 13 assignments / 7 position groups
 - 101 total assignments
 
-Players sharing the same depth rank remain tied. The UI must never flatten ties into invented starter/backup ordering. The date and “UNOFFICIAL” label must remain visible.
+Players sharing the same depth rank remain tied. The UI must never flatten ties into invented starter/backup ordering. The date and “UNOFFICIAL” label remain visible.
 
 ## Statistics rules
 - Current 2026 regular-season totals are not displayed before the regular season begins.
 - 2025 data may be shown only in a visually separate **2025 verified baseline** block.
-- Verified examples cross-checked with NFL.com/PFR:
+- Verified baseline examples:
   - Cam Ward: 323/540, 3,169 passing yards, 15 TD, 7 INT, 80.2 rating.
   - Tony Pollard: 242 carries, 1,082 rushing yards, 4.5 yards/attempt, 5 rushing TD.
-  - Jeffery Simmons: 15 games, 65 total tackles, 11 sacks, 1 safety.
+  - Jeffery Simmons: 15 games, **67 total tackles**, 11 sacks, 1 safety.
 
 ## Visual archive rules
 - “The Shield” is the current 2026 primary mark.

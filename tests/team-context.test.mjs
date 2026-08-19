@@ -12,10 +12,11 @@ test('preseason injury state is not presented as zero injuries',()=>{
   assert.match(auditedTeamContext.injuryReport.detail,/Reserve\/Injured roster status is tracked separately/);
 });
 
-test('verified baseline is explicitly prior season',()=>{
+test('verified baseline is explicitly prior season and audited',()=>{
   assert.equal(auditedTeamContext.baselineStats.season,2025);
   assert.match(auditedTeamContext.baselineStats.label,/not 2026 stats/i);
   assert.equal(auditedTeamContext.baselineStats.players.find(p=>p.name==='Cam Ward').lines.includes('3,169 pass yds'),true);
+  assert.equal(auditedTeamContext.baselineStats.players.find(p=>p.name==='Jeffery Simmons').lines.includes('67 total tackles'),true);
 });
 
 test('current 2026 leadership and coordinators are audited',()=>{
@@ -29,4 +30,11 @@ test('known secondary schedule conflict is documented',()=>{
   const conflict=auditedTeamContext.knownConflicts.find(x=>x.topic==='2026 preseason opener date');
   assert.ok(conflict);
   assert.match(conflict.resolution,/Aug\. 13/);
+});
+
+test('known Jeffery Simmons stat-source conflict is documented',()=>{
+  const conflict=auditedTeamContext.knownConflicts.find(x=>x.topic==='Jeffery Simmons 2025 total tackles');
+  assert.ok(conflict);
+  assert.match(conflict.officialValue,/67/);
+  assert.match(conflict.secondaryValue,/65/);
 });

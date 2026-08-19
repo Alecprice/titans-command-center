@@ -6,11 +6,12 @@ export const auditedTeamContext = {
     statisticalCrossCheck: ['NFL.com', 'Pro Football Reference', 'nflverse'],
     visualCrossCheck: ['Tennessee Titans brand/history', 'SportsLogos.net'],
     secondaryContext: ['Wikipedia'],
-    rule: 'Current official Titans/NFL information overrides secondary sources when they conflict.'
+    rule: 'Current official Titans/NFL information overrides secondary sources when they conflict; conflicting stat feeds are retained as audit notes instead of silently blended.'
   },
   knownConflicts: [
     { topic: '2026 preseason opener date', officialValue: 'Aug. 13, 2026', secondaryValue: 'Pro Football Reference currently lists Aug. 15', resolution: 'Use Tennessee Titans/NFL schedule: Aug. 13.' },
-    { topic: 'Franchise origin date', officialValue: 'Franchise granted Aug. 14, 1959; first season 1960', secondaryValue: 'Some team/league summaries simply say established 1960', resolution: 'Display both grant date and first season instead of collapsing them.' }
+    { topic: 'Franchise origin date', officialValue: 'Franchise granted Aug. 14, 1959; first season 1960', secondaryValue: 'Some team/league summaries simply say established 1960', resolution: 'Display both grant date and first season instead of collapsing them.' },
+    { topic: 'Jeffery Simmons 2025 total tackles', officialValue: '67 total tackles (Tennessee Titans team stats)', secondaryValue: 'NFL.com individual career page currently shows 65', resolution: 'Use 67: Tennessee Titans official team stats, official Titans contract article, and Pro Football Reference agree on 67; retain the NFL.com discrepancy as an audit note.' }
   ],
   leadership: [
     { role: 'Controlling Owner', name: 'Amy Adams Strunk' },
@@ -45,7 +46,7 @@ export const auditedTeamContext = {
     players: [
       { name: 'Cam Ward', position: 'QB', lines: ['323/540 passing', '3,169 pass yds', '15 TD · 7 INT', '80.2 rating'], sourceUrl: 'https://www.nfl.com/players/cam-ward/stats/career' },
       { name: 'Tony Pollard', position: 'RB', lines: ['242 rush att', '1,082 rush yds', '4.5 yds/att', '5 rush TD'], sourceUrl: 'https://www.nfl.com/players/tony-pollard/stats/career' },
-      { name: 'Jeffery Simmons', position: 'DT', lines: ['15 games', '65 total tackles', '11 sacks', '1 safety'], sourceUrl: 'https://www.nfl.com/players/jeffery-simmons/stats/career' }
+      { name: 'Jeffery Simmons', position: 'DT', lines: ['15 games', '67 total tackles', '11 sacks', '1 safety'], sourceUrl: 'https://www.tennesseetitans.com/team/stats/2025/REG' }
     ]
   },
   visualAudit: {
