@@ -1,0 +1,1 @@
+Corrected visual archive assets for the Titans fan project. Filenames describe what each supplied image actually depicts. Decorative/reference artwork is labeled separately from current and classic franchise marks.
