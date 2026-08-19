@@ -53,6 +53,8 @@ The Oilers name remained during the first two Tennessee seasons. The official he
 
 The Titans name and fireball-T arrived for 1999. SportsLogos distinguishes 1999–2001 and 2002–2025 versions of the primary logo, while the pre-2018 wordmark is cataloged separately. The archive therefore avoids pretending a combined fireball/wordmark graphic is one unchanged exact primary mark for 19 seasons.
 
+The sword secondary/alternate also had a color-era split: SportsLogos catalogs a lighter-navy version for **1999–2001** and a darker-navy version for **2002–2025**. Both are the same underlying sword identity, with first wear dated Sept. 12, 1999. That distinction is recorded even though the project does not currently have a distinct provenance-checked sword asset to display.
+
 ### 2018–2025
 
 This is the most important chronology correction. **2018 changed the uniforms, navy helmet and wordmark system; it did not replace the primary fireball-T logo.** The fireball remained the primary mark through 2025. The 2018 system used sword-inspired details that referenced the team’s sword identity. Separately, the Titans do have a documented sword secondary/alternate mark; however, the repo’s old `legacy-sword.webp` alias is not a verified image of it.
@@ -63,7 +65,7 @@ The Titans unveiled the current identity on March 12, 2026. The official team ca
 
 ## Documented identities intentionally not pictured
 
-- **Titans sword secondary/alternate:** real and documented by both the Titans and SportsLogos, but no distinct provenance-checked project asset is currently available. The old `legacy-sword.webp` alias is a duplicate binary and remains quarantined.
+- **Titans sword secondary/alternate:** real and documented by both the Titans and SportsLogos. The lighter-navy version is cataloged for 1999–2001 and the darker-navy version for 2002–2025. No distinct provenance-checked project asset is currently available, so the old duplicate `legacy-sword.webp` alias remains quarantined.
 - **Tennessee Oilers Tennessee-flag / derrick alternate:** documented in secondary historical sources and consistent with the official team’s 1997 Tennessee-branding note, but the current Oilers project image is not verified as that exact alternate.
 
 This is intentional: the archive should admit a missing picture rather than attach the wrong picture to a correct historical label.
@@ -75,6 +77,7 @@ This is intentional: the archive should admit a missing picture rather than atta
 - https://www.tennesseetitans.com/news/titans-unveil-new-uniforms-logo-to-represent-the-next-chapter-of-franchise-history
 - https://www.profootballhof.com/teams/tennessee-titans/team-facts
 - https://www.sportslogos.net/logos/list_by_team/160/Tennessee-Titans-Logos/
+- https://www.sportslogos.net/logos/view/16062041999/Tennessee-Titans-Logo/1999/Alternate-Logo
 - https://www.sportslogos.net/logos/view/16038902002/Tennessee-Titans-Logo/2002/Alternate-Logo
 - https://www.tennesseetitans.com/news/titans-unveil-fans-choice-of-15th-season-logo-9948081
 - https://www.tennesseetitans.com/news/the-story-behind-titans-new-uniforms-and-helmet-20512660
