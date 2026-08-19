@@ -3,7 +3,17 @@
   "version":"0.8.0",
   "private":true,
   "type":"module",
-  "scripts":{"dev":"node server.mjs","test":"node --test tests/*.test.mjs","audit:content":"node scripts/content-audit.mjs","secret-scan":"node scripts/check-secrets.mjs","syntax-check":"node scripts/check-syntax.mjs","check":"npm test && npm run audit:content && npm run secret-scan && npm run syntax-check"},
+  "scripts":{
+    "dev":"node server.mjs",
+    "test":"node --test tests/*.test.mjs",
+    "audit:content":"node scripts/content-audit.mjs",
+    "secret-scan":"node scripts/check-secrets.mjs",
+    "syntax-check":"node scripts/check-syntax.mjs",
+    "build:cloudflare":"node scripts/build-cloudflare.mjs",
+    "verify:cloudflare":"node scripts/check-cloudflare-build.mjs",
+    "deploy:cloudflare":"npm run build:cloudflare && npx wrangler@4 deploy",
+    "check":"npm test && npm run audit:content && npm run secret-scan && npm run syntax-check && npm run build:cloudflare && npm run verify:cloudflare"
+  },
   "dependencies":{"@neondatabase/serverless":"1.0.2"},
   "engines":{"node":">=20"}
 }
