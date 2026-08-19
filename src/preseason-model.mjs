@@ -1,7 +1,13 @@
 const num=v=>v==null||v===''||Number.isNaN(Number(v))?0:Number(v);
 const clean=v=>String(v??'').trim();
 const pair=v=>{const m=clean(v).match(/^(-?\d+(?:\.\d+)?)\s*[\/-]\s*(-?\d+(?:\.\d+)?)/);return m?[Number(m[1]),Number(m[2])]:[0,0]};
-const field=(row,label)=>row?.fields?.find(x=>x.label===label)?.value;
+const labelAliases={
+  'CMP/ATT':['CMP/ATT','C/ATT','COMP/ATT'],'SACK':['SACK','SACKS'],'ATT':['ATT','CAR'],'TAR':['TAR','TGTS','TGT'],
+  'LG':['LG','LONG'],'FG LG':['FG LG','LNG','LONG'],'TKL':['TKL','SOLO'],'COMB':['COMB','TOT','TOTAL'],
+  'SACK YDS':['SACK YDS','SACKYDS'],'QH':['QH','QB HTS','QB HITS'],'PD':['PD','PDEF'],'NO':['NO','RET','PUNTS']
+};
+const normLabel=v=>String(v??'').toUpperCase().replace(/[^A-Z0-9/]/g,'');
+const field=(row,label)=>{const wanted=(labelAliases[label]||[label]).map(normLabel);return row?.fields?.find(x=>wanted.includes(normLabel(x.label)))?.value;};
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const round=(v,d=1)=>Number(v).toFixed(d).replace(/\.0$/,'');
 
