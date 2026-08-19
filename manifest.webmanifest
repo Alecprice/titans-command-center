@@ -1,11 +1,11 @@
 {
   "name": "Titans Command Center",
   "short_name": "Titans CC",
-  "description": "A Tennessee Titans data, news, analytics, and game-day PWA.",
+  "description": "A fan-built Tennessee Titans game-day, roster, intel, analytics, markets, and franchise legacy PWA.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#07111f",
-  "theme_color": "#0b1f36",
+  "background_color": "#F3F7FB",
+  "theme_color": "#4B92DB",
   "orientation": "any",
   "icons": [
     {"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},

@@ -3,49 +3,53 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1f36" />
-  <meta name="description" content="Tennessee Titans data, news, analytics, and game-day command center." />
+  <meta name="theme-color" content="#4B92DB" />
+  <meta name="description" content="A fan-built Tennessee Titans command center for game day, roster, news, analytics, markets, and franchise legacy." />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/assets/icon-192.png" />
   <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/brand.css" />
   <title>Titans Command Center</title>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <a href="#home" class="brand" aria-label="Titans Command Center home">
-        <span class="brand-mark">T</span>
-        <span><strong>Titans</strong><small>Command Center</small></span>
+        <span class="brand-logo-crop" aria-hidden="true"><img src="/assets/brand/current-lockup.webp" alt="" /></span>
+        <span class="brand-copy"><strong>TITANS</strong><small>Command Center</small></span>
       </a>
+      <div class="six-string" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <nav class="nav" id="primary-nav">
-        <a href="#home" data-route="home">⌂ <span>Home</span></a>
-        <a href="#live" data-route="live">● <span>Live</span></a>
-        <a href="#games" data-route="games">◫ <span>Games</span></a>
-        <a href="#roster" data-route="roster">◎ <span>Roster</span></a>
-        <a href="#transactions" data-route="transactions">⇄ <span>Transactions</span></a>
-        <a href="#stats" data-route="stats">↗ <span>Stats Lab</span></a>
-        <a href="#markets" data-route="markets">$ <span>Markets</span></a>
-        <a href="#feed" data-route="feed">≋ <span>Intel Feed</span></a>
-        <a href="#sources" data-route="sources">⌁ <span>Sources</span></a>
+        <a href="#home" data-route="home"><b>01</b><span>Home</span></a>
+        <a href="#live" data-route="live"><b>02</b><span>Game Day</span></a>
+        <a href="#games" data-route="games"><b>03</b><span>Schedule</span></a>
+        <a href="#roster" data-route="roster"><b>04</b><span>Roster</span></a>
+        <a href="#transactions" data-route="transactions"><b>05</b><span>Transactions</span></a>
+        <a href="#stats" data-route="stats"><b>06</b><span>Stats Lab</span></a>
+        <a href="#markets" data-route="markets"><b>07</b><span>Market Pulse</span></a>
+        <a href="#feed" data-route="feed"><b>08</b><span>Intel Feed</span></a>
+        <a href="#legacy" data-route="legacy"><b>09</b><span>Legacy</span></a>
+        <a href="#sources" data-route="sources"><b>10</b><span>Sources</span></a>
       </nav>
       <div class="sidebar-foot">
-        <div class="status-pill"><i></i> PWA ready</div>
-        <small>2026 season workspace</small>
+        <div class="status-pill"><i></i> 2026 fan HQ</div>
+        <small>Unofficial fan-built experience</small>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
         <button class="icon-button menu-button" id="menu-button" aria-label="Open navigation">☰</button>
+        <div class="topbar-wordmark"><span>TN</span><strong>TITAN UP</strong></div>
         <div class="search-wrap">
           <span>⌕</span>
-          <input id="global-search" type="search" placeholder="Search players, reports, games, topics…" autocomplete="off" />
+          <input id="global-search" type="search" placeholder="Search players, games, reports, topics…" autocomplete="off" />
           <kbd>⌘ K</kbd>
         </div>
         <div class="top-actions">
           <button class="icon-button" id="refresh-button" aria-label="Refresh data">↻</button>
-          <button class="install-button" id="install-button" hidden>Install app</button>
-          <button class="avatar" aria-label="User menu">AP</button>
+          <button class="install-button" id="install-button" hidden>Install</button>
+          <a class="official-link" href="https://www.tennesseetitans.com/" target="_blank" rel="noopener noreferrer">Official site ↗</a>
         </div>
       </header>
 
@@ -55,11 +59,11 @@
 
   <nav class="mobile-nav" aria-label="Mobile navigation">
     <a href="#home" data-route="home"><span>⌂</span>Home</a>
-    <a href="#games" data-route="games"><span>◫</span>Games</a>
-    <a href="#live" data-route="live"><span>●</span>Live</a>
+    <a href="#live" data-route="live"><span>●</span>Game</a>
     <a href="#roster" data-route="roster"><span>◎</span>Roster</a>
-    <a href="#markets" data-route="markets"><span>$</span>Market</a>
-    <a href="#feed" data-route="feed"><span>≋</span>Feed</a>
+    <a href="#stats" data-route="stats"><span>↗</span>Stats</a>
+    <a href="#feed" data-route="feed"><span>≋</span>Intel</a>
+    <a href="#legacy" data-route="legacy"><span>★</span>Legacy</a>
   </nav>
 
   <div class="toast" id="toast" role="status"></div>
