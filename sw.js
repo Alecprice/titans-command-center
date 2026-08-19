@@ -1,7 +1,7 @@
-const CACHE = 'titans-cc-brand-2026-v8';
+const CACHE = 'titans-cc-brand-2026-v9';
 const SHELL = [
-  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css',
-  '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js',
+  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/fan-polish.css',
+  '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/fan-polish.js',
   '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs',
   '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',
   '/assets/brand/current-lockup.webp'

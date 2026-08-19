@@ -1,6 +1,6 @@
 import { databaseHealth } from '../src/db.mjs';
 
-const APP_VERSION='0.6.1';
+const APP_VERSION='0.6.2';
 const providerConfig=env=>({
   propLine:Boolean(env.PROPLINE_API_KEY),
   oddsApiIo:Boolean(env.ODDS_API_IO_KEY),
