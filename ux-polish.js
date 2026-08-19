@@ -23,6 +23,12 @@ function ensureUtilityChips(){
   }
 }
 
+function friendlyDate(value){
+  if(!value)return '';
+  const d=new Date(/^\d{4}-\d{2}-\d{2}$/.test(value)?`${value}T12:00:00Z`:value);
+  return Number.isNaN(d.getTime())?String(value):new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric'}).format(d);
+}
+
 function formatCountdown(iso){
   if(!iso)return 'Kickoff TBD';
   const ms=new Date(iso)-Date.now();
@@ -42,6 +48,23 @@ function updateKickoffChip(){
   chip.title=`Next Titans game: ${next.homeAway==='home'?'vs':'at'} ${next.opponent||next.opponentAbbr}`;
 }
 
+function decorateIntelSources(){
+  if(!lastBootstrap?.feed?.length)return;
+  qsa('.intel-item').forEach(card=>{
+    if(card.dataset.uxSource)return;
+    const title=(qs('h3',card)?.textContent||'').trim();
+    const event=lastBootstrap.feed.find(item=>item.title===title);
+    if(!event)return;
+    card.dataset.uxSource='true';
+    const tags=qs('.tags',card),meta=document.createElement('div');
+    meta.className='intel-provenance';
+    const source=document.createElement('span');source.textContent=event.source||'Source';meta.append(source);
+    if(event.official){const official=document.createElement('strong');official.textContent='Official';meta.append(official);}
+    else if(event.sourceSlug==='titans-cc'){const analysis=document.createElement('strong');analysis.textContent='Command Center analysis';meta.append(analysis);}
+    if(tags)tags.before(meta);else qs('p',card)?.after(meta);
+  });
+}
+
 async function refreshUtilityData(){
   ensureUtilityChips();
   const dataChip=qs('#data-chip');
@@ -57,10 +80,10 @@ async function refreshUtilityData(){
       dataChip.classList.toggle('is-good',Boolean(health?.ok));
       dataChip.classList.toggle('is-bad',!health?.ok);
       const audit=health?.database?.content_audit_at||data?.meta?.content_audit_at;
-      dataChip.querySelector('span:last-child').textContent=health?.ok?(audit?`Verified · ${audit}`:'Data online'):'Data fallback';
+      dataChip.querySelector('span:last-child').textContent=health?.ok?(audit?`Verified · ${friendlyDate(audit)}`:'Data online'):'Data fallback';
       dataChip.title=health?.ok?'Neon database online and responding':'Live database unavailable; app may be using verified fallback data';
     }
-    updateKickoffChip();
+    updateKickoffChip();decorateIntelSources();
     clearInterval(kickoffTimer);kickoffTimer=setInterval(updateKickoffChip,60000);
   }catch{
     if(dataChip){dataChip.classList.add('is-bad');dataChip.querySelector('span:last-child').textContent=navigator.onLine?'Data check failed':'Offline';}
@@ -113,6 +136,17 @@ function addRosterFilters(){
   new MutationObserver(apply).observe(grid,{childList:true});apply();
 }
 
+function addTransactionTools(){
+  const list=qs('.transaction-list'),head=qs('.page-head');if(!list||!head||qs('.transaction-tools'))return;
+  const rows=qsa('.transaction-row',list),types=[...new Set(rows.map(r=>(qs('.transaction-date small',r)?.textContent||'transaction').trim()).filter(Boolean))].sort();
+  const tools=document.createElement('div');tools.className='filterbar transaction-tools';
+  tools.innerHTML=`<input type="search" id="txn-search" placeholder="Search players or roster moves…" aria-label="Search transactions"><select id="txn-type" aria-label="Filter transaction type"><option value="all">All move types</option>${types.map(t=>`<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('')}</select><span class="ux-filter-count" aria-live="polite"></span>`;
+  head.insertAdjacentElement('afterend',tools);
+  const search=qs('#txn-search',tools),select=qs('#txn-type',tools),count=qs('.ux-filter-count',tools);
+  const apply=()=>{const q=search.value.trim().toLowerCase(),type=select.value.toLowerCase();let shown=0;rows.forEach(row=>{const hay=row.textContent.toLowerCase(),rowType=(qs('.transaction-date small',row)?.textContent||'').trim().toLowerCase(),visible=(!q||hay.includes(q))&&(type==='all'||rowType===type);row.hidden=!visible;if(visible)shown++;});count.textContent=`${shown} shown`;};
+  search.addEventListener('input',apply);select.addEventListener('change',apply);apply();
+}
+
 function addFeedFilters(){
   const bar=qs('.filterbar'),list=qs('#fl');if(!bar||!list||qs('.intel-tier-filters'))return;
   const wrap=document.createElement('div');wrap.className='ux-filter-row intel-tier-filters';
@@ -121,7 +155,7 @@ function addFeedFilters(){
   let tier='all';
   const apply=()=>qsa('.intel-item',list).forEach(item=>{const dot=qs('.source-dot',item);item.hidden=tier!=='all'&&!dot?.classList.contains(tier);});
   qsa('button',wrap).forEach(btn=>btn.addEventListener('click',()=>{tier=btn.dataset.tier;qsa('button',wrap).forEach(b=>b.classList.toggle('active',b===btn));apply();}));
-  new MutationObserver(apply).observe(list,{childList:true,subtree:true});apply();
+  new MutationObserver(()=>{apply();decorateIntelSources();}).observe(list,{childList:true,subtree:true});apply();
 }
 
 function addSourceFilters(){
@@ -143,9 +177,10 @@ function applyPagePolish(){
   const r=currentRoute();
   if(r==='games')addScheduleSections();
   if(r==='roster')addRosterFilters();
+  if(r==='transactions')addTransactionTools();
   if(r==='feed')addFeedFilters();
   if(r==='sources')addSourceFilters();
-  enhanceEmptyStates();
+  decorateIntelSources();enhanceEmptyStates();
 }
 
 function bindKeyboard(){
@@ -169,7 +204,8 @@ function bindConnectivity(){
 function bindSidebarDismiss(){
   document.addEventListener('pointerdown',event=>{
     const sidebar=qs('#sidebar');if(!sidebar?.classList.contains('open')||innerWidth>980)return;
-    if(!sidebar.contains(event.target)&&!event.target.closest('#menu-button'))sidebar.classList.remove('open');
+    const target=event.target instanceof Element?event.target:null;
+    if(target&&!sidebar.contains(target)&&!target.closest('#menu-button'))sidebar.classList.remove('open');
   });
 }
 
