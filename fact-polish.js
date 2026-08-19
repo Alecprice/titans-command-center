@@ -16,7 +16,7 @@ function polishHome(){
     if(text(label)==='Roster indexed'){
       label.textContent='Players loaded';
       const detail=item.querySelector('span');
-      if(detail&&/fallback/i.test(text(detail)))detail.textContent='verified fallback sample';
+      if(detail&&/fallback/i.test(text(detail)))detail.textContent=fallbackRoster.length>=AUDITED_ACTIVE+AUDITED_RESERVE?'full audited roster snapshot':'verified fallback sample';
     }
   });
 }
@@ -28,7 +28,7 @@ function polishRoster(){
   const fullSnapshot=loaded>=AUDITED_ACTIVE+AUDITED_RESERVE;
   const body=fullSnapshot
     ? `<strong>Roster coverage:</strong> ${loaded} player records are loaded from the official Titans roster snapshot audited ${AUDIT_DATE}: ${AUDITED_ACTIVE} Active + ${AUDITED_RESERVE} Reserve/Injured. This is a dated snapshot and will change as preseason moves occur.`
-    : `<strong>Roster coverage:</strong> this page is currently using the ${fallbackRoster.length}-player verified fallback sample. That count is <em>not</em> the size of the Titans roster.`;
+    : `<strong>Roster coverage:</strong> this page is currently using a ${loaded}-player partial fallback. That count is <em>not</em> the size of the Titans roster.`;
   const notice=makeDisclosure(`${body} <a href="${OFFICIAL_ROSTER_URL}" target="_blank" rel="noopener noreferrer">View the official current roster ↗</a><span>Content audit: ${AUDIT_DATE}</span>`);
   notice.classList.add('roster-fact-disclosure');
   head.insertAdjacentElement('afterend',notice);
