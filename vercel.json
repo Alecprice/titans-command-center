@@ -5,6 +5,8 @@
     {"source":"/api/data","destination":"/api?route=data"},
     {"source":"/api/player","destination":"/api?route=player"},
     {"source":"/api/analytics","destination":"/api?route=analytics"},
+    {"source":"/api/preseason-stats","destination":"/api?route=preseason-stats"},
+    {"source":"/api/market-data","destination":"/api?route=market-data"},
     {"source":"/api/odds","destination":"/api?route=odds"},
     {"source":"/api/bluesky-search","destination":"/api?route=bluesky-search"},
     {"source":"/api/espn-scoreboard","destination":"/api?route=espn-scoreboard"},
