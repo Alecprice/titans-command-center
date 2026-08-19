@@ -1,8 +1,10 @@
-import { team, games as fallbackGames, roster as fallbackRoster } from './src/data.mjs';
+import { games as fallbackGames, roster as fallbackRoster } from './src/data.mjs';
 
 const OFFICIAL_ROSTER_URL='https://www.tennesseetitans.com/team/players-roster/';
 const OFFICIAL_SCHEDULE_URL='https://www.tennesseetitans.com/schedule/';
 const AUDIT_DATE='Aug. 19, 2026';
+const AUDITED_ACTIVE=91;
+const AUDITED_RESERVE=4;
 
 function route(){return location.hash.replace(/^#/,'').split('?')[0]||'home'}
 function text(el){return (el?.textContent||'').trim()}
@@ -22,7 +24,12 @@ function polishHome(){
 function polishRoster(){
   const head=document.querySelector('.page-head');
   if(!head||document.querySelector('.roster-fact-disclosure'))return;
-  const notice=makeDisclosure(`<strong>Roster coverage:</strong> this page shows the latest player records currently loaded by the app. In fallback mode, only ${fallbackRoster.length} verified players are shown; that count is <em>not</em> the size of the Titans roster. <a href="${OFFICIAL_ROSTER_URL}" target="_blank" rel="noopener noreferrer">View the official current roster ↗</a><span>Last content audit: ${AUDIT_DATE}</span>`);
+  const loaded=document.querySelectorAll('#rg .player-card').length;
+  const fullSnapshot=loaded>=AUDITED_ACTIVE+AUDITED_RESERVE;
+  const body=fullSnapshot
+    ? `<strong>Roster coverage:</strong> ${loaded} player records are loaded from the official Titans roster snapshot audited ${AUDIT_DATE}: ${AUDITED_ACTIVE} Active + ${AUDITED_RESERVE} Reserve/Injured. This is a dated snapshot and will change as preseason moves occur.`
+    : `<strong>Roster coverage:</strong> this page is currently using the ${fallbackRoster.length}-player verified fallback sample. That count is <em>not</em> the size of the Titans roster.`;
+  const notice=makeDisclosure(`${body} <a href="${OFFICIAL_ROSTER_URL}" target="_blank" rel="noopener noreferrer">View the official current roster ↗</a><span>Content audit: ${AUDIT_DATE}</span>`);
   notice.classList.add('roster-fact-disclosure');
   head.insertAdjacentElement('afterend',notice);
 }
@@ -70,7 +77,7 @@ function polishStats(){
     const detail=card.querySelector('p');
     if(text(label)==='Roster'){
       label.textContent='Players loaded';
-      if(detail&&/current snapshot/i.test(text(detail)))detail.textContent='Loaded roster snapshot/subset';
+      if(detail&&/current snapshot/i.test(text(detail)))detail.textContent='Latest roster snapshot';
     }
     if(text(label)==='Games'&&Number(text(value))===fallbackGames.length){
       value.textContent=String(fallbackGames.filter(g=>g.status!=='bye').length);
