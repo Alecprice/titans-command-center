@@ -49,7 +49,12 @@ test('provider diagnostics remain GET-only',async()=>{
 test('Vercel rewrites preserve the public API contract',()=>{
   const config=JSON.parse(fs.readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
   const map=new Map((config.rewrites||[]).map(item=>[item.source,item.destination]));
-  for(const route of ['health','data','player','analytics','odds','bluesky-search','espn-scoreboard','provider-health','sync','cron-refresh']){
+  for(const route of ['health','data','player','analytics','preseason-stats','market-data','odds','bluesky-search','espn-scoreboard','provider-health','sync','cron-refresh']){
     assert.equal(map.get(`/api/${route}`),`/api?route=${route}`);
   }
+});
+
+test('health endpoint treats optional warehouse loss as degraded, not app-down',async()=>{
+  const previous=process.env.DATABASE_URL;delete process.env.DATABASE_URL;
+  try{const result=await run('GET',{route:'health'});assert.equal(result.status,200);assert.equal(result.body?.ok,true);assert.equal(result.body?.status,'degraded');assert.equal(result.body?.fallbacks?.auditedRoster,true);}finally{if(previous)process.env.DATABASE_URL=previous;}
 });
