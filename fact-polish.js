@@ -43,19 +43,24 @@ function polishSchedule(){
   let bye=rows.find(row=>/^Wk 9$/i.test(text(row.querySelector('.week')))||(/\bBYE\b/i.test(text(row))&&/Wk 9/i.test(text(row))));
   if(bye){
     bye.classList.add('bye-week-row');
-    bye.innerHTML=byeMarkup();
+    if(bye.dataset.factByePolished!=='true'){
+      bye.dataset.factByePolished='true';
+      bye.innerHTML=byeMarkup();
+    }
   }else{
     const week10=rows.find(row=>/^Wk 10$/i.test(text(row.querySelector('.week'))));
     if(week10){
       bye=document.createElement('div');
       bye.className='game-row bye-week-row';
+      bye.dataset.factByePolished='true';
       bye.innerHTML=byeMarkup();
       week10.insertAdjacentElement('beforebegin',bye);
     }
   }
 
   const week18=[...schedule.querySelectorAll('.game-row')].find(row=>/^Wk 18$/i.test(text(row.querySelector('.week'))));
-  if(week18&&/TBD/i.test(text(week18))){
+  if(week18&&/TBD/i.test(text(week18))&&week18.dataset.factTbdPolished!=='true'){
+    week18.dataset.factTbdPolished='true';
     week18.classList.add('tbd-week-row');
     const dateBox=week18.querySelector('.game-date');
     if(dateBox)dateBox.innerHTML='<strong>TBD</strong><small>Date, time & network set after Week 17</small>';
@@ -104,6 +109,6 @@ function applyFactPolish(){
 }
 
 const root=document.querySelector('#app');
-if(root)new MutationObserver(()=>queueMicrotask(applyFactPolish)).observe(root,{childList:true,subtree:true});
+if(root)new MutationObserver(()=>queueMicrotask(applyFactPolish)).observe(root,{childList:true});
 window.addEventListener('hashchange',()=>queueMicrotask(applyFactPolish));
 queueMicrotask(applyFactPolish);
