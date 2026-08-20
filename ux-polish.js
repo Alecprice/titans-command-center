@@ -133,12 +133,13 @@ function addRosterFilters(){
       const status=statusOfCard(card),visible=selected==='all'||(selected==='active'&&status==='active')||(selected==='reserve'&&status!=='active');
       card.hidden=!visible;if(visible)shown++;
     });
-    if(count)count.textContent=`${shown} player${shown===1?'':'s'} shown`;
+    const total=Number(lastBootstrap?.roster?.length||cards.length);
+    if(count)count.textContent=`${shown} of ${total} player${total===1?'':'s'} shown`;
     if(clear)clear.disabled=selected==='all'&&!(search?.value||'').trim()&&(unit?.value||'all')==='all';
   };
   statusButtons.forEach(btn=>btn.addEventListener('click',()=>{selected=btn.dataset.rosterStatus;statusButtons.forEach(b=>{const on=b===btn;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});apply();}));
   search?.addEventListener('input',()=>queueMicrotask(apply));unit?.addEventListener('change',()=>queueMicrotask(apply));
-  clear?.addEventListener('click',()=>{selected='all';statusButtons.forEach(b=>{const on=b.dataset.rosterStatus==='all';b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});if(search){search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));}if(unit){unit.value='all';unit.dispatchEvent(new Event('change',{bubbles:true}));}queueMicrotask(apply);});
+  clear?.addEventListener('click',()=>{selected='all';statusButtons.forEach(b=>{const on=b.dataset.rosterStatus==='all';b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});if(search){search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));}if(unit){unit.value='all';unit.dispatchEvent(new Event('input',{bubbles:true}));unit.dispatchEvent(new Event('change',{bubbles:true}));}queueMicrotask(apply);});
   new MutationObserver(apply).observe(grid,{childList:true});apply();
 }
 
