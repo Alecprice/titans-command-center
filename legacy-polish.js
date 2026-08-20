@@ -73,6 +73,7 @@ function applyLegacyPolish(){
       <div class="section-rivet">Documented identities not pictured</div>
       <div class="visual-gap-grid">${knownVisualsNotPictured.map(item=>`<article class="visual-gap-card"><small>${lEsc(item.status)}</small><strong>${lEsc(item.title)}</strong><p>${lEsc(item.copy)}</p><div class="archive-source-list">${sourceLinks(item.sourceKeys)}</div></article>`).join('')}</div>
       <div class="legal-mark-note">Unofficial fan-built archive. Historical text and visual labels are source-audited; team/NFL marks remain the property of their respective rights holders.</div>`;
+    page.removeAttribute('aria-busy');
     page.querySelectorAll('.archive-filter').forEach(button=>button.addEventListener('click',()=>{
       page.querySelectorAll('.archive-filter').forEach(x=>x.classList.toggle('active',x===button));
       const filter=button.dataset.filter;
@@ -86,11 +87,12 @@ function applyLegacyPolish(){
     const calloutImage=callout.querySelector('.legacy-callout-art img');
     if(calloutImage){
       const oilers=visualArchive.find(item=>item.id==='oilers-derrick');
-      calloutImage.src=oilers.image;
-      calloutImage.alt=oilers.alt;
+      if(oilers&&calloutImage.getAttribute('src')!==oilers.image)calloutImage.src=oilers.image;
+      if(oilers&&calloutImage.alt!==oilers.alt)calloutImage.alt=oilers.alt;
     }
     const calloutCopy=callout.querySelector('.legacy-callout-copy p');
-    if(calloutCopy)calloutCopy.textContent='From the Oilers derrick and its many year-specific treatments, to the fireball-T, the sword-inspired details of the 2018 uniform system, and today’s Shield, the franchise identity changed in distinct, documented stages.';
+    const desired='From the Oilers derrick and its many year-specific treatments, to the fireball-T, the sword-inspired details of the 2018 uniform system, and today’s Shield, the franchise identity changed in distinct, documented stages.';
+    if(calloutCopy&&calloutCopy.textContent!==desired)calloutCopy.textContent=desired;
   }
 
   const strip=document.querySelector('.legacy-strip');
@@ -101,8 +103,8 @@ function applyLegacyPolish(){
   }
 }
 
-const observer=new MutationObserver(applyLegacyPolish);
+const observer=new MutationObserver(()=>queueMicrotask(applyLegacyPolish));
 const appRoot=document.querySelector('#app');
-if(appRoot)observer.observe(appRoot,{childList:true,subtree:true});
+if(appRoot)observer.observe(appRoot,{childList:true});
 addEventListener('hashchange',()=>queueMicrotask(applyLegacyPolish));
 queueMicrotask(applyLegacyPolish);
