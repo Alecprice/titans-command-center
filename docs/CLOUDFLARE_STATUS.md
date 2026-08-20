@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + advanced analytics regression passed**
-- Source commit: `e451dac826ea85adb8717a93e57b89c6d2efbdce`
+- Source commit: `b0734cb30900d74ea465f74215f46800a7a59353`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -10,7 +10,7 @@
 - Browser navigation regression: success
 - Advanced analytics browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T22:15:57Z
+- Recorded: 2026-08-20T22:27:28Z
 
 ## Production regression
 
@@ -62,19 +62,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "e451dac826ea85adb8717a93e57b89c6d2efbdce",
-    "builtAt": "2026-08-20T22:15:14.942Z"
+    "commit": "b0734cb30900d74ea465f74215f46800a7a59353",
+    "builtAt": "2026-08-20T22:26:37.371Z"
   },
-  "deploymentPropagationAttempts": 4,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 71,
-    "health": 161,
-    "data": 153,
-    "stats": 144,
-    "market": 177,
-    "analytics": 338
+    "root": 23,
+    "health": 1267,
+    "data": 358,
+    "stats": 245,
+    "market": 1263,
+    "analytics": 478
   },
-  "testedAt": "2026-08-20T22:15:42.831Z",
+  "testedAt": "2026-08-20T22:27:00.567Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -134,11 +134,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 0,
+  "maxLongTaskMs": 82,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 7.61,
-  "testedAt": "2026-08-20T22:15:55Z"
+  "durationSeconds": 21.06,
+  "testedAt": "2026-08-20T22:27:27Z"
 }```
 
 ## Advanced analytics browser regression
@@ -183,8 +183,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.49,
-  "testedAt": "2026-08-20T22:15:57Z"
+  "durationSeconds": 1.31,
+  "testedAt": "2026-08-20T22:27:28Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
