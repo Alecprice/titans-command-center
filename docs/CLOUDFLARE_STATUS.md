@@ -1,9 +1,9 @@
 # Cloudflare deployment status
 
 - Status: **deployed + smoke check failure**
-- Source commit: `9f374de402b1d0d2928e0a65b8f29705a8fd8556`
+- Source commit: `7d6c790d1cf3f628f06f75d1491a22d1994ffa5d`
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T13:20:17Z
+- Recorded: 2026-08-20T13:22:09Z
 
 ## Smoke test
 
@@ -26,7 +26,7 @@
   "marketOk": true,
   "marketRows": 6,
   "marketMode": "published-reference",
-  "testedAt": "2026-08-20T13:20:17.506Z"
+  "testedAt": "2026-08-20T13:22:09.325Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml` after a Cloudflare deployment and regression smoke test.
