@@ -36,6 +36,16 @@ async function request(path,{json=false,text=false,retries=4}={}){
   throw lastError;
 }
 
+function expectedContentType(path){
+  if(path==='/'||path.endsWith('.html'))return'text/html';
+  if(path.endsWith('.css'))return'text/css';
+  if(path.endsWith('.js')||path.endsWith('.mjs'))return'javascript';
+  if(path.endsWith('.webp'))return'image/webp';
+  if(path.endsWith('.png'))return'image/png';
+  if(path.endsWith('.webmanifest'))return'application/manifest+json';
+  return null;
+}
+
 const root=await request('/',{text:true});
 const manifest=await request('/manifest.webmanifest',{json:true});
 const sw=await request('/sw.js',{text:true});
@@ -50,8 +60,11 @@ const market=await request('/api/market-data',{json:true});
 
 assert(root.status===200,`Root returned ${root.status}`);
 assert(/<meta name="viewport"[^>]*viewport-fit=cover/.test(root.body),'Viewport metadata is missing safe-area support');
+assert(/class="skip-link" href="#app"/.test(root.body),'Skip navigation is missing from app shell');
+assert(/id="menu-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/.test(root.body),'Menu accessibility state is missing from app shell');
 assert(/rel="manifest" href="\/manifest\.webmanifest"/.test(root.body),'Manifest link missing from app shell');
 assert(/src="\/app\.js"/.test(root.body),'Main app module missing from app shell');
+assert(/src="\/accessibility-runtime\.js"/.test(root.body),'Accessibility runtime missing from app shell');
 assert(!/postgres(?:ql)?:\/\//i.test(root.body),'Database connection string leaked into HTML');
 
 assert(manifest.status===200,'Web manifest is unavailable');
@@ -70,7 +83,9 @@ assert(shellPaths.length>=20,'PWA precache shell is unexpectedly small');
 const shellFailures=[];
 for(const path of shellPaths){
   const response=await request(path);
-  if(response.status!==200)shellFailures.push(`${path}=${response.status}`);
+  if(response.status!==200){shellFailures.push(`${path}=${response.status}`);continue;}
+  const expected=expectedContentType(path),actual=(response.headers.get('content-type')||'').toLowerCase();
+  if(expected&&!actual.includes(expected))shellFailures.push(`${path}=content-type:${actual||'missing'}`);
 }
 assert(shellFailures.length===0,`PWA precache paths failed: ${shellFailures.join(', ')}`);
 
@@ -101,7 +116,10 @@ try{
   const meta=await request('/build-meta.json',{json:true,retries:2});
   if(meta.status===200)buildMeta=meta.body;
 }catch{}
-if(expectedSha&&buildMeta?.commit)assert(buildMeta.commit===expectedSha,`Deployed commit ${buildMeta.commit} does not match expected ${expectedSha}`);
+if(expectedSha){
+  assert(buildMeta?.commit,`Build metadata is missing while expecting deploy ${expectedSha}`);
+  assert(buildMeta.commit===expectedSha,`Deployed commit ${buildMeta.commit} does not match expected ${expectedSha}`);
+}
 
 const result={
   ok:true,
