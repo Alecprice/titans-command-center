@@ -1,15 +1,16 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser navigation regression passed**
-- Source commit: `b60454eaec2e3da1baa12faa0ec42ef2bdf6e47c`
+- Status: **deployed + full production + browser + advanced analytics regression passed**
+- Source commit: `e451dac826ea85adb8717a93e57b89c6d2efbdce`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
 - Deploy outcome: success
 - Production regression: success
 - Browser navigation regression: success
+- Advanced analytics browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T21:49:41Z
+- Recorded: 2026-08-20T22:15:57Z
 
 ## Production regression
 
@@ -28,8 +29,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v29",
-  "precachePaths": 41,
+  "serviceWorkerCache": "titans-cc-brand-2026-v30",
+  "precachePaths": 43,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -61,18 +62,30 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "b60454eaec2e3da1baa12faa0ec42ef2bdf6e47c",
-    "builtAt": "2026-08-20T21:48:57.549Z"
+    "commit": "e451dac826ea85adb8717a93e57b89c6d2efbdce",
+    "builtAt": "2026-08-20T22:15:14.942Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 4,
   "responseMs": {
-    "root": 45,
-    "health": 338,
-    "data": 647,
-    "stats": 382,
-    "market": 1179
+    "root": 71,
+    "health": 161,
+    "data": 153,
+    "stats": 144,
+    "market": 177,
+    "analytics": 338
   },
-  "testedAt": "2026-08-20T21:49:22.015Z"
+  "testedAt": "2026-08-20T22:15:42.831Z",
+  "analyticsStatus": 200,
+  "analyticsDataSeason": 2025,
+  "analyticsSeasonFallback": true,
+  "analyticsWarehousePlays": 48771,
+  "analyticsPersonnelPlays": 45184,
+  "analyticsRecentPlays": 80,
+  "analyticsPersonnelRows": 20,
+  "analyticsOffensiveEpaPerPlay": -0.14842680811935147,
+  "analyticsDefensiveEpaPerPlayAllowed": 0.10385631037224918,
+  "analyticsPaceSecondsPerPlay": 28.914001158972834,
+  "analyticsLatestRestDays": 7
 }```
 
 ## Browser navigation regression
@@ -124,8 +137,54 @@
   "maxLongTaskMs": 0,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 15.13,
-  "testedAt": "2026-08-20T21:49:41Z"
+  "durationSeconds": 7.61,
+  "testedAt": "2026-08-20T22:15:55Z"
+}```
+
+## Advanced analytics browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "metricCount": 4,
+  "metricValues": [
+    {
+      "detail": "#30 of 32",
+      "label": "Offensive EPA / play",
+      "value": "-0.148"
+    },
+    {
+      "detail": "#28 of 32",
+      "label": "Defensive EPA / play allowed",
+      "value": "+0.104"
+    },
+    {
+      "detail": "#11 of 32",
+      "label": "Pace",
+      "value": "28.9 sec/play"
+    },
+    {
+      "detail": "Latest loaded week: 18",
+      "label": "Rest days",
+      "value": "7 days"
+    }
+  ],
+  "situationFields": [
+    "Down & distance",
+    "Field position",
+    "Formation",
+    "Personnel",
+    "Score diff",
+    "TEN EPA",
+    "Time remaining"
+  ],
+  "initialPlayCards": 60,
+  "offenseFilteredPlayCards": 39,
+  "mobileMetricCount": 4,
+  "browserWarnings": [],
+  "durationSeconds": 1.49,
+  "testedAt": "2026-08-20T22:15:57Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
