@@ -26,12 +26,14 @@ function ensureUtilityChips(){
 function friendlyDate(value){
   if(!value)return '';
   const d=new Date(/^\d{4}-\d{2}-\d{2}$/.test(value)?`${value}T12:00:00Z`:value);
-  return Number.isNaN(d.getTime())?String(value):new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric'}).format(d);
+  return Number.isNaN(d.getTime())?'':new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric'}).format(d);
 }
 
 function formatCountdown(iso){
   if(!iso)return 'Kickoff TBD';
-  const ms=new Date(iso)-Date.now();
+  const start=new Date(iso),time=start.getTime();
+  if(!Number.isFinite(time))return 'Kickoff TBD';
+  const ms=time-Date.now();
   if(ms<=0&&ms>-5*60*60*1000)return 'Game window';
   if(ms<=0)return 'Next game';
   const mins=Math.floor(ms/60000),days=Math.floor(mins/1440),hours=Math.floor((mins%1440)/60),minutes=mins%60;
@@ -42,7 +44,7 @@ function formatCountdown(iso){
 
 function updateKickoffChip(){
   const chip=qs('#kickoff-chip');if(!chip)return;
-  const next=(lastBootstrap?.games||[]).find(g=>g.status!=='final'&&g.status!=='bye'&&g.date&&new Date(g.date)>new Date());
+  const next=(lastBootstrap?.games||[]).find(g=>g.status!=='final'&&g.status!=='bye'&&g.date&&Number.isFinite(new Date(g.date).getTime())&&new Date(g.date)>new Date());
   if(!next){chip.querySelector('span:last-child').textContent='Schedule';return;}
   chip.querySelector('span:last-child').textContent=`${next.opponentAbbr||'TEN'} · ${formatCountdown(next.date)}`;
   chip.title=`Next Titans game: ${next.homeAway==='home'?'vs':'at'} ${next.opponent||next.opponentAbbr}`;
@@ -81,12 +83,12 @@ async function refreshUtilityData(){
       dataChip.classList.toggle('is-bad',!health?.ok);
       const audit=health?.database?.content_audit_at||data?.meta?.content_audit_at;
       dataChip.querySelector('span:last-child').textContent=health?.ok?(audit?`Verified · ${friendlyDate(audit)}`:'Data online'):'Data fallback';
-      dataChip.title=health?.ok?'Neon database online and responding':'Live database unavailable; app may be using verified fallback data';
+      dataChip.title=health?.ok?'Live data checks are healthy':'Live data is unavailable; verified backup data may be shown';
     }
     updateKickoffChip();decorateIntelSources();
     clearInterval(kickoffTimer);kickoffTimer=setInterval(updateKickoffChip,60000);
   }catch{
-    if(dataChip){dataChip.classList.add('is-bad');dataChip.querySelector('span:last-child').textContent=navigator.onLine?'Data check failed':'Offline';}
+    if(dataChip){dataChip.classList.add('is-bad');dataChip.querySelector('span:last-child').textContent=navigator.onLine?'Data check failed':'Offline';dataChip.title=navigator.onLine?'Could not verify live data right now':'You are offline';}
   }
 }
 
@@ -120,19 +122,23 @@ function addScheduleSections(){
 function statusOfCard(card){return (qs('.player-tag',card)?.textContent||'').trim().toLowerCase();}
 function addRosterFilters(){
   const bar=qs('.filterbar'),grid=qs('#rg');if(!bar||!grid||qs('.roster-status-filters'))return;
-  const wrap=document.createElement('div');wrap.className='ux-filter-row roster-status-filters';
-  wrap.innerHTML='<span class="ux-filter-label">Status</span><button type="button" data-roster-status="all" class="active">All</button><button type="button" data-roster-status="active">Active</button><button type="button" data-roster-status="reserve">Reserve / injured</button><span class="ux-filter-count" aria-live="polite"></span>';
+  const search=qs('#rs',bar),unit=qs('#ru',bar),wrap=document.createElement('div');wrap.className='ux-filter-row roster-status-filters';
+  wrap.innerHTML='<span class="ux-filter-label">Status</span><button type="button" data-roster-status="all" class="active" aria-pressed="true">All</button><button type="button" data-roster-status="active" aria-pressed="false">Active</button><button type="button" data-roster-status="reserve" aria-pressed="false">Reserve / injured</button><button type="button" data-roster-clear class="ux-clear-filter">Clear filters</button><span class="ux-filter-count" aria-live="polite"></span>';
   bar.insertAdjacentElement('afterend',wrap);
   let selected='all';
+  const statusButtons=qsa('[data-roster-status]',wrap),clear=qs('[data-roster-clear]',wrap),count=qs('.ux-filter-count',wrap);
   const apply=()=>{
     const cards=qsa('.player-card',grid);let shown=0;
     cards.forEach(card=>{
       const status=statusOfCard(card),visible=selected==='all'||(selected==='active'&&status==='active')||(selected==='reserve'&&status!=='active');
       card.hidden=!visible;if(visible)shown++;
     });
-    const count=qs('.ux-filter-count',wrap);if(count)count.textContent=`${shown} shown`;
+    if(count)count.textContent=`${shown} player${shown===1?'':'s'} shown`;
+    if(clear)clear.disabled=selected==='all'&&!(search?.value||'').trim()&&(unit?.value||'all')==='all';
   };
-  qsa('button',wrap).forEach(btn=>btn.addEventListener('click',()=>{selected=btn.dataset.rosterStatus;qsa('button',wrap).forEach(b=>b.classList.toggle('active',b===btn));apply();}));
+  statusButtons.forEach(btn=>btn.addEventListener('click',()=>{selected=btn.dataset.rosterStatus;statusButtons.forEach(b=>{const on=b===btn;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});apply();}));
+  search?.addEventListener('input',()=>queueMicrotask(apply));unit?.addEventListener('change',()=>queueMicrotask(apply));
+  clear?.addEventListener('click',()=>{selected='all';statusButtons.forEach(b=>{const on=b.dataset.rosterStatus==='all';b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});if(search){search.value='';search.dispatchEvent(new Event('input',{bubbles:true}));}if(unit){unit.value='all';unit.dispatchEvent(new Event('change',{bubbles:true}));}queueMicrotask(apply);});
   new MutationObserver(apply).observe(grid,{childList:true});apply();
 }
 
@@ -150,22 +156,22 @@ function addTransactionTools(){
 function addFeedFilters(){
   const bar=qs('.filterbar'),list=qs('#fl');if(!bar||!list||qs('.intel-tier-filters'))return;
   const wrap=document.createElement('div');wrap.className='ux-filter-row intel-tier-filters';
-  wrap.innerHTML='<span class="ux-filter-label">Trust</span><button type="button" data-tier="all" class="active">All</button><button type="button" data-tier="official">Official</button><button type="button" data-tier="media">Analysis / media</button><button type="button" data-tier="reporter">Reporter</button><button type="button" data-tier="community">Community</button>';
+  wrap.innerHTML='<span class="ux-filter-label">Trust</span><button type="button" data-tier="all" class="active" aria-pressed="true">All</button><button type="button" data-tier="official" aria-pressed="false">Official</button><button type="button" data-tier="media" aria-pressed="false">Analysis / media</button><button type="button" data-tier="reporter" aria-pressed="false">Reporter</button><button type="button" data-tier="community" aria-pressed="false">Community</button>';
   bar.insertAdjacentElement('afterend',wrap);
   let tier='all';
-  const apply=()=>qsa('.intel-item',list).forEach(item=>{const dot=qs('.source-dot',item);item.hidden=tier!=='all'&&!dot?.classList.contains(tier);});
-  qsa('button',wrap).forEach(btn=>btn.addEventListener('click',()=>{tier=btn.dataset.tier;qsa('button',wrap).forEach(b=>b.classList.toggle('active',b===btn));apply();}));
-  new MutationObserver(()=>{apply();decorateIntelSources();}).observe(list,{childList:true,subtree:true});apply();
+  const buttons=qsa('[data-tier]',wrap),apply=()=>qsa('.intel-item',list).forEach(item=>{const dot=qs('.source-dot',item);item.hidden=tier!=='all'&&!dot?.classList.contains(tier);});
+  buttons.forEach(btn=>btn.addEventListener('click',()=>{tier=btn.dataset.tier;buttons.forEach(b=>{const on=b===btn;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});apply();}));
+  new MutationObserver(()=>{apply();decorateIntelSources();}).observe(list,{childList:true});apply();
 }
 
 function addSourceFilters(){
   const grid=qs('.source-grid'),head=qs('.page-head');if(!grid||!head||qs('.source-ux-filters'))return;
   const wrap=document.createElement('div');wrap.className='ux-filter-row source-ux-filters';
-  wrap.innerHTML='<span class="ux-filter-label">Integrations</span><button type="button" data-source-filter="all" class="active">All</button><button type="button" data-source-filter="ready">Enabled / ready</button><button type="button" data-source-filter="disabled">Disabled / needs setup</button>';
+  wrap.innerHTML='<span class="ux-filter-label">Sources</span><button type="button" data-source-filter="all" class="active" aria-pressed="true">All</button><button type="button" data-source-filter="ready" aria-pressed="false">Enabled / ready</button><button type="button" data-source-filter="disabled" aria-pressed="false">Disabled / needs setup</button>';
   head.insertAdjacentElement('afterend',wrap);
   let selected='all';
-  const apply=()=>qsa('.source-card',grid).forEach(card=>{const status=(qs('.source-status',card)?.textContent||'').toLowerCase();const disabled=status.includes('disabled')||status.includes('need');card.hidden=selected==='ready'?disabled:selected==='disabled'?!disabled:false;});
-  qsa('button',wrap).forEach(btn=>btn.addEventListener('click',()=>{selected=btn.dataset.sourceFilter;qsa('button',wrap).forEach(b=>b.classList.toggle('active',b===btn));apply();}));apply();
+  const buttons=qsa('[data-source-filter]',wrap),apply=()=>qsa('.source-card',grid).forEach(card=>{const status=(qs('.source-status',card)?.textContent||'').toLowerCase();const disabled=status.includes('disabled')||status.includes('need');card.hidden=selected==='ready'?disabled:selected==='disabled'?!disabled:false;});
+  buttons.forEach(btn=>btn.addEventListener('click',()=>{selected=btn.dataset.sourceFilter;buttons.forEach(b=>{const on=b===btn;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});apply();}));apply();
 }
 
 function enhanceEmptyStates(){
@@ -197,7 +203,7 @@ function bindKeyboard(){
 }
 
 function bindConnectivity(){
-  const apply=()=>{document.body.dataset.offline=String(!navigator.onLine);const chip=qs('#data-chip');if(chip&&!navigator.onLine){chip.classList.add('is-bad');chip.querySelector('span:last-child').textContent='Offline';}};
+  const apply=()=>{document.body.dataset.offline=String(!navigator.onLine);const chip=qs('#data-chip');if(chip&&!navigator.onLine){chip.classList.add('is-bad');chip.querySelector('span:last-child').textContent='Offline';chip.title='You are offline';}};
   addEventListener('online',()=>{apply();refreshUtilityData();});addEventListener('offline',apply);apply();
 }
 
