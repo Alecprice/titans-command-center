@@ -113,6 +113,7 @@ test('DOM polishers cannot recursively observe their own nested rewrites',()=>{
 test('async page modules cannot overwrite a later route',()=>{
   const stats=read('stats-hub.js');
   const market=read('market-hub.js');
+  const marketCss=read('market-hub.css');
   const sources=read('source-activity.js');
   const transactions=read('transactions-hub.js');
   assert.match(stats,/statsRequestSerial/);
@@ -121,10 +122,18 @@ test('async page modules cannot overwrite a later route',()=>{
   assert.doesNotMatch(stats,/observe\(shRoot,\{childList:true,subtree:true\}\)/);
   assert.match(market,/marketRequestSerial/);
   assert.match(market,/requestId!==marketRequestSerial\|\|mhRoute\(\)!=='markets'/);
+  assert.match(market,/const validDate=/);
+  assert.match(market,/const safeUrl=/);
+  assert.match(market,/id="mh-retry"/);
+  assert.match(market,/aria-busy/);
+  assert.match(market,/Technical details/);
+  assert.match(marketCss,/\.mh-error/);
   assert.match(market,/observe\(mhRoot,\{childList:true\}\)/);
   assert.doesNotMatch(market,/observe\(mhRoot,\{childList:true,subtree:true\}\)/);
   assert.match(sources,/saRequestSerial/);
-  assert.match(sources,/requestId!==saRequestSerial\|\|saRoute\(\)!=='sources'/);
+  assert.match(sources,/0 new rows/);
+  assert.match(sources,/> checked</);
+  assert.match(sources,/> new rows</);
   assert.match(sources,/observe\(saApp,\{childList:true\}\)/);
   assert.doesNotMatch(sources,/observe\(saApp,\{childList:true,subtree:true\}\)/);
   assert.match(transactions,/thRequestSerial/);
