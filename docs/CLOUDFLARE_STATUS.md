@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + analytics + player headshot regressions passed**
-- Source commit: `a7d50387897fef91a0465e0ee479d19f3c45660f`
+- Source commit: `8cae2f7b0571da423ab496b91c41d51df003044b`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -11,7 +11,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T23:05:11Z
+- Recorded: 2026-08-20T23:11:19Z
 
 ## Production regression
 
@@ -63,19 +63,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "a7d50387897fef91a0465e0ee479d19f3c45660f",
-    "builtAt": "2026-08-20T23:03:53.127Z"
+    "commit": "8cae2f7b0571da423ab496b91c41d51df003044b",
+    "builtAt": "2026-08-20T23:10:02.158Z"
   },
-  "deploymentPropagationAttempts": 5,
+  "deploymentPropagationAttempts": 8,
   "responseMs": {
-    "root": 66,
-    "health": 152,
-    "data": 200,
-    "stats": 144,
-    "market": 262,
-    "analytics": 314
+    "root": 49,
+    "health": 395,
+    "data": 529,
+    "stats": 234,
+    "market": 1357,
+    "analytics": 828
   },
-  "testedAt": "2026-08-20T23:04:22.025Z",
+  "testedAt": "2026-08-20T23:10:44.472Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -105,8 +105,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 125,
-  "testedAt": "2026-08-20T23:04:22.585Z"
+  "durationMs": 182,
+  "testedAt": "2026-08-20T23:10:45.619Z"
 }```
 
 ## Browser navigation regression
@@ -155,11 +155,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 289,
-  "longTasksOver250ms": 1,
+  "maxLongTaskMs": 143,
+  "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 40.1,
-  "testedAt": "2026-08-20T23:05:06Z"
+  "durationSeconds": 21.05,
+  "testedAt": "2026-08-20T23:11:12Z"
 }```
 
 ## Advanced analytics browser regression
@@ -204,8 +204,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.57,
-  "testedAt": "2026-08-20T23:05:08Z"
+  "durationSeconds": 1.94,
+  "testedAt": "2026-08-20T23:11:14Z"
 }```
 
 ## Player headshot browser regression
@@ -216,16 +216,16 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "rosterCards": 95,
   "rosterDecoratedHeadshots": 82,
-  "rosterLoadedHeadshots": 44,
+  "rosterLoadedHeadshots": 35,
   "statsPlayerRows": 95,
   "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 22,
-  "mobileLoadedHeadshots": 22,
+  "statsLoadedHeadshots": 41,
+  "mobileLoadedHeadshots": 41,
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 2.58,
-  "testedAt": "2026-08-20T23:05:11Z"
+  "durationSeconds": 3.9,
+  "testedAt": "2026-08-20T23:11:19Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
