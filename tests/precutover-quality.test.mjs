@@ -15,6 +15,7 @@ test('app shell keeps core accessibility and PWA semantics',()=>{
   assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
   assert.match(html,/src="\/fact-polish\.js\?v=21"/);
   assert.match(html,/src="\/ux-polish\.js\?v=22"/);
+  assert.match(html,/src="\/fan-polish\.js\?v=23"/);
   assert.match(html,/src="\/source-activity\.js\?v=22"/);
   assert.match(html,/src="\/stats-hub\.js\?v=22"/);
   assert.match(html,/src="\/market-hub\.js\?v=22"/);
@@ -46,7 +47,7 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v22/);
+  assert.match(sw,/titans-cc-brand-2026-v23/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/const NETWORK_FIRST=/);
   assert.match(sw,/js\|mjs\|css\|webmanifest/);
@@ -57,6 +58,7 @@ test('DOM polishers cannot recursively observe their own nested rewrites',()=>{
   const facts=read('fact-polish.js');
   const legacy=read('legacy-polish.js');
   const ux=read('ux-polish.js');
+  const fan=read('fan-polish.js');
   assert.match(facts,/factByePolished/);
   assert.match(facts,/factTbdPolished/);
   assert.match(facts,/observe\(root,\{childList:true\}\)/);
@@ -66,6 +68,10 @@ test('DOM polishers cannot recursively observe their own nested rewrites',()=>{
   assert.doesNotMatch(legacy,/observe\(appRoot,\{childList:true,subtree:true\}\)/);
   assert.match(ux,/observe\(app,\{childList:true\}\)/);
   assert.doesNotMatch(ux,/observe\(app,\{childList:true,subtree:true\}\)/);
+  assert.match(fan,/if\(fanRoute\(\)==='transactions'\)return/);
+  assert.match(fan,/observe\(fanApp,\{childList:true\}\)/);
+  assert.doesNotMatch(fan,/observe\(fanApp,\{childList:true,subtree:true\}\)/);
+  assert.doesNotMatch(fan,/function polishTransactions/);
 });
 
 test('async page modules cannot overwrite a later route',()=>{
