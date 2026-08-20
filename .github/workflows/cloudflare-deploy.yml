@@ -19,8 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - name: Checkout
@@ -38,57 +36,42 @@ jobs:
         id: quality
         run: npm run check
 
-      - name: Check Cloudflare deployment credentials
-        id: cloudflare
+      - name: Check deployment credentials
+        id: creds
         if: always()
         shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]] && echo "ready=true" >> "$GITHUB_OUTPUT" || echo "ready=false" >> "$GITHUB_OUTPUT"
-          [[ -n "$DATABASE_URL" ]] && echo "database_ready=true" >> "$GITHUB_OUTPUT" || echo "database_ready=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]] && echo "cloudflare=true" >> "$GITHUB_OUTPUT" || echo "cloudflare=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$DATABASE_URL" ]] && echo "database=true" >> "$GITHUB_OUTPUT" || echo "database=false" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy Worker + static assets
+      - name: Deploy to Cloudflare
         id: deploy
-        if: steps.quality.outcome == 'success' && steps.cloudflare.outputs.ready == 'true'
-        shell: bash
-        run: |
-          set -u
-          npm run build:cloudflare
-          BUILD_RC=$?
-          if [[ $BUILD_RC -ne 0 ]]; then
-            echo "deploy_exit_code=$BUILD_RC" >> "$GITHUB_OUTPUT"
-            exit $BUILD_RC
-          fi
-          if [[ -n "$DATABASE_URL" ]]; then
-            node --input-type=module <<'NODE'
-            import fs from 'node:fs';
-            fs.writeFileSync('/tmp/cloudflare-secrets.json',JSON.stringify({DATABASE_URL:process.env.DATABASE_URL}));
-            NODE
-            set +e
-            npx wrangler@4 deploy --secrets-file /tmp/cloudflare-secrets.json 2>&1 | tee /tmp/cloudflare-deploy.log
-            DEPLOY_RC=${PIPESTATUS[0]}
-            set -e
-            rm -f /tmp/cloudflare-secrets.json
-          else
-            set +e
-            npx wrangler@4 deploy 2>&1 | tee /tmp/cloudflare-deploy.log
-            DEPLOY_RC=${PIPESTATUS[0]}
-            set -e
-          fi
-          echo "deploy_exit_code=$DEPLOY_RC" >> "$GITHUB_OUTPUT"
-          WORKER_URL="$(grep -Eo 'https://[A-Za-z0-9.-]+\.workers\.dev' /tmp/cloudflare-deploy.log | tail -1 || true)"
-          echo "worker_url=$WORKER_URL" >> "$GITHUB_OUTPUT"
-          [[ $DEPLOY_RC -eq 0 ]] || exit $DEPLOY_RC
+        if: steps.quality.outcome == 'success' && steps.creds.outputs.cloudflare == 'true' && steps.creds.outputs.database == 'true'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4'
+          command: deploy
+          secrets: |
+            DATABASE_URL
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Smoke test deployed Worker
         id: smoke
-        if: steps.deploy.outcome == 'success' && steps.deploy.outputs.worker_url != ''
+        if: steps.deploy.outcome == 'success'
         shell: bash
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const base=process.env.WORKER_URL;
+          if(!base) throw new Error('Cloudflare action did not return a deployment URL');
           const wait=ms=>new Promise(r=>setTimeout(r,ms));
           async function get(path,{json=false,retries=4}={}){
             let last;
@@ -110,13 +93,10 @@ jobs:
           const result={rootStatus:root.status,shieldStatus:shield.status,healthStatus:health.status,appStatus:health.body?.status||null,databaseOk:Boolean(health.body?.database?.ok),databaseConfigured:Boolean(health.body?.database?.configured),dataStatus:data.status,dataOk:Boolean(data.body?.ok),dataRosterCount:Array.isArray(data.body?.roster)?data.body.roster.length:0,statsStatus:stats.status,rosterCount:Number(stats.body?.rosterCount||0),statsRosterSource:stats.body?.rosterSource||null,completedPreseasonGames:Array.isArray(stats.body?.completedGames)?stats.body.completedGames.length:0,marketStatus:market.status,marketOk:Boolean(market.body?.ok),marketRows:Array.isArray(market.body?.odds)?market.body.odds.length:0,marketMode:market.body?.sourceMode||null,testedAt:new Date().toISOString()};
           fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify(result,null,2));
           console.log(JSON.stringify(result,null,2));
-          if(root.status!==200)throw new Error(`Root returned ${root.status}`);
-          if(shield.status!==200)throw new Error(`Shield returned ${shield.status}`);
-          if(health.status!==200)throw new Error(`Health returned ${health.status}`);
+          if(root.status!==200||shield.status!==200||health.status!==200)throw new Error('Static/health smoke test failed');
           if(!result.databaseConfigured||!result.databaseOk||result.appStatus!=='healthy')throw new Error(`Neon health failed: configured=${result.databaseConfigured}, ok=${result.databaseOk}, app=${result.appStatus}`);
           if(data.status!==200||!result.dataOk)throw new Error(`Data API failed: ${data.status}`);
-          if(stats.status!==200||result.rosterCount<90)throw new Error(`Stats failed: ${stats.status}, roster=${result.rosterCount}`);
-          if(!/Neon/i.test(result.statsRosterSource||''))throw new Error(`Stats roster is not Neon-backed: ${result.statsRosterSource||'unknown'}`);
+          if(stats.status!==200||result.rosterCount<90||!/Neon/i.test(result.statsRosterSource||''))throw new Error(`Stats is not Neon-backed: ${result.statsRosterSource||'unknown'}`);
           if(market.status!==200||!result.marketOk)throw new Error(`Market API failed: ${market.status}`);
           NODE
 
@@ -125,17 +105,17 @@ jobs:
         shell: bash
         env:
           QUALITY_OUTCOME: ${{ steps.quality.outcome }}
+          CLOUDFLARE_READY: ${{ steps.creds.outputs.cloudflare }}
+          DATABASE_READY: ${{ steps.creds.outputs.database }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
-          DEPLOY_EXIT_CODE: ${{ steps.deploy.outputs.deploy_exit_code }}
-          WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
-          DATABASE_READY: ${{ steps.cloudflare.outputs.database_ready }}
-          CLOUDFLARE_READY: ${{ steps.cloudflare.outputs.ready }}
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
-          if [[ "$DEPLOY_OUTCOME" == "success" && "$SMOKE_OUTCOME" == "success" ]]; then STATUS='deployed + smoke-tested + Neon healthy';
-          elif [[ "$DEPLOY_OUTCOME" == "failure" ]]; then STATUS='Cloudflare deploy failed before smoke test';
-          elif [[ "$QUALITY_OUTCOME" != "success" ]]; then STATUS='quality gate failed before Cloudflare deploy';
+          if [[ "$QUALITY_OUTCOME" != "success" ]]; then STATUS='quality gate failed before Cloudflare deploy';
           elif [[ "$CLOUDFLARE_READY" != "true" ]]; then STATUS='Cloudflare credentials unavailable to workflow';
+          elif [[ "$DATABASE_READY" != "true" ]]; then STATUS='DATABASE_URL GitHub secret missing';
+          elif [[ "$DEPLOY_OUTCOME" != "success" ]]; then STATUS='Cloudflare deploy failed';
+          elif [[ "$SMOKE_OUTCOME" == "success" ]]; then STATUS='deployed + smoke-tested + Neon healthy';
           else STATUS="deployed + smoke check ${SMOKE_OUTCOME:-not-run}"; fi
           {
             echo '# Cloudflare deployment status'
@@ -146,19 +126,10 @@ jobs:
             echo "- Cloudflare credentials available: ${CLOUDFLARE_READY:-unknown}"
             echo "- DATABASE_URL GitHub secret supplied: ${DATABASE_READY:-unknown}"
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
-            echo "- Deploy exit code: ${DEPLOY_EXIT_CODE:-not-recorded}"
             echo "- Smoke outcome: ${SMOKE_OUTCOME:-not-run}"
-            [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: not recorded in this run'
+            [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: existing deployment remains unchanged'
             echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Smoke test'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
-            if [[ -f /tmp/cloudflare-deploy.log ]]; then
-              echo
-              echo '## Deploy log tail'
-              echo
-              echo '```text'
-              tail -30 /tmp/cloudflare-deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgresql://[redacted]#g'
-              echo '```'
-            fi
             echo
             echo 'Generated automatically by `.github/workflows/cloudflare-deploy.yml`.'
           } > docs/CLOUDFLARE_STATUS.md
