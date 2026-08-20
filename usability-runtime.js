@@ -4,9 +4,22 @@ const menuButton=document.querySelector('#menu-button');
 const mobileMore=document.querySelector('#mobile-more-button');
 const refreshButton=document.querySelector('#refresh-button');
 const toast=document.querySelector('#toast');
+const globalSearch=document.querySelector('#global-search');
 const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
+const queryParams=()=>new URLSearchParams(location.hash.split('?')[1]||'');
 const expectedTitles={games:'Games & Schedule',roster:'Roster',transactions:'Transactions',stats:'Stats Lab',markets:'Odds & Props',feed:'Intel Feed',sources:'Sources',live:'Game Day Center',legacy:'Legacy',player:'Player profile',search:null};
 const mobilePrimary=new Set(['home','live','roster','transactions','stats']);
+const sectionTargets=[
+  {hash:'#live',label:'Game Day',terms:'game live scoreboard kickoff score'},
+  {hash:'#games',label:'Schedule',terms:'schedule games calendar opponent week'},
+  {hash:'#roster',label:'Roster',terms:'roster players depth chart personnel'},
+  {hash:'#transactions',label:'Transactions',terms:'transactions moves signings releases waivers roster moves'},
+  {hash:'#stats',label:'Stats Lab',terms:'stats statistics preseason leaders analytics numbers'},
+  {hash:'#markets',label:'Market Pulse',terms:'market odds lines props spread moneyline total'},
+  {hash:'#feed',label:'Intel Feed',terms:'news intel updates reports stories'},
+  {hash:'#legacy',label:'Legacy',terms:'legacy history oilers logos throwback retro'},
+  {hash:'#sources',label:'Sources',terms:'sources data provenance audit'}
+];
 let navWatch=0;
 let toastTimer=0;
 let hadController=Boolean(navigator.serviceWorker?.controller);
@@ -38,6 +51,7 @@ function syncSidebar(){
   menuButton?.setAttribute('aria-expanded',String(open));
   mobileMore?.setAttribute('aria-expanded',String(open));
   document.body.classList.toggle('nav-open',open);
+  if(sidebar)sidebar.setAttribute('aria-hidden',String(matchMedia('(max-width:760px)').matches&&!open));
 }
 
 function closeSidebar(){
@@ -62,6 +76,20 @@ function renderRecovery(current){
   showToast('Page recovery mode opened.');
 }
 
+function enhanceSearchPage(){
+  if(route()!=='search'||!app||app.querySelector('.search-route-shortcuts'))return;
+  const head=app.querySelector('.page-head');
+  if(!head)return;
+  const query=(queryParams().get('q')||'').trim().toLowerCase();
+  if(!query)return;
+  const matches=sectionTargets.filter(item=>`${item.label} ${item.terms}`.toLowerCase().includes(query)||query.split(/\s+/).some(word=>word.length>2&&`${item.label} ${item.terms}`.toLowerCase().includes(word))).slice(0,5);
+  if(!matches.length)return;
+  const section=document.createElement('section');
+  section.className='search-route-shortcuts';
+  section.innerHTML=`<div><small>Quick jump</small><strong>Go straight to a section</strong></div><div class="search-route-links">${matches.map(item=>`<a href="${item.hash}">${item.label}<span aria-hidden="true">→</span></a>`).join('')}</div>`;
+  head.insertAdjacentElement('afterend',section);
+}
+
 function settleRoute({focus=true}={}){
   const current=route();
   clearTimeout(navWatch);
@@ -77,13 +105,14 @@ function settleRoute({focus=true}={}){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     if(route()!==current)return;
     app?.removeAttribute('aria-busy');
+    enhanceSearchPage();
     if(focus){
       try{window.scrollTo({top:0,left:0,behavior:'instant'});}catch{window.scrollTo(0,0)}
       app?.focus({preventScroll:true});
     }
     syncNav();
   }));
-  navWatch=setTimeout(()=>renderRecovery(current),1200);
+  navWatch=setTimeout(()=>{renderRecovery(current);enhanceSearchPage();},1200);
 }
 
 function showUpdateReady(){
@@ -95,6 +124,15 @@ function showUpdateReady(){
   document.body.appendChild(banner);
 }
 
+function trapMobileDrawerFocus(event){
+  if(event.key!=='Tab'||!sidebar?.classList.contains('open')||!matchMedia('(max-width:760px)').matches)return;
+  const focusable=[...sidebar.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>!el.hidden&&el.getClientRects().length);
+  if(!focusable.length)return;
+  const first=focusable[0],last=focusable.at(-1);
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+}
+
 document.addEventListener('click',event=>{
   const target=event.target;
   if(!(target instanceof Element))return;
@@ -104,17 +142,24 @@ document.addEventListener('click',event=>{
   if(target.closest('#mobile-more-button')){
     sidebar?.classList.toggle('open');
     syncSidebar();
+    if(sidebar?.classList.contains('open'))requestAnimationFrame(()=>sidebar.querySelector('a[href]')?.focus());
     return;
   }
   if(sidebar?.classList.contains('open')&&matchMedia('(max-width:760px)').matches&&!target.closest('#sidebar')&&!target.closest('#menu-button'))closeSidebar();
 });
 
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&sidebar?.classList.contains('open')){closeSidebar();menuButton?.focus();}});
+document.addEventListener('keydown',event=>{
+  trapMobileDrawerFocus(event);
+  if(event.key==='Escape'&&sidebar?.classList.contains('open')){closeSidebar();(mobileMore||menuButton)?.focus();return;}
+  if(event.key==='/'&&!event.metaKey&&!event.ctrlKey&&!event.altKey&&document.activeElement?.tagName!=='INPUT'&&document.activeElement?.tagName!=='TEXTAREA'){event.preventDefault();globalSearch?.focus();}
+});
 window.addEventListener('hashchange',()=>settleRoute({focus:true}));
+window.addEventListener('resize',syncSidebar,{passive:true});
 window.addEventListener('online',()=>showToast('Back online. Live data can refresh again.'));
 window.addEventListener('offline',()=>showToast('You are offline. Showing cached Titans content.',3600));
 window.addEventListener('error',()=>setTimeout(()=>renderRecovery(route()),0));
 window.addEventListener('unhandledrejection',()=>setTimeout(()=>renderRecovery(route()),0));
+if(app)new MutationObserver(()=>queueMicrotask(enhanceSearchPage)).observe(app,{childList:true});
 if(sidebar)new MutationObserver(syncSidebar).observe(sidebar,{attributes:true,attributeFilter:['class']});
 if('serviceWorker'in navigator){
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
