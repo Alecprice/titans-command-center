@@ -4,6 +4,14 @@ const base=String(process.env.WORKER_URL||process.env.PRODUCTION_URL||'https://t
 const expectedSha=String(process.env.EXPECTED_SHA||'').trim();
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
+function recordFailure(error){
+  const message=error instanceof Error?error.message:String(error);
+  try{fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify({ok:false,base,error:message,testedAt:new Date().toISOString()},null,2));}catch{}
+  console.error('[production-regression]',message);
+}
+process.on('uncaughtException',error=>{recordFailure(error);process.exit(1)});
+process.on('unhandledRejection',error=>{recordFailure(error);process.exit(1)});
+
 function assert(condition,message){if(!condition)throw new Error(message)}
 
 async function request(path,{json=false,text=false,retries=4}={}){
@@ -102,7 +110,7 @@ const result={
   manifestStatus:manifest.status,
   serviceWorkerStatus:sw.status,
   serviceWorkerCache:sw.body.match(/const CACHE\s*=\s*['"]([^'"]+)/)?.[1]||null,
-  precachePaths: shellPaths.length,
+  precachePaths:shellPaths.length,
   healthStatus:health.status,
   appStatus:health.body?.status||null,
   databaseConfigured:Boolean(health.body?.database?.configured),
