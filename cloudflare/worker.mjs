@@ -1,4 +1,5 @@
 import apiHandler from '../api/index.js';
+import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflverseStats,syncNwsNextHomeGame,syncFreeOdds,recordSyncRun} from '../src/ingest.mjs';
 
 const API_PREFIX='/api/';
 
@@ -77,18 +78,29 @@ async function runApi(request){
   }
 }
 
+async function executeScheduledJob(env,job,run){
+  const started=new Date();
+  let result;
+  try{result={job,...(await run())};}
+  catch(error){console.error('[cloudflare-cron]',job,error);result={job,ok:false,error:'Sync job failed'};}
+  const stored=await recordSyncRun(env,job,result,started);
+  return {...result,auditStored:Boolean(stored.stored)};
+}
+
 async function runScheduled(env){
-  const secret=env.CRON_SECRET||env.INGEST_SECRET;
-  if(!secret){
-    console.warn('[cloudflare-cron] CRON_SECRET/INGEST_SECRET is not configured; scheduled refresh skipped.');
-    return;
-  }
-  const request=new Request('https://internal.titans-command-center/api/cron-refresh',{
-    method:'GET',
-    headers:{authorization:`Bearer ${secret}`}
-  });
-  const response=await runApi(request);
-  if(!response.ok)console.error('[cloudflare-cron] refresh failed',response.status,await response.text());
+  const jobs=[
+    ['official-audit',()=>syncTitansOfficialAudit(env)],
+    ['espn',()=>syncEspn(env)],
+    ['nflverse-roster',()=>syncNflverseRoster(env,2026)],
+    ['nflverse-stats',()=>syncNflverseStats(env,2026)],
+    ['nws-weather',()=>syncNwsNextHomeGame(env)],
+    ['bluesky',()=>syncBluesky(env,'Tennessee Titans',30)],
+    ['odds',()=>env.PROPLINE_API_KEY||env.ODDS_API_IO_KEY?syncFreeOdds(env):Promise.resolve({ok:true,skipped:true,source:'titans-cc',error:'No free odds API key configured'})]
+  ];
+  const results=await Promise.all(jobs.map(([job,run])=>executeScheduledJob(env,job,run)));
+  const succeeded=results.filter(r=>r?.ok&&!r?.skipped).length;
+  const failed=results.filter(r=>!r?.ok&&!r?.skipped).length;
+  console.log('[cloudflare-cron]',{succeeded,failed,results:results.map(r=>({job:r.job,ok:r.ok,skipped:Boolean(r.skipped),auditStored:Boolean(r.auditStored)}))});
 }
 
 export default {
