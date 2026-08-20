@@ -1,3 +1,3 @@
 # Cloudflare production recheck
 
-Triggered after the Cloudflare and GitHub DATABASE_URL secret configuration to force a fresh production deployment and Neon-backed smoke test.
+Fresh deployment trigger after confirming the GitHub Actions `DATABASE_URL` repository secret was added. This run verifies Cloudflare receives the Neon secret, `/api/health` reports healthy, `/api/data` succeeds, and Stats Lab is Neon-backed.
