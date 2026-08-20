@@ -9,7 +9,14 @@ export async function getSql(env = process.env) {
 }
 
 const iso = value => value ? new Date(value).toISOString() : null;
-const asDateIso = value => value ? `${String(value).slice(0,10)}T00:00:00.000Z` : null;
+const asDateIso = value => {
+  if (!value) return null;
+  const raw = String(value);
+  const direct = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (direct) return `${direct[1]}T00:00:00.000Z`;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : `${date.toISOString().slice(0,10)}T00:00:00.000Z`;
+};
 
 export async function databaseHealth(env = process.env) {
   const sql = await getSql(env);
@@ -74,7 +81,7 @@ export async function getBootstrapData(env = process.env) {
           where l.rn=1 and p.active=true
           order by case coalesce(l.unit,'') when 'Offense' then 1 when 'Defense' then 2 when 'Special Teams' then 3 else 4 end,
                    coalesce(l.position,p.position),p.full_name`,
-      sql`select id,transaction_date,transaction_type,description,source_url
+      sql`select id,transaction_date::text transaction_date,transaction_type,description,source_url
           from transactions
           order by transaction_date desc nulls last,created_at desc
           limit 100`,
@@ -360,7 +367,7 @@ export async function getPlayerProfile(playerId, env = process.env) {
       injuries:injuryRows.map(i=>({
         id:String(i.id),season:i.season,week:i.week,seasonType:i.season_type,primaryInjury:i.primary_injury||'',
         secondaryInjury:i.secondary_injury||'',reportStatus:i.report_status||'',practiceStatus:i.practice_status||'',
-        reportDate:i.report_date?String(i.report_date).slice(0,10):null,capturedAt:iso(i.captured_at)
+        reportDate:asDateIso(i.report_date)?.slice(0,10)||null,capturedAt:iso(i.captured_at)
       })),
       props:propRows.map(r=>({
         id:String(r.id),provider:r.source_name||'',marketName:r.market_name||'',category:r.market_category||'',
