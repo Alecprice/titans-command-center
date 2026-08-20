@@ -7,8 +7,8 @@
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
-  "background_color": "#F3F7FB",
-  "theme_color": "#4B92DB",
+  "background_color": "#06101C",
+  "theme_color": "#0C2340",
   "orientation": "any",
   "categories": ["sports", "news"],
   "icons": [
@@ -18,7 +18,7 @@
   "shortcuts": [
     {"name":"Game Day","short_name":"Game Day","url":"/#live","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]},
     {"name":"Roster","short_name":"Roster","url":"/#roster","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]},
-    {"name":"Intel Feed","short_name":"Intel","url":"/#feed","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]},
-    {"name":"Legacy","short_name":"Legacy","url":"/#legacy","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]}
+    {"name":"Transactions","short_name":"Moves","url":"/#transactions","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]},
+    {"name":"Stats Lab","short_name":"Stats","url":"/#stats","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]}
   ]
 }
