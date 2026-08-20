@@ -82,6 +82,7 @@ jobs:
           const root=await get('/');
           const shield=await get('/assets/archive/current-shield-primary.webp');
           const health=await get('/api/health',{json:true});
+          const data=await get('/api/data',{json:true});
           const stats=await get('/api/preseason-stats',{json:true});
           const market=await get('/api/market-data',{json:true});
           const result={
@@ -91,8 +92,12 @@ jobs:
             appStatus:health.body?.status||null,
             databaseOk:Boolean(health.body?.database?.ok),
             databaseConfigured:Boolean(health.body?.database?.configured),
+            dataStatus:data.status,
+            dataOk:Boolean(data.body?.ok),
+            dataRosterCount:Array.isArray(data.body?.roster)?data.body.roster.length:0,
             statsStatus:stats.status,
             rosterCount:Number(stats.body?.rosterCount||0),
+            statsRosterSource:stats.body?.rosterSource||null,
             completedPreseasonGames:Array.isArray(stats.body?.completedGames)?stats.body.completedGames.length:0,
             marketStatus:market.status,
             marketOk:Boolean(market.body?.ok),
@@ -105,20 +110,29 @@ jobs:
           if(root.status!==200)throw new Error(`Root returned ${root.status}`);
           if(shield.status!==200)throw new Error(`Shield asset returned ${shield.status}`);
           if(health.status!==200)throw new Error(`Health returned ${health.status}`);
+          if(!result.databaseConfigured||!result.databaseOk||result.appStatus!=='healthy')throw new Error(`Neon health failed: configured=${result.databaseConfigured}, ok=${result.databaseOk}, app=${result.appStatus}`);
+          if(data.status!==200||!result.dataOk)throw new Error(`Data API failed: ${data.status}`);
           if(stats.status!==200||result.rosterCount<90)throw new Error(`Preseason stats failed: ${stats.status}, roster ${result.rosterCount}`);
+          if(!/Neon/i.test(result.statsRosterSource||''))throw new Error(`Stats roster is not Neon-backed: ${result.statsRosterSource||'unknown source'}`);
           if(market.status!==200||!result.marketOk)throw new Error(`Market API failed: ${market.status}`);
           NODE
 
-      - name: Record successful Cloudflare deployment
-        if: steps.deploy.outcome == 'success' && steps.smoke.outcome == 'success'
+      - name: Record Cloudflare deployment result
+        if: always() && steps.deploy.outcome == 'success'
         shell: bash
         env:
           WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
         run: |
+          if [[ "$SMOKE_OUTCOME" == "success" ]]; then
+            STATUS='deployed + smoke-tested + Neon healthy'
+          else
+            STATUS="deployed + smoke check ${SMOKE_OUTCOME}"
+          fi
           {
             echo '# Cloudflare deployment status'
             echo
-            echo '- Status: **deployed + smoke-tested**'
+            echo "- Status: **$STATUS**"
             echo "- Source commit: \`$GITHUB_SHA\`"
             if [[ -n "$WORKER_URL" ]]; then
               echo "- Worker URL: $WORKER_URL"
@@ -126,14 +140,16 @@ jobs:
               echo '- Worker URL: deployment succeeded; Wrangler did not emit a parseable workers.dev URL in this run.'
             fi
             echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            if [[ -f /tmp/cloudflare-smoke.json ]]; then
+              echo
+              echo '## Smoke test'
+              echo
+              echo '```json'
+              cat /tmp/cloudflare-smoke.json
+              echo '```'
+            fi
             echo
-            echo '## Smoke test'
-            echo
-            echo '```json'
-            cat /tmp/cloudflare-smoke.json
-            echo '```'
-            echo
-            echo 'Generated automatically by `.github/workflows/cloudflare-deploy.yml` after a successful Cloudflare deployment and regression smoke test.'
+            echo 'Generated automatically by `.github/workflows/cloudflare-deploy.yml` after a Cloudflare deployment and regression smoke test.'
           } > docs/CLOUDFLARE_STATUS.md
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
