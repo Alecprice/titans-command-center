@@ -25,6 +25,14 @@ test('Cloudflare adapter reuses the existing single API gateway and trusted sche
   assert.doesNotMatch(worker,/CRON_SECRET\|\|env\.INGEST_SECRET/);
 });
 
+test('Cloudflare adapter explicitly bridges server-only bindings for reused Node API modules',()=>{
+  const worker=read('cloudflare/worker.mjs');
+  assert.match(worker,/SERVER_BINDINGS/);
+  assert.match(worker,/DATABASE_URL/);
+  assert.match(worker,/applyRuntimeEnv\(env\)/);
+  assert.match(worker,/process\.env\[key\]=String\(value\)/);
+});
+
 test('Cloudflare build publishes only browser-facing assets',()=>{
   const build=read('scripts/build-cloudflare.mjs');
   for(const module of ['src/core.mjs','src/data.mjs','src/odds.mjs','src/visual-audit.mjs','src/roster-audit-20260819.mjs'])assert.match(build,new RegExp(module.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
