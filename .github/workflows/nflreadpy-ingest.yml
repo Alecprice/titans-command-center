@@ -1,0 +1,92 @@
+name: nflreadpy Analytics Ingest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/ingest_nflreadpy.py'
+      - 'requirements-analytics.txt'
+      - 'db/migrations/010_nflreadpy_analytics.sql'
+      - '.github/workflows/nflreadpy-ingest.yml'
+  schedule:
+    - cron: '25 11 * * *'
+  workflow_dispatch:
+    inputs:
+      seasons:
+        description: 'Comma-separated NFL seasons to ingest (example: 2024,2025)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: titans-nflreadpy-analytics
+  cancel-in-progress: true
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: requirements-analytics.txt
+
+      - name: Install analytics dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-analytics.txt
+
+      - name: Resolve seasons
+        shell: bash
+        env:
+          MANUAL_SEASONS: ${{ github.event.inputs.seasons }}
+        run: |
+          if [[ -n "$MANUAL_SEASONS" ]]; then
+            seasons="$MANUAL_SEASONS"
+          elif [[ "$GITHUB_EVENT_NAME" == "schedule" ]]; then
+            seasons="2026"
+          else
+            seasons="2025,2026"
+          fi
+          echo "NFLREADPY_SEASONS=$seasons" >> "$GITHUB_ENV"
+          echo "Analytics seasons: $seasons"
+
+      - name: Require database secret
+        shell: bash
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo 'DATABASE_URL GitHub Actions secret is required.' >&2
+            exit 1
+          fi
+
+      - name: Ingest nflverse analytics
+        run: python scripts/ingest_nflreadpy.py
+
+      - name: Verify warehouse rows
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          import psycopg
+          with psycopg.connect(os.environ['DATABASE_URL']) as conn, conn.cursor() as cur:
+              cur.execute("""
+                select
+                  (select count(*) from plays)::int,
+                  (select count(*) from plays where epa is not null)::int,
+                  (select count(*) from plays where offense_personnel is not null or defense_personnel is not null)::int,
+                  (select count(*) from team_week_metrics)::int,
+                  (select max(season) from team_week_metrics where coalesce(offensive_plays,0)>0)::int
+              """)
+              plays, epa, personnel, metrics, max_season = cur.fetchone()
+          print(json.dumps({'plays':plays,'epaPlays':epa,'personnelPlays':personnel,'teamWeekMetrics':metrics,'maxDataSeason':max_season}))
+          if plays < 1 or epa < 1 or metrics < 1:
+              raise SystemExit('nflreadpy ingest did not populate the required analytics rows')
+          PY
