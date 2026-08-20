@@ -115,6 +115,8 @@ async function runApi(request,env){
     if(route==='market-data')return await adapterRoute(request,route,marketDataRoute,env);
     if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
 
+    // Legacy routes still share the Vercel-compatible gateway. Mirror bindings for
+    // those routes until the remaining handlers are migrated to explicit env args.
     applyRuntimeEnv(env);
     const req=vercelRequest(request,route);
     const res=vercelResponse();
