@@ -74,10 +74,11 @@ const manifest=await request('/manifest.webmanifest',{json:true});
 const sw=await request('/sw.js',{text:true});
 const shield=await request('/assets/archive/current-shield-primary.webp');
 const app=await request('/app.js',{text:true});
+const transactionsJs=await request('/transactions-hub.js',{text:true});
 const statsJs=await request('/stats-hub.js',{text:true});
 const marketJs=await request('/market-hub.js',{text:true});
 const health=await request('/api/health',{json:true});
-const data=await request('/api/data',{json:true});
+const data=await request(`/api/data?audit=${Date.now()}`,{json:true});
 const stats=await request('/api/preseason-stats',{json:true});
 const market=await request('/api/market-data',{json:true});
 
@@ -87,6 +88,7 @@ assert(/class="skip-link" href="#app"/.test(root.body),'Skip navigation is missi
 assert(/id="menu-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/.test(root.body),'Menu accessibility state is missing from app shell');
 assert(/rel="manifest" href="\/manifest\.webmanifest"/.test(root.body),'Manifest link missing from app shell');
 assert(/src="\/app\.js"/.test(root.body),'Main app module missing from app shell');
+assert(/src="\/transactions-hub\.js\?v=24"/.test(root.body),'Transactions route module missing from app shell');
 assert(/src="\/accessibility-runtime\.js"/.test(root.body),'Accessibility runtime missing from app shell');
 assert(!/postgres(?:ql)?:\/\//i.test(root.body),'Database connection string leaked into HTML');
 const rootHeaders={
@@ -110,6 +112,7 @@ assert(Array.isArray(manifest.body?.icons)&&manifest.body.icons.some(icon=>icon.
 
 assert(sw.status===200,'Service worker is unavailable');
 assert(/const CACHE\s*=\s*['"]titans-cc-brand-2026-v\d+['"]/.test(sw.body),'Service worker cache is not versioned');
+assert(sw.body.includes('/transactions-hub.js'),'Service worker does not precache the Transactions route module');
 assert(!sw.body.includes('/src/preseason-p1-20260813.mjs'),'Service worker still references the server-only preseason gamebook module');
 const shellBlock=sw.body.match(/const SHELL\s*=\s*\[([\s\S]*?)\];/);
 assert(shellBlock,'Unable to parse service-worker precache shell');
@@ -126,7 +129,7 @@ assert(shellFailures.length===0,`PWA precache paths failed: ${shellFailures.join
 
 assert(shield.status===200,'Current Shield asset is unavailable');
 assert((shield.headers.get('content-type')||'').startsWith('image/'),'Current Shield did not return an image content type');
-for(const [label,response] of [['app.js',app],['stats-hub.js',statsJs],['market-hub.js',marketJs]]){
+for(const [label,response] of [['app.js',app],['transactions-hub.js',transactionsJs],['stats-hub.js',statsJs],['market-hub.js',marketJs]]){
   assert(response.status===200,`${label} is unavailable`);
   assert(!/postgres(?:ql)?:\/\//i.test(response.body),`${label} leaked a database connection string`);
   assert(!/npg_[A-Za-z0-9_-]{8,}/.test(response.body),`${label} leaked a Neon credential`);
@@ -140,6 +143,9 @@ assert(health.body?.version==='0.8.0','Unexpected API application version');
 
 assert(data.status===200&&data.body?.ok===true,`Data API failed with ${data.status}`);
 assert(Array.isArray(data.body?.roster)&&data.body.roster.length===95,`Expected 95 Neon roster players, received ${data.body?.roster?.length??0}`);
+assert(Array.isArray(data.body?.transactions)&&data.body.transactions.length>0,'Transactions API returned no rows');
+const invalidTransactionDates=data.body.transactions.filter(row=>row.date&&!Number.isFinite(new Date(row.date).getTime()));
+assert(invalidTransactionDates.length===0,`Transactions API returned ${invalidTransactionDates.length} invalid date value(s)`);
 assert(stats.status===200&&stats.body?.ok===true,`Stats API failed with ${stats.status}`);
 assert(Number(stats.body?.rosterCount)===95,`Expected 95 Stats Lab roster players, received ${stats.body?.rosterCount??0}`);
 assert(/Neon/i.test(stats.body?.rosterSource||''),`Stats Lab is not Neon-backed: ${stats.body?.rosterSource||'unknown source'}`);
@@ -163,6 +169,8 @@ const result={
   databaseOk:Boolean(health.body?.database?.ok),
   dataStatus:data.status,
   dataRosterCount:data.body?.roster?.length||0,
+  transactionCount:data.body?.transactions?.length||0,
+  invalidTransactionDates:invalidTransactionDates.length,
   statsStatus:stats.status,
   statsRosterCount:Number(stats.body?.rosterCount||0),
   statsRosterSource:stats.body?.rosterSource||null,
