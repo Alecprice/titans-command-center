@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 BASE = os.environ.get('WORKER_URL', 'https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
@@ -25,6 +25,27 @@ def set_route(driver, route, settle=0.08):
     time.sleep(settle)
 
 
+def install_longtask_observer(driver):
+    driver.execute_script("""
+      window.__titansLongTasks = [];
+      if ('PerformanceObserver' in window) {
+        try {
+          const observer = new PerformanceObserver(list => {
+            for (const entry of list.getEntries()) window.__titansLongTasks.push(entry.duration);
+          });
+          observer.observe({entryTypes:['longtask']});
+          window.__titansLongTaskObserver = observer;
+        } catch {}
+      }
+    """)
+
+
+def assert_no_horizontal_overflow(driver, label):
+    state = driver.execute_script("return {width:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body?.scrollWidth||0}")
+    if state['scrollWidth'] > state['width'] + 3:
+        raise RuntimeError(f'Horizontal overflow on {label}: {state}')
+
+
 def browser_state(driver):
     try:
         return driver.execute_script("""
@@ -38,7 +59,11 @@ def browser_state(driver):
             marketLoading:app?.dataset?.marketHub||null,
             statsLoading:app?.dataset?.preseasonHub||null,
             appChildren:app?.children?.length||0,
-            appText:(app?.innerText||'').slice(0,500)
+            appText:(app?.innerText||'').slice(0,500),
+            viewport:window.innerWidth,
+            scrollWidth:document.documentElement.scrollWidth,
+            sidebarOpen:document.querySelector('#sidebar')?.classList.contains('open')||false,
+            moreExpanded:document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded')||null
           };
         """)
     except Exception as exc:
@@ -62,25 +87,12 @@ try:
     driver.set_page_load_timeout(20)
     driver.set_script_timeout(4)
 
-    stage = 'load-home'
+    stage = 'desktop:load-home'
     driver.get(f'{BASE}/#home')
-    stage = 'wait-home-ready'
+    stage = 'desktop:wait-home-ready'
     wait_for(driver, "document.readyState === 'complete' && document.querySelector('#app')")
     wait_for(driver, "document.querySelector('.page-head h1') || document.querySelector('.fan-hero')", timeout=10)
-
-    stage = 'install-longtask-observer'
-    driver.execute_script("""
-      window.__titansLongTasks = [];
-      if ('PerformanceObserver' in window) {
-        try {
-          const observer = new PerformanceObserver(list => {
-            for (const entry of list.getEntries()) window.__titansLongTasks.push(entry.duration);
-          });
-          observer.observe({entryTypes:['longtask']});
-          window.__titansLongTaskObserver = observer;
-        } catch {}
-      }
-    """)
+    install_longtask_observer(driver)
 
     sequence = ['#stats', '#transactions', '#markets', '#transactions', '#sources', '#transactions', '#roster', '#transactions']
     transaction_checks = 0
@@ -88,31 +100,85 @@ try:
 
     for round_index in range(1, rounds + 1):
         for route in sequence:
-            stage = f'round-{round_index}:navigate:{route}'
+            stage = f'desktop:round-{round_index}:navigate:{route}'
             set_route(driver, route)
             if route == '#transactions':
-                stage = f'round-{round_index}:transactions:wait-hash'
+                stage = f'desktop:round-{round_index}:transactions:wait-hash'
                 wait_for(driver, "location.hash === '#transactions'")
-                stage = f'round-{round_index}:transactions:wait-heading'
+                stage = f'desktop:round-{round_index}:transactions:wait-heading'
                 wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Transactions'")
-                stage = f'round-{round_index}:transactions:wait-content'
+                stage = f'desktop:round-{round_index}:transactions:wait-content'
                 wait_for(driver, "document.querySelector('.transaction-list') || document.querySelector('.panel-body .empty')")
-                stage = f'round-{round_index}:transactions:heartbeat'
+                stage = f'desktop:round-{round_index}:transactions:heartbeat'
                 heartbeat = browser_state(driver)
                 if heartbeat.get('hash') != '#transactions' or heartbeat.get('title') != 'Transactions':
                     raise RuntimeError(f'Transactions route was overwritten: {heartbeat}')
                 if heartbeat.get('rows', 0) < 1:
-                    stage = f'round-{round_index}:transactions:wait-hydration'
+                    stage = f'desktop:round-{round_index}:transactions:wait-hydration'
                     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=8)
+                assert_no_horizontal_overflow(driver, 'desktop Transactions')
                 transaction_checks += 1
             else:
-                stage = f'round-{round_index}:leave-fast:{route}'
+                stage = f'desktop:round-{round_index}:leave-fast:{route}'
                 time.sleep(0.12)
 
-    stage = 'read-longtasks'
-    long_tasks = driver.execute_script('return window.__titansLongTasks || []') or []
-    max_long_task = max(long_tasks) if long_tasks else 0
-    severe_long_tasks = [x for x in long_tasks if x >= 1500]
+    desktop_long_tasks = driver.execute_script('return window.__titansLongTasks || []') or []
+
+    stage = 'mobile:resize'
+    driver.set_window_size(390, 844)
+    driver.get(f'{BASE}/#home')
+    stage = 'mobile:wait-home'
+    wait_for(driver, "document.readyState === 'complete' && document.querySelector('.fan-hero')")
+    wait_for(driver, "getComputedStyle(document.querySelector('.mobile-nav')).display !== 'none'")
+    install_longtask_observer(driver)
+    assert_no_horizontal_overflow(driver, 'mobile Home')
+
+    stage = 'mobile:touch-targets'
+    mobile_targets = driver.execute_script("""
+      return [...document.querySelectorAll('.mobile-nav a,.mobile-nav button')].map(el=>({label:el.textContent.trim(),height:el.getBoundingClientRect().height,width:el.getBoundingClientRect().width}));
+    """)
+    if len(mobile_targets) != 6 or any(item['height'] < 44 for item in mobile_targets):
+        raise RuntimeError(f'Mobile nav touch targets invalid: {mobile_targets}')
+
+    stage = 'mobile:moves-click'
+    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#transactions\"]')?.click()")
+    wait_for(driver, "location.hash === '#transactions'")
+    wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Transactions'")
+    wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
+    wait_for(driver, "document.querySelector('.mobile-nav a[href=\"#transactions\"]')?.getAttribute('aria-current') === 'page'")
+    assert_no_horizontal_overflow(driver, 'mobile Transactions')
+
+    stage = 'mobile:more-open'
+    driver.execute_script("document.querySelector('#mobile-more-button')?.click()")
+    wait_for(driver, "document.querySelector('#sidebar')?.classList.contains('open')")
+    wait_for(driver, "document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded') === 'true'")
+
+    stage = 'mobile:schedule-from-more'
+    driver.execute_script("document.querySelector('#primary-nav a[href=\"#games\"]')?.click()")
+    wait_for(driver, "location.hash === '#games'")
+    wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Games & Schedule'")
+    wait_for(driver, "!document.querySelector('#sidebar')?.classList.contains('open')")
+    assert_no_horizontal_overflow(driver, 'mobile Schedule')
+
+    stage = 'mobile:more-escape'
+    driver.execute_script("document.querySelector('#mobile-more-button')?.click()")
+    wait_for(driver, "document.querySelector('#sidebar')?.classList.contains('open')")
+    driver.find_element('tag name', 'body').send_keys(Keys.ESCAPE)
+    wait_for(driver, "!document.querySelector('#sidebar')?.classList.contains('open')")
+
+    stage = 'mobile:stats-then-moves'
+    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#stats\"]')?.click()")
+    wait_for(driver, "location.hash === '#stats'")
+    time.sleep(0.12)
+    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#transactions\"]')?.click()")
+    wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Transactions'")
+    wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
+    assert_no_horizontal_overflow(driver, 'mobile Transactions after Stats')
+
+    mobile_long_tasks = driver.execute_script('return window.__titansLongTasks || []') or []
+    all_long_tasks = desktop_long_tasks + mobile_long_tasks
+    max_long_task = max(all_long_tasks) if all_long_tasks else 0
+    severe_long_tasks = [x for x in all_long_tasks if x >= 1500]
     if severe_long_tasks:
         raise RuntimeError(f'Severe browser long task detected: max={max_long_task:.1f}ms')
 
@@ -122,14 +188,19 @@ try:
         console = [entry for entry in driver.get_log('browser') if entry.get('level') in ('SEVERE', 'WARNING')]
     except Exception:
         pass
+    severe_console = [entry for entry in console if entry.get('level') == 'SEVERE']
+    if severe_console:
+        raise RuntimeError(f'Browser console has severe errors: {severe_console[:3]}')
 
     result = {
         'ok': True,
         'base': BASE,
-        'rounds': rounds,
+        'desktopRounds': rounds,
         'transactionChecks': transaction_checks,
+        'mobileChecks': 5,
+        'mobileTargets': mobile_targets,
         'maxLongTaskMs': round(max_long_task, 1),
-        'longTasksOver250ms': len([x for x in long_tasks if x >= 250]),
+        'longTasksOver250ms': len([x for x in all_long_tasks if x >= 250]),
         'browserWarnings': console[:20],
         'durationSeconds': round(time.time() - started, 2),
         'testedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
