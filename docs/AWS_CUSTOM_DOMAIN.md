@@ -8,57 +8,83 @@ Existing application origin:
 
 `https://titans-command-center.alecjordanprice.workers.dev`
 
+## Cost policy for this project
+
+The preferred production path is the **CloudFront Free flat-rate plan ($0/month)**. Do not use the repository's pay-as-you-go CloudFormation fallback for normal deployment.
+
+AWS's flat-rate Free plan currently includes 1 million requests/month and 100 GB transfer/month with no overage charges. If usage substantially exceeds the allowance for a sustained period, AWS may adjust delivery performance instead of charging overages.
+
+Important safety rules:
+
+- If the AWS console says the account is ineligible for the Free flat-rate plan, **stop**. Do not fall back to pay-as-you-go automatically.
+- Do not choose Pro, Business, Premium, or pay-as-you-go.
+- Do not enable Lambda@Edge, paid CAPTCHA API usage, Route 53 DNS query logging, enhanced CloudFront metrics, or other separately billed extras.
+- Do not attach the entire `alecjprice.com` Route 53 hosted zone to the plan during the initial cutover. The existing zone can remain exactly as it is. Route 53 A/AAAA Alias queries to CloudFront are not billed as DNS queries; the existing hosted-zone fee remains unchanged.
+- The existing Cloudflare Worker and Neon database remain the origin/backend and are not replaced by this AWS front door.
+
 ## Architecture
 
-The public hostname stays in the existing AWS account:
-
-`Route 53 -> CloudFront + ACM -> Cloudflare Worker -> Neon`
+`Route 53 -> CloudFront Free flat-rate + ACM -> Cloudflare Worker -> Neon`
 
 This deliberately does **not** move `alecjprice.com` DNS to Cloudflare. Cloudflare Workers native Custom Domains require an active Cloudflare DNS zone, so CloudFront is used as the AWS-controlled HTTPS front door instead.
 
-CloudFront is initially configured with caching disabled for correctness. It forwards all viewer values except the viewer `Host` header. CloudFront substitutes the Worker origin hostname as `Host`, which keeps HTTPS validation against `*.workers.dev` correct.
+CloudFront should forward viewer values except the viewer `Host` header. The Worker must receive its own `titans-command-center.alecjordanprice.workers.dev` hostname as `Host` so TLS validation against the origin remains correct.
 
-The Worker staging hostname returns `X-Robots-Tag: noindex, nofollow`. The CloudFront response policy removes that staging-only header on the public AWS hostname while preserving the application's existing security headers.
+The Worker staging hostname returns `X-Robots-Tag: noindex, nofollow`. The public custom hostname must remove that staging-only response header while preserving the application's other security headers.
 
-## One-command deployment
+## Step 1 — read-only preflight
 
-From the repository root on a computer where the AWS CLI is authenticated to the AWS account that owns the `alecjprice.com` Route 53 hosted zone:
+Before creating anything, update the repository and run the read-only account inspection:
 
 ```bash
 git pull
-chmod +x scripts/deploy-aws-custom-domain.sh
-./scripts/deploy-aws-custom-domain.sh
+chmod +x scripts/aws-free-plan-preflight.sh
+./scripts/aws-free-plan-preflight.sh
 ```
 
-The script will:
+This script only performs AWS read operations. It shows:
 
-1. Show the active AWS identity before making changes.
-2. Locate the `alecjprice.com` Route 53 hosted-zone ID automatically.
-3. Validate the CloudFormation template.
-4. Create/maintain an ACM certificate for `titans-command-center.alecjprice.com` in `us-east-1`.
-5. Create/maintain the CloudFront distribution.
-6. Create Route 53 A and AAAA alias records.
-7. Wait for the HTTPS hostname to answer.
-8. Verify the custom hostname is not returning the `workers.dev` staging `noindex` header.
-9. Run the repository production regression against the custom hostname when Node is available.
+1. The active AWS account identity.
+2. The public Route 53 hosted zone for `alecjprice.com`.
+3. Any existing DNS records already using `titans-command-center.alecjprice.com`.
+4. Existing CloudFront distributions.
+5. Any existing ACM certificate for the target hostname in `us-east-1`.
+6. Whether the old pay-as-you-go fallback CloudFormation stack already exists.
 
-CloudFront and ACM provisioning can take several minutes. Do not interrupt the CloudFormation deployment while the certificate/distribution is being created.
+It does not create, update, delete, subscribe, or associate any AWS resource.
 
-## Required AWS permissions
+## Step 2 — create the distribution in the AWS console
 
-The authenticated AWS principal needs permission to read the account identity and manage the resources in this stack, including:
+Use the current CloudFront console flow rather than the metered CloudFormation fallback:
 
-- `sts:GetCallerIdentity`
-- Route 53 hosted-zone lookup and record changes
-- ACM certificate creation/description/tagging in `us-east-1`
-- CloudFront distributions and response-headers policies
-- CloudFormation stack create/update/read operations
+1. Open **CloudFront -> Distributions -> Create distribution**.
+2. Choose **Single website or app**.
+3. For the domain, use `titans-command-center.alecjprice.com` when the console offers Route 53 domain setup.
+4. For the origin, enter `titans-command-center.alecjordanprice.workers.dev` as a custom HTTPS origin.
+5. Ensure the origin request behavior does **not forward the viewer Host header**. The equivalent AWS managed origin request policy is **AllViewerExceptHostHeader**.
+6. Start with **Caching disabled** for correctness. We can optimize static caching later after the custom-domain regression is green.
+7. Redirect HTTP viewers to HTTPS.
+8. Use the normal ACM certificate generated/selected by CloudFront for the hostname. CloudFront certificates must be available in `us-east-1`.
+9. On the pricing-plan step, select **Free — $0/month** only.
+10. If the Free plan is not selectable or AWS says the account is ineligible, stop before creating the distribution.
+11. Do **not** attach the full Route 53 hosted zone to the plan during this first cutover.
+12. Leave separately billed optional features off.
+13. Review the final page and confirm the selected pricing plan still says **Free / $0 per month** before choosing Create distribution.
 
-No AWS access key, secret key, certificate private key, database URL, or Cloudflare token belongs in the repository or chat.
+## Step 3 — Route 53
 
-## Manual validation
+For the target hostname, use Route 53 Alias records that point to the CloudFront distribution:
 
-After the stack completes:
+- `A` Alias -> CloudFront distribution
+- `AAAA` Alias -> CloudFront distribution
+
+Alias A/AAAA queries mapped to CloudFront do not incur Route 53 DNS-query charges.
+
+If the CloudFront console creates these records automatically during domain setup, do not create duplicates manually.
+
+## Step 4 — validate before treating it as production
+
+After CloudFront finishes deploying and DNS resolves:
 
 ```bash
 curl -I https://titans-command-center.alecjprice.com/
@@ -71,29 +97,28 @@ Expected results:
 - HTTPS certificate is valid for `titans-command-center.alecjprice.com`.
 - HTTP redirects to HTTPS.
 - Root page returns 200.
-- `/api/health` returns a healthy application with Neon configured and healthy.
-- `X-Robots-Tag: noindex` is **not** present on the custom hostname.
+- `/api/health` reports a healthy application with Neon configured and healthy.
+- `X-Robots-Tag: noindex` is not present on the public custom hostname.
 - Existing CSP/security headers remain present.
 - Roster, Transactions, Stats Lab, Advanced Analytics, Market Pulse and player-headshot paths continue to work.
 
+After that, run the normal desktop/mobile browser regressions against the custom hostname before treating it as the canonical production URL.
+
+## Pay-as-you-go fallback is deliberately blocked
+
+The files below exist only as an emergency fallback:
+
+- `infra/aws/titans-command-center-domain.yaml`
+- `scripts/deploy-aws-custom-domain.sh`
+
+Both now require an explicit `I_UNDERSTAND_CHARGES` acknowledgement before they can create metered CloudFront resources. A normal invocation stops without creating anything.
+
+Do not bypass this interlock for the planned production setup.
+
 ## Rollback
 
-The existing `workers.dev` hostname remains untouched and usable as the origin/fallback.
+The existing `workers.dev` hostname remains untouched and usable as the origin/fallback throughout the custom-domain setup.
 
-To remove the AWS public hostname, delete the CloudFormation stack:
+If a Free-plan CloudFront distribution is created and later needs to be removed, cancel its Free pricing plan first (Free plan cancellation is immediate), then disable/delete the distribution and remove only the target A/AAAA aliases if they are not removed automatically.
 
-```bash
-aws cloudformation delete-stack \
-  --region us-east-1 \
-  --stack-name titans-command-center-domain
-
-aws cloudformation wait stack-delete-complete \
-  --region us-east-1 \
-  --stack-name titans-command-center-domain
-```
-
-This removes the CloudFront distribution, Route 53 aliases, response policy and certificate created by the stack. It does not delete the Cloudflare Worker, Neon database, GitHub repository or the `alecjprice.com` hosted zone.
-
-## After cutover
-
-Keep CloudFront caching disabled until the custom-domain browser/API regression is clean. Once verified, static JS/CSS/images can receive a separate cache behavior while `/api/*`, `/sw.js`, HTML navigation and build metadata remain uncached/revalidated.
+Do not delete the `alecjprice.com` hosted zone, Cloudflare Worker, Neon database, or GitHub repository.
