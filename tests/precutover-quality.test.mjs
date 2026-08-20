@@ -11,10 +11,10 @@ test('app shell keeps core accessibility, mobile navigation and PWA semantics',(
   assert.match(html,/id="primary-nav" aria-label="Primary navigation"/);
   assert.match(html,/id="app"[^>]*aria-live="polite"[^>]*tabindex="-1"/);
   assert.match(html,/rel="preload" as="image" href="\/assets\/brand\/current-lockup\.webp"/);
-  assert.match(html,/class="mobile-nav"[\s\S]*href="#transactions"[^>]*data-route="transactions"[\s\S]*>Moves</);
+  assert.match(html,/class="mobile-nav"[\s\S]*href="#transactions"[^>]*data-route="transactions"[\s\S]*>Moves/);
   assert.match(html,/id="mobile-more-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/);
   assert.match(html,/href="\/usability-runtime\.css"/);
-  assert.match(html,/src="\/usability-runtime\.js\?v=25"/);
+  assert.match(html,/src="\/usability-runtime\.js\?v=26"/);
   assert.match(html,/src="\/accessibility-runtime\.js"/);
   assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
   assert.match(html,/src="\/fact-polish\.js\?v=21"/);
@@ -33,6 +33,8 @@ test('responsive layer preserves keyboard focus, safe areas and mobile touch tar
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(css,/\.mobile-nav button,.mobile-nav a\{min-height:48px\}/);
   assert.match(css,/body\.nav-open\{overflow:hidden\}/);
+  assert.match(css,/body\.nav-open:after/);
+  assert.match(css,/\.search-route-links a\{min-height:44px/);
 });
 
 test('usability runtime prevents stale-route dead ends and keeps navigation state accessible',()=>{
@@ -42,8 +44,14 @@ test('usability runtime prevents stale-route dead ends and keeps navigation stat
   assert.match(runtime,/aria-current/);
   assert.match(runtime,/controllerchange/);
   assert.match(runtime,/Update ready/);
+  assert.match(runtime,/trapMobileDrawerFocus/);
   assert.match(runtime,/event\.key==='Escape'/);
+  assert.match(runtime,/event\.key==='\/'/);
+  assert.match(runtime,/enhanceSearchPage/);
+  assert.match(runtime,/hash:'#transactions',label:'Transactions'/);
   assert.match(runtime,/current==='home'\|\|current==='live'\|\|current==='games'/);
+  assert.match(runtime,/observe\(app,\{childList:true\}\)/);
+  assert.doesNotMatch(runtime,/observe\(app,\{childList:true,subtree:true\}\)/);
 });
 
 test('manifest uses dark launch colors and prioritizes core fan shortcuts',()=>{
@@ -72,7 +80,7 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v25/);
+  assert.match(sw,/titans-cc-brand-2026-v26/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.css/);
@@ -137,4 +145,5 @@ test('production regression audit is wired as a package command',()=>{
   assert.match(script,/database connection string leaked/i);
   assert.match(script,/workers\.dev staging hostname is not marked noindex/);
   assert.match(script,/Deployed commit .* does not match expected/);
+  assert.match(script,/192px PWA icon dimensions/);
 });
