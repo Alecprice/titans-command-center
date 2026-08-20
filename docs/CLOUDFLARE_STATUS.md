@@ -1,14 +1,14 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production regression passed**
-- Source commit: `fb772946302438ddefdd30e177f1244bab51fb34`
+- Source commit: `647dc7fa1bf0d3c7668208fa5bb91666d9f29135`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
 - Deploy outcome: success
 - Production regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T16:57:05Z
+- Recorded: 2026-08-20T17:16:53Z
 
 ## Production regression
 
@@ -27,7 +27,7 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v20",
+  "serviceWorkerCache": "titans-cc-brand-2026-v21",
   "precachePaths": 39,
   "healthStatus": 200,
   "appStatus": "healthy",
@@ -45,18 +45,18 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "fb772946302438ddefdd30e177f1244bab51fb34",
-    "builtAt": "2026-08-20T16:56:39.376Z"
+    "commit": "647dc7fa1bf0d3c7668208fa5bb91666d9f29135",
+    "builtAt": "2026-08-20T17:16:18.412Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 9,
   "responseMs": {
-    "root": 33,
-    "health": 209,
-    "data": 325,
-    "stats": 216,
-    "market": 157
+    "root": 25,
+    "health": 170,
+    "data": 158,
+    "stats": 119,
+    "market": 250
   },
-  "testedAt": "2026-08-20T16:57:05.256Z"
+  "testedAt": "2026-08-20T17:16:53.776Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
