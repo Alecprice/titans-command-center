@@ -1,14 +1,13 @@
 # Cloudflare deployment status
 
-- Status: **Cloudflare deploy failed before smoke test**
-- Source commit: `b43887c164dafe33be1a72f171a7a6567bcf7970`
+- Status: **DATABASE_URL GitHub secret missing**
+- Source commit: `eb994ba24fe7d9b8f6a0044b55f4f113f0ddc706`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: false
-- Deploy outcome: failure
-- Deploy exit code: not-recorded
+- Deploy outcome: skipped
 - Smoke outcome: skipped
-- Worker URL: not recorded in this run
-- Recorded: 2026-08-20T15:42:23Z
+- Worker URL: existing deployment remains unchanged
+- Recorded: 2026-08-20T15:44:13Z
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
