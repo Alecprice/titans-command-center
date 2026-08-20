@@ -1,4 +1,4 @@
-import {cp,mkdir,readdir,rm,stat} from 'node:fs/promises';
+import {cp,mkdir,readdir,rm,stat,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -28,6 +28,14 @@ for(const entry of await readdir(root,{withFileTypes:true})){
 }
 await cp(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});
 for(const module of browserModules)await copyFile(module);
+
+const pkg=JSON.parse(await readFile(path.join(root,'package.json'),'utf8'));
+await writeFile(path.join(dist,'build-meta.json'),JSON.stringify({
+  app:'titans-command-center',
+  version:pkg.version,
+  commit:process.env.GITHUB_SHA||'local',
+  builtAt:new Date().toISOString()
+},null,2));
 
 const files=[];
 async function walk(dir,prefix=''){
