@@ -17,6 +17,7 @@ test('app shell keeps core accessibility and PWA semantics',()=>{
   assert.match(html,/src="\/ux-polish\.js\?v=22"/);
   assert.match(html,/src="\/fan-polish\.js\?v=23"/);
   assert.match(html,/src="\/source-activity\.js\?v=22"/);
+  assert.match(html,/src="\/transactions-hub\.js\?v=24"/);
   assert.match(html,/src="\/stats-hub\.js\?v=22"/);
   assert.match(html,/src="\/market-hub\.js\?v=22"/);
 });
@@ -47,8 +48,9 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v23/);
+  assert.match(sw,/titans-cc-brand-2026-v24/);
   assert.match(sw,/\/accessibility-runtime\.js/);
+  assert.match(sw,/\/transactions-hub\.js/);
   assert.match(sw,/const NETWORK_FIRST=/);
   assert.match(sw,/js\|mjs\|css\|webmanifest/);
   assert.doesNotMatch(sw,/\/src\/preseason-p1-20260813\.mjs/);
@@ -78,6 +80,7 @@ test('async page modules cannot overwrite a later route',()=>{
   const stats=read('stats-hub.js');
   const market=read('market-hub.js');
   const sources=read('source-activity.js');
+  const transactions=read('transactions-hub.js');
   assert.match(stats,/statsRequestSerial/);
   assert.match(stats,/requestId!==statsRequestSerial\|\|shRoute\(\)!=='stats'/);
   assert.match(stats,/observe\(shRoot,\{childList:true\}\)/);
@@ -90,6 +93,11 @@ test('async page modules cannot overwrite a later route',()=>{
   assert.match(sources,/requestId!==saRequestSerial\|\|saRoute\(\)!=='sources'/);
   assert.match(sources,/observe\(saApp,\{childList:true\}\)/);
   assert.doesNotMatch(sources,/observe\(saApp,\{childList:true,subtree:true\}\)/);
+  assert.match(transactions,/thRequestSerial/);
+  assert.match(transactions,/requestId!==thRequestSerial\|\|thRoute\(\)!=='transactions'/);
+  assert.match(transactions,/cache:'no-store'/);
+  assert.match(transactions,/observe\(thApp,\{childList:true\}\)/);
+  assert.doesNotMatch(transactions,/observe\(thApp,\{childList:true,subtree:true\}\)/);
 });
 
 test('production regression audit is wired as a package command',()=>{
