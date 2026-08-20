@@ -48,10 +48,11 @@ function syncNav(){
 
 function syncSidebar(){
   const open=Boolean(sidebar?.classList.contains('open'));
+  const hidden=matchMedia('(max-width:760px)').matches&&!open;
   menuButton?.setAttribute('aria-expanded',String(open));
   mobileMore?.setAttribute('aria-expanded',String(open));
   document.body.classList.toggle('nav-open',open);
-  if(sidebar)sidebar.setAttribute('aria-hidden',String(matchMedia('(max-width:760px)').matches&&!open));
+  if(sidebar){sidebar.setAttribute('aria-hidden',String(hidden));sidebar.inert=hidden;}
 }
 
 function closeSidebar(){
