@@ -17,7 +17,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
@@ -61,44 +61,13 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Smoke test deployed Worker
+      - name: Run production regression audit
         id: smoke
         if: steps.deploy.outcome == 'success'
-        shell: bash
         env:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const base=process.env.WORKER_URL;
-          if(!base) throw new Error('Cloudflare action did not return a deployment URL');
-          const wait=ms=>new Promise(r=>setTimeout(r,ms));
-          async function get(path,{json=false,retries=4}={}){
-            let last;
-            for(let i=0;i<retries;i++){
-              try{
-                const response=await fetch(`${base}${path}`,{headers:{'User-Agent':'TitansCommandCenter-CI/0.8'},signal:AbortSignal.timeout(15000)});
-                const body=json?await response.json():await response.arrayBuffer();
-                return {status:response.status,body};
-              }catch(error){last=error;if(i<retries-1)await wait(2500);}
-            }
-            throw last;
-          }
-          const root=await get('/');
-          const shield=await get('/assets/archive/current-shield-primary.webp');
-          const health=await get('/api/health',{json:true});
-          const data=await get('/api/data',{json:true});
-          const stats=await get('/api/preseason-stats',{json:true});
-          const market=await get('/api/market-data',{json:true});
-          const result={rootStatus:root.status,shieldStatus:shield.status,healthStatus:health.status,appStatus:health.body?.status||null,databaseOk:Boolean(health.body?.database?.ok),databaseConfigured:Boolean(health.body?.database?.configured),dataStatus:data.status,dataOk:Boolean(data.body?.ok),dataRosterCount:Array.isArray(data.body?.roster)?data.body.roster.length:0,statsStatus:stats.status,rosterCount:Number(stats.body?.rosterCount||0),statsRosterSource:stats.body?.rosterSource||null,completedPreseasonGames:Array.isArray(stats.body?.completedGames)?stats.body.completedGames.length:0,marketStatus:market.status,marketOk:Boolean(market.body?.ok),marketRows:Array.isArray(market.body?.odds)?market.body.odds.length:0,marketMode:market.body?.sourceMode||null,testedAt:new Date().toISOString()};
-          fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify(result,null,2));
-          console.log(JSON.stringify(result,null,2));
-          if(root.status!==200||shield.status!==200||health.status!==200)throw new Error('Static/health smoke test failed');
-          if(!result.databaseConfigured||!result.databaseOk||result.appStatus!=='healthy')throw new Error(`Neon health failed: configured=${result.databaseConfigured}, ok=${result.databaseOk}, app=${result.appStatus}`);
-          if(data.status!==200||!result.dataOk)throw new Error(`Data API failed: ${data.status}`);
-          if(stats.status!==200||result.rosterCount<90||!/Neon/i.test(result.statsRosterSource||''))throw new Error(`Stats is not Neon-backed: ${result.statsRosterSource||'unknown'}`);
-          if(market.status!==200||!result.marketOk)throw new Error(`Market API failed: ${market.status}`);
-          NODE
+          EXPECTED_SHA: ${{ github.sha }}
+        run: npm run audit:production
 
       - name: Record Cloudflare deployment result
         if: always()
@@ -115,8 +84,8 @@ jobs:
           elif [[ "$CLOUDFLARE_READY" != "true" ]]; then STATUS='Cloudflare credentials unavailable to workflow';
           elif [[ "$DATABASE_READY" != "true" ]]; then STATUS='DATABASE_URL GitHub secret missing';
           elif [[ "$DEPLOY_OUTCOME" != "success" ]]; then STATUS='Cloudflare deploy failed';
-          elif [[ "$SMOKE_OUTCOME" == "success" ]]; then STATUS='deployed + smoke-tested + Neon healthy';
-          else STATUS="deployed + smoke check ${SMOKE_OUTCOME:-not-run}"; fi
+          elif [[ "$SMOKE_OUTCOME" == "success" ]]; then STATUS='deployed + full production regression passed';
+          else STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}"; fi
           {
             echo '# Cloudflare deployment status'
             echo
@@ -126,10 +95,10 @@ jobs:
             echo "- Cloudflare credentials available: ${CLOUDFLARE_READY:-unknown}"
             echo "- DATABASE_URL GitHub secret supplied: ${DATABASE_READY:-unknown}"
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
-            echo "- Smoke outcome: ${SMOKE_OUTCOME:-not-run}"
+            echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"
             [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: existing deployment remains unchanged'
             echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Smoke test'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
+            if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Production regression'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
             echo
             echo 'Generated automatically by `.github/workflows/cloudflare-deploy.yml`.'
           } > docs/CLOUDFLARE_STATUS.md
