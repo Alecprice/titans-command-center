@@ -1,10 +1,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >-
-  AWS Route 53 + ACM + CloudFront front door for Titans Command Center.
-  CloudFront terminates TLS for the public hostname and forwards requests to
-  the existing Cloudflare Worker origin without forwarding the viewer Host header.
+  PAY-AS-YOU-GO FALLBACK ONLY. AWS Route 53 + ACM + CloudFront front door for
+  Titans Command Center. This template is intentionally blocked unless the
+  operator explicitly acknowledges metered CloudFront billing.
 
 Parameters:
+  PayAsYouGoAcknowledgement:
+    Type: String
+    Default: BLOCKED
+    AllowedValues:
+      - BLOCKED
+      - I_UNDERSTAND_CHARGES
+    Description: >-
+      Cost-safety interlock. Leave BLOCKED for normal use. The preferred path is
+      the CloudFront $0/month flat-rate Free plan created/subscribed in the AWS console.
   DomainName:
     Type: String
     Default: titans-command-center.alecjprice.com
@@ -16,6 +25,15 @@ Parameters:
     Type: String
     Default: titans-command-center.alecjordanprice.workers.dev
     Description: Existing Cloudflare Worker hostname. Do not include https:// or a path.
+
+Rules:
+  RequireExplicitMeteredBillingAcknowledgement:
+    Assertions:
+      - Assert: !Equals [!Ref PayAsYouGoAcknowledgement, I_UNDERSTAND_CHARGES]
+        AssertDescription: >-
+          COST SAFETY STOP: this template creates pay-as-you-go CloudFront. Use
+          the CloudFront $0/month flat-rate Free plan instead unless you intentionally
+          accept metered billing and explicitly set PayAsYouGoAcknowledgement.
 
 Resources:
   Certificate:
