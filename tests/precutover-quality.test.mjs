@@ -17,7 +17,7 @@ test('app shell keeps core accessibility, mobile navigation and PWA semantics',(
   assert.match(html,/src="\/usability-runtime\.js\?v=26"/);
   assert.match(html,/src="\/ux-polish\.js\?v=27"/);
   assert.match(html,/src="\/fan-polish\.js\?v=27"/);
-  assert.match(html,/src="\/team-room\.js\?v=27"/);
+  assert.match(html,/src="\/team-room\.js\?v=28"/);
   assert.match(html,/src="\/source-activity\.js\?v=27"/);
   assert.match(html,/src="\/market-hub\.js\?v=27"/);
   assert.match(html,/href="\/ux-polish\.css\?v=27"/);
@@ -70,6 +70,13 @@ test('shared UX helpers keep countdowns finite and roster filters recoverable',(
   assert.doesNotMatch(ux,/observe\(list,\{childList:true,subtree:true\}\)/);
 });
 
+test('team room semantically hides base roster controls in alternate views',()=>{
+  const room=read('team-room.js');
+  assert.match(room,/function syncRosterBaseVisibility/);
+  assert.match(room,/el\.hidden=hide/);
+  assert.match(room,/syncRosterBaseVisibility\(app,view\)/);
+});
+
 test('manifest uses dark launch colors and prioritizes core fan shortcuts',()=>{
   const manifest=JSON.parse(read('manifest.webmanifest'));
   assert.equal(manifest.background_color,'#06101C');
@@ -96,7 +103,7 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v27/);
+  assert.match(sw,/titans-cc-brand-2026-v28/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.css/);
