@@ -43,18 +43,6 @@ function polishRoster(data){
   const disclosure=fanQs('.roster-fact-disclosure');(disclosure||head).insertAdjacentElement('afterend',strip);
 }
 
-function polishTransactions(data){
-  if(!data)return;
-  const map=new Map((data.transactions||[]).map(t=>[String(t.description||'').trim(),t]));
-  fanQsa('.transaction-row').forEach(row=>{
-    if(row.dataset.fanSource)return;
-    const p=fanQs('p',row),item=map.get((p?.textContent||'').trim());if(!p||!item?.sourceUrl)return;
-    row.dataset.fanSource='true';
-    const a=document.createElement('a');a.className='transaction-source-link';a.href=item.sourceUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Official source ↗';
-    p.insertAdjacentElement('afterend',a);
-  });
-}
-
 function polishGameDay(data,health){
   if(!data||fanQs('.game-day-readiness'))return;
   const head=fanQs('.page-head');if(!head)return;
@@ -101,18 +89,18 @@ function polishSources(data,health){
 }
 
 async function fanApply(){
+  if(fanRoute()==='transactions')return;
   const {data,health}=await fanLoad();if(!data)return;
   const route=fanRoute();
   if(route==='home')polishHome(data);
   if(route==='roster')polishRoster(data);
-  if(route==='transactions')polishTransactions(data);
   if(route==='live')polishGameDay(data,health);
   if(route==='stats')polishStats(data);
   if(route==='markets')polishMarkets(data,health);
   if(route==='sources')polishSources(data,health);
 }
 
-const fanApp=fanQs('#app');if(fanApp)new MutationObserver(()=>queueMicrotask(fanApply)).observe(fanApp,{childList:true,subtree:true});
+const fanApp=fanQs('#app');if(fanApp)new MutationObserver(()=>queueMicrotask(fanApply)).observe(fanApp,{childList:true});
 addEventListener('hashchange',()=>queueMicrotask(fanApply));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){fanData=null;fanHealth=null;queueMicrotask(fanApply)}});
 queueMicrotask(fanApply);
