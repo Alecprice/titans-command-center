@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  AWS Route 53 + ACM + CloudFront front door for Titans Command Center.
+  CloudFront terminates TLS for the public hostname and forwards requests to
+  the existing Cloudflare Worker origin without forwarding the viewer Host header.
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: titans-command-center.alecjprice.com
+    Description: Public hostname for Titans Command Center.
+  HostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Description: Route 53 hosted zone ID that contains alecjprice.com.
+  OriginDomainName:
+    Type: String
+    Default: titans-command-center.alecjordanprice.workers.dev
+    Description: Existing Cloudflare Worker hostname. Do not include https:// or a path.
+
+Resources:
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostedZoneId
+      Tags:
+        - Key: Project
+          Value: Titans Command Center
+
+  PublicResponseHeaders:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub '${AWS::StackName}-public-headers'
+        Comment: Removes workers.dev staging-only indexing header on the AWS public hostname.
+        RemoveHeadersConfig:
+          Items:
+            - Header: X-Robots-Tag
+        SecurityHeadersConfig:
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 31536000
+            IncludeSubdomains: false
+            Preload: false
+            Override: true
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub 'Titans Command Center - ${DomainName}'
+        Aliases:
+          - !Ref DomainName
+        IPV6Enabled: true
+        HttpVersion: http2and3
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: CloudflareWorkerOrigin
+            DomainName: !Ref OriginDomainName
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+              OriginKeepaliveTimeout: 5
+              OriginReadTimeout: 30
+        DefaultCacheBehavior:
+          TargetOriginId: CloudflareWorkerOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          AllowedMethods:
+            - DELETE
+            - GET
+            - HEAD
+            - OPTIONS
+            - PATCH
+            - POST
+            - PUT
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          # AWS managed policy: CachingDisabled.
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+          # AWS managed policy: AllViewerExceptHostHeader.
+          # This is critical: Cloudflare must receive its workers.dev hostname as Host.
+          OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac
+          ResponseHeadersPolicyId: !Ref PublicResponseHeaders
+        ViewerCertificate:
+          AcmCertificateArn: !Ref Certificate
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+
+  PublicIPv4Record:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt Distribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+        EvaluateTargetHealth: false
+
+  PublicIPv6Record:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: AAAA
+      AliasTarget:
+        DNSName: !GetAtt Distribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+        EvaluateTargetHealth: false
+
+Outputs:
+  PublicUrl:
+    Description: Public Titans Command Center URL.
+    Value: !Sub 'https://${DomainName}'
+  CloudFrontDomainName:
+    Description: CloudFront distribution hostname.
+    Value: !GetAtt Distribution.DomainName
+  CloudFrontDistributionId:
+    Description: CloudFront distribution ID.
+    Value: !Ref Distribution
+  CertificateArn:
+    Description: ACM certificate ARN used by CloudFront.
+    Value: !Ref Certificate
