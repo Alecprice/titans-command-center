@@ -14,6 +14,7 @@ test('app shell keeps core accessibility and PWA semantics',()=>{
   assert.match(html,/src="\/accessibility-runtime\.js"/);
   assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
   assert.match(html,/src="\/fact-polish\.js\?v=21"/);
+  assert.match(html,/src="\/ux-polish\.js\?v=22"/);
   assert.match(html,/src="\/source-activity\.js\?v=22"/);
   assert.match(html,/src="\/stats-hub\.js\?v=22"/);
   assert.match(html,/src="\/market-hub\.js\?v=22"/);
@@ -55,6 +56,7 @@ test('PWA shell excludes server-only modules and refreshes code assets from netw
 test('DOM polishers cannot recursively observe their own nested rewrites',()=>{
   const facts=read('fact-polish.js');
   const legacy=read('legacy-polish.js');
+  const ux=read('ux-polish.js');
   assert.match(facts,/factByePolished/);
   assert.match(facts,/factTbdPolished/);
   assert.match(facts,/observe\(root,\{childList:true\}\)/);
@@ -62,6 +64,8 @@ test('DOM polishers cannot recursively observe their own nested rewrites',()=>{
   assert.match(legacy,/calloutCopy&&calloutCopy\.textContent!==desired/);
   assert.match(legacy,/observe\(appRoot,\{childList:true\}\)/);
   assert.doesNotMatch(legacy,/observe\(appRoot,\{childList:true,subtree:true\}\)/);
+  assert.match(ux,/observe\(app,\{childList:true\}\)/);
+  assert.doesNotMatch(ux,/observe\(app,\{childList:true,subtree:true\}\)/);
 });
 
 test('async page modules cannot overwrite a later route',()=>{
