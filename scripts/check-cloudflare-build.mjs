@@ -6,7 +6,7 @@ const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(here,'..');
 const dist=path.join(root,'dist');
 const required=[
-  'index.html','app.js','stats-hub.js','market-hub.js','sw.js','manifest.webmanifest',
+  'index.html','app.js','stats-hub.js','market-hub.js','sw.js','manifest.webmanifest','build-meta.json',
   'src/core.mjs','src/data.mjs','src/odds.mjs','src/visual-audit.mjs','src/roster-audit-20260819.mjs',
   'assets/archive/current-shield-primary.webp','assets/brand/current-lockup.webp'
 ];
@@ -18,6 +18,8 @@ const html=await readFile(path.join(dist,'index.html'),'utf8');
 for(const asset of ['/app.js','/stats-hub.js','/market-hub.js','/assets/brand/current-lockup.webp']){
   if(!html.includes(asset))throw new Error(`index.html missing expected production asset ${asset}`);
 }
+const meta=JSON.parse(await readFile(path.join(dist,'build-meta.json'),'utf8'));
+if(meta.app!=='titans-command-center'||!meta.version||!meta.commit||!meta.builtAt)throw new Error('Cloudflare build metadata is incomplete');
 const sw=await readFile(path.join(dist,'sw.js'),'utf8');
 const shellBlock=sw.match(/const SHELL\s*=\s*\[([\s\S]*?)\];/);
 if(!shellBlock)throw new Error('Service worker SHELL precache list could not be parsed');
@@ -30,4 +32,4 @@ for(const publicPath of shellPaths){
 }
 const rootEntries=await readdir(dist);
 if(rootEntries.some(name=>name.endsWith('.mjs')))throw new Error('Server/root .mjs files must not be copied to static output');
-console.log(`Cloudflare static build verification passed (${shellPaths.length} PWA shell paths verified).`);
+console.log(`Cloudflare static build verification passed (${shellPaths.length} PWA shell paths verified, commit ${meta.commit}).`);
