@@ -23,6 +23,8 @@ test('app shell keeps core accessibility, mobile navigation and PWA semantics',(
   assert.match(html,/href="\/ux-polish\.css\?v=27"/);
   assert.match(html,/href="\/team-room\.css\?v=27"/);
   assert.match(html,/href="\/market-hub\.css\?v=27"/);
+  assert.match(html,/href="\/analytics-hub\.css\?v=30"/);
+  assert.match(html,/src="\/analytics-hub\.js\?v=30"/);
   assert.match(html,/src="\/accessibility-runtime\.js"/);
   assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
   assert.match(html,/src="\/fact-polish\.js\?v=21"/);
@@ -106,11 +108,13 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v29/);
+  assert.match(sw,/titans-cc-brand-2026-v30/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.css/);
   assert.match(sw,/\/transactions-hub\.js/);
+  assert.match(sw,/\/analytics-hub\.js/);
+  assert.match(sw,/\/analytics-hub\.css/);
   assert.match(sw,/const NETWORK_FIRST=/);
   assert.match(sw,/js\|mjs\|css\|webmanifest/);
   assert.doesNotMatch(sw,/\/src\/preseason-p1-20260813\.mjs/);
@@ -142,10 +146,15 @@ test('async page modules cannot overwrite a later route',()=>{
   const marketCss=read('market-hub.css');
   const sources=read('source-activity.js');
   const transactions=read('transactions-hub.js');
+  const analytics=read('analytics-hub.js');
   assert.match(stats,/statsRequestSerial/);
   assert.match(stats,/requestId!==statsRequestSerial\|\|shRoute\(\)!=='stats'/);
   assert.match(stats,/observe\(shRoot,\{childList:true\}\)/);
   assert.doesNotMatch(stats,/observe\(shRoot,\{childList:true,subtree:true\}\)/);
+  assert.match(analytics,/ahSerial/);
+  assert.match(analytics,/requestId!==ahSerial\|\|ahRoute\(\)!=='stats'/);
+  assert.match(analytics,/observe\(ahApp,\{childList:true\}\)/);
+  assert.doesNotMatch(analytics,/observe\(ahApp,\{childList:true,subtree:true\}\)/);
   assert.match(market,/marketRequestSerial/);
   assert.match(market,/requestId!==marketRequestSerial\|\|mhRoute\(\)!=='markets'/);
   assert.match(market,/const validDate=/);
