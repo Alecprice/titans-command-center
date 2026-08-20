@@ -3,6 +3,7 @@ import {databaseHealth,getBootstrapData,getSql} from '../src/db.mjs';
 import {getAuditedTeamContext} from '../src/team-context.mjs';
 import {preseasonStatsRoute} from '../src/preseason-api.mjs';
 import {marketDataRoute} from '../src/market-api.mjs';
+import {advancedAnalyticsRoute} from '../src/advanced-analytics-api.mjs';
 import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflverseStats,syncNwsNextHomeGame,syncFreeOdds,recordSyncRun} from '../src/ingest.mjs';
 
 const API_PREFIX='/api/';
@@ -72,23 +73,14 @@ function vercelResponse(){
 }
 
 function jsonResponse(payload,status=200,headers={}){
-  return new Response(JSON.stringify(payload),{
-    status,
-    headers:{'Content-Type':'application/json; charset=utf-8',...headers}
-  });
+  return new Response(JSON.stringify(payload),{status,headers:{'Content-Type':'application/json; charset=utf-8',...headers}});
 }
 
 async function nativeHealth(request,env){
   if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});
   const db=await databaseHealth(env);
   return jsonResponse({
-    ok:true,
-    status:db.ok?'healthy':'degraded',
-    app:'titans-command-center',
-    version:APP_VERSION,
-    contentAudit:'2026-08-19',
-    time:new Date().toISOString(),
-    database:db,
+    ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:'2026-08-19',time:new Date().toISOString(),database:db,
     providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),espnFallback:true,nws:true},
     fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}
   },200,{'Cache-Control':'no-store'});
@@ -121,9 +113,8 @@ async function runApi(request,env){
     if(route==='data')return await nativeData(request,env);
     if(route==='preseason-stats')return await adapterRoute(request,route,preseasonStatsRoute,env);
     if(route==='market-data')return await adapterRoute(request,route,marketDataRoute,env);
+    if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
 
-    // Legacy routes still share the Vercel-compatible gateway. Mirror bindings for
-    // those routes until the remaining handlers are migrated to explicit env args.
     applyRuntimeEnv(env);
     const req=vercelRequest(request,route);
     const res=vercelResponse();
