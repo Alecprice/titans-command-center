@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + browser navigation regression failure**
-- Source commit: `d72dbd56d74e6e2a7bbf12dadda9726be2ba7713`
+- Source commit: `2c671569b36099135d8758a10ed628f339dfd8ff`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -9,7 +9,7 @@
 - Production regression: success
 - Browser navigation regression: failure
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T17:55:41Z
+- Recorded: 2026-08-20T17:58:10Z
 
 ## Production regression
 
@@ -46,18 +46,18 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "d72dbd56d74e6e2a7bbf12dadda9726be2ba7713",
-    "builtAt": "2026-08-20T17:54:38.833Z"
+    "commit": "2c671569b36099135d8758a10ed628f339dfd8ff",
+    "builtAt": "2026-08-20T17:57:10.086Z"
   },
   "deploymentPropagationAttempts": 9,
   "responseMs": {
-    "root": 52,
-    "health": 383,
-    "data": 641,
-    "stats": 319,
-    "market": 1291
+    "root": 23,
+    "health": 315,
+    "data": 683,
+    "stats": 485,
+    "market": 105
   },
-  "testedAt": "2026-08-20T17:55:20.318Z"
+  "testedAt": "2026-08-20T17:57:49.227Z"
 }```
 
 ## Browser navigation regression
@@ -79,14 +79,14 @@
     "title": "Transactions",
     "transactionTools": false
   },
-  "durationSeconds": 17.05,
-  "testedAt": "2026-08-20T17:55:41Z",
+  "durationSeconds": 17.58,
+  "testedAt": "2026-08-20T17:58:10Z",
   "browserWarnings": [
     {
       "level": "WARNING",
       "message": "https://titans-command-center.alecjordanprice.workers.dev/#home - Error while trying to use the following icon from the Manifest: https://titans-command-center.alecjordanprice.workers.dev/assets/icon-192.png (Download error or resource isn't a valid image)",
       "source": "other",
-      "timestamp": 1787248533158
+      "timestamp": 1787248681935
     }
   ]
 }```
