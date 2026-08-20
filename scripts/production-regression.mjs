@@ -46,6 +46,29 @@ function expectedContentType(path){
   return null;
 }
 
+async function waitForDeployment(){
+  if(!expectedSha){
+    const response=await request('/build-meta.json',{json:true,retries:3});
+    assert(response.status===200,'Build metadata is unavailable');
+    return {meta:response.body,propagationAttempts:1};
+  }
+  let lastCommit=null;
+  const maxAttempts=15;
+  for(let attempt=1;attempt<=maxAttempts;attempt++){
+    try{
+      const response=await request(`/build-meta.json?expected=${encodeURIComponent(expectedSha)}&attempt=${attempt}`,{json:true,retries:1});
+      if(response.status===200){
+        lastCommit=response.body?.commit||null;
+        if(lastCommit===expectedSha)return {meta:response.body,propagationAttempts:attempt};
+      }
+    }catch{}
+    if(attempt<maxAttempts)await wait(2000);
+  }
+  throw new Error(`Expected deploy ${expectedSha} did not propagate; last observed commit ${lastCommit||'unknown'}`);
+}
+
+const deployment=await waitForDeployment();
+const buildMeta=deployment.meta;
 const root=await request('/',{text:true});
 const manifest=await request('/manifest.webmanifest',{json:true});
 const sw=await request('/sw.js',{text:true});
@@ -123,15 +146,7 @@ assert(/Neon/i.test(stats.body?.rosterSource||''),`Stats Lab is not Neon-backed:
 assert(Array.isArray(stats.body?.completedGames)&&stats.body.completedGames.length>=1,'No completed preseason gamebook is available');
 assert(market.status===200&&market.body?.ok===true,`Market API failed with ${market.status}`);
 
-let buildMeta=null;
-try{
-  const meta=await request('/build-meta.json',{json:true,retries:2});
-  if(meta.status===200)buildMeta=meta.body;
-}catch{}
-if(expectedSha){
-  assert(buildMeta?.commit,`Build metadata is missing while expecting deploy ${expectedSha}`);
-  assert(buildMeta.commit===expectedSha,`Deployed commit ${buildMeta.commit} does not match expected ${expectedSha}`);
-}
+assert(buildMeta?.commit===expectedSha||!expectedSha,`Deployed commit ${buildMeta?.commit||'unknown'} does not match expected ${expectedSha}`);
 
 const result={
   ok:true,
@@ -156,6 +171,7 @@ const result={
   marketRows:Array.isArray(market.body?.odds)?market.body.odds.length:0,
   marketMode:market.body?.sourceMode||null,
   buildMeta,
+  deploymentPropagationAttempts:deployment.propagationAttempts,
   responseMs:{root:root.durationMs,health:health.durationMs,data:data.durationMs,stats:stats.durationMs,market:market.durationMs},
   testedAt:new Date().toISOString()
 };
