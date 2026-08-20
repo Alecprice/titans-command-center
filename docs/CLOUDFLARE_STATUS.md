@@ -1,37 +1,23 @@
 # Cloudflare deployment status
 
-- Status: **deployed + smoke-tested + Neon healthy**
-- Source commit: `cb80d4d0a8117d6d779fbb2b6016ba7bb0414612`
+- Status: **deployed + production regression failure**
+- Source commit: `536caf069f56bb6c6d7498d543fd744fa7feb8b2`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
 - Deploy outcome: success
-- Smoke outcome: success
+- Production regression: failure
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T16:44:21Z
+- Recorded: 2026-08-20T16:52:30Z
 
-## Smoke test
+## Production regression
 
 ```json
 {
-  "rootStatus": 200,
-  "shieldStatus": 200,
-  "healthStatus": 200,
-  "appStatus": "healthy",
-  "databaseOk": true,
-  "databaseConfigured": true,
-  "dataStatus": 200,
-  "dataOk": true,
-  "dataRosterCount": 95,
-  "statsStatus": 200,
-  "rosterCount": 95,
-  "statsRosterSource": "Neon · latest audited Titans roster snapshot",
-  "completedPreseasonGames": 1,
-  "marketStatus": 200,
-  "marketOk": true,
-  "marketRows": 6,
-  "marketMode": "published-reference",
-  "testedAt": "2026-08-20T16:44:21.640Z"
+  "ok": false,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "error": "Deployed commit d1fb85fbd293150120a781682aaa88a20d28d38e does not match expected 536caf069f56bb6c6d7498d543fd744fa7feb8b2",
+  "testedAt": "2026-08-20T16:52:30.283Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
