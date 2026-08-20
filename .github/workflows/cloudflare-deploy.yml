@@ -17,7 +17,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
@@ -69,6 +69,17 @@ jobs:
           EXPECTED_SHA: ${{ github.sha }}
         run: npm run audit:production
 
+      - name: Install Selenium for browser stress test
+        if: steps.smoke.outcome == 'success'
+        run: python -m pip install --disable-pip-version-check 'selenium>=4.25,<5'
+
+      - name: Run browser navigation stress test
+        id: browser
+        if: steps.smoke.outcome == 'success'
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: python scripts/browser-navigation-smoke.py
+
       - name: Record Cloudflare deployment result
         if: always()
         shell: bash
@@ -78,14 +89,16 @@ jobs:
           DATABASE_READY: ${{ steps.creds.outputs.database }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          BROWSER_OUTCOME: ${{ steps.browser.outcome }}
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           if [[ "$QUALITY_OUTCOME" != "success" ]]; then STATUS='quality gate failed before Cloudflare deploy';
           elif [[ "$CLOUDFLARE_READY" != "true" ]]; then STATUS='Cloudflare credentials unavailable to workflow';
           elif [[ "$DATABASE_READY" != "true" ]]; then STATUS='DATABASE_URL GitHub secret missing';
           elif [[ "$DEPLOY_OUTCOME" != "success" ]]; then STATUS='Cloudflare deploy failed';
-          elif [[ "$SMOKE_OUTCOME" == "success" ]]; then STATUS='deployed + full production regression passed';
-          else STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}"; fi
+          elif [[ "$SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}";
+          elif [[ "$BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser navigation regression passed';
+          else STATUS="deployed + browser navigation regression ${BROWSER_OUTCOME:-not-run}"; fi
           {
             echo '# Cloudflare deployment status'
             echo
@@ -96,9 +109,11 @@ jobs:
             echo "- DATABASE_URL GitHub secret supplied: ${DATABASE_READY:-unknown}"
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
             echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"
+            echo "- Browser navigation regression: ${BROWSER_OUTCOME:-not-run}"
             [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: existing deployment remains unchanged'
             echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Production regression'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
+            if [[ -f /tmp/browser-nav-smoke.json ]]; then echo; echo '## Browser navigation regression'; echo; echo '```json'; cat /tmp/browser-nav-smoke.json; echo '```'; fi
             echo
             echo 'Generated automatically by `.github/workflows/cloudflare-deploy.yml`.'
           } > docs/CLOUDFLARE_STATUS.md
