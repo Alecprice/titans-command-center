@@ -22,9 +22,14 @@ test('AWS custom domain stack keeps Route 53 and CloudFront in front of the exis
   assert.doesNotMatch(template,/AKIA[0-9A-Z]{16}/);
 });
 
-test('AWS deployment helper auto-resolves the hosted zone and validates the public hostname',()=>{
+test('AWS deployment helper fails closed before accidental pay-as-you-go CloudFront creation',()=>{
   const script=read('scripts/deploy-aws-custom-domain.sh');
   assert.match(script,/REGION="us-east-1"/);
+  assert.match(script,/ALLOW_PAY_AS_YOU_GO_CLOUDFRONT/);
+  assert.match(script,/I_UNDERSTAND_CHARGES/);
+  assert.match(script,/COST SAFETY STOP/);
+  assert.match(script,/No AWS resources were created by this invocation/);
+  assert.match(script,/FLAT-RATE FREE PLAN/);
   assert.match(script,/route53 list-hosted-zones-by-name/);
   assert.match(script,/cloudformation validate-template/);
   assert.match(script,/cloudformation deploy/);
