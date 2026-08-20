@@ -1,15 +1,15 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser navigation regression passed**
-- Source commit: `ed6987f87f6902c3f6e4220580086910806190f8`
+- Status: **deployed + browser navigation regression failure**
+- Source commit: `734f2a71462b13d4474acffd221152142b627f43`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
 - Deploy outcome: success
 - Production regression: success
-- Browser navigation regression: success
+- Browser navigation regression: failure
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T20:42:47Z
+- Recorded: 2026-08-20T21:03:44Z
 
 ## Production regression
 
@@ -28,7 +28,7 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v26",
+  "serviceWorkerCache": "titans-cc-brand-2026-v27",
   "precachePaths": 42,
   "pwaIcons": {
     "icon192": {
@@ -61,69 +61,48 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "ed6987f87f6902c3f6e4220580086910806190f8",
-    "builtAt": "2026-08-20T20:41:37.278Z"
+    "commit": "734f2a71462b13d4474acffd221152142b627f43",
+    "builtAt": "2026-08-20T21:02:56.305Z"
   },
   "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 23,
-    "health": 141,
-    "data": 117,
-    "stats": 129,
-    "market": 1223
+    "root": 18,
+    "health": 192,
+    "data": 304,
+    "stats": 560,
+    "market": 287
   },
-  "testedAt": "2026-08-20T20:42:02.171Z"
+  "testedAt": "2026-08-20T21:03:19.016Z"
 }```
 
 ## Browser navigation regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktopRounds": 3,
-  "transactionChecks": 12,
-  "mobileChecks": 8,
-  "smallPhoneChecks": 2,
-  "searchQuickJump": true,
-  "mobileDrawerInert": true,
-  "mobileTargets": [
-    {
-      "height": 48,
-      "label": "\u2302Home",
-      "width": 59.15625
-    },
-    {
-      "height": 48,
-      "label": "\u25cfGame",
-      "width": 59.171875
-    },
-    {
-      "height": 48,
-      "label": "\u25ceRoster",
-      "width": 59.171875
-    },
-    {
-      "height": 48,
-      "label": "\u21c4Moves",
-      "width": 59.15625
-    },
-    {
-      "height": 48,
-      "label": "\u2197Stats",
-      "width": 59.171875
-    },
-    {
-      "height": 48,
-      "label": "\u2630More",
-      "width": 59.171875
-    }
-  ],
-  "maxLongTaskMs": 79,
-  "longTasksOver250ms": 0,
-  "browserWarnings": [],
-  "durationSeconds": 35.64,
-  "testedAt": "2026-08-20T20:42:46Z"
+  "stage": "mobile:depth-chart",
+  "error": "TimeoutException: Message: \n",
+  "state": {
+    "appChildren": 10,
+    "appText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nOFFICIAL TEAM SNAPSHOT\nUNOFFICIAL depth chart \u00b7 Aug 9, 2026\n\nTies are preserved exactly instead of ",
+    "hash": "#roster",
+    "href": "https://titans-command-center.alecjordanprice.workers.dev/#roster",
+    "marketLoading": null,
+    "moreExpanded": "false",
+    "rows": 0,
+    "scrollWidth": 375,
+    "sidebarInert": true,
+    "sidebarOpen": false,
+    "statsLoading": null,
+    "teamRoomView": "depth",
+    "title": "Roster",
+    "transactionTools": false,
+    "viewport": 390
+  },
+  "durationSeconds": 19.21,
+  "testedAt": "2026-08-20T21:03:44Z",
+  "browserWarnings": []
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
