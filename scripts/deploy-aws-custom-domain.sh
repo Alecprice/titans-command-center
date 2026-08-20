@@ -7,11 +7,39 @@ ORIGIN="${ORIGIN:-titans-command-center.alecjordanprice.workers.dev}"
 STACK="${STACK:-titans-command-center-domain}"
 REGION="us-east-1"
 TEMPLATE="infra/aws/titans-command-center-domain.yaml"
+PAYG_OVERRIDE="${ALLOW_PAY_AS_YOU_GO_CLOUDFRONT:-}"
 
 command -v aws >/dev/null 2>&1 || { echo 'ERROR: AWS CLI is not installed.' >&2; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo 'ERROR: curl is required.' >&2; exit 1; }
 [[ -f "$TEMPLATE" ]] || { echo "ERROR: run this from the repository root; missing $TEMPLATE" >&2; exit 1; }
 
+# COST SAFETY: This CloudFormation template creates a standard pay-as-you-go
+# CloudFront distribution. AWS has a separate $0/month CloudFront flat-rate
+# Free plan with no overage charges, but subscription to that plan is managed
+# separately from this template. Fail closed so a normal invocation cannot
+# accidentally create a metered distribution.
+if [[ "$PAYG_OVERRIDE" != "I_UNDERSTAND_CHARGES" ]]; then
+  cat >&2 <<'EOF'
+COST SAFETY STOP
+
+This helper is intentionally blocked because the CloudFormation stack creates
+PAY-AS-YOU-GO CloudFront. That pricing mode can incur charges if usage exceeds
+AWS free-tier allowances.
+
+For this project, use the CloudFront $0/month FLAT-RATE FREE PLAN instead and
+verify the distribution is subscribed to that plan before sending production
+traffic to it.
+
+No AWS resources were created by this invocation.
+
+Only if you intentionally accept pay-as-you-go billing may you override this
+safety with:
+  ALLOW_PAY_AS_YOU_GO_CLOUDFRONT=I_UNDERSTAND_CHARGES ./scripts/deploy-aws-custom-domain.sh
+EOF
+  exit 64
+fi
+
+printf 'WARNING: explicit pay-as-you-go override accepted.\n'
 printf 'Checking AWS identity...\n'
 aws sts get-caller-identity --output table
 
