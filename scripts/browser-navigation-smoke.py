@@ -50,6 +50,10 @@ def browser_state(driver):
     try:
         return driver.execute_script("""
           const app=document.querySelector('#app');
+          const grid=document.querySelector('#rg');
+          const rosterButton=document.querySelector('[data-team-room-view="roster"]');
+          const depthButton=document.querySelector('[data-team-room-view="depth"]');
+          const staffButton=document.querySelector('[data-team-room-view="staff"]');
           return {
             href:location.href,
             hash:location.hash,
@@ -59,6 +63,18 @@ def browser_state(driver):
             marketLoading:app?.dataset?.marketHub||null,
             statsLoading:app?.dataset?.preseasonHub||null,
             teamRoomView:app?.dataset?.teamRoomView||null,
+            teamRoomSwitcher:Boolean(document.querySelector('.team-room-switcher')),
+            rosterGridExists:Boolean(grid),
+            rosterGridHidden:grid?.hidden??null,
+            rosterGridDisplay:grid?getComputedStyle(grid).display:null,
+            rosterGridChildren:grid?.children?.length??null,
+            rosterCardCount:document.querySelectorAll('#rg .player-card').length,
+            rosterGridPreview:(grid?.innerText||'').slice(0,240),
+            rosterPressed:rosterButton?.getAttribute('aria-pressed')||null,
+            depthPressed:depthButton?.getAttribute('aria-pressed')||null,
+            staffPressed:staffButton?.getAttribute('aria-pressed')||null,
+            rosterSearchValue:document.querySelector('#rs')?.value||null,
+            rosterUnitValue:document.querySelector('#ru')?.value||null,
             appChildren:app?.children?.length||0,
             appText:(app?.innerText||'').slice(0,500),
             viewport:window.innerWidth,
@@ -191,19 +207,26 @@ try:
     wait_for(driver, "location.hash === '#transactions'")
     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
 
-    stage = 'mobile:roster-team-room'
+    stage = 'mobile:roster-route'
     driver.execute_script("document.querySelector('.mobile-nav a[href=\"#roster\"]')?.click()")
     wait_for(driver, "location.hash === '#roster'")
-    wait_for(driver, "document.querySelector('.team-room-switcher') && document.querySelectorAll('#rg .player-card').length > 0", timeout=10)
+    stage = 'mobile:roster-switcher'
+    wait_for(driver, "document.querySelector('.team-room-switcher')", timeout=10)
+    stage = 'mobile:roster-cards'
+    wait_for(driver, "document.querySelectorAll('#rg .player-card').length > 0", timeout=10)
+    stage = 'mobile:roster-pressed'
     wait_for(driver, "document.querySelector('[data-team-room-view=\"roster\"]')?.getAttribute('aria-pressed') === 'true'")
     assert_no_horizontal_overflow(driver, 'mobile Roster')
 
-    stage = 'mobile:depth-chart'
+    stage = 'mobile:depth-route-state'
     driver.execute_script("document.querySelector('[data-team-room-view=\"depth\"]')?.click()")
     wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'depth'")
+    stage = 'mobile:depth-pressed'
     wait_for(driver, "document.querySelector('[data-team-room-view=\"depth\"]')?.getAttribute('aria-pressed') === 'true'")
+    stage = 'mobile:depth-panel'
     wait_for(driver, "document.querySelector('.team-room-panel[data-panel=\"depth\"]')?.hidden === false")
-    wait_for(driver, "getComputedStyle(document.querySelector('#rg')).display === 'none'")
+    stage = 'mobile:depth-grid-hidden'
+    wait_for(driver, "document.querySelector('#rg')?.hidden === true && getComputedStyle(document.querySelector('#rg')).display === 'none'")
     assert_no_horizontal_overflow(driver, 'mobile Depth Chart')
 
     stage = 'mobile:staff-arrow-key'
@@ -217,7 +240,7 @@ try:
     stage = 'mobile:return-roster'
     driver.execute_script("document.querySelector('[data-team-room-view=\"roster\"]')?.click()")
     wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'roster'")
-    wait_for(driver, "getComputedStyle(document.querySelector('#rg')).display !== 'none' && document.querySelectorAll('#rg .player-card').length > 0")
+    wait_for(driver, "document.querySelector('#rg')?.hidden === false && getComputedStyle(document.querySelector('#rg')).display !== 'none' && document.querySelectorAll('#rg .player-card').length > 0")
     assert_no_horizontal_overflow(driver, 'mobile Roster restored')
 
     stage = 'small-phone:320'
