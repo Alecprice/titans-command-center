@@ -4,8 +4,13 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('AWS custom domain stack keeps Route 53 and CloudFront in front of the existing Worker',()=>{
+test('pay-as-you-go AWS custom domain template is fail-closed and keeps safe origin settings',()=>{
   const template=read('infra/aws/titans-command-center-domain.yaml');
+  assert.match(template,/PAY-AS-YOU-GO FALLBACK ONLY/);
+  assert.match(template,/PayAsYouGoAcknowledgement/);
+  assert.match(template,/Default: BLOCKED/);
+  assert.match(template,/I_UNDERSTAND_CHARGES/);
+  assert.match(template,/RequireExplicitMeteredBillingAcknowledgement/);
   assert.match(template,/titans-command-center\.alecjprice\.com/);
   assert.match(template,/titans-command-center\.alecjordanprice\.workers\.dev/);
   assert.match(template,/AWS::CertificateManager::Certificate/);
@@ -22,18 +27,37 @@ test('AWS custom domain stack keeps Route 53 and CloudFront in front of the exis
   assert.doesNotMatch(template,/AKIA[0-9A-Z]{16}/);
 });
 
-test('AWS deployment helper fails closed before accidental pay-as-you-go CloudFront creation',()=>{
+test('metered deployment helper refuses normal execution and requires explicit charge acknowledgement',()=>{
   const script=read('scripts/deploy-aws-custom-domain.sh');
   assert.match(script,/REGION="us-east-1"/);
+  assert.match(script,/COST SAFETY STOP/);
   assert.match(script,/ALLOW_PAY_AS_YOU_GO_CLOUDFRONT/);
   assert.match(script,/I_UNDERSTAND_CHARGES/);
-  assert.match(script,/COST SAFETY STOP/);
-  assert.match(script,/No AWS resources were created by this invocation/);
-  assert.match(script,/FLAT-RATE FREE PLAN/);
+  assert.match(script,/PayAsYouGoAcknowledgement=I_UNDERSTAND_CHARGES/);
   assert.match(script,/route53 list-hosted-zones-by-name/);
   assert.match(script,/cloudformation validate-template/);
   assert.match(script,/cloudformation deploy/);
   assert.match(script,/PRODUCTION_URL="https:\/\/\$\{DOMAIN\}" node scripts\/production-regression\.mjs/);
   assert.match(script,/x-robots-tag:.*noindex/i);
+  assert.doesNotMatch(script,/aws_secret_access_key/i);
+});
+
+test('AWS free-plan preflight is read-only and checks account, DNS, CloudFront and ACM state',()=>{
+  const script=read('scripts/aws-free-plan-preflight.sh');
+  assert.match(script,/AWS COST-SAFE PREFLIGHT/);
+  assert.match(script,/READ ONLY/);
+  assert.match(script,/sts get-caller-identity/);
+  assert.match(script,/route53 list-hosted-zones-by-name/);
+  assert.match(script,/route53 get-hosted-zone/);
+  assert.match(script,/route53 list-resource-record-sets/);
+  assert.match(script,/cloudfront list-distributions/);
+  assert.match(script,/acm list-certificates/);
+  assert.match(script,/cloudformation describe-stacks/);
+  assert.match(script,/CloudFront Free flat-rate plan \(\$0\/month\)/);
+  assert.match(script,/If AWS says the account is ineligible.*STOP/s);
+  assert.doesNotMatch(script,/cloudformation deploy/);
+  assert.doesNotMatch(script,/route53 change-resource-record-sets/);
+  assert.doesNotMatch(script,/request-certificate/);
+  assert.doesNotMatch(script,/create-distribution/);
   assert.doesNotMatch(script,/aws_secret_access_key/i);
 });
