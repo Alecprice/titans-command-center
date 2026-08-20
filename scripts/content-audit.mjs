@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { team, games, roster, feed, sources } from '../src/data.mjs';
 import { legacyTimeline, visualArchive, knownVisualsNotPictured, visualSources } from '../src/visual-audit.mjs';
 
@@ -27,6 +28,11 @@ check('visual labels are source-audited and active art avoids legacy aliases',()
   assert.equal(visualArchive.some(item=>/Sword alternate|Vintage roundel/i.test(item.title)),false);
   const sword=knownVisualsNotPictured.find(item=>item.id==='titans-sword-alternate');
   assert.match(sword?.copy||'',/real Titans secondary\/alternate mark/i);
+});
+check('base app no longer requests retired duplicate legacy assets',()=>{
+  const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');
+  assert.doesNotMatch(app,/\/assets\/legacy\//);
+  assert.doesNotMatch(app,/legacy-(?:banner|derrick|fireball|lightblue-wordmark|logo-evolution|sword|vintage-roundel|wordmark-fireball)\.webp/);
 });
 if(errors.length){console.error(`\nContent audit failed (${errors.length}):\n- ${errors.join('\n- ')}`);process.exit(1)}
 console.log(`\nContent audit passed: ${games.length} schedule rows, ${roster.length} audited fallback players, ${feed.length} sourced fallback feed items, ${visualArchive.length} audited visual assets.`);
