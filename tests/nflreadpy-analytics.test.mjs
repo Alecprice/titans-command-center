@@ -82,7 +82,7 @@ test('Cloudflare and browser shell route advanced analytics without exposing ser
   assert.match(worker,/route==='advanced-analytics'/);
   assert.match(html,/href="\/analytics-hub\.css\?v=30"/);
   assert.match(html,/src="\/analytics-hub\.js\?v=30"/);
-  assert.match(sw,/titans-cc-brand-2026-v30/);
+  assert.match(sw,/titans-cc-brand-2026-v31/);
   assert.match(sw,/\/analytics-hub\.css/);
   assert.match(sw,/\/analytics-hub\.js/);
 });
