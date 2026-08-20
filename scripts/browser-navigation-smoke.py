@@ -25,6 +25,26 @@ def set_route(driver, route, settle=0.08):
     time.sleep(settle)
 
 
+def browser_state(driver):
+    try:
+        return driver.execute_script("""
+          const app=document.querySelector('#app');
+          return {
+            href:location.href,
+            hash:location.hash,
+            title:document.querySelector('.page-head h1')?.textContent?.trim()||document.title,
+            rows:document.querySelectorAll('.transaction-row').length,
+            transactionTools:Boolean(document.querySelector('.transaction-tools')),
+            marketLoading:app?.dataset?.marketHub||null,
+            statsLoading:app?.dataset?.preseasonHub||null,
+            appChildren:app?.children?.length||0,
+            appText:(app?.innerText||'').slice(0,500)
+          };
+        """)
+    except Exception as exc:
+        return {'stateReadError': f'{type(exc).__name__}: {exc}'}
+
+
 options = webdriver.ChromeOptions()
 options.add_argument('--headless=new')
 options.add_argument('--no-sandbox')
@@ -35,15 +55,20 @@ options.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
 
 driver = None
 started = time.time()
+stage = 'starting'
 try:
+    stage = 'launch-chrome'
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(20)
     driver.set_script_timeout(4)
-    driver.get(f'{BASE}/#home')
 
+    stage = 'load-home'
+    driver.get(f'{BASE}/#home')
+    stage = 'wait-home-ready'
     wait_for(driver, "document.readyState === 'complete' && document.querySelector('#app')")
     wait_for(driver, "document.querySelector('.page-head h1') || document.querySelector('.fan-hero')", timeout=10)
 
+    stage = 'install-longtask-observer'
     driver.execute_script("""
       window.__titansLongTasks = [];
       if ('PerformanceObserver' in window) {
@@ -61,31 +86,37 @@ try:
     transaction_checks = 0
     rounds = 3
 
-    for _ in range(rounds):
+    for round_index in range(1, rounds + 1):
         for route in sequence:
+            stage = f'round-{round_index}:navigate:{route}'
             set_route(driver, route)
             if route == '#transactions':
+                stage = f'round-{round_index}:transactions:wait-hash'
                 wait_for(driver, "location.hash === '#transactions'")
+                stage = f'round-{round_index}:transactions:wait-heading'
                 wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Transactions'")
+                stage = f'round-{round_index}:transactions:wait-content'
                 wait_for(driver, "document.querySelector('.transaction-list') || document.querySelector('.panel-body .empty')")
-                # Confirm the main thread is still answering script execution after route polish has run.
-                heartbeat = driver.execute_script("return {hash: location.hash, title: document.querySelector('.page-head h1')?.textContent.trim(), now: performance.now(), rows: document.querySelectorAll('.transaction-row').length}")
+                stage = f'round-{round_index}:transactions:heartbeat'
+                heartbeat = browser_state(driver)
                 if heartbeat.get('hash') != '#transactions' or heartbeat.get('title') != 'Transactions':
                     raise RuntimeError(f'Transactions route was overwritten: {heartbeat}')
                 if heartbeat.get('rows', 0) < 1:
-                    # Hydration may still be finishing on a cold edge; give it one bounded chance.
+                    stage = f'round-{round_index}:transactions:wait-hydration'
                     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=8)
                 transaction_checks += 1
             else:
-                # Intentionally leave async-heavy routes quickly to reproduce stale-render races.
+                stage = f'round-{round_index}:leave-fast:{route}'
                 time.sleep(0.12)
 
+    stage = 'read-longtasks'
     long_tasks = driver.execute_script('return window.__titansLongTasks || []') or []
     max_long_task = max(long_tasks) if long_tasks else 0
     severe_long_tasks = [x for x in long_tasks if x >= 1500]
     if severe_long_tasks:
         raise RuntimeError(f'Severe browser long task detected: max={max_long_task:.1f}ms')
 
+    stage = 'read-console'
     console = []
     try:
         console = [entry for entry in driver.get_log('browser') if entry.get('level') in ('SEVERE', 'WARNING')]
@@ -105,14 +136,21 @@ try:
     }
     write_report(result)
     print(json.dumps(result, indent=2))
-except (TimeoutException, WebDriverException, RuntimeError, Exception) as exc:
+except Exception as exc:
     result = {
         'ok': False,
         'base': BASE,
+        'stage': stage,
         'error': f'{type(exc).__name__}: {exc}',
+        'state': browser_state(driver) if driver is not None else None,
         'durationSeconds': round(time.time() - started, 2),
         'testedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
     }
+    try:
+        if driver is not None:
+            result['browserWarnings'] = [entry for entry in driver.get_log('browser') if entry.get('level') in ('SEVERE', 'WARNING')][:20]
+    except Exception:
+        pass
     write_report(result)
     print(json.dumps(result, indent=2), file=sys.stderr)
     sys.exit(1)
