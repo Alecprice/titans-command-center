@@ -66,6 +66,18 @@ assert(/rel="manifest" href="\/manifest\.webmanifest"/.test(root.body),'Manifest
 assert(/src="\/app\.js"/.test(root.body),'Main app module missing from app shell');
 assert(/src="\/accessibility-runtime\.js"/.test(root.body),'Accessibility runtime missing from app shell');
 assert(!/postgres(?:ql)?:\/\//i.test(root.body),'Database connection string leaked into HTML');
+const rootHeaders={
+  contentTypeOptions:(root.headers.get('x-content-type-options')||'').toLowerCase(),
+  frameOptions:(root.headers.get('x-frame-options')||'').toUpperCase(),
+  referrerPolicy:(root.headers.get('referrer-policy')||'').toLowerCase(),
+  contentSecurityPolicy:root.headers.get('content-security-policy')||'',
+  robots:(root.headers.get('x-robots-tag')||'').toLowerCase()
+};
+assert(rootHeaders.contentTypeOptions==='nosniff','Static assets are missing X-Content-Type-Options: nosniff');
+assert(rootHeaders.frameOptions==='DENY','Static assets are missing X-Frame-Options: DENY');
+assert(rootHeaders.referrerPolicy==='strict-origin-when-cross-origin','Static assets have an unexpected Referrer-Policy');
+assert(rootHeaders.contentSecurityPolicy.includes("frame-ancestors 'none'"),'Static assets are missing CSP frame-ancestors protection');
+if(new URL(base).hostname.endsWith('.workers.dev'))assert(rootHeaders.robots.includes('noindex'),'workers.dev staging hostname is not marked noindex');
 
 assert(manifest.status===200,'Web manifest is unavailable');
 assert(manifest.body?.name==='Titans Command Center','Unexpected PWA name');
@@ -125,6 +137,7 @@ const result={
   ok:true,
   base,
   rootStatus:root.status,
+  securityHeaders:{...rootHeaders,csp:Boolean(rootHeaders.contentSecurityPolicy)},
   manifestStatus:manifest.status,
   serviceWorkerStatus:sw.status,
   serviceWorkerCache:sw.body.match(/const CACHE\s*=\s*['"]([^'"]+)/)?.[1]||null,
