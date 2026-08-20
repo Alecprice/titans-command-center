@@ -14,12 +14,15 @@ test('Cloudflare Worker serves static assets and runs only API paths through com
   assert.match(config,/"15 10 \* \* \*"/);
 });
 
-test('Cloudflare adapter reuses the existing single API gateway',()=>{
+test('Cloudflare adapter reuses the existing single API gateway and trusted scheduler',()=>{
   const worker=read('cloudflare/worker.mjs');
   assert.match(worker,/import apiHandler from '\.\.\/api\/index\.js'/);
   assert.match(worker,/pathname\.startsWith\(API_PREFIX\)/);
   assert.match(worker,/env\.ASSETS\.fetch\(request\)/);
-  assert.match(worker,/CRON_SECRET\|\|env\.INGEST_SECRET/);
+  assert.match(worker,/executeScheduledJob/);
+  assert.match(worker,/syncTitansOfficialAudit/);
+  assert.match(worker,/syncEspn/);
+  assert.doesNotMatch(worker,/CRON_SECRET\|\|env\.INGEST_SECRET/);
 });
 
 test('Cloudflare build publishes only browser-facing assets',()=>{
