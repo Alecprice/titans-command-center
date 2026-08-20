@@ -1,0 +1,46 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+
+test('app shell keeps core accessibility and PWA semantics',()=>{
+  const html=read('index.html');
+  assert.match(html,/class="skip-link" href="#app"/);
+  assert.match(html,/id="menu-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/);
+  assert.match(html,/id="primary-nav" aria-label="Primary navigation"/);
+  assert.match(html,/id="app"[^>]*aria-live="polite"[^>]*tabindex="-1"/);
+  assert.match(html,/rel="preload" as="image" href="\/assets\/brand\/current-lockup\.webp"/);
+  assert.match(html,/src="\/accessibility-runtime\.js"/);
+});
+
+test('responsive layer preserves keyboard focus, safe areas and reduced motion',()=>{
+  const css=`${read('ux-polish.css')}\n${read('audit-responsive.css')}`;
+  assert.match(css,/:focus-visible/);
+  assert.match(css,/prefers-reduced-motion:reduce/);
+  assert.match(css,/env\(safe-area-inset-bottom\)/);
+  assert.match(css,/\.mobile-nav a\{min-height:48px\}/);
+});
+
+test('Cloudflare deployment requires Neon and exposes only API paths to Worker compute',()=>{
+  const config=read('wrangler.jsonc');
+  assert.match(config,/"required"\s*:\s*\["DATABASE_URL"\]/);
+  assert.match(config,/"run_worker_first"\s*:\s*\["\/api\/\*"\]/);
+  assert.match(config,/"observability"\s*:\s*\{\s*"enabled"\s*:\s*true/);
+});
+
+test('PWA shell excludes server-only modules and includes accessibility runtime',()=>{
+  const sw=read('sw.js');
+  assert.match(sw,/titans-cc-brand-2026-v20/);
+  assert.match(sw,/\/accessibility-runtime\.js/);
+  assert.doesNotMatch(sw,/\/src\/preseason-p1-20260813\.mjs/);
+});
+
+test('production regression audit is wired as a package command',()=>{
+  const pkg=JSON.parse(read('package.json'));
+  assert.equal(pkg.scripts['audit:production'],'node scripts/production-regression.mjs');
+  const script=read('scripts/production-regression.mjs');
+  assert.match(script,/Expected 95 Neon roster players/);
+  assert.match(script,/PWA precache paths failed/);
+  assert.match(script,/database connection string leaked/i);
+});
