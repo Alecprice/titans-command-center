@@ -77,9 +77,32 @@ test('analytics workflow is secret-safe and scheduled',()=>{
 });
 
 test('Cloudflare and browser shell route advanced analytics without exposing server code',()=>{
-  const worker=read('cloudflare/worker.mjs'),html=read('index.html');
+  const worker=read('cloudflare/worker.mjs'),html=read('index.html'),sw=read('sw.js');
   assert.match(worker,/advancedAnalyticsRoute/);
   assert.match(worker,/route==='advanced-analytics'/);
-  assert.match(html,/href="\/analytics-hub\.css"/);
-  assert.match(html,/src="\/analytics-hub\.js"/);
+  assert.match(html,/href="\/analytics-hub\.css\?v=30"/);
+  assert.match(html,/src="\/analytics-hub\.js\?v=30"/);
+  assert.match(sw,/titans-cc-brand-2026-v30/);
+  assert.match(sw,/\/analytics-hub\.css/);
+  assert.match(sw,/\/analytics-hub\.js/);
+});
+
+test('production gate validates analytics API data and the real Stats Lab browser panel',()=>{
+  const workflow=read('.github/workflows/cloudflare-deploy.yml');
+  const production=read('scripts/advanced-analytics-regression.mjs');
+  const browser=read('scripts/analytics-browser-smoke.py');
+  assert.match(workflow,/advanced-analytics-regression\.mjs/);
+  assert.match(workflow,/analytics-browser-smoke\.py/);
+  assert.match(workflow,/ANALYTICS_BROWSER_OUTCOME/);
+  assert.match(workflow,/Advanced analytics browser regression/);
+  assert.match(production,/\/api\/advanced-analytics\?season=2026&team=TEN/);
+  assert.match(production,/Offensive EPA\/play is missing/);
+  assert.match(production,/No recent play contains a personnel package/);
+  assert.match(browser,/advanced-analytics-hub \.ah-metrics/);
+  assert.match(browser,/Down & distance/);
+  assert.match(browser,/Field position/);
+  assert.match(browser,/Score diff/);
+  assert.match(browser,/Time remaining/);
+  assert.match(browser,/Personnel/);
+  assert.match(browser,/Formation/);
 });
