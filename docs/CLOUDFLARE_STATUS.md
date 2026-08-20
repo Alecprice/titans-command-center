@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser navigation regression passed**
-- Source commit: `95ef095872ed7a737f134cb8feae890f9767fa08`
+- Source commit: `95f893df7ec56b5fa11d39f4ff2ef7f31974bcce`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -9,7 +9,7 @@
 - Production regression: success
 - Browser navigation regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T20:32:04Z
+- Recorded: 2026-08-20T20:33:30Z
 
 ## Production regression
 
@@ -60,18 +60,18 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "95ef095872ed7a737f134cb8feae890f9767fa08",
-    "builtAt": "2026-08-20T20:30:56.480Z"
+    "commit": "95f893df7ec56b5fa11d39f4ff2ef7f31974bcce",
+    "builtAt": "2026-08-20T20:32:44.100Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 62,
-    "health": 167,
-    "data": 391,
-    "stats": 370,
-    "market": 1149
+    "root": 160,
+    "health": 180,
+    "data": 359,
+    "stats": 278,
+    "market": 155
   },
-  "testedAt": "2026-08-20T20:31:22.331Z"
+  "testedAt": "2026-08-20T20:33:09.133Z"
 }```
 
 ## Browser navigation regression
@@ -115,11 +115,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 66,
+  "maxLongTaskMs": 0,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 37.07,
-  "testedAt": "2026-08-20T20:32:04Z"
+  "durationSeconds": 11.54,
+  "testedAt": "2026-08-20T20:33:30Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
