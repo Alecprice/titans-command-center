@@ -210,7 +210,7 @@ function bindSidebarDismiss(){
 }
 
 ensureSkipLink();ensureUtilityChips();bindKeyboard();bindConnectivity();bindSidebarDismiss();
-const app=qs('#app');if(app)new MutationObserver(()=>queueMicrotask(applyPagePolish)).observe(app,{childList:true,subtree:true});
+const app=qs('#app');if(app)new MutationObserver(()=>queueMicrotask(applyPagePolish)).observe(app,{childList:true});
 addEventListener('hashchange',()=>{queueMicrotask(applyPagePolish);scrollRouteTop();});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshUtilityData();});
 queueMicrotask(applyPagePolish);refreshUtilityData();
