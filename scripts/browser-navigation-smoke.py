@@ -69,12 +69,14 @@ def browser_state(driver):
             rosterGridDisplay:grid?getComputedStyle(grid).display:null,
             rosterGridChildren:grid?.children?.length??null,
             rosterCardCount:document.querySelectorAll('#rg .player-card').length,
+            rosterVisibleCardCount:[...document.querySelectorAll('#rg .player-card')].filter(el=>!el.hidden).length,
             rosterGridPreview:(grid?.innerText||'').slice(0,240),
             rosterPressed:rosterButton?.getAttribute('aria-pressed')||null,
             depthPressed:depthButton?.getAttribute('aria-pressed')||null,
             staffPressed:staffButton?.getAttribute('aria-pressed')||null,
             rosterSearchValue:document.querySelector('#rs')?.value||null,
             rosterUnitValue:document.querySelector('#ru')?.value||null,
+            rosterFilterCount:document.querySelector('.roster-status-filters .ux-filter-count')?.textContent?.trim()||null,
             appChildren:app?.children?.length||0,
             appText:(app?.innerText||'').slice(0,500),
             viewport:window.innerWidth,
@@ -243,6 +245,24 @@ try:
     wait_for(driver, "document.querySelector('#rg')?.hidden === false && getComputedStyle(document.querySelector('#rg')).display !== 'none' && document.querySelectorAll('#rg .player-card').length > 0")
     assert_no_horizontal_overflow(driver, 'mobile Roster restored')
 
+    stage = 'mobile:roster-filter-defense'
+    driver.execute_script("""
+      const unit=document.querySelector('#ru');
+      unit.value='Defense';
+      unit.dispatchEvent(new Event('input',{bubbles:true}));
+      unit.dispatchEvent(new Event('change',{bubbles:true}));
+    """)
+    wait_for(driver, "document.querySelector('#ru')?.value === 'Defense' && document.querySelectorAll('#rg .player-card').length > 0 && document.querySelectorAll('#rg .player-card').length < 95")
+    wait_for(driver, "document.querySelector('[data-roster-clear]')?.disabled === false")
+
+    stage = 'mobile:roster-clear-filters'
+    driver.execute_script("document.querySelector('[data-roster-clear]')?.click()")
+    wait_for(driver, "document.querySelector('#ru')?.value === 'all'")
+    wait_for(driver, "document.querySelectorAll('#rg .player-card').length === 95", timeout=10)
+    wait_for(driver, "document.querySelector('[data-roster-status=\"all\"]')?.getAttribute('aria-pressed') === 'true'")
+    wait_for(driver, "document.querySelector('.roster-status-filters .ux-filter-count')?.textContent.includes('95 of 95')")
+    assert_no_horizontal_overflow(driver, 'mobile Roster filters cleared')
+
     stage = 'small-phone:320'
     driver.set_window_size(320, 760)
     driver.get(f'{BASE}/#home')
@@ -274,11 +294,12 @@ try:
         'base': BASE,
         'desktopRounds': rounds,
         'transactionChecks': transaction_checks,
-        'mobileChecks': 12,
+        'mobileChecks': 14,
         'smallPhoneChecks': 2,
         'searchQuickJump': True,
         'mobileDrawerInert': True,
         'teamRoomChecks': 4,
+        'rosterFilterReset': True,
         'mobileTargets': mobile_targets,
         'maxLongTaskMs': round(max_long_task, 1),
         'longTasksOver250ms': len([x for x in all_long_tasks if x >= 250]),
