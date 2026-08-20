@@ -58,6 +58,7 @@ def browser_state(driver):
             transactionTools:Boolean(document.querySelector('.transaction-tools')),
             marketLoading:app?.dataset?.marketHub||null,
             statsLoading:app?.dataset?.preseasonHub||null,
+            teamRoomView:app?.dataset?.teamRoomView||null,
             appChildren:app?.children?.length||0,
             appText:(app?.innerText||'').slice(0,500),
             viewport:window.innerWidth,
@@ -190,6 +191,35 @@ try:
     wait_for(driver, "location.hash === '#transactions'")
     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
 
+    stage = 'mobile:roster-team-room'
+    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#roster\"]')?.click()")
+    wait_for(driver, "location.hash === '#roster'")
+    wait_for(driver, "document.querySelector('.team-room-switcher') && document.querySelectorAll('#rg .player-card').length > 0", timeout=10)
+    wait_for(driver, "document.querySelector('[data-team-room-view=\"roster\"]')?.getAttribute('aria-pressed') === 'true'")
+    assert_no_horizontal_overflow(driver, 'mobile Roster')
+
+    stage = 'mobile:depth-chart'
+    driver.execute_script("document.querySelector('[data-team-room-view=\"depth\"]')?.click()")
+    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'depth'")
+    wait_for(driver, "document.querySelector('[data-team-room-view=\"depth\"]')?.getAttribute('aria-pressed') === 'true'")
+    wait_for(driver, "document.querySelector('.team-room-panel[data-panel=\"depth\"]')?.hidden === false")
+    wait_for(driver, "getComputedStyle(document.querySelector('#rg')).display === 'none'")
+    assert_no_horizontal_overflow(driver, 'mobile Depth Chart')
+
+    stage = 'mobile:staff-arrow-key'
+    depth_button = driver.find_element('css selector', '[data-team-room-view="depth"]')
+    depth_button.send_keys(Keys.ARROW_RIGHT)
+    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'staff'")
+    wait_for(driver, "document.querySelector('[data-team-room-view=\"staff\"]')?.getAttribute('aria-pressed') === 'true'")
+    wait_for(driver, "document.querySelector('.team-room-panel[data-panel=\"staff\"]')?.hidden === false")
+    assert_no_horizontal_overflow(driver, 'mobile Staff')
+
+    stage = 'mobile:return-roster'
+    driver.execute_script("document.querySelector('[data-team-room-view=\"roster\"]')?.click()")
+    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'roster'")
+    wait_for(driver, "getComputedStyle(document.querySelector('#rg')).display !== 'none' && document.querySelectorAll('#rg .player-card').length > 0")
+    assert_no_horizontal_overflow(driver, 'mobile Roster restored')
+
     stage = 'small-phone:320'
     driver.set_window_size(320, 760)
     driver.get(f'{BASE}/#home')
@@ -221,10 +251,11 @@ try:
         'base': BASE,
         'desktopRounds': rounds,
         'transactionChecks': transaction_checks,
-        'mobileChecks': 8,
+        'mobileChecks': 12,
         'smallPhoneChecks': 2,
         'searchQuickJump': True,
         'mobileDrawerInert': True,
+        'teamRoomChecks': 4,
         'mobileTargets': mobile_targets,
         'maxLongTaskMs': round(max_long_task, 1),
         'longTasksOver250ms': len([x for x in all_long_tasks if x >= 250]),
