@@ -63,6 +63,7 @@ def browser_state(driver):
             viewport:window.innerWidth,
             scrollWidth:document.documentElement.scrollWidth,
             sidebarOpen:document.querySelector('#sidebar')?.classList.contains('open')||false,
+            sidebarInert:Boolean(document.querySelector('#sidebar')?.inert),
             moreExpanded:document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded')||null
           };
         """)
@@ -130,6 +131,7 @@ try:
     stage = 'mobile:wait-home'
     wait_for(driver, "document.readyState === 'complete' && document.querySelector('.fan-hero')")
     wait_for(driver, "getComputedStyle(document.querySelector('.mobile-nav')).display !== 'none'")
+    wait_for(driver, "document.querySelector('#sidebar')?.inert === true")
     install_longtask_observer(driver)
     assert_no_horizontal_overflow(driver, 'mobile Home')
 
@@ -151,20 +153,21 @@ try:
     stage = 'mobile:more-open'
     driver.execute_script("document.querySelector('#mobile-more-button')?.click()")
     wait_for(driver, "document.querySelector('#sidebar')?.classList.contains('open')")
+    wait_for(driver, "document.querySelector('#sidebar')?.inert === false")
     wait_for(driver, "document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded') === 'true'")
 
     stage = 'mobile:schedule-from-more'
     driver.execute_script("document.querySelector('#primary-nav a[href=\"#games\"]')?.click()")
     wait_for(driver, "location.hash === '#games'")
     wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Games & Schedule'")
-    wait_for(driver, "!document.querySelector('#sidebar')?.classList.contains('open')")
+    wait_for(driver, "!document.querySelector('#sidebar')?.classList.contains('open') && document.querySelector('#sidebar')?.inert === true")
     assert_no_horizontal_overflow(driver, 'mobile Schedule')
 
     stage = 'mobile:more-escape'
     driver.execute_script("document.querySelector('#mobile-more-button')?.click()")
     wait_for(driver, "document.querySelector('#sidebar')?.classList.contains('open')")
     driver.find_element('tag name', 'body').send_keys(Keys.ESCAPE)
-    wait_for(driver, "!document.querySelector('#sidebar')?.classList.contains('open')")
+    wait_for(driver, "!document.querySelector('#sidebar')?.classList.contains('open') && document.querySelector('#sidebar')?.inert === true")
 
     stage = 'mobile:stats-then-moves'
     driver.execute_script("document.querySelector('.mobile-nav a[href=\"#stats\"]')?.click()")
@@ -174,6 +177,27 @@ try:
     wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Transactions'")
     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
     assert_no_horizontal_overflow(driver, 'mobile Transactions after Stats')
+
+    stage = 'mobile:search-quick-jump'
+    search = driver.find_element('id', 'global-search')
+    search.clear()
+    search.send_keys('transactions')
+    search.send_keys(Keys.ENTER)
+    wait_for(driver, "location.hash.startsWith('#search?q=transactions')")
+    wait_for(driver, "document.querySelector('.search-route-shortcuts a[href=\"#transactions\"]')")
+    assert_no_horizontal_overflow(driver, 'mobile Search')
+    driver.execute_script("document.querySelector('.search-route-shortcuts a[href=\"#transactions\"]')?.click()")
+    wait_for(driver, "location.hash === '#transactions'")
+    wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
+
+    stage = 'small-phone:320'
+    driver.set_window_size(320, 760)
+    driver.get(f'{BASE}/#home')
+    wait_for(driver, "document.readyState === 'complete' && document.querySelector('.fan-hero')")
+    assert_no_horizontal_overflow(driver, '320px Home')
+    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#transactions\"]')?.click()")
+    wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
+    assert_no_horizontal_overflow(driver, '320px Transactions')
 
     mobile_long_tasks = driver.execute_script('return window.__titansLongTasks || []') or []
     all_long_tasks = desktop_long_tasks + mobile_long_tasks
@@ -197,7 +221,10 @@ try:
         'base': BASE,
         'desktopRounds': rounds,
         'transactionChecks': transaction_checks,
-        'mobileChecks': 5,
+        'mobileChecks': 8,
+        'smallPhoneChecks': 2,
+        'searchQuickJump': True,
+        'mobileDrawerInert': True,
         'mobileTargets': mobile_targets,
         'maxLongTaskMs': round(max_long_task, 1),
         'longTasksOver250ms': len([x for x in all_long_tasks if x >= 250]),
