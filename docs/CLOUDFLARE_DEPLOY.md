@@ -23,26 +23,36 @@ npm run build:cloudflare
 
 ## One-time Cloudflare setup
 
-1. Sign in to Cloudflare / Wrangler:
+The repository contains `.github/workflows/cloudflare-deploy.yml`. On every push to `main`, GitHub runs the full Titans quality gate and then deploys through Wrangler when both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets are configured.
+
+For a local/manual fallback deployment, sign in to Cloudflare / Wrangler:
 
 ```bash
 npx wrangler@4 login
 ```
 
-2. Add the existing Neon connection string as a Worker secret:
+Then deploy with:
+
+```bash
+npm run deploy:cloudflare
+```
+
+## Worker runtime secrets
+
+After the first Worker exists, add the existing Neon connection string as a Worker secret:
 
 ```bash
 npx wrangler@4 secret put DATABASE_URL
 ```
 
-3. Add ingestion/cron secrets. Use the same values as the existing production environment if preserving the same automation credentials:
+Add ingestion/cron secrets if preserving the scheduled source-check automation:
 
 ```bash
 npx wrangler@4 secret put INGEST_SECRET
 npx wrangler@4 secret put CRON_SECRET
 ```
 
-4. Optional market-provider secrets:
+Optional market-provider secrets:
 
 ```bash
 npx wrangler@4 secret put PROPLINE_API_KEY
@@ -51,23 +61,7 @@ npx wrangler@4 secret put ODDS_API_IO_KEY
 
 The market UI still has its non-key fallback path when these are absent.
 
-5. Deploy:
-
-```bash
-npm run deploy:cloudflare
-```
-
 The Worker configuration in `wrangler.jsonc` includes the same daily `15 10 * * *` UTC source-check schedule used by the Vercel project.
-
-## GitHub auto-deploy option
-
-After the first successful manual deployment, connect the GitHub repository to Cloudflare Workers Builds and use:
-
-- Production branch: `main`
-- Build command: `npm run build:cloudflare`
-- Deploy command: `npx wrangler@4 deploy`
-
-Keep secrets in Cloudflare; never store database/API credentials in GitHub or the repository.
 
 ## Production verification before DNS cutover
 
