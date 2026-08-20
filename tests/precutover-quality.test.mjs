@@ -15,15 +15,19 @@ test('app shell keeps core accessibility, mobile navigation and PWA semantics',(
   assert.match(html,/id="mobile-more-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/);
   assert.match(html,/href="\/usability-runtime\.css"/);
   assert.match(html,/src="\/usability-runtime\.js\?v=26"/);
+  assert.match(html,/src="\/ux-polish\.js\?v=27"/);
+  assert.match(html,/src="\/fan-polish\.js\?v=27"/);
+  assert.match(html,/src="\/team-room\.js\?v=27"/);
+  assert.match(html,/src="\/source-activity\.js\?v=27"/);
+  assert.match(html,/src="\/market-hub\.js\?v=27"/);
+  assert.match(html,/href="\/ux-polish\.css\?v=27"/);
+  assert.match(html,/href="\/team-room\.css\?v=27"/);
+  assert.match(html,/href="\/market-hub\.css\?v=27"/);
   assert.match(html,/src="\/accessibility-runtime\.js"/);
   assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
   assert.match(html,/src="\/fact-polish\.js\?v=21"/);
-  assert.match(html,/src="\/ux-polish\.js\?v=22"/);
-  assert.match(html,/src="\/fan-polish\.js\?v=23"/);
-  assert.match(html,/src="\/source-activity\.js\?v=22"/);
   assert.match(html,/src="\/transactions-hub\.js\?v=24"/);
   assert.match(html,/src="\/stats-hub\.js\?v=22"/);
-  assert.match(html,/src="\/market-hub\.js\?v=22"/);
 });
 
 test('responsive layer preserves keyboard focus, safe areas and mobile touch targets',()=>{
@@ -35,6 +39,7 @@ test('responsive layer preserves keyboard focus, safe areas and mobile touch tar
   assert.match(css,/body\.nav-open\{overflow:hidden\}/);
   assert.match(css,/body\.nav-open:after/);
   assert.match(css,/\.search-route-links a\{min-height:44px/);
+  assert.match(css,/\.roster-status-filters \.ux-clear-filter/);
 });
 
 test('usability runtime prevents stale-route dead ends and keeps navigation state accessible',()=>{
@@ -52,6 +57,17 @@ test('usability runtime prevents stale-route dead ends and keeps navigation stat
   assert.match(runtime,/current==='home'\|\|current==='live'\|\|current==='games'/);
   assert.match(runtime,/observe\(app,\{childList:true\}\)/);
   assert.doesNotMatch(runtime,/observe\(app,\{childList:true,subtree:true\}\)/);
+});
+
+test('shared UX helpers keep countdowns finite and roster filters recoverable',()=>{
+  const ux=read('ux-polish.js');
+  assert.match(ux,/if\(!Number\.isFinite\(time\)\)return 'Kickoff TBD'/);
+  assert.match(ux,/data-roster-clear/);
+  assert.match(ux,/aria-pressed="true"/);
+  assert.match(ux,/Live data checks are healthy/);
+  assert.doesNotMatch(ux,/Neon database online and responding/);
+  assert.match(ux,/observe\(list,\{childList:true\}\)/);
+  assert.doesNotMatch(ux,/observe\(list,\{childList:true,subtree:true\}\)/);
 });
 
 test('manifest uses dark launch colors and prioritizes core fan shortcuts',()=>{
@@ -80,7 +96,7 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v26/);
+  assert.match(sw,/titans-cc-brand-2026-v27/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.css/);
