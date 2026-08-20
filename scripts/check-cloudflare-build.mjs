@@ -6,18 +6,19 @@ const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(here,'..');
 const dist=path.join(root,'dist');
 const required=[
-  'index.html','app.js','transactions-hub.js','stats-hub.js','market-hub.js','sw.js','manifest.webmanifest','build-meta.json','_headers',
+  'index.html','app.js','usability-runtime.js','usability-runtime.css','transactions-hub.js','stats-hub.js','market-hub.js','sw.js','manifest.webmanifest','build-meta.json','_headers',
   'src/core.mjs','src/data.mjs','src/odds.mjs','src/visual-audit.mjs','src/roster-audit-20260819.mjs',
-  'assets/archive/current-shield-primary.webp','assets/brand/current-lockup.webp'
+  'assets/archive/current-shield-primary.webp','assets/brand/current-lockup.webp','assets/icon-192.png','assets/icon-512.png'
 ];
 for(const relative of required)await access(path.join(dist,relative));
 for(const forbidden of ['api','db','cloudflare','scripts','.env','.git']){
   try{await access(path.join(dist,forbidden));throw new Error(`Cloudflare static build leaked ${forbidden}`)}catch(error){if(error?.code!=='ENOENT')throw error}
 }
 const html=await readFile(path.join(dist,'index.html'),'utf8');
-for(const asset of ['/app.js','/transactions-hub.js','/stats-hub.js','/market-hub.js','/assets/brand/current-lockup.webp']){
+for(const asset of ['/app.js','/usability-runtime.js','/usability-runtime.css','/transactions-hub.js','/stats-hub.js','/market-hub.js','/assets/brand/current-lockup.webp']){
   if(!html.includes(asset))throw new Error(`index.html missing expected production asset ${asset}`);
 }
+if(!html.includes('href="#transactions" data-route="transactions"')||!html.includes('id="mobile-more-button"'))throw new Error('Mobile navigation is missing Transactions or More');
 const meta=JSON.parse(await readFile(path.join(dist,'build-meta.json'),'utf8'));
 if(meta.app!=='titans-command-center'||!meta.version||!meta.commit||!meta.builtAt)throw new Error('Cloudflare build metadata is incomplete');
 const headers=await readFile(path.join(dist,'_headers'),'utf8');
