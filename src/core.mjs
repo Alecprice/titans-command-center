@@ -23,12 +23,20 @@ export function filterFeed(items, filters = {}) {
   }).sort((a, b) => {
     const sourceDelta = sourceRank(b.tier) - sourceRank(a.tier);
     if (sourceDelta) return sourceDelta;
-    return new Date(b.publishedAt) - new Date(a.publishedAt);
+    const aTime = new Date(a.publishedAt).getTime();
+    const bTime = new Date(b.publishedAt).getTime();
+    if (!Number.isFinite(aTime) && !Number.isFinite(bTime)) return 0;
+    if (!Number.isFinite(aTime)) return 1;
+    if (!Number.isFinite(bTime)) return -1;
+    return bTime - aTime;
   });
 }
 
 export function relativeTime(iso, now = new Date()) {
-  const diff = new Date(iso).getTime() - now.getTime();
+  const time = new Date(iso).getTime();
+  const nowTime = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  if (!Number.isFinite(time) || !Number.isFinite(nowTime)) return 'Time unavailable';
+  const diff = time - nowTime;
   const mins = Math.round(Math.abs(diff) / 60000);
   if (mins < 60) return diff < 0 ? `${mins}m ago` : `in ${mins}m`;
   const hours = Math.round(mins / 60);
@@ -86,7 +94,7 @@ export function mergeLiveGames(existingGames, liveGames) {
     );
     if (index >= 0) {
       const canonical = merged[index];
-      merged[index] = { ...canonical, ...live, id: canonical.id, week: canonical.week, source: `${canonical.source || 'Neon'} + ESPN` };
+      merged[index] = { ...canonical, ...live, id: canonical.id, week: canonical.week, source: `${canonical.source || 'verified schedule'} + ESPN` };
     } else merged.push(live);
   }
   return merged.sort((a, b) => {
