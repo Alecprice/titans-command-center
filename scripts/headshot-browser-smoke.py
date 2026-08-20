@@ -35,10 +35,13 @@ try:
     stage='roster-load'
     driver.get(f'{BASE}/#roster')
     wait_for(driver,"document.querySelectorAll('.player-card').length >= 90")
-    wait_for(driver,"document.querySelectorAll('.player-card .jersey.has-headshot img').length >= 55")
-    wait_for(driver,"[...document.querySelectorAll('.player-card .jersey.has-headshot img')].filter(img=>img.complete&&img.naturalWidth>20).length >= 55")
+    wait_for(driver,"document.querySelectorAll('.player-card .jersey.has-headshot img').length >= 60")
+    driver.execute_script("document.querySelector('.player-card .jersey.has-headshot img')?.scrollIntoView({block:'center'})")
+    wait_for(driver,"document.querySelector('.player-card .jersey.has-headshot img')?.complete && document.querySelector('.player-card .jersey.has-headshot img')?.naturalWidth > 20")
     roster_total=driver.execute_script("return document.querySelectorAll('.player-card').length")
+    roster_decorated=driver.execute_script("return document.querySelectorAll('.player-card .jersey.has-headshot img').length")
     roster_photos=loaded_images(driver,'.player-card .jersey.has-headshot img')
+    if roster_photos < 1: raise RuntimeError('No visible roster headshot loaded successfully')
     if overflow(driver): raise RuntimeError('Roster headshots introduced horizontal overflow')
 
     stage='rich-player'
@@ -55,14 +58,19 @@ try:
     wait_for(driver,"document.querySelector('.preseason-stats-hub')",timeout=15)
     wait_for(driver,"document.querySelectorAll('.ps-player').length >= 90",timeout=15)
     wait_for(driver,"document.querySelectorAll('.ps-player .ps-number.has-headshot img').length >= 50",timeout=15)
-    wait_for(driver,"[...document.querySelectorAll('.ps-player .ps-number.has-headshot img')].filter(img=>img.complete&&img.naturalWidth>20).length >= 50",timeout=15)
+    driver.execute_script("document.querySelector('.ps-player .ps-number.has-headshot img')?.scrollIntoView({block:'center'})")
+    wait_for(driver,"document.querySelector('.ps-player .ps-number.has-headshot img')?.complete && document.querySelector('.ps-player .ps-number.has-headshot img')?.naturalWidth > 20",timeout=15)
     stats_total=driver.execute_script("return document.querySelectorAll('.ps-player').length")
+    stats_decorated=driver.execute_script("return document.querySelectorAll('.ps-player .ps-number.has-headshot img').length")
     stats_photos=loaded_images(driver,'.ps-player .ps-number.has-headshot img')
+    if stats_photos < 1: raise RuntimeError('No visible Stats Lab headshot loaded successfully')
     if overflow(driver): raise RuntimeError('Stats headshots introduced desktop horizontal overflow')
 
     stage='stats-mobile'
     driver.set_window_size(390,844)
     time.sleep(.3)
+    driver.execute_script("document.querySelector('.ps-player .ps-number.has-headshot img')?.scrollIntoView({block:'center'})")
+    wait_for(driver,"document.querySelector('.ps-player .ps-number.has-headshot img')?.complete && document.querySelector('.ps-player .ps-number.has-headshot img')?.naturalWidth > 20")
     if overflow(driver): raise RuntimeError('Stats headshots introduced mobile horizontal overflow')
     mobile_photos=loaded_images(driver,'.ps-player .ps-number.has-headshot img')
 
@@ -73,13 +81,13 @@ try:
     severe=[entry for entry in warnings if entry.get('level')=='SEVERE']
     if severe: raise RuntimeError(f'Headshot browser regression has severe console errors: {severe[:3]}')
 
-    result={'ok':True,'base':BASE,'rosterCards':roster_total,'rosterLoadedHeadshots':roster_photos,'statsPlayerRows':stats_total,'statsLoadedHeadshots':stats_photos,'mobileLoadedHeadshots':mobile_photos,'richPlayer':rich_name,'richPlayerHeadshotLoaded':rich_photo==1,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    result={'ok':True,'base':BASE,'rosterCards':roster_total,'rosterDecoratedHeadshots':roster_decorated,'rosterLoadedHeadshots':roster_photos,'statsPlayerRows':stats_total,'statsDecoratedHeadshots':stats_decorated,'statsLoadedHeadshots':stats_photos,'mobileLoadedHeadshots':mobile_photos,'richPlayer':rich_name,'richPlayerHeadshotLoaded':rich_photo==1,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     REPORT.write_text(json.dumps(result,indent=2),encoding='utf-8')
     print(json.dumps(result,indent=2))
 except Exception as exc:
     state=None
     if driver:
-        try: state=driver.execute_script("return {hash:location.hash,title:document.querySelector('.page-head h1')?.textContent||document.title,rosterCards:document.querySelectorAll('.player-card').length,rosterPhotos:document.querySelectorAll('.player-card .has-headshot img').length,statsRows:document.querySelectorAll('.ps-player').length,statsPhotos:document.querySelectorAll('.ps-player .has-headshot img').length,appText:(document.querySelector('#app')?.innerText||'').slice(0,350)}")
+        try: state=driver.execute_script("return {hash:location.hash,title:document.querySelector('.page-head h1')?.textContent||document.title,rosterCards:document.querySelectorAll('.player-card').length,rosterPhotos:document.querySelectorAll('.player-card .has-headshot img').length,rosterLoaded:[...document.querySelectorAll('.player-card .has-headshot img')].filter(img=>img.complete&&img.naturalWidth>20).length,statsRows:document.querySelectorAll('.ps-player').length,statsPhotos:document.querySelectorAll('.ps-player .has-headshot img').length,statsLoaded:[...document.querySelectorAll('.ps-player .has-headshot img')].filter(img=>img.complete&&img.naturalWidth>20).length,firstSrc:document.querySelector('.has-headshot img')?.currentSrc||'',appText:(document.querySelector('#app')?.innerText||'').slice(0,350)}")
         except Exception: pass
     result={'ok':False,'base':BASE,'stage':stage,'error':f'{type(exc).__name__}: {exc}','state':state,'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     REPORT.write_text(json.dumps(result,indent=2),encoding='utf-8')
