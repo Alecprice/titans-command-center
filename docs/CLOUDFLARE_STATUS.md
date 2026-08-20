@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser navigation regression passed**
-- Source commit: `2d248537198a535caf223396dd0cc73496058338`
+- Source commit: `5f1559425a3dd11befbcd9c90fe7c7a10ec88c4a`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -9,7 +9,7 @@
 - Production regression: success
 - Browser navigation regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T20:24:22Z
+- Recorded: 2026-08-20T20:27:17Z
 
 ## Production regression
 
@@ -30,6 +30,18 @@
   "serviceWorkerStatus": 200,
   "serviceWorkerCache": "titans-cc-brand-2026-v25",
   "precachePaths": 42,
+  "pwaIcons": {
+    "icon192": {
+      "width": 192,
+      "height": 192,
+      "bytes": 2854
+    },
+    "icon512": {
+      "width": 512,
+      "height": 512,
+      "bytes": 5724
+    }
+  },
   "healthStatus": 200,
   "appStatus": "healthy",
   "databaseConfigured": true,
@@ -48,18 +60,18 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "2d248537198a535caf223396dd0cc73496058338",
-    "builtAt": "2026-08-20T20:23:25.248Z"
+    "commit": "5f1559425a3dd11befbcd9c90fe7c7a10ec88c4a",
+    "builtAt": "2026-08-20T20:26:34.856Z"
   },
-  "deploymentPropagationAttempts": 9,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 23,
-    "health": 311,
-    "data": 638,
-    "stats": 278,
-    "market": 268
+    "root": 26,
+    "health": 335,
+    "data": 576,
+    "stats": 457,
+    "market": 264
   },
-  "testedAt": "2026-08-20T20:24:03.790Z"
+  "testedAt": "2026-08-20T20:26:58.956Z"
 }```
 
 ## Browser navigation regression
@@ -105,16 +117,9 @@
   ],
   "maxLongTaskMs": 0,
   "longTasksOver250ms": 0,
-  "browserWarnings": [
-    {
-      "level": "WARNING",
-      "message": "https://titans-command-center.alecjordanprice.workers.dev/#home - Error while trying to use the following icon from the Manifest: https://titans-command-center.alecjordanprice.workers.dev/assets/icon-192.png (Download error or resource isn't a valid image)",
-      "source": "other",
-      "timestamp": 1787257457549
-    }
-  ],
-  "durationSeconds": 14.79,
-  "testedAt": "2026-08-20T20:24:22Z"
+  "browserWarnings": [],
+  "durationSeconds": 13.79,
+  "testedAt": "2026-08-20T20:27:17Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
