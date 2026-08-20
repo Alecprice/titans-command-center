@@ -15,7 +15,7 @@ test('app shell keeps core accessibility, mobile navigation and PWA semantics',(
   assert.match(html,/id="mobile-more-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/);
   assert.match(html,/href="\/usability-runtime\.css"/);
   assert.match(html,/src="\/usability-runtime\.js\?v=26"/);
-  assert.match(html,/src="\/ux-polish\.js\?v=27"/);
+  assert.match(html,/src="\/ux-polish\.js\?v=29"/);
   assert.match(html,/src="\/fan-polish\.js\?v=27"/);
   assert.match(html,/src="\/team-room\.js\?v=28"/);
   assert.match(html,/src="\/source-activity\.js\?v=27"/);
@@ -64,6 +64,9 @@ test('shared UX helpers keep countdowns finite and roster filters recoverable',(
   assert.match(ux,/if\(!Number\.isFinite\(time\)\)return 'Kickoff TBD'/);
   assert.match(ux,/data-roster-clear/);
   assert.match(ux,/aria-pressed="true"/);
+  assert.match(ux,/of \$\{total\} player/);
+  assert.match(ux,/unit\.dispatchEvent\(new Event\('input'/);
+  assert.match(ux,/unit\.dispatchEvent\(new Event\('change'/);
   assert.match(ux,/Live data checks are healthy/);
   assert.doesNotMatch(ux,/Neon database online and responding/);
   assert.match(ux,/observe\(list,\{childList:true\}\)/);
@@ -103,7 +106,7 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v28/);
+  assert.match(sw,/titans-cc-brand-2026-v29/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.css/);
