@@ -2,10 +2,18 @@ import apiHandler from '../api/index.js';
 import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflverseStats,syncNwsNextHomeGame,syncFreeOdds,recordSyncRun} from '../src/ingest.mjs';
 
 const API_PREFIX='/api/';
+const SERVER_BINDINGS=['DATABASE_URL','INGEST_SECRET','CRON_SECRET','PROPLINE_API_KEY','ODDS_API_IO_KEY','PROPLINE_BOOKS','PROPLINE_EXTRA_MARKETS','ODDS_API_IO_BOOKS','ODDS_CACHE_SECONDS','TITANS_HISTORY_START','TITANS_HISTORY_END','CONTINUE_ON_IMPORT_ERROR'];
+
+function applyRuntimeEnv(env){
+  for(const key of SERVER_BINDINGS){
+    const value=env?.[key];
+    if(value!==undefined&&value!==null)process.env[key]=String(value);
+  }
+}
 
 function requestHeaders(headers){
   const out={};
-  for(const [key,value] of headers.entries()) out[key.toLowerCase()]=value;
+  for(const [key,value] of headers.entries())out[key.toLowerCase()]=value;
   return out;
 }
 
@@ -23,12 +31,7 @@ function requestQuery(url,route){
 
 function vercelRequest(request,route){
   const url=new URL(request.url);
-  return {
-    method:request.method,
-    headers:requestHeaders(request.headers),
-    query:requestQuery(url,route),
-    url:`${url.pathname}${url.search}`
-  };
+  return {method:request.method,headers:requestHeaders(request.headers),query:requestQuery(url,route),url:`${url.pathname}${url.search}`};
 }
 
 function vercelResponse(){
@@ -88,6 +91,7 @@ async function executeScheduledJob(env,job,run){
 }
 
 async function runScheduled(env){
+  applyRuntimeEnv(env);
   const jobs=[
     ['official-audit',()=>syncTitansOfficialAudit(env)],
     ['espn',()=>syncEspn(env)],
@@ -105,6 +109,7 @@ async function runScheduled(env){
 
 export default {
   async fetch(request,env){
+    applyRuntimeEnv(env);
     const pathname=new URL(request.url).pathname;
     if(pathname.startsWith(API_PREFIX))return runApi(request);
     return env.ASSETS.fetch(request);
