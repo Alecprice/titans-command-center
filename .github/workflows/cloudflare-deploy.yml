@@ -35,44 +35,61 @@ jobs:
         run: npm install --ignore-scripts --no-audit --no-fund
 
       - name: Run Titans quality gate
+        id: quality
         run: npm run check
 
       - name: Check Cloudflare deployment credentials
         id: cloudflare
+        if: always()
         shell: bash
         run: |
           if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Cloudflare deploy skipped until CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets are configured."
           fi
           if [[ -n "$DATABASE_URL" ]]; then
             echo "database_ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "database_ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::DATABASE_URL GitHub Actions secret is not configured; deploy will continue without uploading a database secret."
           fi
 
       - name: Deploy Worker + static assets
         id: deploy
-        if: steps.cloudflare.outputs.ready == 'true'
+        if: steps.quality.outcome == 'success' && steps.cloudflare.outputs.ready == 'true'
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           npm run build:cloudflare
+          BUILD_RC=$?
+          if [[ $BUILD_RC -ne 0 ]]; then
+            echo "deploy_exit_code=$BUILD_RC" >> "$GITHUB_OUTPUT"
+            exit $BUILD_RC
+          fi
+
           if [[ -n "$DATABASE_URL" ]]; then
             node --input-type=module <<'NODE'
             import fs from 'node:fs';
             fs.writeFileSync('/tmp/cloudflare-secrets.json',JSON.stringify({DATABASE_URL:process.env.DATABASE_URL}));
             NODE
+            set +e
             npx wrangler@4 deploy --secrets-file /tmp/cloudflare-secrets.json 2>&1 | tee /tmp/cloudflare-deploy.log
+            DEPLOY_RC=${PIPESTATUS[0]}
+            set -e
             rm -f /tmp/cloudflare-secrets.json
           else
+            set +e
             npx wrangler@4 deploy 2>&1 | tee /tmp/cloudflare-deploy.log
+            DEPLOY_RC=${PIPESTATUS[0]}
+            set -e
           fi
+
+          echo "deploy_exit_code=$DEPLOY_RC" >> "$GITHUB_OUTPUT"
           WORKER_URL="$(grep -Eo 'https://[A-Za-z0-9.-]+\.workers\.dev' /tmp/cloudflare-deploy.log | tail -1 || true)"
           echo "worker_url=$WORKER_URL" >> "$GITHUB_OUTPUT"
+          if [[ $DEPLOY_RC -ne 0 ]]; then
+            exit $DEPLOY_RC
+          fi
 
       - name: Smoke test deployed Worker
         id: smoke
@@ -91,7 +108,7 @@ jobs:
               try{
                 const response=await fetch(`${base}${path}`,{headers:{'User-Agent':'TitansCommandCenter-CI/0.8'},signal:AbortSignal.timeout(15000)});
                 const body=json?await response.json():await response.arrayBuffer();
-                return {status:response.status,body,contentType:response.headers.get('content-type')||''};
+                return {status:response.status,body};
               }catch(error){last=error;if(i<retries-1)await wait(2500);}
             }
             throw last;
@@ -125,38 +142,53 @@ jobs:
           fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify(result,null,2));
           console.log(JSON.stringify(result,null,2));
           if(root.status!==200)throw new Error(`Root returned ${root.status}`);
-          if(shield.status!==200)throw new Error(`Shield asset returned ${shield.status}`);
+          if(shield.status!==200)throw new Error(`Shield returned ${shield.status}`);
           if(health.status!==200)throw new Error(`Health returned ${health.status}`);
           if(!result.databaseConfigured||!result.databaseOk||result.appStatus!=='healthy')throw new Error(`Neon health failed: configured=${result.databaseConfigured}, ok=${result.databaseOk}, app=${result.appStatus}`);
           if(data.status!==200||!result.dataOk)throw new Error(`Data API failed: ${data.status}`);
-          if(stats.status!==200||result.rosterCount<90)throw new Error(`Preseason stats failed: ${stats.status}, roster ${result.rosterCount}`);
-          if(!/Neon/i.test(result.statsRosterSource||''))throw new Error(`Stats roster is not Neon-backed: ${result.statsRosterSource||'unknown source'}`);
+          if(stats.status!==200||result.rosterCount<90)throw new Error(`Stats failed: ${stats.status}, roster=${result.rosterCount}`);
+          if(!/Neon/i.test(result.statsRosterSource||''))throw new Error(`Stats roster is not Neon-backed: ${result.statsRosterSource||'unknown'}`);
           if(market.status!==200||!result.marketOk)throw new Error(`Market API failed: ${market.status}`);
           NODE
 
       - name: Record Cloudflare deployment result
-        if: always() && steps.deploy.outcome == 'success'
+        if: always()
         shell: bash
         env:
+          QUALITY_OUTCOME: ${{ steps.quality.outcome }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          DEPLOY_EXIT_CODE: ${{ steps.deploy.outputs.deploy_exit_code }}
           WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
           DATABASE_READY: ${{ steps.cloudflare.outputs.database_ready }}
+          CLOUDFLARE_READY: ${{ steps.cloudflare.outputs.ready }}
         run: |
-          if [[ "$SMOKE_OUTCOME" == "success" ]]; then
+          if [[ "$DEPLOY_OUTCOME" == "success" && "$SMOKE_OUTCOME" == "success" ]]; then
             STATUS='deployed + smoke-tested + Neon healthy'
+          elif [[ "$DEPLOY_OUTCOME" == "failure" ]]; then
+            STATUS='Cloudflare deploy failed before smoke test'
+          elif [[ "$QUALITY_OUTCOME" != "success" ]]; then
+            STATUS='quality gate failed before Cloudflare deploy'
+          elif [[ "$CLOUDFLARE_READY" != "true" ]]; then
+            STATUS='Cloudflare credentials unavailable to workflow'
           else
-            STATUS="deployed + smoke check ${SMOKE_OUTCOME}"
+            STATUS="deployed + smoke check ${SMOKE_OUTCOME:-not-run}"
           fi
           {
             echo '# Cloudflare deployment status'
             echo
             echo "- Status: **$STATUS**"
             echo "- Source commit: \`$GITHUB_SHA\`"
-            echo "- DATABASE_URL GitHub secret supplied to deploy: $DATABASE_READY"
+            echo "- Quality gate: ${QUALITY_OUTCOME:-unknown}"
+            echo "- Cloudflare credentials available: ${CLOUDFLARE_READY:-unknown}"
+            echo "- DATABASE_URL GitHub secret supplied: ${DATABASE_READY:-unknown}"
+            echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
+            echo "- Deploy exit code: ${DEPLOY_EXIT_CODE:-not-recorded}"
+            echo "- Smoke outcome: ${SMOKE_OUTCOME:-not-run}"
             if [[ -n "$WORKER_URL" ]]; then
               echo "- Worker URL: $WORKER_URL"
             else
-              echo '- Worker URL: deployment succeeded; Wrangler did not emit a parseable workers.dev URL in this run.'
+              echo '- Worker URL: not recorded in this run'
             fi
             echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             if [[ -f /tmp/cloudflare-smoke.json ]]; then
@@ -168,7 +200,7 @@ jobs:
               echo '```'
             fi
             echo
-            echo 'Generated automatically by `.github/workflows/cloudflare-deploy.yml` after a Cloudflare deployment and regression smoke test.'
+            echo 'Generated automatically by `.github/workflows/cloudflare-deploy.yml`.'
           } > docs/CLOUDFLARE_STATUS.md
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
