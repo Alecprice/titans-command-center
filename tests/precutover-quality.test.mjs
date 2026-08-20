@@ -14,6 +14,9 @@ test('app shell keeps core accessibility and PWA semantics',()=>{
   assert.match(html,/src="\/accessibility-runtime\.js"/);
   assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
   assert.match(html,/src="\/fact-polish\.js\?v=21"/);
+  assert.match(html,/src="\/source-activity\.js\?v=22"/);
+  assert.match(html,/src="\/stats-hub\.js\?v=22"/);
+  assert.match(html,/src="\/market-hub\.js\?v=22"/);
 });
 
 test('responsive layer preserves keyboard focus, safe areas and reduced motion',()=>{
@@ -42,7 +45,7 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v21/);
+  assert.match(sw,/titans-cc-brand-2026-v22/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/const NETWORK_FIRST=/);
   assert.match(sw,/js\|mjs\|css\|webmanifest/);
@@ -59,6 +62,24 @@ test('DOM polishers cannot recursively observe their own nested rewrites',()=>{
   assert.match(legacy,/calloutCopy&&calloutCopy\.textContent!==desired/);
   assert.match(legacy,/observe\(appRoot,\{childList:true\}\)/);
   assert.doesNotMatch(legacy,/observe\(appRoot,\{childList:true,subtree:true\}\)/);
+});
+
+test('async page modules cannot overwrite a later route',()=>{
+  const stats=read('stats-hub.js');
+  const market=read('market-hub.js');
+  const sources=read('source-activity.js');
+  assert.match(stats,/statsRequestSerial/);
+  assert.match(stats,/requestId!==statsRequestSerial\|\|shRoute\(\)!=='stats'/);
+  assert.match(stats,/observe\(shRoot,\{childList:true\}\)/);
+  assert.doesNotMatch(stats,/observe\(shRoot,\{childList:true,subtree:true\}\)/);
+  assert.match(market,/marketRequestSerial/);
+  assert.match(market,/requestId!==marketRequestSerial\|\|mhRoute\(\)!=='markets'/);
+  assert.match(market,/observe\(mhRoot,\{childList:true\}\)/);
+  assert.doesNotMatch(market,/observe\(mhRoot,\{childList:true,subtree:true\}\)/);
+  assert.match(sources,/saRequestSerial/);
+  assert.match(sources,/requestId!==saRequestSerial\|\|saRoute\(\)!=='sources'/);
+  assert.match(sources,/observe\(saApp,\{childList:true\}\)/);
+  assert.doesNotMatch(sources,/observe\(saApp,\{childList:true,subtree:true\}\)/);
 });
 
 test('production regression audit is wired as a package command',()=>{
