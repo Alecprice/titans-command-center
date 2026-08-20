@@ -12,6 +12,8 @@ test('app shell keeps core accessibility and PWA semantics',()=>{
   assert.match(html,/id="app"[^>]*aria-live="polite"[^>]*tabindex="-1"/);
   assert.match(html,/rel="preload" as="image" href="\/assets\/brand\/current-lockup\.webp"/);
   assert.match(html,/src="\/accessibility-runtime\.js"/);
+  assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
+  assert.match(html,/src="\/fact-polish\.js\?v=21"/);
 });
 
 test('responsive layer preserves keyboard focus, safe areas and reduced motion',()=>{
@@ -38,11 +40,25 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
   assert.match(headers,/https:\/\/:version\.:subdomain\.workers\.dev\/\*[\s\S]*X-Robots-Tag: noindex/);
 });
 
-test('PWA shell excludes server-only modules and includes accessibility runtime',()=>{
+test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v20/);
+  assert.match(sw,/titans-cc-brand-2026-v21/);
   assert.match(sw,/\/accessibility-runtime\.js/);
+  assert.match(sw,/const NETWORK_FIRST=/);
+  assert.match(sw,/js\|mjs\|css\|webmanifest/);
   assert.doesNotMatch(sw,/\/src\/preseason-p1-20260813\.mjs/);
+});
+
+test('DOM polishers cannot recursively observe their own nested rewrites',()=>{
+  const facts=read('fact-polish.js');
+  const legacy=read('legacy-polish.js');
+  assert.match(facts,/factByePolished/);
+  assert.match(facts,/factTbdPolished/);
+  assert.match(facts,/observe\(root,\{childList:true\}\)/);
+  assert.doesNotMatch(facts,/observe\(root,\{childList:true,subtree:true\}\)/);
+  assert.match(legacy,/calloutCopy&&calloutCopy\.textContent!==desired/);
+  assert.match(legacy,/observe\(appRoot,\{childList:true\}\)/);
+  assert.doesNotMatch(legacy,/observe\(appRoot,\{childList:true,subtree:true\}\)/);
 });
 
 test('production regression audit is wired as a package command',()=>{
