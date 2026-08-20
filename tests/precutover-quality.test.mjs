@@ -4,13 +4,17 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('app shell keeps core accessibility and PWA semantics',()=>{
+test('app shell keeps core accessibility, mobile navigation and PWA semantics',()=>{
   const html=read('index.html');
   assert.match(html,/class="skip-link" href="#app"/);
   assert.match(html,/id="menu-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/);
   assert.match(html,/id="primary-nav" aria-label="Primary navigation"/);
   assert.match(html,/id="app"[^>]*aria-live="polite"[^>]*tabindex="-1"/);
   assert.match(html,/rel="preload" as="image" href="\/assets\/brand\/current-lockup\.webp"/);
+  assert.match(html,/class="mobile-nav"[\s\S]*href="#transactions"[^>]*data-route="transactions"[\s\S]*>Moves</);
+  assert.match(html,/id="mobile-more-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/);
+  assert.match(html,/href="\/usability-runtime\.css"/);
+  assert.match(html,/src="\/usability-runtime\.js\?v=25"/);
   assert.match(html,/src="\/accessibility-runtime\.js"/);
   assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
   assert.match(html,/src="\/fact-polish\.js\?v=21"/);
@@ -22,12 +26,32 @@ test('app shell keeps core accessibility and PWA semantics',()=>{
   assert.match(html,/src="\/market-hub\.js\?v=22"/);
 });
 
-test('responsive layer preserves keyboard focus, safe areas and reduced motion',()=>{
-  const css=`${read('ux-polish.css')}\n${read('audit-responsive.css')}`;
+test('responsive layer preserves keyboard focus, safe areas and mobile touch targets',()=>{
+  const css=`${read('ux-polish.css')}\n${read('audit-responsive.css')}\n${read('usability-runtime.css')}`;
   assert.match(css,/:focus-visible/);
   assert.match(css,/prefers-reduced-motion:reduce/);
   assert.match(css,/env\(safe-area-inset-bottom\)/);
-  assert.match(css,/\.mobile-nav a\{min-height:48px\}/);
+  assert.match(css,/\.mobile-nav button,.mobile-nav a\{min-height:48px\}/);
+  assert.match(css,/body\.nav-open\{overflow:hidden\}/);
+});
+
+test('usability runtime prevents stale-route dead ends and keeps navigation state accessible',()=>{
+  const runtime=read('usability-runtime.js');
+  assert.match(runtime,/renderRecovery/);
+  assert.match(runtime,/routeLooksRendered/);
+  assert.match(runtime,/aria-current/);
+  assert.match(runtime,/controllerchange/);
+  assert.match(runtime,/Update ready/);
+  assert.match(runtime,/event\.key==='Escape'/);
+  assert.match(runtime,/current==='home'\|\|current==='live'\|\|current==='games'/);
+});
+
+test('manifest uses dark launch colors and prioritizes core fan shortcuts',()=>{
+  const manifest=JSON.parse(read('manifest.webmanifest'));
+  assert.equal(manifest.background_color,'#06101C');
+  assert.equal(manifest.theme_color,'#0C2340');
+  assert.ok(manifest.shortcuts.some(item=>item.url==='/#transactions'&&item.short_name==='Moves'));
+  assert.ok(manifest.shortcuts.some(item=>item.url==='/#stats'));
 });
 
 test('Cloudflare deployment requires Neon and exposes only API paths to Worker compute',()=>{
@@ -48,8 +72,10 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v24/);
+  assert.match(sw,/titans-cc-brand-2026-v25/);
   assert.match(sw,/\/accessibility-runtime\.js/);
+  assert.match(sw,/\/usability-runtime\.js/);
+  assert.match(sw,/\/usability-runtime\.css/);
   assert.match(sw,/\/transactions-hub\.js/);
   assert.match(sw,/const NETWORK_FIRST=/);
   assert.match(sw,/js\|mjs\|css\|webmanifest/);
@@ -96,6 +122,8 @@ test('async page modules cannot overwrite a later route',()=>{
   assert.match(transactions,/thRequestSerial/);
   assert.match(transactions,/requestId!==thRequestSerial\|\|thRoute\(\)!=='transactions'/);
   assert.match(transactions,/cache:'no-store'/);
+  assert.match(transactions,/aria-busy/);
+  assert.match(transactions,/id="txn-retry"/);
   assert.match(transactions,/observe\(thApp,\{childList:true\}\)/);
   assert.doesNotMatch(transactions,/observe\(thApp,\{childList:true,subtree:true\}\)/);
 });
