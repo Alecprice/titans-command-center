@@ -43,16 +43,8 @@ jobs:
         if: always()
         shell: bash
         run: |
-          if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          fi
-          if [[ -n "$DATABASE_URL" ]]; then
-            echo "database_ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "database_ready=false" >> "$GITHUB_OUTPUT"
-          fi
+          [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]] && echo "ready=true" >> "$GITHUB_OUTPUT" || echo "ready=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$DATABASE_URL" ]] && echo "database_ready=true" >> "$GITHUB_OUTPUT" || echo "database_ready=false" >> "$GITHUB_OUTPUT"
 
       - name: Deploy Worker + static assets
         id: deploy
@@ -66,7 +58,6 @@ jobs:
             echo "deploy_exit_code=$BUILD_RC" >> "$GITHUB_OUTPUT"
             exit $BUILD_RC
           fi
-
           if [[ -n "$DATABASE_URL" ]]; then
             node --input-type=module <<'NODE'
             import fs from 'node:fs';
@@ -83,13 +74,10 @@ jobs:
             DEPLOY_RC=${PIPESTATUS[0]}
             set -e
           fi
-
           echo "deploy_exit_code=$DEPLOY_RC" >> "$GITHUB_OUTPUT"
           WORKER_URL="$(grep -Eo 'https://[A-Za-z0-9.-]+\.workers\.dev' /tmp/cloudflare-deploy.log | tail -1 || true)"
           echo "worker_url=$WORKER_URL" >> "$GITHUB_OUTPUT"
-          if [[ $DEPLOY_RC -ne 0 ]]; then
-            exit $DEPLOY_RC
-          fi
+          [[ $DEPLOY_RC -eq 0 ]] || exit $DEPLOY_RC
 
       - name: Smoke test deployed Worker
         id: smoke
@@ -119,26 +107,7 @@ jobs:
           const data=await get('/api/data',{json:true});
           const stats=await get('/api/preseason-stats',{json:true});
           const market=await get('/api/market-data',{json:true});
-          const result={
-            rootStatus:root.status,
-            shieldStatus:shield.status,
-            healthStatus:health.status,
-            appStatus:health.body?.status||null,
-            databaseOk:Boolean(health.body?.database?.ok),
-            databaseConfigured:Boolean(health.body?.database?.configured),
-            dataStatus:data.status,
-            dataOk:Boolean(data.body?.ok),
-            dataRosterCount:Array.isArray(data.body?.roster)?data.body.roster.length:0,
-            statsStatus:stats.status,
-            rosterCount:Number(stats.body?.rosterCount||0),
-            statsRosterSource:stats.body?.rosterSource||null,
-            completedPreseasonGames:Array.isArray(stats.body?.completedGames)?stats.body.completedGames.length:0,
-            marketStatus:market.status,
-            marketOk:Boolean(market.body?.ok),
-            marketRows:Array.isArray(market.body?.odds)?market.body.odds.length:0,
-            marketMode:market.body?.sourceMode||null,
-            testedAt:new Date().toISOString()
-          };
+          const result={rootStatus:root.status,shieldStatus:shield.status,healthStatus:health.status,appStatus:health.body?.status||null,databaseOk:Boolean(health.body?.database?.ok),databaseConfigured:Boolean(health.body?.database?.configured),dataStatus:data.status,dataOk:Boolean(data.body?.ok),dataRosterCount:Array.isArray(data.body?.roster)?data.body.roster.length:0,statsStatus:stats.status,rosterCount:Number(stats.body?.rosterCount||0),statsRosterSource:stats.body?.rosterSource||null,completedPreseasonGames:Array.isArray(stats.body?.completedGames)?stats.body.completedGames.length:0,marketStatus:market.status,marketOk:Boolean(market.body?.ok),marketRows:Array.isArray(market.body?.odds)?market.body.odds.length:0,marketMode:market.body?.sourceMode||null,testedAt:new Date().toISOString()};
           fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify(result,null,2));
           console.log(JSON.stringify(result,null,2));
           if(root.status!==200)throw new Error(`Root returned ${root.status}`);
@@ -163,17 +132,11 @@ jobs:
           DATABASE_READY: ${{ steps.cloudflare.outputs.database_ready }}
           CLOUDFLARE_READY: ${{ steps.cloudflare.outputs.ready }}
         run: |
-          if [[ "$DEPLOY_OUTCOME" == "success" && "$SMOKE_OUTCOME" == "success" ]]; then
-            STATUS='deployed + smoke-tested + Neon healthy'
-          elif [[ "$DEPLOY_OUTCOME" == "failure" ]]; then
-            STATUS='Cloudflare deploy failed before smoke test'
-          elif [[ "$QUALITY_OUTCOME" != "success" ]]; then
-            STATUS='quality gate failed before Cloudflare deploy'
-          elif [[ "$CLOUDFLARE_READY" != "true" ]]; then
-            STATUS='Cloudflare credentials unavailable to workflow'
-          else
-            STATUS="deployed + smoke check ${SMOKE_OUTCOME:-not-run}"
-          fi
+          if [[ "$DEPLOY_OUTCOME" == "success" && "$SMOKE_OUTCOME" == "success" ]]; then STATUS='deployed + smoke-tested + Neon healthy';
+          elif [[ "$DEPLOY_OUTCOME" == "failure" ]]; then STATUS='Cloudflare deploy failed before smoke test';
+          elif [[ "$QUALITY_OUTCOME" != "success" ]]; then STATUS='quality gate failed before Cloudflare deploy';
+          elif [[ "$CLOUDFLARE_READY" != "true" ]]; then STATUS='Cloudflare credentials unavailable to workflow';
+          else STATUS="deployed + smoke check ${SMOKE_OUTCOME:-not-run}"; fi
           {
             echo '# Cloudflare deployment status'
             echo
@@ -185,18 +148,15 @@ jobs:
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
             echo "- Deploy exit code: ${DEPLOY_EXIT_CODE:-not-recorded}"
             echo "- Smoke outcome: ${SMOKE_OUTCOME:-not-run}"
-            if [[ -n "$WORKER_URL" ]]; then
-              echo "- Worker URL: $WORKER_URL"
-            else
-              echo '- Worker URL: not recorded in this run'
-            fi
+            [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: not recorded in this run'
             echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            if [[ -f /tmp/cloudflare-smoke.json ]]; then
+            if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Smoke test'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
+            if [[ -f /tmp/cloudflare-deploy.log ]]; then
               echo
-              echo '## Smoke test'
+              echo '## Deploy log tail'
               echo
-              echo '```json'
-              cat /tmp/cloudflare-smoke.json
+              echo '```text'
+              tail -30 /tmp/cloudflare-deploy.log | sed -E 's#postgres(ql)?://[^ ]+#postgresql://[redacted]#g'
               echo '```'
             fi
             echo
@@ -205,7 +165,4 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add docs/CLOUDFLARE_STATUS.md
-          if ! git diff --cached --quiet; then
-            git commit -m 'chore: record Cloudflare deployment status [skip ci]'
-            git push
-          fi
+          if ! git diff --cached --quiet; then git commit -m 'chore: record Cloudflare deployment status [skip ci]'; git push; fi
