@@ -34,7 +34,10 @@ jobs:
 
       - name: Run Titans quality gate
         id: quality
-        run: npm run check
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run check 2>&1 | tee /tmp/quality.log
 
       - name: Check deployment credentials
         id: creds
@@ -112,6 +115,7 @@ jobs:
             echo "- Browser navigation regression: ${BROWSER_OUTCOME:-not-run}"
             [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: existing deployment remains unchanged'
             echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            if [[ "$QUALITY_OUTCOME" != "success" && -f /tmp/quality.log ]]; then echo; echo '## Quality gate tail'; echo; echo '```text'; tail -n 120 /tmp/quality.log; echo '```'; fi
             if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Production regression'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
             if [[ -f /tmp/browser-nav-smoke.json ]]; then echo; echo '## Browser navigation regression'; echo; echo '```json'; cat /tmp/browser-nav-smoke.json; echo '```'; fi
             echo
