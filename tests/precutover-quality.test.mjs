@@ -29,6 +29,15 @@ test('Cloudflare deployment requires Neon and exposes only API paths to Worker c
   assert.match(config,/"observability"\s*:\s*\{\s*"enabled"\s*:\s*true/);
 });
 
+test('Cloudflare static policy hardens the temporary workers.dev deployment',()=>{
+  const headers=read('_headers');
+  assert.match(headers,/X-Content-Type-Options: nosniff/);
+  assert.match(headers,/X-Frame-Options: DENY/);
+  assert.match(headers,/Referrer-Policy: strict-origin-when-cross-origin/);
+  assert.match(headers,/Content-Security-Policy:.*frame-ancestors 'none'/);
+  assert.match(headers,/https:\/\/:version\.:subdomain\.workers\.dev\/\*[\s\S]*X-Robots-Tag: noindex/);
+});
+
 test('PWA shell excludes server-only modules and includes accessibility runtime',()=>{
   const sw=read('sw.js');
   assert.match(sw,/titans-cc-brand-2026-v20/);
@@ -43,4 +52,6 @@ test('production regression audit is wired as a package command',()=>{
   assert.match(script,/Expected 95 Neon roster players/);
   assert.match(script,/PWA precache paths failed/);
   assert.match(script,/database connection string leaked/i);
+  assert.match(script,/workers\.dev staging hostname is not marked noindex/);
+  assert.match(script,/Deployed commit .* does not match expected/);
 });
