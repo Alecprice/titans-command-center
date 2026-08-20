@@ -1,14 +1,14 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production regression passed**
-- Source commit: `dc9eca2eb0445cb45b009845725fa6c2ff620081`
+- Source commit: `10259ce5cd8726bc8077892d930cf0e2033dbf84`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
 - Deploy outcome: success
 - Production regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T17:31:57Z
+- Recorded: 2026-08-20T17:34:32Z
 
 ## Production regression
 
@@ -45,18 +45,18 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "dc9eca2eb0445cb45b009845725fa6c2ff620081",
-    "builtAt": "2026-08-20T17:31:23.650Z"
+    "commit": "10259ce5cd8726bc8077892d930cf0e2033dbf84",
+    "builtAt": "2026-08-20T17:34:07.274Z"
   },
-  "deploymentPropagationAttempts": 6,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 21,
-    "health": 339,
-    "data": 769,
-    "stats": 251,
-    "market": 326
+    "root": 87,
+    "health": 181,
+    "data": 379,
+    "stats": 286,
+    "market": 1170
   },
-  "testedAt": "2026-08-20T17:31:57.264Z"
+  "testedAt": "2026-08-20T17:34:32.593Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
