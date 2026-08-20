@@ -1,5 +1,5 @@
 const thRoute=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
-const thEsc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const thEsc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const thDate=value=>{if(!value)return'TBD';const date=new Date(value);return Number.isNaN(date.getTime())?'TBD':new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}).format(date)};
 const thSafeUrl=value=>{try{const url=new URL(String(value||''),location.origin);return ['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}};
 let thRequestSerial=0;
