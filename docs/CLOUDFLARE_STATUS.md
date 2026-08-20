@@ -1,14 +1,14 @@
 # Cloudflare deployment status
 
 - Status: **deployed + smoke-tested + Neon healthy**
-- Source commit: `c186b53bc838ecc3171b59343589c37ec95246bf`
+- Source commit: `cb80d4d0a8117d6d779fbb2b6016ba7bb0414612`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
 - Deploy outcome: success
 - Smoke outcome: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-20T16:38:57Z
+- Recorded: 2026-08-20T16:44:21Z
 
 ## Smoke test
 
@@ -31,7 +31,7 @@
   "marketOk": true,
   "marketRows": 6,
   "marketMode": "published-reference",
-  "testedAt": "2026-08-20T16:38:57.076Z"
+  "testedAt": "2026-08-20T16:44:21.640Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
