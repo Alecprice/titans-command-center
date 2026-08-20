@@ -51,9 +51,9 @@ def browser_state(driver):
         return driver.execute_script("""
           const app=document.querySelector('#app');
           const grid=document.querySelector('#rg');
-          const rosterButton=document.querySelector('[data-team-room-view="roster"]');
-          const depthButton=document.querySelector('[data-team-room-view="depth"]');
-          const staffButton=document.querySelector('[data-team-room-view="staff"]');
+          const rosterButton=document.querySelector('.team-room-switcher [data-team-room-view="roster"]');
+          const depthButton=document.querySelector('.team-room-switcher [data-team-room-view="depth"]');
+          const staffButton=document.querySelector('.team-room-switcher [data-team-room-view="staff"]');
           return {
             href:location.href,
             hash:location.hash,
@@ -215,14 +215,14 @@ try:
     stage = 'mobile:roster-cards'
     wait_for(driver, "document.querySelectorAll('#rg .player-card').length > 0", timeout=10)
     stage = 'mobile:roster-pressed'
-    wait_for(driver, "document.querySelector('[data-team-room-view=\"roster\"]')?.getAttribute('aria-pressed') === 'true'")
+    wait_for(driver, "document.querySelector('.team-room-switcher [data-team-room-view=\"roster\"]')?.getAttribute('aria-pressed') === 'true'")
     assert_no_horizontal_overflow(driver, 'mobile Roster')
 
     stage = 'mobile:depth-route-state'
-    driver.execute_script("document.querySelector('[data-team-room-view=\"depth\"]')?.click()")
+    driver.execute_script("document.querySelector('.team-room-switcher [data-team-room-view=\"depth\"]')?.click()")
     wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'depth'")
     stage = 'mobile:depth-pressed'
-    wait_for(driver, "document.querySelector('[data-team-room-view=\"depth\"]')?.getAttribute('aria-pressed') === 'true'")
+    wait_for(driver, "document.querySelector('.team-room-switcher [data-team-room-view=\"depth\"]')?.getAttribute('aria-pressed') === 'true'")
     stage = 'mobile:depth-panel'
     wait_for(driver, "document.querySelector('.team-room-panel[data-panel=\"depth\"]')?.hidden === false")
     stage = 'mobile:depth-grid-hidden'
@@ -230,15 +230,15 @@ try:
     assert_no_horizontal_overflow(driver, 'mobile Depth Chart')
 
     stage = 'mobile:staff-arrow-key'
-    depth_button = driver.find_element('css selector', '[data-team-room-view="depth"]')
+    depth_button = driver.find_element('css selector', '.team-room-switcher [data-team-room-view="depth"]')
     depth_button.send_keys(Keys.ARROW_RIGHT)
     wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'staff'")
-    wait_for(driver, "document.querySelector('[data-team-room-view=\"staff\"]')?.getAttribute('aria-pressed') === 'true'")
+    wait_for(driver, "document.querySelector('.team-room-switcher [data-team-room-view=\"staff\"]')?.getAttribute('aria-pressed') === 'true'")
     wait_for(driver, "document.querySelector('.team-room-panel[data-panel=\"staff\"]')?.hidden === false")
     assert_no_horizontal_overflow(driver, 'mobile Staff')
 
     stage = 'mobile:return-roster'
-    driver.execute_script("document.querySelector('[data-team-room-view=\"roster\"]')?.click()")
+    driver.execute_script("document.querySelector('.team-room-switcher [data-team-room-view=\"roster\"]')?.click()")
     wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'roster'")
     wait_for(driver, "document.querySelector('#rg')?.hidden === false && getComputedStyle(document.querySelector('#rg')).display !== 'none' && document.querySelectorAll('#rg .player-card').length > 0")
     assert_no_horizontal_overflow(driver, 'mobile Roster restored')
