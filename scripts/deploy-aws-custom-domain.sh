@@ -15,8 +15,7 @@ command -v curl >/dev/null 2>&1 || { echo 'ERROR: curl is required.' >&2; exit 1
 
 # COST SAFETY: This CloudFormation template creates a standard pay-as-you-go
 # CloudFront distribution. AWS has a separate $0/month CloudFront flat-rate
-# Free plan with no overage charges, but subscription to that plan is managed
-# separately from this template. Fail closed so a normal invocation cannot
+# Free plan with no overage charges. Fail closed so a normal invocation cannot
 # accidentally create a metered distribution.
 if [[ "$PAYG_OVERRIDE" != "I_UNDERSTAND_CHARGES" ]]; then
   cat >&2 <<'EOF'
@@ -67,6 +66,7 @@ aws cloudformation deploy \
   --stack-name "$STACK" \
   --template-file "$TEMPLATE" \
   --parameter-overrides \
+    PayAsYouGoAcknowledgement=I_UNDERSTAND_CHARGES \
     DomainName="$DOMAIN" \
     HostedZoneId="$HOSTED_ZONE_ID" \
     OriginDomainName="$ORIGIN" \
