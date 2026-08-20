@@ -12,12 +12,17 @@ test('Cloudflare Worker serves static assets and runs only API paths through com
   assert.match(config,/"not_found_handling"\s*:\s*"single-page-application"/);
   assert.match(config,/"run_worker_first"\s*:\s*\["\/api\/\*"\]/);
   assert.match(config,/"15 10 \* \* \*"/);
+  assert.match(config,/"required"\s*:\s*\["DATABASE_URL"\]/);
 });
 
-test('Cloudflare adapter reuses the existing single API gateway and trusted scheduler',()=>{
+test('Cloudflare adapter uses native Worker env for core API routes and trusted scheduler',()=>{
   const worker=read('cloudflare/worker.mjs');
   assert.match(worker,/import apiHandler from '\.\.\/api\/index\.js'/);
-  assert.match(worker,/pathname\.startsWith\(API_PREFIX\)/);
+  assert.match(worker,/databaseHealth\(env\)/);
+  assert.match(worker,/getBootstrapData\(env\)/);
+  assert.match(worker,/preseasonStatsRoute,env/);
+  assert.match(worker,/marketDataRoute,env/);
+  assert.match(worker,/runApi\(request,env\)/);
   assert.match(worker,/env\.ASSETS\.fetch\(request\)/);
   assert.match(worker,/executeScheduledJob/);
   assert.match(worker,/syncTitansOfficialAudit/);
@@ -25,12 +30,13 @@ test('Cloudflare adapter reuses the existing single API gateway and trusted sche
   assert.doesNotMatch(worker,/CRON_SECRET\|\|env\.INGEST_SECRET/);
 });
 
-test('Cloudflare adapter explicitly bridges server-only bindings for reused Node API modules',()=>{
+test('Cloudflare adapter retains a temporary process.env bridge only for legacy gateway routes',()=>{
   const worker=read('cloudflare/worker.mjs');
   assert.match(worker,/SERVER_BINDINGS/);
   assert.match(worker,/DATABASE_URL/);
   assert.match(worker,/applyRuntimeEnv\(env\)/);
   assert.match(worker,/process\.env\[key\]=String\(value\)/);
+  assert.match(worker,/Legacy routes still share the Vercel-compatible gateway/);
 });
 
 test('Cloudflare build publishes only browser-facing assets',()=>{
