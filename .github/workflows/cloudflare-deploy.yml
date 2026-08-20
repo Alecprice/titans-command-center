@@ -3,10 +3,12 @@ name: Titans Cloudflare Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/CLOUDFLARE_STATUS.md'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: titans-cloudflare-production
@@ -46,5 +48,39 @@ jobs:
           fi
 
       - name: Deploy Worker + static assets
+        id: deploy
         if: steps.cloudflare.outputs.ready == 'true'
-        run: npm run deploy:cloudflare
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run deploy:cloudflare 2>&1 | tee /tmp/cloudflare-deploy.log
+          WORKER_URL="$(grep -Eo 'https://[A-Za-z0-9.-]+\.workers\.dev' /tmp/cloudflare-deploy.log | tail -1 || true)"
+          echo "worker_url=$WORKER_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Record successful Cloudflare deployment
+        if: steps.deploy.outcome == 'success'
+        shell: bash
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
+        run: |
+          {
+            echo '# Cloudflare deployment status'
+            echo
+            echo '- Status: **deployed**'
+            echo "- Source commit: \`$GITHUB_SHA\`"
+            if [[ -n "$WORKER_URL" ]]; then
+              echo "- Worker URL: $WORKER_URL"
+            else
+              echo '- Worker URL: deployment succeeded; Wrangler did not emit a parseable workers.dev URL in this run.'
+            fi
+            echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo
+            echo 'Generated automatically by `.github/workflows/cloudflare-deploy.yml` after a successful Cloudflare deployment.'
+          } > docs/CLOUDFLARE_STATUS.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/CLOUDFLARE_STATUS.md
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore: record Cloudflare deployment status [skip ci]'
+            git push
+          fi
