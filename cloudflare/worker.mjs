@@ -1,7 +1,12 @@
 import apiHandler from '../api/index.js';
+import {databaseHealth,getBootstrapData,getSql} from '../src/db.mjs';
+import {getAuditedTeamContext} from '../src/team-context.mjs';
+import {preseasonStatsRoute} from '../src/preseason-api.mjs';
+import {marketDataRoute} from '../src/market-api.mjs';
 import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflverseStats,syncNwsNextHomeGame,syncFreeOdds,recordSyncRun} from '../src/ingest.mjs';
 
 const API_PREFIX='/api/';
+const APP_VERSION='0.8.0';
 const SERVER_BINDINGS=['DATABASE_URL','INGEST_SECRET','CRON_SECRET','PROPLINE_API_KEY','ODDS_API_IO_KEY','PROPLINE_BOOKS','PROPLINE_EXTRA_MARKETS','ODDS_API_IO_BOOKS','ODDS_CACHE_SECONDS','TITANS_HISTORY_START','TITANS_HISTORY_END','CONTINUE_ON_IMPORT_ERROR'];
 
 function applyRuntimeEnv(env){
@@ -66,18 +71,67 @@ function vercelResponse(){
   return {api,result:()=>response||new Response(null,{status:statusCode,headers})};
 }
 
-async function runApi(request){
-  const url=new URL(request.url);
-  const route=url.pathname.slice(API_PREFIX.length).replace(/^\/+|\/+$/g,'');
-  if(!route)return Response.json({ok:false,error:'API route required'},{status:404});
+function jsonResponse(payload,status=200,headers={}){
+  return new Response(JSON.stringify(payload),{
+    status,
+    headers:{'Content-Type':'application/json; charset=utf-8',...headers}
+  });
+}
+
+async function nativeHealth(request,env){
+  if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});
+  const db=await databaseHealth(env);
+  return jsonResponse({
+    ok:true,
+    status:db.ok?'healthy':'degraded',
+    app:'titans-command-center',
+    version:APP_VERSION,
+    contentAudit:'2026-08-19',
+    time:new Date().toISOString(),
+    database:db,
+    providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),espnFallback:true,nws:true},
+    fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}
+  },200,{'Cache-Control':'no-store'});
+}
+
+async function nativeData(request,env){
+  if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});
+  const headers={'Cache-Control':'public, s-maxage=30, stale-while-revalidate=120'};
+  const data=await getBootstrapData(env);
+  if(!data.configured)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);
+  if(!data.ok)return jsonResponse(data,503,headers);
+  const sql=await getSql(env);
+  const teamContext=await getAuditedTeamContext(sql);
+  return jsonResponse({...data,teamContext},200,headers);
+}
+
+async function adapterRoute(request,route,handler,env){
   const req=vercelRequest(request,route);
   const res=vercelResponse();
+  await handler(req,res.api,env);
+  return res.result();
+}
+
+async function runApi(request,env){
+  const url=new URL(request.url);
+  const route=url.pathname.slice(API_PREFIX.length).replace(/^\/+|\/+$/g,'');
+  if(!route)return jsonResponse({ok:false,error:'API route required'},404);
   try{
+    if(route==='health')return await nativeHealth(request,env);
+    if(route==='data')return await nativeData(request,env);
+    if(route==='preseason-stats')return await adapterRoute(request,route,preseasonStatsRoute,env);
+    if(route==='market-data')return await adapterRoute(request,route,marketDataRoute,env);
+
+    // Legacy routes still share the Vercel-compatible gateway. Mirror bindings for
+    // those routes until the remaining handlers are migrated to explicit env args.
+    applyRuntimeEnv(env);
+    const req=vercelRequest(request,route);
+    const res=vercelResponse();
     await apiHandler(req,res.api);
     return res.result();
   }catch(error){
     console.error('[cloudflare-api-adapter]',route,error);
-    return Response.json({ok:false,error:'API request failed'},{status:500});
+    return jsonResponse({ok:false,error:'API request failed'},500);
   }
 }
 
@@ -91,7 +145,6 @@ async function executeScheduledJob(env,job,run){
 }
 
 async function runScheduled(env){
-  applyRuntimeEnv(env);
   const jobs=[
     ['official-audit',()=>syncTitansOfficialAudit(env)],
     ['espn',()=>syncEspn(env)],
@@ -109,9 +162,8 @@ async function runScheduled(env){
 
 export default {
   async fetch(request,env){
-    applyRuntimeEnv(env);
     const pathname=new URL(request.url).pathname;
-    if(pathname.startsWith(API_PREFIX))return runApi(request);
+    if(pathname.startsWith(API_PREFIX))return runApi(request,env);
     return env.ASSETS.fetch(request);
   },
   async scheduled(_controller,env,ctx){
