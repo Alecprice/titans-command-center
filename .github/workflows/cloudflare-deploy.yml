@@ -21,6 +21,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,14 +47,30 @@ jobs:
             echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Cloudflare deploy skipped until CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets are configured."
           fi
+          if [[ -n "$DATABASE_URL" ]]; then
+            echo "database_ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "database_ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::DATABASE_URL GitHub Actions secret is not configured; deploy will continue without uploading a database secret."
+          fi
 
       - name: Deploy Worker + static assets
         id: deploy
         if: steps.cloudflare.outputs.ready == 'true'
         shell: bash
         run: |
-          set -o pipefail
-          npm run deploy:cloudflare 2>&1 | tee /tmp/cloudflare-deploy.log
+          set -euo pipefail
+          npm run build:cloudflare
+          if [[ -n "$DATABASE_URL" ]]; then
+            node --input-type=module <<'NODE'
+            import fs from 'node:fs';
+            fs.writeFileSync('/tmp/cloudflare-secrets.json',JSON.stringify({DATABASE_URL:process.env.DATABASE_URL}));
+            NODE
+            npx wrangler@4 deploy --secrets-file /tmp/cloudflare-secrets.json 2>&1 | tee /tmp/cloudflare-deploy.log
+            rm -f /tmp/cloudflare-secrets.json
+          else
+            npx wrangler@4 deploy 2>&1 | tee /tmp/cloudflare-deploy.log
+          fi
           WORKER_URL="$(grep -Eo 'https://[A-Za-z0-9.-]+\.workers\.dev' /tmp/cloudflare-deploy.log | tail -1 || true)"
           echo "worker_url=$WORKER_URL" >> "$GITHUB_OUTPUT"
 
@@ -123,6 +140,7 @@ jobs:
         env:
           WORKER_URL: ${{ steps.deploy.outputs.worker_url }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          DATABASE_READY: ${{ steps.cloudflare.outputs.database_ready }}
         run: |
           if [[ "$SMOKE_OUTCOME" == "success" ]]; then
             STATUS='deployed + smoke-tested + Neon healthy'
@@ -134,6 +152,7 @@ jobs:
             echo
             echo "- Status: **$STATUS**"
             echo "- Source commit: \`$GITHUB_SHA\`"
+            echo "- DATABASE_URL GitHub secret supplied to deploy: $DATABASE_READY"
             if [[ -n "$WORKER_URL" ]]; then
               echo "- Worker URL: $WORKER_URL"
             else
