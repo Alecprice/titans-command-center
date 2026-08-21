@@ -1,17 +1,18 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser + analytics + player headshot regressions passed**
-- Source commit: `858c7acc55729fa948e0d2fbf386482c29a3fe5c`
+- Status: **deployed + Listen Watch browser regression failure**
+- Source commit: `09de8ee46d4c3c7423ba9836f20b4c73c0248f8f`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
 - Deploy outcome: success
 - Production regression: success
 - Browser navigation regression: success
-- Advanced analytics browser regression: success
-- Player headshot browser regression: success
+- Listen Watch browser regression: failure
+- Advanced analytics browser regression: skipped
+- Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-21T21:29:24Z
+- Recorded: 2026-08-21T21:41:23Z
 
 ## Production regression
 
@@ -24,14 +25,14 @@
     "contentTypeOptions": "nosniff",
     "frameOptions": "DENY",
     "referrerPolicy": "strict-origin-when-cross-origin",
-    "contentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com; connect-src 'self'; media-src 'self' https://playerservices.streamtheworld.com; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com; connect-src 'self'; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
     "robots": "noindex, nofollow",
     "csp": true
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v37",
-  "precachePaths": 64,
+  "serviceWorkerCache": "titans-cc-brand-2026-v38",
+  "precachePaths": 65,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -63,19 +64,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "858c7acc55729fa948e0d2fbf386482c29a3fe5c",
-    "builtAt": "2026-08-21T21:28:45.616Z"
+    "commit": "09de8ee46d4c3c7423ba9836f20b4c73c0248f8f",
+    "builtAt": "2026-08-21T21:39:59.538Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 15,
   "responseMs": {
-    "root": 100,
-    "health": 962,
-    "data": 387,
-    "stats": 215,
-    "market": 1330,
-    "analytics": 894
+    "root": 32,
+    "health": 200,
+    "data": 271,
+    "stats": 148,
+    "market": 674,
+    "analytics": 529
   },
-  "testedAt": "2026-08-21T21:29:08.791Z",
+  "testedAt": "2026-08-21T21:40:51.367Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -105,8 +106,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 143,
-  "testedAt": "2026-08-21T21:29:09.922Z"
+  "durationMs": 167,
+  "testedAt": "2026-08-21T21:40:52.192Z"
 }```
 
 ## Browser navigation regression
@@ -155,77 +156,26 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 84,
+  "maxLongTaskMs": 115,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 7.31,
-  "testedAt": "2026-08-21T21:29:20Z"
+  "durationSeconds": 15.87,
+  "testedAt": "2026-08-21T21:41:11Z"
 }```
 
-## Advanced analytics browser regression
+## Listen Watch browser regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "metricCount": 4,
-  "metricValues": [
-    {
-      "detail": "#30 of 32",
-      "label": "Offensive EPA / play",
-      "value": "-0.148"
-    },
-    {
-      "detail": "#28 of 32",
-      "label": "Defensive EPA / play allowed",
-      "value": "+0.104"
-    },
-    {
-      "detail": "#11 of 32",
-      "label": "Pace",
-      "value": "28.9 sec/play"
-    },
-    {
-      "detail": "Latest loaded week: 18",
-      "label": "Rest days",
-      "value": "7 days"
-    }
-  ],
-  "situationFields": [
-    "Down & distance",
-    "Field position",
-    "Formation",
-    "Personnel",
-    "Score diff",
-    "TEN EPA",
-    "Time remaining"
-  ],
-  "initialPlayCards": 60,
-  "offenseFilteredPlayCards": 39,
-  "mobileMetricCount": 4,
-  "browserWarnings": [],
-  "durationSeconds": 1.52,
-  "testedAt": "2026-08-21T21:29:22Z"
-}```
-
-## Player headshot browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "rosterCards": 95,
-  "rosterDecoratedHeadshots": 82,
-  "rosterLoadedHeadshots": 46,
-  "statsPlayerRows": 95,
-  "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 7,
-  "mobileLoadedHeadshots": 7,
-  "richPlayer": "Austin Schlottmann",
-  "richPlayerHeadshotLoaded": true,
-  "browserWarnings": [],
-  "durationSeconds": 2.18,
-  "testedAt": "2026-08-21T21:29:24Z"
+  "stage": "desktop:click-media-link",
+  "error": "TimeoutException: Message: \n",
+  "durationSeconds": 11.02,
+  "testedAt": "2026-08-21T21:41:22Z",
+  "hash": "#media",
+  "pageText": "TITANS MEDIA CENTER\nListen / Watch\n\nOne simple place to find the Titans broadcast you can legally use \u2014 local radio, all-game audio, TV and streaming.\n\nNashville / Middle Tennessee\nElsewhere in U.S.\nInternational\nNEXT GAME\nvs Seattle Seahawks\nSun, Aug 23, 7:00 PM\nFOX\nLISTEN\nTitans Radio\n\nNashville flagship: WGFX 104.5 The Zone. Use the official station or Titans game-audio player below; NFL geographic/device restrictions can still apply.\n\n104.5\nTHE ZONE\nNEXT TITANS BROADCAST\nvs Seattle Seahawks\nSun, Aug 23, 7:00 PM\nGAME AUDIO\nListen on Titans Radio\nThe official live-audio button appears when the broadcast is available. Mobile home-market rules apply.\nOpen official game audio \u2197\n104.5 THE ZONE\nOpen the official station player\nCurrent 104.5 web player \u00b7 player ID 3234.\nOpen 104.5 \u2197\n\nThe Comma",
+  "browserWarnings": []
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
