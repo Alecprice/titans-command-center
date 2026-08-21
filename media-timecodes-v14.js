@@ -33,6 +33,6 @@
   window.addEventListener('hashchange',()=>setTimeout(run,0));
   window.addEventListener('popstate',()=>setTimeout(run,0));
   window.addEventListener('storage',event=>{if(event.key===AREA_KEY&&route()==='media'){document.querySelector('.media-tune-guide')?.remove();run()}});
-  if(app)new MutationObserver(()=>queueMicrotask(renderGuide)).observe(app,{childList:true,subtree:false});
+  if(app)new MutationObserver(()=>queueMicrotask(()=>{if(route()==='media'&&!data)run();else renderGuide()})).observe(app,{childList:true,subtree:false});
   setTimeout(run,80);
 })();
