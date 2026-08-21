@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeOddsRows } from '../src/odds.mjs';
+import { fetchFreeOdds, normalizeOddsRows, resetOddsRuntimeCache } from '../src/odds.mjs';
 
 const payload={
   id:'148033',
@@ -81,4 +81,34 @@ test('player prop description is preserved as entity name',()=>{
   assert.equal(prop.statId,'player_pass_yds');
   assert.equal(prop.book,'FanDuel');
   assert.equal(prop.periodId,'game');
+});
+
+test('free provider runtime cache caps event requests and reuses a successful response',async t=>{
+  const originalFetch=globalThis.fetch;
+  let calls=0;
+  const events=[
+    {id:'evt-1',home_team:'Tennessee Titans',away_team:'Seattle Seahawks',commence_time:'2026-08-24T00:00:00Z'},
+    {id:'evt-2',home_team:'TEN Titans',away_team:'CHI Bears',commence_time:'2026-08-29T22:00:00Z'},
+    {id:'evt-3',home_team:'Tennessee Titans',away_team:'Houston Texans',commence_time:'2026-09-06T17:00:00Z'}
+  ];
+  globalThis.fetch=async url=>{
+    calls++;
+    const value=String(url);
+    if(value.endsWith('/events'))return new Response(JSON.stringify(events),{status:200,headers:{'content-type':'application/json','x-ratelimit-remaining':'998','x-ratelimit-limit':'1000'}});
+    const id=value.match(/\/events\/([^/]+)\/odds/)?.[1]||'evt-1';
+    return new Response(JSON.stringify({id,bookmakers:[{key:'fanduel',title:'FanDuel',markets:[{key:'h2h',outcomes:[{name:'Tennessee Titans',price:-120},{name:'Opponent',price:110}]}]}]}),{status:200,headers:{'content-type':'application/json'}});
+  };
+  resetOddsRuntimeCache();
+  t.after(()=>{globalThis.fetch=originalFetch;resetOddsRuntimeCache()});
+  const env={PROPLINE_API_KEY:'test-only-key',ODDS_CACHE_SECONDS:'300'};
+  const first=await fetchFreeOdds(env,{maxEvents:3});
+  assert.equal(first.ok,true);
+  assert.equal(first.events.length,2,'public fetches should cap provider event detail calls at two');
+  assert.equal(calls,3,'one events request plus two event-odds requests expected');
+  const second=await fetchFreeOdds(env,{maxEvents:3});
+  assert.equal(second.cache,'runtime-memory');
+  assert.equal(calls,3,'a warm cache must not spend more provider requests');
+  const bypassed=await fetchFreeOdds(env,{maxEvents:3,bypassCache:true});
+  assert.equal(bypassed.ok,true);
+  assert.equal(calls,6,'trusted bypass performs one fresh events request plus two odds requests');
 });
