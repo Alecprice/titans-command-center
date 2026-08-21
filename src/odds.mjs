@@ -31,6 +31,9 @@ const rowTime = (...values) => {
   for(const value of values){if(!value)continue;const d=new Date(value);if(!Number.isNaN(d.getTime()))return d.toISOString();}
   return new Date().toISOString();
 };
+const cacheSeconds = env => {const raw=Number(env?.ODDS_CACHE_SECONDS||300);return Number.isFinite(raw)?Math.max(300,Math.min(900,raw)):300};
+let runtimeOddsCache={key:'',expiresAt:0,value:null,inflight:null};
+export function resetOddsRuntimeCache(){runtimeOddsCache={key:'',expiresAt:0,value:null,inflight:null}}
 
 function inferAlternateLines(rows) {
   const groups=new Map();
@@ -159,11 +162,28 @@ async function fetchOddsApiIo(env,{maxEvents=2}={}) {
   return {ok:true,configured:true,provider:'Odds-API.io',events,odds,futures:[],fetchedAt:new Date().toISOString()};
 }
 
-export async function fetchFreeOdds(env=process.env, options={}) {
+async function loadProviderOdds(env,options){
   const diagnostics=[];
-  if(env.PROPLINE_API_KEY){try{const r=await fetchPropLine(env,options);diagnostics.push({provider:'PropLine',ok:r.ok,rows:r.odds.length});if(r.ok&&(r.odds.length||r.events.length))return {...r,diagnostics};}catch(e){diagnostics.push({provider:'PropLine',ok:false,error:e.message});}}
-  if(env.ODDS_API_IO_KEY){try{const r=await fetchOddsApiIo(env,options);diagnostics.push({provider:'Odds-API.io',ok:r.ok,rows:r.odds.length});if(r.ok)return {...r,diagnostics};}catch(e){diagnostics.push({provider:'Odds-API.io',ok:false,error:e.message});}}
-  return {ok:false,provider:'free-odds-stack',events:[],odds:[],futures:[],diagnostics,error:'No configured free odds provider returned data',fetchedAt:new Date().toISOString()};
+  if(env.PROPLINE_API_KEY){try{const r=await fetchPropLine(env,options);diagnostics.push({provider:'PropLine',ok:r.ok,rows:r.odds.length});if(r.ok&&(r.odds.length||r.events.length))return {...r,diagnostics,cache:'provider'};}catch(e){diagnostics.push({provider:'PropLine',ok:false,error:e.message});}}
+  if(env.ODDS_API_IO_KEY){try{const r=await fetchOddsApiIo(env,options);diagnostics.push({provider:'Odds-API.io',ok:r.ok,rows:r.odds.length});if(r.ok)return {...r,diagnostics,cache:'provider'};}catch(e){diagnostics.push({provider:'Odds-API.io',ok:false,error:e.message});}}
+  return {ok:false,provider:'free-odds-stack',events:[],odds:[],futures:[],diagnostics,error:'No configured free odds provider returned data',fetchedAt:new Date().toISOString(),cache:'provider'};
+}
+
+export async function fetchFreeOdds(env=process.env, options={}) {
+  const maxEvents=Math.min(2,Math.max(1,Number(options.maxEvents||2)||2));
+  const requestOptions={...options,maxEvents};
+  const useCache=options.bypassCache!==true;
+  const providerKey=`${env.PROPLINE_API_KEY?'propline':''}|${env.ODDS_API_IO_KEY?'oddsapiio':''}|${maxEvents}`;
+  const now=Date.now();
+  if(useCache&&runtimeOddsCache.key===providerKey&&runtimeOddsCache.value&&now<runtimeOddsCache.expiresAt)return {...runtimeOddsCache.value,cache:'runtime-memory'};
+  if(useCache&&runtimeOddsCache.key===providerKey&&runtimeOddsCache.inflight)return runtimeOddsCache.inflight;
+  if(!useCache)return loadProviderOdds(env,requestOptions);
+  const pending=loadProviderOdds(env,requestOptions).then(result=>{
+    if(result.ok){runtimeOddsCache.value=result;runtimeOddsCache.expiresAt=Date.now()+cacheSeconds(env)*1000;}
+    return result;
+  });
+  runtimeOddsCache={key:providerKey,expiresAt:runtimeOddsCache.key===providerKey?runtimeOddsCache.expiresAt:0,value:runtimeOddsCache.key===providerKey?runtimeOddsCache.value:null,inflight:pending};
+  try{return await pending}finally{if(runtimeOddsCache.inflight===pending)runtimeOddsCache.inflight=null}
 }
 
 export async function probeFreeOddsProviders(env=process.env,{compare=true}={}) {
