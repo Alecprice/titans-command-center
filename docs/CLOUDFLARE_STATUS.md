@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Listen Watch browser regression failure**
-- Source commit: `09de8ee46d4c3c7423ba9836f20b4c73c0248f8f`
+- Source commit: `f0de76b1236519ad82996062c6340e2ea7a182eb`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -12,7 +12,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-21T21:41:23Z
+- Recorded: 2026-08-21T23:10:05Z
 
 ## Production regression
 
@@ -31,8 +31,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v38",
-  "precachePaths": 65,
+  "serviceWorkerCache": "titans-cc-brand-2026-v40",
+  "precachePaths": 69,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -64,19 +64,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "09de8ee46d4c3c7423ba9836f20b4c73c0248f8f",
-    "builtAt": "2026-08-21T21:39:59.538Z"
+    "commit": "f0de76b1236519ad82996062c6340e2ea7a182eb",
+    "builtAt": "2026-08-21T23:09:03.947Z"
   },
-  "deploymentPropagationAttempts": 15,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 32,
-    "health": 200,
-    "data": 271,
-    "stats": 148,
-    "market": 674,
-    "analytics": 529
+    "root": 59,
+    "health": 806,
+    "data": 416,
+    "stats": 1046,
+    "market": 1087,
+    "analytics": 515
   },
-  "testedAt": "2026-08-21T21:40:51.367Z",
+  "testedAt": "2026-08-21T23:09:30.653Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -106,8 +106,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 167,
-  "testedAt": "2026-08-21T21:40:52.192Z"
+  "durationMs": 130,
+  "testedAt": "2026-08-21T23:09:31.425Z"
 }```
 
 ## Browser navigation regression
@@ -156,11 +156,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 115,
+  "maxLongTaskMs": 0,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 15.87,
-  "testedAt": "2026-08-21T21:41:11Z"
+  "durationSeconds": 19.09,
+  "testedAt": "2026-08-21T23:09:53Z"
 }```
 
 ## Listen Watch browser regression
@@ -171,8 +171,8 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "stage": "desktop:click-media-link",
   "error": "TimeoutException: Message: \n",
-  "durationSeconds": 11.02,
-  "testedAt": "2026-08-21T21:41:22Z",
+  "durationSeconds": 11.03,
+  "testedAt": "2026-08-21T23:10:05Z",
   "hash": "#media",
   "pageText": "TITANS MEDIA CENTER\nListen / Watch\n\nOne simple place to find the Titans broadcast you can legally use \u2014 local radio, all-game audio, TV and streaming.\n\nNashville / Middle Tennessee\nElsewhere in U.S.\nInternational\nNEXT GAME\nvs Seattle Seahawks\nSun, Aug 23, 7:00 PM\nFOX\nLISTEN\nTitans Radio\n\nNashville flagship: WGFX 104.5 The Zone. Use the official station or Titans game-audio player below; NFL geographic/device restrictions can still apply.\n\n104.5\nTHE ZONE\nNEXT TITANS BROADCAST\nvs Seattle Seahawks\nSun, Aug 23, 7:00 PM\nGAME AUDIO\nListen on Titans Radio\nThe official live-audio button appears when the broadcast is available. Mobile home-market rules apply.\nOpen official game audio \u2197\n104.5 THE ZONE\nOpen the official station player\nCurrent 104.5 web player \u00b7 player ID 3234.\nOpen 104.5 \u2197\n\nThe Comma",
   "browserWarnings": []
