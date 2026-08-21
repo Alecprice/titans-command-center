@@ -1,6 +1,14 @@
 (() => {
   'use strict';
 
+  if(!document.querySelector('link[data-media-custom-links]')){
+    const style=document.createElement('link');
+    style.rel='stylesheet';
+    style.href='/media-custom-links-v14.css?v=1';
+    style.dataset.mediaCustomLinks='true';
+    document.head.append(style);
+  }
+
   const STORAGE_KEY='titans:v14CustomMediaLinks';
   const MAX_LINKS=12;
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
