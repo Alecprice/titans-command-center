@@ -4,7 +4,7 @@
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const AREA_KEY='titans:v14MediaArea';
   let data=null,loading=null,timer=0;
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const storageGet=key=>{try{return localStorage.getItem(key)}catch{return null}};
   const nextGame=()=>{const now=Date.now();return (data?.games||[]).find(g=>{const t=Date.parse(g.date);return Number.isFinite(t)&&t>now&&!/final|bye/i.test(String(g.status||''))})||null};
   async function load(){if(data)return data;if(loading)return loading;loading=fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{data=d?.ok?d:null;return data}).finally(()=>loading=null);return loading}
@@ -33,6 +33,6 @@
   window.addEventListener('hashchange',()=>setTimeout(run,0));
   window.addEventListener('popstate',()=>setTimeout(run,0));
   window.addEventListener('storage',event=>{if(event.key===AREA_KEY&&route()==='media'){document.querySelector('.media-tune-guide')?.remove();run()}});
-  if(app)new MutationObserver(()=>queueMicrotask(renderGuide)).observe(app,{childList:true,subtree:false});
+  if(app)new MutationObserver(()=>queueMicrotask(()=>{if(route()==='media'&&!data)run();else renderGuide()})).observe(app,{childList:true,subtree:false});
   setTimeout(run,80);
 })();
