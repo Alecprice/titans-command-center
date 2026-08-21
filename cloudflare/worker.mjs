@@ -4,6 +4,7 @@ import {getAuditedTeamContext} from '../src/team-context.mjs';
 import {preseasonStatsRoute} from '../src/preseason-api.mjs';
 import {marketDataRoute} from '../src/market-api.mjs';
 import {advancedAnalyticsRoute} from '../src/advanced-analytics-api.mjs';
+import {fanIntelRoute} from '../src/fan-intel-api.mjs';
 import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflverseStats,syncNwsNextHomeGame,syncFreeOdds,recordSyncRun} from '../src/ingest.mjs';
 
 const API_PREFIX='/api/';
@@ -114,6 +115,7 @@ async function runApi(request,env){
     if(route==='preseason-stats')return await adapterRoute(request,route,preseasonStatsRoute,env);
     if(route==='market-data')return await adapterRoute(request,route,marketDataRoute,env);
     if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
+    if(route==='fan-intel')return await adapterRoute(request,route,fanIntelRoute,env);
 
     // Legacy routes still share the Vercel-compatible gateway. Mirror bindings for
     // those routes until the remaining handlers are migrated to explicit env args.
