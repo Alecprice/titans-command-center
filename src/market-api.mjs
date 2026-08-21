@@ -11,10 +11,24 @@ function busrRows({spread=-2.5,seahawksMl=-140,titansMl=120,total=37.5,capturedA
 async function busrPublishedReference(){const text=await (await fetchOk(BUSR_URL,'text/html')).text(),start=text.search(/Seattle Seahawks vs\. Tennessee Titans/i);if(start<0)throw new Error('Titans matchup not found');const chunk=text.slice(start,start+9000).replace(/<[^>]+>/g,' ').replace(/&nbsp;|&#160;/g,' ').replace(/\s+/g,' ');const spread=chunk.match(/Point Spread:\s*Seahawks\s*([+-]?\d+(?:\.\d+)?)/i),ml=chunk.match(/Moneyline:\s*Seahawks\s*([+-]?\d+)\s*\/\s*Titans\s*([+-]?\d+)/i),total=chunk.match(/Over\/Under:\s*([0-9]+(?:\.\d+)?)/i);if(!spread||!ml||!total)throw new Error('Published Titans line could not be parsed');return busrRows({spread:Number(spread[1]),seahawksMl:Number(ml[1]),titansMl:Number(ml[2]),total:Number(total[1]),capturedAt:new Date().toISOString()});}
 function referenceExpired(){return Date.now()>=new Date(KICKOFF).getTime()}
 
+export function validateConfiguredMarketData(data={}){
+  const input=Array.isArray(data.odds)?data.odds:[];
+  const odds=input.filter(row=>{
+    if(!row||row.available===false)return false;
+    const marketKey=String(row.marketKey||'').trim().toLowerCase(),marketName=String(row.marketName||'').trim().toLowerCase(),book=String(row.book||'').trim(),side=String(row.side||'').trim(),rawPrice=row.price,parsedPrice=rawPrice===''||rawPrice==null?NaN:Number(rawPrice);
+    return Boolean(marketKey&&marketKey!=='outcomes'&&marketName&&marketName!=='outcomes'&&book&&side&&Number.isFinite(parsedPrice)&&parsedPrice!==0);
+  });
+  return {ok:odds.length>0,odds,acceptedRows:odds.length,rejectedRows:Math.max(0,input.length-odds.length)};
+}
+
 export async function marketDataRoute(req,res,env=process.env){
   if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({ok:false,error:'Method not allowed'})}
   res.setHeader('Cache-Control','public, s-maxage=180, stale-while-revalidate=600');const diagnostics=[];
-  try{const configured=await fetchFreeOdds(env,{maxEvents:3});if(configured.ok&&(configured.odds?.length||configured.events?.length))return res.status(200).json({...configured,propsAvailable:(configured.odds||[]).some(row=>row.category==='player_prop'),sourceMode:'configured-provider',quality:'live-provider',message:'Live configured provider data.',diagnostics});}catch(e){diagnostics.push(`Configured provider: ${e.message}`)}
+  try{
+    const configured=await fetchFreeOdds(env,{maxEvents:2}),validated=validateConfiguredMarketData(configured);
+    if(configured.ok&&validated.ok)return res.status(200).json({...configured,odds:validated.odds,propsAvailable:validated.odds.some(row=>row.category==='player_prop'),sourceMode:'configured-provider',quality:'live-provider',message:'Live configured provider data.',providerValidation:{acceptedRows:validated.acceptedRows,rejectedRows:validated.rejectedRows},diagnostics});
+    if(configured.ok)diagnostics.push(`Configured provider returned no display-safe normalized rows (${validated.rejectedRows} rejected).`);
+  }catch(e){diagnostics.push(`Configured provider: ${e.message}`)}
   try{const parsed=spreadRows(await json(SPREAD_URL));if(parsed.odds.length)return res.status(200).json({ok:true,provider:'TheSpread.io keyless feed',events:parsed.events,odds:parsed.odds,futures:[],propsAvailable:false,sourceMode:'keyless-live',quality:'live-keyless',message:'Keyless game-line feed loaded. Player props require a configured props provider.',diagnostics,fetchedAt:new Date().toISOString()});diagnostics.push('TheSpread.io returned no current Titans rows.');}catch(e){diagnostics.push(`TheSpread.io: ${e.message}`)}
   if(!referenceExpired()){
     try{const ref=await busrPublishedReference();return res.status(200).json({ok:true,provider:'BUSR Week 2 published lines',events:ref.events,odds:ref.odds,futures:[],propsAvailable:false,sourceMode:'published-reference',quality:'published-reference',message:'No live feed is reachable, so the board is showing a dated published Week 2 market reference instead of failing.',diagnostics,referenceNotice:'Published Aug. 18 market article — not a live sportsbook feed. Refresh retries live providers first. Verify a current sportsbook before relying on a line.',referencePublishedAt:'2026-08-18T00:00:00Z',referenceExpiresAt:KICKOFF,sources:[{label:'BUSR · Aug. 18 Week 2 market article',url:BUSR_URL},{label:'NFL official Titans schedule',url:NFL_SCHEDULE}],fetchedAt:new Date().toISOString()});}catch(e){diagnostics.push(`BUSR published reference: ${e.message}`)}
