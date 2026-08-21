@@ -10,7 +10,7 @@ test('Listen Watch is a first-class route and PWA asset',()=>{
   assert.match(html,/Listen \/ Watch/);
   assert.match(html,/media-center-v14\.css\?v=1/);
   assert.match(html,/media-center-v14\.js\?v=1/);
-  assert.match(sw,/titans-cc-brand-2026-v33/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
   assert.match(sw,/\/media-center-v14\.css/);
   assert.match(sw,/\/media-center-v14\.js/);
 });
