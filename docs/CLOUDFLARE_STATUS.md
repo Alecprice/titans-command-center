@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + analytics + player headshot regressions passed**
-- Source commit: `1d5b057dc65c7cba72f0c0f16b1c68c7ecaf3d90`
+- Source commit: `3d4349cf16555d554dda0edda3e61f624a36fc1a`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -11,7 +11,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-21T17:18:40Z
+- Recorded: 2026-08-21T18:34:24Z
 
 ## Production regression
 
@@ -24,14 +24,14 @@
     "contentTypeOptions": "nosniff",
     "frameOptions": "DENY",
     "referrerPolicy": "strict-origin-when-cross-origin",
-    "contentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com; connect-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com; connect-src 'self'; media-src 'self' https://playerservices.streamtheworld.com; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
     "robots": "noindex, nofollow",
     "csp": true
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v32",
-  "precachePaths": 55,
+  "serviceWorkerCache": "titans-cc-brand-2026-v37",
+  "precachePaths": 64,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -63,19 +63,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "1d5b057dc65c7cba72f0c0f16b1c68c7ecaf3d90",
-    "builtAt": "2026-08-21T17:17:33.805Z"
+    "commit": "3d4349cf16555d554dda0edda3e61f624a36fc1a",
+    "builtAt": "2026-08-21T18:33:16.772Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 98,
-    "health": 797,
-    "data": 282,
-    "stats": 113,
-    "market": 4975,
-    "analytics": 627
+    "root": 82,
+    "health": 943,
+    "data": 321,
+    "stats": 212,
+    "market": 6528,
+    "analytics": 611
   },
-  "testedAt": "2026-08-21T17:18:03.873Z",
+  "testedAt": "2026-08-21T18:33:46.729Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -105,8 +105,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 205,
-  "testedAt": "2026-08-21T17:18:04.841Z"
+  "durationMs": 121,
+  "testedAt": "2026-08-21T18:33:47.560Z"
 }```
 
 ## Browser navigation regression
@@ -155,11 +155,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 168,
-  "longTasksOver250ms": 0,
+  "maxLongTaskMs": 975,
+  "longTasksOver250ms": 4,
   "browserWarnings": [],
-  "durationSeconds": 25.04,
-  "testedAt": "2026-08-21T17:18:35Z"
+  "durationSeconds": 24.94,
+  "testedAt": "2026-08-21T18:34:18Z"
 }```
 
 ## Advanced analytics browser regression
@@ -204,8 +204,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.62,
-  "testedAt": "2026-08-21T17:18:37Z"
+  "durationSeconds": 1.92,
+  "testedAt": "2026-08-21T18:34:21Z"
 }```
 
 ## Player headshot browser regression
@@ -216,7 +216,7 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "rosterCards": 95,
   "rosterDecoratedHeadshots": 82,
-  "rosterLoadedHeadshots": 44,
+  "rosterLoadedHeadshots": 46,
   "statsPlayerRows": 95,
   "statsDecoratedHeadshots": 82,
   "statsLoadedHeadshots": 8,
@@ -224,8 +224,8 @@
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 2.86,
-  "testedAt": "2026-08-21T17:18:40Z"
+  "durationSeconds": 2.95,
+  "testedAt": "2026-08-21T18:34:24Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
