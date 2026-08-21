@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser + analytics + player headshot regressions passed**
-- Source commit: `a30d0fd1720d9e32939f66b0a3caf0e35036fde3`
+- Status: **deployed + player headshot browser regression failure**
+- Source commit: `f034e21cd1caf5f6684f678688dea75feb707953`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -9,9 +9,9 @@
 - Production regression: success
 - Browser navigation regression: success
 - Advanced analytics browser regression: success
-- Player headshot browser regression: success
+- Player headshot browser regression: failure
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-21T12:27:16Z
+- Recorded: 2026-08-21T14:55:36Z
 
 ## Production regression
 
@@ -30,8 +30,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v31",
-  "precachePaths": 45,
+  "serviceWorkerCache": "titans-cc-brand-2026-v32",
+  "precachePaths": 47,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -63,19 +63,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "a30d0fd1720d9e32939f66b0a3caf0e35036fde3",
-    "builtAt": "2026-08-21T12:26:26.404Z"
+    "commit": "f034e21cd1caf5f6684f678688dea75feb707953",
+    "builtAt": "2026-08-21T14:54:52.447Z"
   },
-  "deploymentPropagationAttempts": 6,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 16,
-    "health": 108,
-    "data": 210,
-    "stats": 166,
-    "market": 700,
-    "analytics": 294
+    "root": 86,
+    "health": 275,
+    "data": 280,
+    "stats": 181,
+    "market": 562,
+    "analytics": 729
   },
-  "testedAt": "2026-08-21T12:26:59.149Z",
+  "testedAt": "2026-08-21T14:55:18.802Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -105,8 +105,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 163,
-  "testedAt": "2026-08-21T12:26:59.737Z"
+  "durationMs": 197,
+  "testedAt": "2026-08-21T14:55:19.860Z"
 }```
 
 ## Browser navigation regression
@@ -155,11 +155,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 0,
+  "maxLongTaskMs": 98,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 7.78,
-  "testedAt": "2026-08-21T12:27:10Z"
+  "durationSeconds": 7.27,
+  "testedAt": "2026-08-21T14:55:30Z"
 }```
 
 ## Advanced analytics browser regression
@@ -204,28 +204,32 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.57,
-  "testedAt": "2026-08-21T12:27:12Z"
+  "durationSeconds": 1.94,
+  "testedAt": "2026-08-21T14:55:32Z"
 }```
 
 ## Player headshot browser regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "rosterCards": 95,
-  "rosterDecoratedHeadshots": 82,
-  "rosterLoadedHeadshots": 35,
-  "statsPlayerRows": 95,
-  "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 27,
-  "mobileLoadedHeadshots": 27,
-  "richPlayer": "Austin Schlottmann",
-  "richPlayerHeadshotLoaded": true,
-  "browserWarnings": [],
-  "durationSeconds": 3.05,
-  "testedAt": "2026-08-21T12:27:16Z"
+  "stage": "roster-load",
+  "error": "RuntimeError: No visible roster headshot loaded successfully",
+  "state": {
+    "appText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury r",
+    "firstSrc": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/oyncfcyyfflsqesj6xei",
+    "hash": "#roster",
+    "rosterCards": 95,
+    "rosterLoaded": 1,
+    "rosterPhotos": 82,
+    "statsLoaded": 0,
+    "statsPhotos": 0,
+    "statsRows": 0,
+    "title": "Roster"
+  },
+  "durationSeconds": 2.61,
+  "testedAt": "2026-08-21T14:55:35Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
