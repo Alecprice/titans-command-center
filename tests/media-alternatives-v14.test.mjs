@@ -16,7 +16,7 @@ test('Alternative Viewing uses authorized NFL, Titans and commercial provider pa
   const js=read('media-alternatives-v14.js');
   for(const token of ['nfl.com/ways-to-watch','nfl.com/plus','tennesseetitans.com/watch-live-games','tv.youtube.com/learn/nflsundayticket','nfl.com/international/ways-to-watch','dazn.com','everpass.com/live-sports/nfl-sunday-ticket'])assert.match(js,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
   assert.match(js,/Other legitimate ways to watch/);
-  assert.match(js,/authorized or licensed providers/);
+  assert.match(js,/official or licensed providers/);
   assert.doesNotMatch(js,/<iframe/i);
   assert.doesNotMatch(js,/document\.write/);
 });
