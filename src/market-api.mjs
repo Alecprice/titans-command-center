@@ -15,8 +15,8 @@ export function validateConfiguredMarketData(data={}){
   const input=Array.isArray(data.odds)?data.odds:[];
   const odds=input.filter(row=>{
     if(!row||row.available===false)return false;
-    const marketKey=String(row.marketKey||'').trim().toLowerCase(),marketName=String(row.marketName||'').trim().toLowerCase(),book=String(row.book||'').trim(),side=String(row.side||'').trim();
-    return Boolean(marketKey&&marketKey!=='outcomes'&&marketName&&marketName!=='outcomes'&&book&&side&&Number.isFinite(Number(row.price)));
+    const marketKey=String(row.marketKey||'').trim().toLowerCase(),marketName=String(row.marketName||'').trim().toLowerCase(),book=String(row.book||'').trim(),side=String(row.side||'').trim(),rawPrice=row.price,parsedPrice=rawPrice===''||rawPrice==null?NaN:Number(rawPrice);
+    return Boolean(marketKey&&marketKey!=='outcomes'&&marketName&&marketName!=='outcomes'&&book&&side&&Number.isFinite(parsedPrice)&&parsedPrice!==0);
   });
   return {ok:odds.length>0,odds,acceptedRows:odds.length,rejectedRows:Math.max(0,input.length-odds.length)};
 }
