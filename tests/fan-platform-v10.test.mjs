@@ -4,10 +4,18 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('release identifies itself as v1.0.0 across package and Cloudflare health',()=>{
-  const pkg=JSON.parse(read('package.json')),worker=read('cloudflare/worker.mjs');
+test('release identifies itself as v1.0.0 across package and API health paths',()=>{
+  const pkg=JSON.parse(read('package.json')),worker=read('cloudflare/worker.mjs'),api=read('api/index.js');
   assert.equal(pkg.version,'1.0.0');
   assert.match(worker,/const APP_VERSION='1\.0\.0'/);
+  assert.match(api,/const APP_VERSION='1\.0\.0'/);
+});
+
+test('production regression validates the deployed release version instead of a stale constant',()=>{
+  const regression=read('scripts/production-regression.mjs');
+  assert.match(regression,/health\.body\?\.version===buildMeta\?\.version/);
+  assert.doesNotMatch(regression,/health\.body\?\.version==='0\.8\.0'/);
+  assert.match(regression,/ProductionAudit\/1\.0/);
 });
 
 test('v1 fan platform is loaded in browser shell and PWA shell',()=>{
