@@ -18,6 +18,18 @@ async function getJson(url, options={}) {
 }
 const titanText = value => /tennessee|titans|\bTEN\b/i.test(JSON.stringify(value));
 const arr = value => Array.isArray(value)?value:Array.isArray(value?.data)?value.data:Array.isArray(value?.events)?value.events:Array.isArray(value?.results)?value.results:[];
+const eventTime = event => {const raw=event?.commence_time??event?.commenceTime??event?.start_time??event?.startTime??event?.date??event?.start;const t=raw?new Date(raw).getTime():NaN;return Number.isFinite(t)?t:null};
+export function selectTitansEvents(values=[],maxEvents=2,{now=Date.now(),graceMs=45*60*1000}={}){
+  const limit=Math.max(1,Math.floor(Number(maxEvents)||2));
+  return arr(values).filter(titanText).filter(event=>{
+    if(event?.live===true)return true;
+    if(/final|finished|complete|completed|ended|closed/i.test(String(event?.status??event?.state??'')))return false;
+    const t=eventTime(event);return t==null||t>=now-graceMs;
+  }).sort((a,b)=>{
+    if(Boolean(a?.live)!==Boolean(b?.live))return a?.live?-1:1;
+    const at=eventTime(a),bt=eventTime(b);if(at==null&&bt==null)return String(a?.id??'').localeCompare(String(b?.id??''));if(at==null)return 1;if(bt==null)return -1;return at-bt;
+  }).slice(0,limit);
+}
 const PLAYER_MARKET_RE = /(^player_|^pitcher_|^batter_|^goalie_|passing|rushing|receiv|touchdown|sack|tackle|interception|field_goal|kicking)/i;
 const MARKET_LABELS = new Map([
   ['h2h','Moneyline'],
@@ -147,7 +159,7 @@ async function fetchPropLine(env,{maxEvents=2}={}) {
   const base='https://api.prop-line.com/v1/sports/football_nfl';
   const headers={'X-API-Key':env.PROPLINE_API_KEY};
   const {json,headers:rh}=await getJson(`${base}/events`,{headers});
-  const events=arr(json).filter(titanText).slice(0,maxEvents);
+  const events=selectTitansEvents(json,maxEvents);
   const odds=[];
   for(const event of events){const id=event.id??event.eventId??event.key;if(!id)continue;try{const out=await getJson(`${base}/events/${encodeURIComponent(id)}/odds?includeLinks=true`,{headers});odds.push(...normalizeOddsRows(out.json,'PropLine',event));}catch{}}
   return {ok:true,configured:true,provider:'PropLine',events,odds,futures:[],quota:{remaining:rh.get('x-ratelimit-remaining')||rh.get('ratelimit-remaining')||null,limit:rh.get('x-ratelimit-limit')||rh.get('ratelimit-limit')||null},fetchedAt:new Date().toISOString()};
@@ -157,7 +169,7 @@ async function fetchOddsApiIo(env,{maxEvents=2}={}) {
   if(!env.ODDS_API_IO_KEY) return {ok:false,configured:false,provider:'Odds-API.io',odds:[],events:[]};
   const key=encodeURIComponent(env.ODDS_API_IO_KEY);
   const {json}=await getJson(`https://api.odds-api.io/v3/events?apiKey=${key}&sport=nfl&limit=100`);
-  const events=arr(json).filter(titanText).slice(0,maxEvents); const odds=[];
+  const events=selectTitansEvents(json,maxEvents); const odds=[];
   for(const event of events){const id=event.id??event.eventId??event.key;if(!id)continue;try{const out=await getJson(`https://api.odds-api.io/v3/odds?apiKey=${key}&eventId=${encodeURIComponent(id)}`);odds.push(...normalizeOddsRows(out.json,'Odds-API.io',event));}catch{}}
   return {ok:true,configured:true,provider:'Odds-API.io',events,odds,futures:[],fetchedAt:new Date().toISOString()};
 }
@@ -178,12 +190,13 @@ export async function fetchFreeOdds(env=process.env, options={}) {
   if(useCache&&runtimeOddsCache.key===providerKey&&runtimeOddsCache.value&&now<runtimeOddsCache.expiresAt)return {...runtimeOddsCache.value,cache:'runtime-memory'};
   if(useCache&&runtimeOddsCache.key===providerKey&&runtimeOddsCache.inflight)return runtimeOddsCache.inflight;
   if(!useCache)return loadProviderOdds(env,requestOptions);
-  const pending=loadProviderOdds(env,requestOptions).then(result=>{
-    if(result.ok){runtimeOddsCache.value=result;runtimeOddsCache.expiresAt=Date.now()+cacheSeconds(env)*1000;}
+  let pending;
+  pending=loadProviderOdds(env,requestOptions).then(result=>{
+    if(result.ok&&runtimeOddsCache.key===providerKey&&runtimeOddsCache.inflight===pending){runtimeOddsCache.value=result;runtimeOddsCache.expiresAt=Date.now()+cacheSeconds(env)*1000;}
     return result;
   });
   runtimeOddsCache={key:providerKey,expiresAt:runtimeOddsCache.key===providerKey?runtimeOddsCache.expiresAt:0,value:runtimeOddsCache.key===providerKey?runtimeOddsCache.value:null,inflight:pending};
-  try{return await pending}finally{if(runtimeOddsCache.inflight===pending)runtimeOddsCache.inflight=null}
+  try{return await pending}finally{if(runtimeOddsCache.key===providerKey&&runtimeOddsCache.inflight===pending)runtimeOddsCache.inflight=null}
 }
 
 export async function probeFreeOddsProviders(env=process.env,{compare=true}={}) {

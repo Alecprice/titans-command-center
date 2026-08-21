@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchFreeOdds, normalizeOddsRows, resetOddsRuntimeCache } from '../src/odds.mjs';
+import { fetchFreeOdds, normalizeOddsRows, resetOddsRuntimeCache, selectTitansEvents } from '../src/odds.mjs';
 
 const payload={
   id:'148033',
@@ -83,13 +83,35 @@ test('player prop description is preserved as entity name',()=>{
   assert.equal(prop.periodId,'game');
 });
 
+test('Titans event selection ignores stale/final/non-Titans games and sorts upcoming kickoffs',()=>{
+  const now=Date.parse('2026-08-21T12:00:00Z');
+  const selected=selectTitansEvents([
+    {id:'later',home_team:'TEN Titans',away_team:'Chicago Bears',commence_time:'2026-08-29T22:00:00Z'},
+    {id:'final',home_team:'Tennessee Titans',away_team:'Atlanta Falcons',commence_time:'2026-08-15T00:00:00Z',status:'Final'},
+    {id:'other',home_team:'Seattle Seahawks',away_team:'Green Bay Packers',commence_time:'2026-08-23T00:00:00Z'},
+    {id:'next',home_team:'Tennessee Titans',away_team:'Seattle Seahawks',commence_time:'2026-08-24T00:00:00Z'},
+    {id:'stale',home_team:'Tennessee Titans',away_team:'Baltimore Ravens',commence_time:'2026-08-20T00:00:00Z'}
+  ],2,{now});
+  assert.deepEqual(selected.map(event=>event.id),['next','later']);
+});
+
+test('live Titans event remains eligible and takes priority even after scheduled kickoff',()=>{
+  const now=Date.parse('2026-08-21T12:00:00Z');
+  const selected=selectTitansEvents([
+    {id:'future',home_team:'Tennessee Titans',away_team:'Seattle Seahawks',commence_time:'2026-08-24T00:00:00Z'},
+    {id:'live',home_team:'Tennessee Titans',away_team:'Houston Texans',commence_time:'2026-08-21T09:00:00Z',live:true}
+  ],2,{now});
+  assert.deepEqual(selected.map(event=>event.id),['live','future']);
+});
+
 test('free provider runtime cache caps event requests and reuses a successful response',async t=>{
   const originalFetch=globalThis.fetch;
   let calls=0;
+  const future=days=>new Date(Date.now()+days*24*60*60*1000).toISOString();
   const events=[
-    {id:'evt-1',home_team:'Tennessee Titans',away_team:'Seattle Seahawks',commence_time:'2026-08-24T00:00:00Z'},
-    {id:'evt-2',home_team:'TEN Titans',away_team:'CHI Bears',commence_time:'2026-08-29T22:00:00Z'},
-    {id:'evt-3',home_team:'Tennessee Titans',away_team:'Houston Texans',commence_time:'2026-09-06T17:00:00Z'}
+    {id:'evt-3',home_team:'Tennessee Titans',away_team:'Houston Texans',commence_time:future(3)},
+    {id:'evt-1',home_team:'Tennessee Titans',away_team:'Seattle Seahawks',commence_time:future(1)},
+    {id:'evt-2',home_team:'TEN Titans',away_team:'CHI Bears',commence_time:future(2)}
   ];
   globalThis.fetch=async url=>{
     calls++;
@@ -103,7 +125,7 @@ test('free provider runtime cache caps event requests and reuses a successful re
   const env={PROPLINE_API_KEY:'test-only-key',ODDS_CACHE_SECONDS:'300'};
   const first=await fetchFreeOdds(env,{maxEvents:3});
   assert.equal(first.ok,true);
-  assert.equal(first.events.length,2,'public fetches should cap provider event detail calls at two');
+  assert.deepEqual(first.events.map(event=>event.id),['evt-1','evt-2']);
   assert.equal(calls,3,'one events request plus two event-odds requests expected');
   const second=await fetchFreeOdds(env,{maxEvents:3});
   assert.equal(second.cache,'runtime-memory');
