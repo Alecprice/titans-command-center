@@ -37,7 +37,7 @@ test('premium assets are loaded and precached',()=>{
   const html=read('index.html'),sw=read('sw.js');
   assert.match(html,/premium-experience-v14\.css\?v=1/);
   assert.match(html,/premium-experience-v14\.js\?v=1/);
-  assert.match(sw,/titans-cc-brand-2026-v35/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
   assert.match(sw,/premium-experience-v14\.css/);
   assert.match(sw,/premium-experience-v14\.js/);
 });
