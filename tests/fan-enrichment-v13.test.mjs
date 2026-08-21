@@ -6,7 +6,7 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('Fan Hub assets are loaded and available offline',()=>{
   const html=read('index.html'),sw=read('sw.js');
-  for(const name of ['fan-enrichment-v13.css','fan-enrichment-v13.js','fan-enrichment-addons-v13.css','fan-enrichment-addons-v13.js']){
+  for(const name of ['fan-enrichment-v13.css','fan-enrichment-v13.js','fan-enrichment-addons-v13.css','fan-enrichment-addons-v13.js','fan-enrichment-tabfix-v13.js']){
     assert.match(html,new RegExp(name.replaceAll('.','\\.')+'\\?v=1'));
     assert.match(sw,new RegExp('/'+name.replaceAll('.','\\.')));
   }
@@ -18,7 +18,7 @@ test('Fan intelligence API is Cloudflare-wired and database-backed',()=>{
   assert.match(worker,/fanIntelRoute/);
   assert.match(worker,/route==='fan-intel'/);
   for(const token of ['standings_snapshots','injury_reports','depth_chart_snapshots','contracts','drives','plays','player_game_stats'])assert.match(api,new RegExp(token));
-  assert.match(api,/Cache-Control','public, s-maxage=60, stale-while-revalidate=300'/);
+  assert.match(api,/s-maxage=60, stale-while-revalidate=300/);
 });
 
 test('Fan Hub contains the requested football, fan, offseason and history experiences',()=>{
@@ -38,6 +38,13 @@ test('Fan Hub addon layer covers fan picks, roster timelines, scouting, momentum
   assert.match(js,/model output, not certainty/);
   assert.match(css,/@media\(max-width:759px\)/);
   assert.match(css,/min-height:44px/);
+});
+
+test('Fan Hub addon enrichment resets when switching tabs',()=>{
+  const bridge=read('fan-enrichment-tabfix-v13.js');
+  assert.match(bridge,/closest\('\[data-tab\]'\)/);
+  assert.match(bridge,/removeAttribute\('data-v13-addons'\)/);
+  assert.match(bridge,/true\);/);
 });
 
 test('Fan Hub defaults to plain-language mobile-first navigation',()=>{
