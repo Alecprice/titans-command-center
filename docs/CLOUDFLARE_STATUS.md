@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser + analytics + player headshot regressions passed**
-- Source commit: `b55f53213e14b79b1c99b93ba277e8fae09f2e73`
+- Status: **deployed + player headshot browser regression failure**
+- Source commit: `37a1143db87f8b31f2f87016bfefb06577bb3c32`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -9,9 +9,9 @@
 - Production regression: success
 - Browser navigation regression: success
 - Advanced analytics browser regression: success
-- Player headshot browser regression: success
+- Player headshot browser regression: failure
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-21T12:22:30Z
+- Recorded: 2026-08-21T12:24:51Z
 
 ## Production regression
 
@@ -63,19 +63,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "b55f53213e14b79b1c99b93ba277e8fae09f2e73",
-    "builtAt": "2026-08-21T12:21:39.855Z"
+    "commit": "37a1143db87f8b31f2f87016bfefb06577bb3c32",
+    "builtAt": "2026-08-21T12:23:44.691Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 3,
   "responseMs": {
-    "root": 16,
-    "health": 153,
-    "data": 407,
-    "stats": 286,
-    "market": 1764,
-    "analytics": 520
+    "root": 34,
+    "health": 327,
+    "data": 375,
+    "stats": 322,
+    "market": 421,
+    "analytics": 842
   },
-  "testedAt": "2026-08-21T12:22:05.807Z",
+  "testedAt": "2026-08-21T12:24:14.382Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -105,8 +105,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 122,
-  "testedAt": "2026-08-21T12:22:06.605Z"
+  "durationMs": 230,
+  "testedAt": "2026-08-21T12:24:15.590Z"
 }```
 
 ## Browser navigation regression
@@ -155,11 +155,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 54,
+  "maxLongTaskMs": 75,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 13.92,
-  "testedAt": "2026-08-21T12:22:24Z"
+  "durationSeconds": 25.37,
+  "testedAt": "2026-08-21T12:24:46Z"
 }```
 
 ## Advanced analytics browser regression
@@ -204,28 +204,32 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.17,
-  "testedAt": "2026-08-21T12:22:26Z"
+  "durationSeconds": 2.05,
+  "testedAt": "2026-08-21T12:24:48Z"
 }```
 
 ## Player headshot browser regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "rosterCards": 95,
-  "rosterDecoratedHeadshots": 82,
-  "rosterLoadedHeadshots": 41,
-  "statsPlayerRows": 95,
-  "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 41,
-  "mobileLoadedHeadshots": 41,
-  "richPlayer": "Austin Schlottmann",
-  "richPlayerHeadshotLoaded": true,
-  "browserWarnings": [],
-  "durationSeconds": 3.51,
-  "testedAt": "2026-08-21T12:22:30Z"
+  "stage": "roster-load",
+  "error": "RuntimeError: No visible roster headshot loaded successfully",
+  "state": {
+    "appText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury r",
+    "firstSrc": "",
+    "hash": "#roster",
+    "rosterCards": 95,
+    "rosterLoaded": 0,
+    "rosterPhotos": 82,
+    "statsLoaded": 0,
+    "statsPhotos": 0,
+    "statsRows": 0,
+    "title": "Roster"
+  },
+  "durationSeconds": 2.18,
+  "testedAt": "2026-08-21T12:24:51Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
