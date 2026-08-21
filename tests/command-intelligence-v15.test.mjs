@@ -143,3 +143,16 @@ test('media tune guide loads data after pushState route navigation',()=>{
   assert.match(js,/if\(route\(\)==='media'&&!data\)run\(\);else renderGuide\(\)/);
   assert.match(js,/observe\(app,\{childList:true,subtree:false\}\)/);
 });
+
+test('Cloudflare deploy cannot report full success without Command Intelligence browser health',()=>{
+  const workflow=read('.github/workflows/cloudflare-deploy.yml'),smoke=read('scripts/command-intelligence-browser-smoke.py');
+  assert.match(workflow,/Run Command Intelligence browser regression/);
+  assert.match(workflow,/id: command_browser/);
+  assert.match(workflow,/steps\.command_browser\.outcome/);
+  assert.match(workflow,/command-intelligence-browser-smoke\.py/);
+  assert.match(workflow,/Command Intelligence browser regression/);
+  assert.match(smoke,/document\.querySelectorAll\('\[data-v15-tab\]'\)\.length === 7/);
+  assert.match(smoke,/mediaTuneGuideAfterPushState/);
+  assert.match(smoke,/390px command/);
+  assert.match(smoke,/SEVERE/);
+});
