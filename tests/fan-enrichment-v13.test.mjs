@@ -6,10 +6,11 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('Fan Hub assets are loaded and available offline',()=>{
   const html=read('index.html'),sw=read('sw.js');
-  assert.match(html,/fan-enrichment-v13\.css\?v=1/);
-  assert.match(html,/fan-enrichment-v13\.js\?v=1/);
-  assert.match(sw,/\/fan-enrichment-v13\.css/);
-  assert.match(sw,/\/fan-enrichment-v13\.js/);
+  for(const name of ['fan-enrichment-v13.css','fan-enrichment-v13.js','fan-enrichment-addons-v13.css','fan-enrichment-addons-v13.js']){
+    assert.match(html,new RegExp(name.replaceAll('.','\\.')+'\\?v=1'));
+    assert.match(sw,new RegExp('/'+name.replaceAll('.','\\.')));
+  }
+  assert.match(html,/href="#fan" data-route="fan"/);
 });
 
 test('Fan intelligence API is Cloudflare-wired and database-backed',()=>{
@@ -27,6 +28,16 @@ test('Fan Hub contains the requested football, fan, offseason and history experi
   assert.match(js,/localStorage\.setItem\(KEY\.predictions/);
   assert.match(js,/localStorage\.setItem\(KEY\.draft/);
   assert.doesNotMatch(js,/DATABASE_URL|PROPLINE_API_KEY|ODDS_API_IO_KEY|VAPID_PRIVATE_KEY/);
+});
+
+test('Fan Hub addon layer covers fan picks, roster timelines, scouting, momentum, what-if standings and year comparison',()=>{
+  const js=read('fan-enrichment-addons-v13.js'),css=read('fan-enrichment-addons-v13.css');
+  for(const token of ['Fan picks','Season MVP','Player of the game','My starting skill group','Quick Titans trivia','Roster movement tracker','What to watch','Game momentum','What-if standings','2025 vs 2026'])assert.match(js,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  assert.match(js,/Private to this device\. No account needed\./);
+  assert.match(js,/does <strong>not<\/strong> replace official NFL tiebreakers/);
+  assert.match(js,/model output, not certainty/);
+  assert.match(css,/@media\(max-width:759px\)/);
+  assert.match(css,/min-height:44px/);
 });
 
 test('Fan Hub defaults to plain-language mobile-first navigation',()=>{
