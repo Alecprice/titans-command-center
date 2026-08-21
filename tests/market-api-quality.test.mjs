@@ -13,15 +13,17 @@ test('configured market validator accepts normalized sportsbook rows',()=>{
   assert.equal(result.rejectedRows,0);
 });
 
-test('configured market validator rejects old flattened and unavailable rows',()=>{
+test('configured market validator rejects flattened, unavailable, missing-price and zero-price rows',()=>{
   const result=validateConfiguredMarketData({odds:[
     {marketKey:'outcomes',marketName:'outcomes',book:'PropLine',side:'Tennessee Titans',price:-220,available:true},
     {marketKey:'spreads',marketName:'Spread',book:'FanDuel',side:'Tennessee Titans',price:-110,available:false},
-    {marketKey:'spreads',marketName:'Spread',book:'',side:'Tennessee Titans',price:-110,available:true}
+    {marketKey:'spreads',marketName:'Spread',book:'',side:'Tennessee Titans',price:-110,available:true},
+    {marketKey:'spreads',marketName:'Spread',book:'FanDuel',side:'Tennessee Titans',price:null,available:true},
+    {marketKey:'spreads',marketName:'Spread',book:'FanDuel',side:'Tennessee Titans',price:0,available:true}
   ]});
   assert.equal(result.ok,false);
   assert.equal(result.acceptedRows,0);
-  assert.equal(result.rejectedRows,3);
+  assert.equal(result.rejectedRows,5);
 });
 
 test('market route only labels validated configured data as live',()=>{
@@ -30,4 +32,5 @@ test('market route only labels validated configured data as live',()=>{
   assert.match(source,/configured\.ok&&validated\.ok/);
   assert.match(source,/providerValidation/);
   assert.match(source,/no display-safe normalized rows/);
+  assert.match(source,/parsedPrice!==0/);
 });
