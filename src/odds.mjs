@@ -18,8 +18,103 @@ async function getJson(url, options={}) {
 }
 const titanText = value => /tennessee|titans|\bTEN\b/i.test(JSON.stringify(value));
 const arr = value => Array.isArray(value)?value:Array.isArray(value?.data)?value.data:Array.isArray(value?.events)?value.events:Array.isArray(value?.results)?value.results:[];
+const PLAYER_MARKET_RE = /(^player_|^pitcher_|^batter_|^goalie_|passing|rushing|receiv|touchdown|sack|tackle|interception|field_goal|kicking)/i;
+const MARKET_LABELS = new Map([
+  ['h2h','Moneyline'],
+  ['spreads','Spread'],
+  ['totals','Total'],
+  ['team_totals','Team Total']
+]);
+const humanizeMarket = value => String(value||'Market').replace(/^player_/,'').replace(/_/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
+const marketLabel = market => String(market?.description||market?.title||MARKET_LABELS.get(String(market?.key||''))||humanizeMarket(market?.key));
+const rowTime = (...values) => {
+  for(const value of values){if(!value)continue;const d=new Date(value);if(!Number.isNaN(d.getTime()))return d.toISOString();}
+  return new Date().toISOString();
+};
 
-function genericOddsRows(payload, provider, event={}) {
+function inferAlternateLines(rows) {
+  const groups=new Map();
+  for(const row of rows){
+    if(row.line==null||row.marketKey==='h2h')continue;
+    const key=[row.providerEventId,row.bookId||row.book,row.marketKey,row.entityName,row.periodId].join('|');
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(row);
+  }
+  for(const group of groups.values()){
+    const byLine=new Map();
+    for(const row of group){
+      const lineKey=row.marketKey==='spreads'?Math.abs(row.line):row.line;
+      if(!byLine.has(lineKey))byLine.set(lineKey,[]);
+      byLine.get(lineKey).push(row);
+    }
+    if(byLine.size<2)continue;
+    let primary=null,best=Infinity;
+    for(const [lineKey,candidates] of byLine){
+      const priced=candidates.map(row=>americanToImplied(row.price)).filter(v=>v!=null);
+      if(priced.length<2)continue;
+      const score=priced.reduce((sum,p)=>sum+Math.abs(p-.5),0)/priced.length;
+      if(score<best){best=score;primary=lineKey;}
+    }
+    if(primary==null)continue;
+    for(const row of group){
+      const lineKey=row.marketKey==='spreads'?Math.abs(row.line):row.line;
+      if(lineKey!==primary)row.alt=true;
+    }
+  }
+  return rows;
+}
+
+function structuredOddsRows(payload, provider, event={}) {
+  if(!Array.isArray(payload?.bookmakers)||!payload.bookmakers.length)return null;
+  const rows=[]; const seen=new Set();
+  const providerEventId=String(payload.id??payload.eventId??event.id??event.eventId??event.key??'');
+  for(const bookmaker of payload.bookmakers){
+    const bookId=String(bookmaker.key??bookmaker.id??bookmaker.book_id??'');
+    const book=String(bookmaker.title??bookmaker.name??bookmaker.bookmaker_title??bookId)||provider;
+    for(const market of Array.isArray(bookmaker.markets)?bookmaker.markets:[]){
+      const marketKey=String(market.key??market.market_key??market.name??'market');
+      const category=PLAYER_MARKET_RE.test(marketKey)?'player_prop':'game_line';
+      const periodId=String(market.period??payload.period??'game');
+      const explicitAlt=Boolean(market.alt??market.isAlt??market.alternate)||/\balt(?:ernate)?\b/i.test(`${marketKey} ${market.description||''}`);
+      for(const outcome of Array.isArray(market.outcomes)?market.outcomes:[]){
+        const rawPrice=outcome.price??outcome.americanOdds??outcome.american??outcome.odds??outcome.decimalOdds;
+        let price=num(rawPrice); if(price!=null&&price>1&&price<20)price=decimalToAmerican(price);
+        if(price==null)continue;
+        const line=num(outcome.point??outcome.line??outcome.handicap??outcome.total);
+        const side=String(outcome.name??outcome.side??outcome.outcome??outcome.label??'');
+        const entityName=String(outcome.playerName??outcome.player??outcome.participant??(category==='player_prop'?outcome.description:'')??'');
+        const key=[providerEventId,bookId||book,marketKey,periodId,entityName,side,line,price].join('|');
+        if(seen.has(key))continue;
+        seen.add(key);
+        rows.push({
+          provider,
+          providerEventId,
+          providerOddId:key,
+          category,
+          marketKey,
+          marketName:marketLabel(market),
+          statId:String(outcome.statId??outcome.stat_id??(category==='player_prop'?marketKey:'')),
+          entityName,
+          periodId,
+          betType:String(outcome.betType??outcome.type??marketKey),
+          side,
+          book,
+          bookId,
+          line,
+          price,
+          live:Boolean(outcome.live??market.live??payload.live??event.live),
+          alt:Boolean(outcome.alt??outcome.isAlt??outcome.alternate)||explicitAlt,
+          available:outcome.available!==false&&market.available!==false&&bookmaker.available!==false,
+          deeplink:outcome.deeplink??outcome.url??outcome.link??market.link??market.url??bookmaker.link??bookmaker.url??null,
+          capturedAt:rowTime(outcome.last_update,outcome.book_updated_at,outcome.last_change_at,market.last_update,bookmaker.last_update,payload.last_update)
+        });
+      }
+    }
+  }
+  return inferAlternateLines(rows).slice(0,600);
+}
+
+function recursiveOddsRows(payload, provider, event={}) {
   const rows=[]; const seen=new Set();
   const walk=(node,path=[])=>{
     if(!node||typeof node!=='object')return;
@@ -33,11 +128,15 @@ function genericOddsRows(payload, provider, event={}) {
     const market=node.market ?? node.marketName ?? node.market_name ?? node.key ?? path.slice(-2,-1)[0];
     if(price!=null && (book||side||market)){
       const key=[event.id||event.eventId||'',market,side,line,book,price].join('|');
-      if(!seen.has(key)){seen.add(key);rows.push({provider,providerEventId:String(event.id||event.eventId||event.key||''),providerOddId:key,category:/player|passing|rushing|receiv|touchdown|sack/i.test(String(market))?'player_prop':'game_line',marketName:String(market||'Market'),statId:String(node.statId??node.stat_id??''),entityName:String(node.playerName??node.player??node.participant??''),periodId:String(node.period??node.periodId??'game'),betType:String(node.betType??node.type??''),side:String(side??''),book:String(book??provider),bookId:String(node.bookId??node.book_id??''),line,price,live:Boolean(node.live??event.live),alt:Boolean(node.alt??node.isAlt),available:node.available!==false,deeplink:node.deeplink??node.url??null,capturedAt:new Date().toISOString()});}
+      if(!seen.has(key)){seen.add(key);rows.push({provider,providerEventId:String(event.id||event.eventId||event.key||''),providerOddId:key,category:PLAYER_MARKET_RE.test(String(market))?'player_prop':'game_line',marketKey:String(market||''),marketName:String(market||'Market'),statId:String(node.statId??node.stat_id??''),entityName:String(node.playerName??node.player??node.participant??''),periodId:String(node.period??node.periodId??'game'),betType:String(node.betType??node.type??''),side:String(side??''),book:String(book??provider),bookId:String(node.bookId??node.book_id??''),line,price,live:Boolean(node.live??event.live),alt:Boolean(node.alt??node.isAlt),available:node.available!==false,deeplink:node.deeplink??node.url??null,capturedAt:new Date().toISOString()});}
     }
     for(const [k,v] of Object.entries(node)) if(typeof v==='object') walk(v,[...path,k]);
   };
   walk(payload); return rows.slice(0,600);
+}
+
+export function normalizeOddsRows(payload, provider, event={}) {
+  return structuredOddsRows(payload,provider,event)??recursiveOddsRows(payload,provider,event);
 }
 
 async function fetchPropLine(env,{maxEvents=2}={}) {
@@ -47,7 +146,7 @@ async function fetchPropLine(env,{maxEvents=2}={}) {
   const {json,headers:rh}=await getJson(`${base}/events`,{headers});
   const events=arr(json).filter(titanText).slice(0,maxEvents);
   const odds=[];
-  for(const event of events){const id=event.id??event.eventId??event.key;if(!id)continue;try{const out=await getJson(`${base}/events/${encodeURIComponent(id)}/odds`,{headers});odds.push(...genericOddsRows(out.json,'PropLine',event));}catch{}}
+  for(const event of events){const id=event.id??event.eventId??event.key;if(!id)continue;try{const out=await getJson(`${base}/events/${encodeURIComponent(id)}/odds?includeLinks=true`,{headers});odds.push(...normalizeOddsRows(out.json,'PropLine',event));}catch{}}
   return {ok:true,configured:true,provider:'PropLine',events,odds,futures:[],quota:{remaining:rh.get('x-ratelimit-remaining')||rh.get('ratelimit-remaining')||null,limit:rh.get('x-ratelimit-limit')||rh.get('ratelimit-limit')||null},fetchedAt:new Date().toISOString()};
 }
 
@@ -56,7 +155,7 @@ async function fetchOddsApiIo(env,{maxEvents=2}={}) {
   const key=encodeURIComponent(env.ODDS_API_IO_KEY);
   const {json}=await getJson(`https://api.odds-api.io/v3/events?apiKey=${key}&sport=nfl&limit=100`);
   const events=arr(json).filter(titanText).slice(0,maxEvents); const odds=[];
-  for(const event of events){const id=event.id??event.eventId??event.key;if(!id)continue;try{const out=await getJson(`https://api.odds-api.io/v3/odds?apiKey=${key}&eventId=${encodeURIComponent(id)}`);odds.push(...genericOddsRows(out.json,'Odds-API.io',event));}catch{}}
+  for(const event of events){const id=event.id??event.eventId??event.key;if(!id)continue;try{const out=await getJson(`https://api.odds-api.io/v3/odds?apiKey=${key}&eventId=${encodeURIComponent(id)}`);odds.push(...normalizeOddsRows(out.json,'Odds-API.io',event));}catch{}}
   return {ok:true,configured:true,provider:'Odds-API.io',events,odds,futures:[],fetchedAt:new Date().toISOString()};
 }
 
