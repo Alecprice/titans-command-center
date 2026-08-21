@@ -6,7 +6,7 @@ import { preseasonStatsRoute } from '../src/preseason-api.mjs';
 import { marketDataRoute } from '../src/market-api.mjs';
 import { advancedAnalyticsRoute } from '../src/advanced-analytics-api.mjs';
 
-const APP_VERSION='0.8.0';
+const APP_VERSION='1.0.0';
 const TITANS_QUERY='Tennessee Titans';
 let oddsCache={expiresAt:0,value:null,inflight:null};
 const requestedCacheSeconds=Number(process.env.ODDS_CACHE_SECONDS||300);
