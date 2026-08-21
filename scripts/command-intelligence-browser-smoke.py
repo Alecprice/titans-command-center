@@ -57,12 +57,23 @@ try:
         'gm': 'Fan GM',
         'history': 'Your franchise timeline',
     }
+    addon_expectations = {
+        'changes': 'ONE-MINUTE TITANS',
+        'scheme': 'Play Explainer',
+        'global': 'SMART ALERTS',
+        'gm': 'FRONT OFFICE SANDBOX',
+    }
     visited = []
+    addons_verified = []
     for tab, expected in tab_expectations.items():
         stage = f'desktop:tab:{tab}'
         driver.execute_script("document.querySelector(`[data-v15-tab=\"${arguments[0]}\"]`)?.click()", tab)
         wait_for(driver, f"document.querySelector('[data-v15-tab=\"{tab}\"]')?.getAttribute('aria-selected') === 'true'")
         wait_for(driver, f"(document.querySelector('.v15-pane')?.innerText || '').includes({json.dumps(expected)})")
+        addon = addon_expectations.get(tab)
+        if addon:
+            wait_for(driver, f"(document.querySelector('.v15-addon-root')?.innerText || '').includes({json.dumps(addon)})")
+            addons_verified.append(tab)
         if driver.execute_script("return location.hash") != '#command':
             raise RuntimeError(f'Command tab changed route unexpectedly: {tab}')
         no_overflow(driver, f'desktop {tab}')
@@ -85,6 +96,7 @@ try:
     driver.set_window_size(390, 844)
     driver.get(f'{BASE}/#command')
     wait_for(driver, "document.querySelector('.v15-command') && document.querySelectorAll('[data-v15-tab]').length === 7", timeout=14)
+    wait_for(driver, "(document.querySelector('.v15-addon-root')?.innerText || '').includes('ONE-MINUTE TITANS')", timeout=14)
     no_overflow(driver, '390px command')
     mobile = driver.execute_script("""
       return {
@@ -92,13 +104,14 @@ try:
         command:Boolean(document.querySelector('.v15-command')),
         hero:Boolean(document.querySelector('.v15-hero')),
         nav:Boolean(document.querySelector('a[data-route="command"]')),
+        addons:Boolean(document.querySelector('.v15-addon-root')),
         gridWidth:document.querySelector('.v15-command')?.getBoundingClientRect().width || 0,
         viewport:document.documentElement.clientWidth
       }
     """)
     if len(mobile['tabTargets']) != 7 or any(x['h'] < 44 for x in mobile['tabTargets']):
         raise RuntimeError(f'Mobile Command tabs invalid: {mobile}')
-    if not mobile['command'] or not mobile['hero'] or not mobile['nav']:
+    if not mobile['command'] or not mobile['hero'] or not mobile['nav'] or not mobile['addons']:
         raise RuntimeError(f'Mobile Command shell incomplete: {mobile}')
 
     stage = 'console'
@@ -115,6 +128,7 @@ try:
         'ok': True,
         'base': BASE,
         'tabsVisited': visited,
+        'addonsVerified': addons_verified,
         'spoilerToggle': spoiler_toggled,
         'mediaTuneGuideAfterPushState': media_guide_after_pushstate,
         'mobileTabTargets': mobile['tabTargets'],
@@ -137,7 +151,7 @@ except Exception as exc:
     try:
         if driver is not None:
             result['hash'] = driver.execute_script('return location.hash')
-            result['pageText'] = driver.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,1200)")
+            result['pageText'] = driver.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,1600)")
             result['browserWarnings'] = [x for x in driver.get_log('browser') if x.get('level') in ('SEVERE', 'WARNING')][:20]
     except Exception:
         pass
