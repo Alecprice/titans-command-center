@@ -48,15 +48,24 @@ test('international mode avoids U.S.-only viewing assumptions',()=>{
   assert.match(js,/rights vary/);
 });
 
+test('timecode runtime tolerates browser storage and formatting edge cases',()=>{
+  const js=read('media-timecodes-v14.js');
+  assert.match(js,/const storageGet=key=>\{try\{return localStorage\.getItem\(key\)\}catch\{return null\}\}/);
+  assert.match(js,/function zoneParts\(value,timeZone\)\{try\{/);
+  assert.match(js,/function stopTimer\(\)/);
+  assert.match(js,/observe\(app,\{childList:true,subtree:false\}\)/);
+  assert.doesNotMatch(js,/observe\(app,\{childList:true,subtree:true\}\)/);
+});
+
 test('global kickoff guide includes countdown and responsive mobile layout',()=>{
   const js=read('media-timecodes-v14.js'),css=read('media-timecodes-v14.css'),html=read('index.html'),sw=read('sw.js');
   assert.match(js,/STARTS IN/);
   assert.match(js,/setInterval/);
   assert.match(css,/@media\(max-width:759px\)/);
   assert.match(css,/@media\(max-width:390px\)/);
-  assert.match(html,/media-timecodes-v14\.css\?v=1/);
-  assert.match(html,/media-timecodes-v14\.js\?v=1/);
-  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
+  assert.match(html,/media-timecodes-v14\.css\?v=2/);
+  assert.match(html,/media-timecodes-v14\.js\?v=2/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v38'/);
   assert.match(sw,/media-timecodes-v14\.css/);
   assert.match(sw,/media-timecodes-v14\.js/);
 });
