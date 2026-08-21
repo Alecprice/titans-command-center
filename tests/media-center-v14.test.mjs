@@ -17,7 +17,7 @@ test('Listen Watch is a first-class route and PWA asset',()=>{
 
 test('media center uses authorized providers and never proxies live media',()=>{
   const js=read('media-center-v14.js');
-  for(const token of ['tennesseetitans.com','1045thezone.com','nfl.com/plus','tunein.com','siriusxm.com','paramountplus.com','foxsports.com','peacocktv.com','espn.com/watch','amazon.com','youtube.com'])assert.match(js,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  for(const token of ['tennesseetitans.com','1045thezone.com','nfl.com/plus','nfl.com/international','tunein.com','siriusxm.com','paramountplus.com','foxsports.com','peacocktv.com','espn.com/watch','amazon.com','youtube.com','dazn.com'])assert.match(js,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
   assert.match(js,/does not proxy, copy or rebroadcast the audio/i);
   assert.match(js,/There is no public third-party API that legally hands this site the raw game stream/);
   assert.doesNotMatch(js,/fetch\([^)]*playerservices\.streamtheworld/);
@@ -33,7 +33,7 @@ test('104.5 direct playback is client-side and CSP-limited',()=>{
   assert.doesNotMatch(headers,/media-src[^\n;]*\*/);
 });
 
-test('watch router covers core NFL distribution paths',()=>{
+test('watch router covers core U.S. NFL distribution paths',()=>{
   const js=read('media-center-v14.js');
   for(const token of ['CBS','FOX','NBC','ESPN','ABC','PRIME','AMAZON','NFL NETWORK','NETFLIX','NFL Sunday Ticket','NFL+'])assert.match(js,new RegExp(token));
   assert.match(js,/Out of market/);
@@ -41,12 +41,16 @@ test('watch router covers core NFL distribution paths',()=>{
   assert.match(js,/Local FOX/);
 });
 
-test('media center defaults to Nashville but offers outside-market mode without geolocation',()=>{
+test('media center separates Nashville, elsewhere U.S. and international rights modes without geolocation',()=>{
   const js=read('media-center-v14.js');
   assert.match(js,/AREA_KEY='titans:v14MediaArea'/);
-  assert.match(js,/\|\|'nashville'/);
+  assert.match(js,/savedArea==='outside'\?'us'/);
   assert.match(js,/Nashville \/ Middle Tennessee/);
-  assert.match(js,/Outside local market/);
+  assert.match(js,/Elsewhere in U\.S\./);
+  assert.match(js,/>International</);
+  assert.match(js,/NFL International/);
+  assert.match(js,/NFL Game Pass on DAZN/);
+  assert.match(js,/U\.S\. broadcast network shown above is schedule context only/);
   assert.doesNotMatch(js,/navigator\.geolocation/);
 });
 
@@ -56,5 +60,6 @@ test('mobile media UI has safe simple responsive layouts',()=>{
   assert.match(css,/@media\(max-width:390px\)/);
   assert.match(css,/min-height:44px/);
   assert.match(css,/prefers-reduced-motion:reduce/);
+  assert.match(css,/\.media-area-switch\{width:100%;display:grid;grid-template-columns:1fr\}/);
   assert.match(css,/grid-template-columns:1fr/);
 });
