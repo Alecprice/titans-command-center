@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + player headshot browser regression failure**
-- Source commit: `d5bf52cb3dcc718d595fc4101af978a2064f5cfe`
+- Status: **deployed + full production + browser + analytics + player headshot regressions passed**
+- Source commit: `0a2a0ccef429de73eb7c495398a146f0aa8f5a09`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -9,9 +9,9 @@
 - Production regression: success
 - Browser navigation regression: success
 - Advanced analytics browser regression: success
-- Player headshot browser regression: failure
+- Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-21T05:15:22Z
+- Recorded: 2026-08-21T12:07:50Z
 
 ## Production regression
 
@@ -58,24 +58,24 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 6,
-  "marketMode": "published-reference",
+  "marketRows": 445,
+  "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "0.8.0",
-    "commit": "d5bf52cb3dcc718d595fc4101af978a2064f5cfe",
-    "builtAt": "2026-08-21T05:14:32.211Z"
+    "commit": "0a2a0ccef429de73eb7c495398a146f0aa8f5a09",
+    "builtAt": "2026-08-21T12:06:36.740Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 12,
   "responseMs": {
-    "root": 21,
-    "health": 398,
-    "data": 746,
-    "stats": 237,
-    "market": 1124,
-    "analytics": 1219
+    "root": 19,
+    "health": 957,
+    "data": 651,
+    "stats": 295,
+    "market": 325,
+    "analytics": 726
   },
-  "testedAt": "2026-08-21T05:14:56.656Z",
+  "testedAt": "2026-08-21T12:07:23.603Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -105,8 +105,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 160,
-  "testedAt": "2026-08-21T05:14:58.167Z"
+  "durationMs": 137,
+  "testedAt": "2026-08-21T12:07:24.546Z"
 }```
 
 ## Browser navigation regression
@@ -155,11 +155,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 110,
-  "longTasksOver250ms": 0,
+  "maxLongTaskMs": 273,
+  "longTasksOver250ms": 1,
   "browserWarnings": [],
-  "durationSeconds": 17.02,
-  "testedAt": "2026-08-21T05:15:18Z"
+  "durationSeconds": 15.81,
+  "testedAt": "2026-08-21T12:07:45Z"
 }```
 
 ## Advanced analytics browser regression
@@ -204,32 +204,28 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.84,
-  "testedAt": "2026-08-21T05:15:20Z"
+  "durationSeconds": 1.57,
+  "testedAt": "2026-08-21T12:07:47Z"
 }```
 
 ## Player headshot browser regression
 
 ```json
 {
-  "ok": false,
+  "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "roster-load",
-  "error": "RuntimeError: No visible roster headshot loaded successfully",
-  "state": {
-    "appText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury r",
-    "firstSrc": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/oyncfcyyfflsqesj6xei",
-    "hash": "#roster",
-    "rosterCards": 95,
-    "rosterLoaded": 4,
-    "rosterPhotos": 82,
-    "statsLoaded": 0,
-    "statsPhotos": 0,
-    "statsRows": 0,
-    "title": "Roster"
-  },
-  "durationSeconds": 1.75,
-  "testedAt": "2026-08-21T05:15:22Z"
+  "rosterCards": 95,
+  "rosterDecoratedHeadshots": 82,
+  "rosterLoadedHeadshots": 46,
+  "statsPlayerRows": 95,
+  "statsDecoratedHeadshots": 82,
+  "statsLoadedHeadshots": 22,
+  "mobileLoadedHeadshots": 22,
+  "richPlayer": "Austin Schlottmann",
+  "richPlayerHeadshotLoaded": true,
+  "browserWarnings": [],
+  "durationSeconds": 2.69,
+  "testedAt": "2026-08-21T12:07:50Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
