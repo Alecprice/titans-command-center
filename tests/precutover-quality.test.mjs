@@ -27,6 +27,8 @@ test('app shell keeps core accessibility, mobile navigation and PWA semantics',(
   assert.match(html,/src="\/analytics-hub\.js\?v=30"/);
   assert.match(html,/href="\/headshot-polish\.css\?v=31"/);
   assert.match(html,/src="\/headshot-polish\.js\?v=31"/);
+  assert.match(html,/href="\/fan-experience-v09\.css\?v=1"/);
+  assert.match(html,/src="\/fan-experience-v09\.js\?v=1"/);
   assert.match(html,/src="\/accessibility-runtime\.js"/);
   assert.match(html,/src="\/legacy-polish\.js\?v=21"/);
   assert.match(html,/src="\/fact-polish\.js\?v=21"/);
@@ -110,7 +112,7 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v31/);
+  assert.match(sw,/titans-cc-brand-2026-v32/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.css/);
@@ -119,6 +121,8 @@ test('PWA shell excludes server-only modules and refreshes code assets from netw
   assert.match(sw,/\/analytics-hub\.css/);
   assert.match(sw,/\/headshot-polish\.js/);
   assert.match(sw,/\/headshot-polish\.css/);
+  assert.match(sw,/\/fan-experience-v09\.js/);
+  assert.match(sw,/\/fan-experience-v09\.css/);
   assert.match(sw,/const NETWORK_FIRST=/);
   assert.match(sw,/js\|mjs\|css\|webmanifest/);
   assert.doesNotMatch(sw,/\/src\/preseason-p1-20260813\.mjs/);
