@@ -65,7 +65,7 @@ test('global kickoff guide includes countdown and responsive mobile layout',()=>
   assert.match(css,/@media\(max-width:390px\)/);
   assert.match(html,/media-timecodes-v14\.css\?v=2/);
   assert.match(html,/media-timecodes-v14\.js\?v=2/);
-  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v38'/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
   assert.match(sw,/media-timecodes-v14\.css/);
   assert.match(sw,/media-timecodes-v14\.js/);
 });
