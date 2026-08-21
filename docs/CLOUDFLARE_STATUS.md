@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + analytics + player headshot regressions passed**
-- Source commit: `3d4349cf16555d554dda0edda3e61f624a36fc1a`
+- Source commit: `858c7acc55729fa948e0d2fbf386482c29a3fe5c`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -11,7 +11,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-21T18:34:24Z
+- Recorded: 2026-08-21T21:29:24Z
 
 ## Production regression
 
@@ -58,24 +58,24 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 220,
+  "marketRows": 222,
   "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "3d4349cf16555d554dda0edda3e61f624a36fc1a",
-    "builtAt": "2026-08-21T18:33:16.772Z"
+    "commit": "858c7acc55729fa948e0d2fbf386482c29a3fe5c",
+    "builtAt": "2026-08-21T21:28:45.616Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 82,
-    "health": 943,
-    "data": 321,
-    "stats": 212,
-    "market": 6528,
-    "analytics": 611
+    "root": 100,
+    "health": 962,
+    "data": 387,
+    "stats": 215,
+    "market": 1330,
+    "analytics": 894
   },
-  "testedAt": "2026-08-21T18:33:46.729Z",
+  "testedAt": "2026-08-21T21:29:08.791Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -105,8 +105,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 121,
-  "testedAt": "2026-08-21T18:33:47.560Z"
+  "durationMs": 143,
+  "testedAt": "2026-08-21T21:29:09.922Z"
 }```
 
 ## Browser navigation regression
@@ -155,11 +155,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 975,
-  "longTasksOver250ms": 4,
+  "maxLongTaskMs": 84,
+  "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 24.94,
-  "testedAt": "2026-08-21T18:34:18Z"
+  "durationSeconds": 7.31,
+  "testedAt": "2026-08-21T21:29:20Z"
 }```
 
 ## Advanced analytics browser regression
@@ -204,8 +204,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.92,
-  "testedAt": "2026-08-21T18:34:21Z"
+  "durationSeconds": 1.52,
+  "testedAt": "2026-08-21T21:29:22Z"
 }```
 
 ## Player headshot browser regression
@@ -219,13 +219,13 @@
   "rosterLoadedHeadshots": 46,
   "statsPlayerRows": 95,
   "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 8,
-  "mobileLoadedHeadshots": 8,
+  "statsLoadedHeadshots": 7,
+  "mobileLoadedHeadshots": 7,
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 2.95,
-  "testedAt": "2026-08-21T18:34:24Z"
+  "durationSeconds": 2.18,
+  "testedAt": "2026-08-21T21:29:24Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
