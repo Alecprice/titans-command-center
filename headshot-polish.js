@@ -19,38 +19,43 @@ async function hsManifest(){
   return hsManifestPromise;
 }
 
-function hsImage(name,row,loading='lazy'){
+function hsImage(name,row,{eager=false}={}){
   const image=document.createElement('img');
-  image.src=row.headshotUrl;image.alt=`${name} headshot`;image.loading=loading;image.decoding='async';image.referrerPolicy='no-referrer';
+  image.src=row.headshotUrl;image.alt=`${name} headshot`;image.loading=eager?'eager':'lazy';image.decoding='async';image.referrerPolicy='no-referrer';
+  if(eager)image.fetchPriority='high';
   image.dataset.headshotSource=row.source||'nflverse roster headshot';
   return image;
 }
 
-function hsApplyMedia(media,name,row,{hero=false}={}){
-  if(!media||media.dataset.headshotApplied==='true')return;
-  media.dataset.headshotApplied='true';
+function hsApplyMedia(media,name,row,{hero=false,eager=false}={}){
+  if(!media||media.dataset.headshotApplied==='true'||media.dataset.headshotFailed==='true')return;
+  media.dataset.headshotApplied='true';media.classList.add('headshot-pending');
   const number=media.textContent.trim();
-  const image=hsImage(name,row,hero?'eager':'lazy');
+  const image=hsImage(name,row,{eager:hero||eager});
   const numberBadge=document.createElement('span');numberBadge.className='player-photo-number';numberBadge.textContent=number;
   media.textContent='';media.classList.add('has-headshot');media.append(image,numberBadge);
-  image.addEventListener('error',()=>{media.classList.remove('has-headshot');media.textContent=number;media.removeAttribute('data-headshot-applied')},{once:true});
+  image.addEventListener('load',()=>{media.classList.remove('headshot-pending');media.classList.add('headshot-loaded')},{once:true});
+  image.addEventListener('error',()=>{
+    media.classList.remove('has-headshot','headshot-pending','headshot-loaded');
+    media.dataset.headshotFailed='true';media.textContent=number;
+  },{once:true});
 }
 
 async function hsDecorate(){
   const {byName}=await hsManifest();if(!byName.size)return;
-  document.querySelectorAll('.player-card').forEach(card=>{
+  document.querySelectorAll('.player-card').forEach((card,index)=>{
     const name=card.querySelector('h3')?.textContent?.trim()||'';const row=byName.get(hsNormalize(name));
-    if(row)hsApplyMedia(card.querySelector('.jersey'),name,row);
+    if(row)hsApplyMedia(card.querySelector('.jersey'),name,row,{eager:index<8});
   });
-  document.querySelectorAll('.ps-player').forEach(card=>{
+  document.querySelectorAll('.ps-player').forEach((card,index)=>{
     const name=card.querySelector('.ps-player-id strong')?.textContent?.trim()||'';const row=byName.get(hsNormalize(name));
-    if(row)hsApplyMedia(card.querySelector('.ps-number'),name,row);
+    if(row)hsApplyMedia(card.querySelector('.ps-number'),name,row,{eager:index<8});
   });
   const hero=document.querySelector('.player-profile-rich .player-rich-hero');
   if(hero){
     const name=hero.querySelector('.player-rich-copy h1')?.textContent?.trim()||'';const row=byName.get(hsNormalize(name));
     if(row){
-      hsApplyMedia(hero.querySelector('.player-rich-number'),name,row,{hero:true});
+      hsApplyMedia(hero.querySelector('.player-rich-number'),name,row,{hero:true,eager:true});
       const copy=hero.querySelector('.player-rich-copy');
       if(copy&&!copy.querySelector('.player-photo-credit'))copy.insertAdjacentHTML('beforeend','<div class="player-photo-credit">Player photo · NFL roster headshot via nflverse</div>');
     }

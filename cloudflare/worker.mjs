@@ -7,7 +7,7 @@ import {advancedAnalyticsRoute} from '../src/advanced-analytics-api.mjs';
 import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflverseStats,syncNwsNextHomeGame,syncFreeOdds,recordSyncRun} from '../src/ingest.mjs';
 
 const API_PREFIX='/api/';
-const APP_VERSION='0.8.0';
+const APP_VERSION='1.0.0';
 const SERVER_BINDINGS=['DATABASE_URL','INGEST_SECRET','CRON_SECRET','PROPLINE_API_KEY','ODDS_API_IO_KEY','PROPLINE_BOOKS','PROPLINE_EXTRA_MARKETS','ODDS_API_IO_BOOKS','ODDS_CACHE_SECONDS','TITANS_HISTORY_START','TITANS_HISTORY_END','CONTINUE_ON_IMPORT_ERROR'];
 
 function applyRuntimeEnv(env){
