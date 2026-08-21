@@ -4,10 +4,10 @@
   const app=document.querySelector('#app');
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const AREA_KEY='titans:v14MediaArea';
-  const PLAYER_KEY='titans:v14RadioProvider';
   const OFFICIAL={
+    titansLiveAudio:'https://www.tennesseetitans.com/broadcast/titans-radio/live-game-day-audio',
     titansRadio:'https://www.tennesseetitans.com/audio/live-game-broadcast-titans-radio-2026',
-    zonePlayer:'https://player.1045thezone.com/',
+    zonePlayer:'https://www.1045thezone.com/player/?playerID=3234',
     zoneListen:'https://www.1045thezone.com/listen/',
     titansWatch:'https://www.tennesseetitans.com/watch-live-games/ways-to-watch',
     nflPlus:'https://www.nfl.com/plus/learn-more',
@@ -24,10 +24,12 @@
     dazn:'https://www.dazn.com/',
     nflWatch:'https://www.nfl.com/ways-to-watch'
   };
-  const RADIO_STREAM='https://playerservices.streamtheworld.com/api/livestream-redirect/WGFXFMAAC.aac';
-  const savedArea=localStorage.getItem(AREA_KEY);
+
+  const storageGet=key=>{try{return localStorage.getItem(key)}catch{return null}};
+  const storageSet=(key,value)=>{try{localStorage.setItem(key,value);return true}catch{return false}};
+  const savedArea=storageGet(AREA_KEY);
   const initialArea=savedArea==='outside'?'us':['nashville','us','international'].includes(savedArea)?savedArea:'nashville';
-  const state={data:null,loading:null,area:initialArea,radioProvider:localStorage.getItem(PLAYER_KEY)||'zone'};
+  const state={data:null,loading:null,area:initialArea};
 
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const validDate=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?null:d};
@@ -69,7 +71,7 @@
     ['WGFX','104.5 FM','Nashville flagship'],['WAKM','950 AM','Franklin'],['WANT','98.9 FM','Lebanon'],['WCOR','1490 AM','Lebanon'],['WZNG','100.9 FM / 1400 AM','Shelbyville'],['WQMV','93.5 FM / 1060 AM','Waverly'],['WMSR','107.9 FM / 1320 AM','Manchester'],['WGOW','102.3 FM / 1150 AM','Chattanooga'],['WXSM','640 AM','Tri-Cities'],['WCDT','1340 AM','Winchester']
   ]}
 
-  function areaSwitch(){return `<div class="media-area-switch" role="group" aria-label="Media area"><button type="button" data-media-area="nashville" class="${state.area==='nashville'?'active':''}">Nashville / Middle Tennessee</button><button type="button" data-media-area="us" class="${state.area==='us'?'active':''}">Elsewhere in U.S.</button><button type="button" data-media-area="international" class="${state.area==='international'?'active':''}">International</button></div>`}
+  function areaSwitch(){return `<div class="media-area-switch" role="group" aria-label="Media area"><button type="button" data-media-area="nashville" class="${state.area==='nashville'?'active':''}" aria-pressed="${state.area==='nashville'}">Nashville / Middle Tennessee</button><button type="button" data-media-area="us" class="${state.area==='us'?'active':''}" aria-pressed="${state.area==='us'}">Elsewhere in U.S.</button><button type="button" data-media-area="international" class="${state.area==='international'?'active':''}" aria-pressed="${state.area==='international'}">International</button></div>`}
 
   function radioProviderGrid(){
     if(state.area==='international')return `<div class="media-provider-grid"><a class="media-provider" href="${OFFICIAL.nflInternational}" target="_blank" rel="noopener noreferrer"><b>NFL International</b><span>Choose your country for current authorized NFL viewing and streaming partners.</span><em>By country</em></a><a class="media-provider" href="${OFFICIAL.dazn}" target="_blank" rel="noopener noreferrer"><b>NFL Game Pass on DAZN</b><span>International NFL access in supported countries; local rights and availability vary.</span><em>International</em></a><a class="media-provider" href="${OFFICIAL.titansRadio}" target="_blank" rel="noopener noreferrer"><b>Titans Radio</b><span>Open the official Titans audio page. Geographic and digital restrictions may apply.</span><em>Official team</em></a></div>`;
@@ -78,8 +80,9 @@
 
   function radioSection(g){
     const local=state.area==='nashville',international=state.area==='international';
-    const intro=local?'Nashville flagship: WGFX 104.5 The Zone. Station and NFL digital restrictions still apply.':international?'International audio and streaming rights vary by country. Use the official country guide first.':'For Titans games outside the Nashville market in the U.S., use an NFL-licensed all-game audio provider.';
-    return `<section class="media-radio-deck"><div class="media-radio-top"><div><small>LISTEN</small><h2>Titans Radio</h2><p>${intro}</p></div><div class="media-radio-dial"><span>104.5</span><small>THE ZONE</small></div></div>${local?`<div class="media-radio-player"><div class="media-onair"><i></i><span>${g?'NEXT TITANS BROADCAST':'NASHVILLE SPORTS RADIO'}</span><strong>${esc(g?gameLabel(g):'104.5 The Zone')}</strong><small>${g?fmt(g.date):'Official station stream'}</small></div><audio id="media-zone-audio" preload="none" controls playsinline src="${RADIO_STREAM}"></audio><p class="media-rights-note">Direct station playback is requested from the station's streaming provider in your browser. Titans Command Center does not proxy, copy or rebroadcast the audio. If the provider blocks playback or a game is digitally restricted, use the official player below.</p><div class="media-action-row"><a class="button primary" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.zonePlayer}">Open official 104.5 player ↗</a><a class="button" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.titansRadio}">Titans live audio page ↗</a></div></div>`:''}${radioProviderGrid()}<details class="media-affiliates"><summary>Terrestrial Titans Radio affiliates</summary><div>${stationAffiliates().map(x=>`<div><strong>${x[0]}</strong><span>${x[1]}</span><small>${x[2]}</small></div>`).join('')}</div><p>Use your actual radio for AM/FM reception. iPhones do not expose an AM/FM tuner to websites, so web playback uses authorized digital sources instead.</p></details></section>`
+    const intro=local?'Nashville flagship: WGFX 104.5 The Zone. Use the official station or Titans game-audio player below; NFL geographic/device restrictions can still apply.':international?'International audio and streaming rights vary by country. Use the official country guide first.':'For Titans games outside the Nashville market in the U.S., use an NFL-licensed all-game audio provider.';
+    const localDeck=local?`<div class="media-radio-player"><div class="media-onair"><i></i><span>${g?'NEXT TITANS BROADCAST':'NASHVILLE SPORTS RADIO'}</span><strong>${esc(g?gameLabel(g):'104.5 The Zone')}</strong><small>${g?fmt(g.date):'Official listening options'}</small></div><div class="media-radio-launch" role="group" aria-label="Official Titans Radio listening options"><a class="media-radio-launch-main" href="${OFFICIAL.titansLiveAudio}" target="_blank" rel="noopener noreferrer"><small>GAME AUDIO</small><strong>Listen on Titans Radio</strong><span>The official live-audio button appears when the broadcast is available. Mobile home-market rules apply.</span><b>Open official game audio ↗</b></a><a class="media-radio-launch-alt" href="${OFFICIAL.zonePlayer}" target="_blank" rel="noopener noreferrer"><small>104.5 THE ZONE</small><strong>Open the official station player</strong><span>Current 104.5 web player · player ID 3234.</span><b>Open 104.5 ↗</b></a></div><p class="media-rights-note">The Command Center does not hotlink or rebroadcast the station’s raw audio stream. That avoids broken-player errors and keeps playback on the current rights-holder player. You can keep this page open for kickoff times, affiliates and watch guidance.</p><div class="media-action-row"><a class="button" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.zoneListen}">104.5 listening options ↗</a><a class="button" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.titansRadio}">Titans Radio broadcast page ↗</a></div></div>`:'';
+    return `<section class="media-radio-deck"><div class="media-radio-top"><div><small>LISTEN</small><h2>Titans Radio</h2><p>${intro}</p></div><div class="media-radio-dial"><span>104.5</span><small>THE ZONE</small></div></div>${localDeck}${radioProviderGrid()}<details class="media-affiliates"><summary>Terrestrial Titans Radio affiliates</summary><div>${stationAffiliates().map(x=>`<div><strong>${x[0]}</strong><span>${x[1]}</span><small>${x[2]}</small></div>`).join('')}</div><p>Use your actual radio for AM/FM reception. iPhones do not expose an AM/FM tuner to websites, so web playback uses authorized digital sources instead.</p></details></section>`
   }
 
   function watchSection(g){
@@ -93,14 +96,33 @@
 
   function futureSection(){return `<section class="media-future"><div><small>MEDIA ROADMAP</small><h2>What unlocks a true all-games media layer?</h2></div><div class="media-future-grid"><article><strong>1. All-game audio</strong><p>Already solvable today through NFL+, TuneIn Premium and SiriusXM in supported U.S./North American use cases. International availability must follow country-specific rights.</p></article><article><strong>2. Market-aware TV routing</strong><p>Use a licensed listings/broadcast feed such as Gracenote, Sportradar or SportsDataIO to resolve network and market details. The site can then say exactly where a fan should watch without guessing.</p></article><article><strong>3. In-app live video</strong><p>This requires a direct commercial rights agreement with the NFL/broadcaster plus DRM/authentication integration. A normal public developer key is not enough.</p></article><article><strong>4. Official highlights</strong><p>YouTube Data + IFrame APIs can support embeddable official Titans/NFL videos when the rights holder allows embedding. This is a good next media enhancement without touching live-game rights.</p></article></div></section>`}
 
-  function mediaPage(){const g=nextGame();app.innerHTML=`<section class="media-page"><header class="media-hero"><div><div class="eyebrow">TITANS MEDIA CENTER</div><h1>Listen / Watch</h1><p>One simple place to find the Titans broadcast you can legally use — local radio, all-game audio, TV and streaming.</p>${areaSwitch()}</div><div class="media-next"><small>NEXT GAME</small><strong>${esc(gameLabel(g))}</strong><span>${g?fmt(g.date):'Schedule loading'}</span><em>${esc(g?.network||'Network TBD')}</em></div></header>${radioSection(g)}${watchSection(g)}${futureSection()}</section>`;bind()}
+  function syncChrome(){document.querySelectorAll('[data-route]').forEach(a=>{const active=a.dataset.route===route();a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});const sidebar=document.querySelector('#sidebar');sidebar?.classList.remove('open');if(sidebar&&matchMedia('(max-width: 759px)').matches)sidebar.inert=true;const more=document.querySelector('#mobile-more-button');if(more){more.setAttribute('aria-expanded','false');more.setAttribute('aria-pressed','false')}}
+  function mediaPage(){if(!app)return;const g=nextGame();app.innerHTML=`<section class="media-page"><header class="media-hero"><div><div class="eyebrow">TITANS MEDIA CENTER</div><h1>Listen / Watch</h1><p>One simple place to find the Titans broadcast you can legally use — local radio, all-game audio, TV and streaming.</p>${areaSwitch()}</div><div class="media-next"><small>NEXT GAME</small><strong>${esc(gameLabel(g))}</strong><span>${g?fmt(g.date):'Schedule loading'}</span><em>${esc(g?.network||'Network TBD')}</em></div></header>${radioSection(g)}${watchSection(g)}${futureSection()}</section>`;syncChrome()}
 
   function homeCard(){if(route()!=='home'||document.querySelector('.media-home-card'))return;const hero=document.querySelector('.fan-hero');if(!hero)return;const g=nextGame(),card=document.createElement('section');card.className='media-home-card';const scheduleLine=g?`${fmt(g.date)} · ${esc(g.network||'Network TBD')}`:'Find the authorized radio or streaming option.';card.innerHTML=`<div><small>LISTEN / WATCH</small><strong>${esc(g?gameLabel(g):'Titans media')}</strong><span>${scheduleLine}</span></div><a href="#media">Open media center →</a>`;hero.insertAdjacentElement('afterend',card)}
 
-  function bind(){document.querySelectorAll('[data-media-area]').forEach(btn=>btn.addEventListener('click',()=>{state.area=btn.dataset.mediaArea;localStorage.setItem(AREA_KEY,state.area);mediaPage()}));const audio=document.querySelector('#media-zone-audio');if(audio){audio.addEventListener('error',()=>{const note=document.createElement('div');note.className='media-playback-error';note.textContent='The station stream did not open here. Use the official 104.5 player — station/NFL geo or digital restrictions may apply.';audio.insertAdjacentElement('afterend',note)},{once:true})}}
+  document.addEventListener('click',event=>{
+    const areaButton=event.target instanceof Element?event.target.closest('[data-media-area]'):null;
+    if(areaButton&&route()==='media'){
+      event.preventDefault();
+      const next=areaButton.dataset.mediaArea;
+      if(!['nashville','us','international'].includes(next))return;
+      state.area=next;
+      storageSet(AREA_KEY,next);
+      mediaPage();
+      return;
+    }
+    const mediaLink=event.target instanceof Element?event.target.closest('a[href="#media"]'):null;
+    if(mediaLink){
+      event.preventDefault();
+      if(location.hash!=='#media')history.pushState(null,'','#media');
+      load().then(()=>mediaPage());
+    }
+  },true);
 
-  async function render(){await load();if(route()==='media')mediaPage();else homeCard();document.querySelectorAll('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===route()))}
-  window.addEventListener('hashchange',()=>setTimeout(render,20));
-  if(app)new MutationObserver(()=>queueMicrotask(()=>{if(route()==='media'){if(!app.querySelector('.media-page'))render()}else homeCard()})).observe(app,{childList:true,subtree:false});
-  setTimeout(render,80);
+  async function render(){await load();if(route()==='media')mediaPage();else homeCard()}
+  window.addEventListener('hashchange',()=>setTimeout(render,0));
+  window.addEventListener('popstate',()=>setTimeout(render,0));
+  if(app)new MutationObserver(()=>queueMicrotask(()=>{if(route()==='media'){if(!app.querySelector('.media-page')){if(state.data)mediaPage();else render()}}else homeCard()})).observe(app,{childList:true,subtree:false});
+  setTimeout(render,40);
 })();
