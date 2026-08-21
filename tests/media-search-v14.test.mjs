@@ -5,7 +5,8 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('media section is discoverable from common fan search terms',()=>{
   const js=read('media-search-v14.js');
-  for(const term of ['listen','watch','radio','stream','streaming','tv','broadcast','kickoff','104\\.5','wgfx'])assert.match(js,new RegExp(term,'i'));
+  for(const term of ['listen','watch','radio','stream','streaming','tv','broadcast','kickoff','wgfx'])assert.match(js,new RegExp(term,'i'));
+  assert.ok(js.includes('104\\.5'));
   assert.match(js,/href='#media'|href=\'#media\'|a\.href='#media'/);
   assert.match(js,/Listen \/ Watch/);
 });
