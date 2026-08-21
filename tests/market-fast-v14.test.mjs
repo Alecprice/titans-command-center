@@ -25,7 +25,7 @@ test('fast market shell is mobile and reduced-motion friendly',()=>{
   assert.match(css,/prefers-reduced-motion:reduce/);
   assert.match(html,/market-fast-v14\.css\?v=1/);
   assert.match(html,/market-fast-v14\.js\?v=1/);
-  assert.match(sw,/titans-cc-brand-2026-v37/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
   assert.match(sw,/market-fast-v14\.css/);
   assert.match(sw,/market-fast-v14\.js/);
 });
