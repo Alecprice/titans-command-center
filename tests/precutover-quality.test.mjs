@@ -112,7 +112,7 @@ test('Cloudflare static policy hardens the temporary workers.dev deployment',()=
 
 test('PWA shell excludes server-only modules and refreshes code assets from network first',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v32/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
   assert.match(sw,/\/accessibility-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.js/);
   assert.match(sw,/\/usability-runtime\.css/);
