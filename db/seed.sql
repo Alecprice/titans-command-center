@@ -7,7 +7,7 @@
 
 insert into schema_meta(key,value,updated_at) values
 ('schema_version','0.6.0',now()),
-('app_version','0.6.1',now()),
+('app_version','0.8.0',now()),
 ('content_audit','2026-08-19',now()),
 ('market_policy','free-only-no-card',now()),
 ('production_app','titans-command-center',now())

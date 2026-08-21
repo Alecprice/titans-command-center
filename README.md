@@ -2,7 +2,7 @@
 
 A mobile-first, installable Tennessee Titans fan HQ and data PWA. It combines official/current team information, game-day context, roster and transaction snapshots, free market-data adapters, franchise history, and a Neon Postgres warehouse behind a custom Titans-focused UI.
 
-## Current build — v0.6.6
+## Current build — v0.8.0
 
 The project follows a **content-integrity first** model. Current facts are checked against TennesseeTitans.com first, then NFL.com where appropriate. The Pro Football Hall of Fame, Pro Football Reference, nflverse, SportsLogos.net and Wikipedia are secondary/cross-check sources by domain rather than interchangeable authorities.
 

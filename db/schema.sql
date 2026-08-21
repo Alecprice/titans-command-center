@@ -425,5 +425,5 @@ create index if not exists saved_filters_user_idx on saved_filters(user_id,creat
 
 insert into schema_meta(key,value,updated_at) values
 ('schema_version','0.6.0',now()),
-('app_version','0.6.1',now())
+('app_version','0.8.0',now())
 on conflict(key) do update set value=excluded.value,updated_at=excluded.updated_at;
