@@ -90,9 +90,16 @@ jobs:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: python scripts/media-browser-smoke.py
 
+      - name: Run Command Intelligence browser regression
+        id: command_browser
+        if: steps.media_browser.outcome == 'success'
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: python scripts/command-intelligence-browser-smoke.py
+
       - name: Run advanced analytics browser regression
         id: analytics_browser
-        if: steps.media_browser.outcome == 'success'
+        if: steps.command_browser.outcome == 'success'
         env:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: python scripts/analytics-browser-smoke.py
@@ -115,6 +122,7 @@ jobs:
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
           BROWSER_OUTCOME: ${{ steps.browser.outcome }}
           MEDIA_BROWSER_OUTCOME: ${{ steps.media_browser.outcome }}
+          COMMAND_BROWSER_OUTCOME: ${{ steps.command_browser.outcome }}
           ANALYTICS_BROWSER_OUTCOME: ${{ steps.analytics_browser.outcome }}
           HEADSHOT_BROWSER_OUTCOME: ${{ steps.headshot_browser.outcome }}
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
@@ -126,8 +134,9 @@ jobs:
           elif [[ "$SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}";
           elif [[ "$BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + browser navigation regression ${BROWSER_OUTCOME:-not-run}";
           elif [[ "$MEDIA_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Listen Watch browser regression ${MEDIA_BROWSER_OUTCOME:-not-run}";
+          elif [[ "$COMMAND_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Command Intelligence browser regression ${COMMAND_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ANALYTICS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + advanced analytics browser regression ${ANALYTICS_BROWSER_OUTCOME:-not-run}";
-          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + analytics + player headshot regressions passed';
+          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + command intelligence + analytics + player headshot regressions passed';
           else STATUS="deployed + player headshot browser regression ${HEADSHOT_BROWSER_OUTCOME:-not-run}"; fi
           {
             echo '# Cloudflare deployment status'
@@ -141,6 +150,7 @@ jobs:
             echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"
             echo "- Browser navigation regression: ${BROWSER_OUTCOME:-not-run}"
             echo "- Listen Watch browser regression: ${MEDIA_BROWSER_OUTCOME:-not-run}"
+            echo "- Command Intelligence browser regression: ${COMMAND_BROWSER_OUTCOME:-not-run}"
             echo "- Advanced analytics browser regression: ${ANALYTICS_BROWSER_OUTCOME:-not-run}"
             echo "- Player headshot browser regression: ${HEADSHOT_BROWSER_OUTCOME:-not-run}"
             [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: existing deployment remains unchanged'
@@ -155,6 +165,7 @@ jobs:
             if [[ -f /tmp/headshot-production-smoke.json ]]; then echo; echo '## Player headshot production regression'; echo; echo '```json'; cat /tmp/headshot-production-smoke.json; echo '```'; fi
             if [[ -f /tmp/browser-nav-smoke.json ]]; then echo; echo '## Browser navigation regression'; echo; echo '```json'; cat /tmp/browser-nav-smoke.json; echo '```'; fi
             if [[ -f /tmp/media-browser-smoke.json ]]; then echo; echo '## Listen Watch browser regression'; echo; echo '```json'; cat /tmp/media-browser-smoke.json; echo '```'; fi
+            if [[ -f /tmp/command-intelligence-browser-smoke.json ]]; then echo; echo '## Command Intelligence browser regression'; echo; echo '```json'; cat /tmp/command-intelligence-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/analytics-browser-smoke.json ]]; then echo; echo '## Advanced analytics browser regression'; echo; echo '```json'; cat /tmp/analytics-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/headshot-browser-smoke.json ]]; then echo; echo '## Player headshot browser regression'; echo; echo '```json'; cat /tmp/headshot-browser-smoke.json; echo '```'; fi
             echo
