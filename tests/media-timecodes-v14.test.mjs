@@ -38,6 +38,16 @@ test('every next-game watch guide states how to watch and listen',()=>{
   assert.match(js,/NFL\+/);
 });
 
+test('international mode avoids U.S.-only viewing assumptions',()=>{
+  const js=read('media-timecodes-v14.js');
+  assert.match(js,/saved==='outside'\?'us'/);
+  assert.match(js,/area==='international'/);
+  assert.match(js,/NFL International by-country guide/);
+  assert.match(js,/Game Pass provider/);
+  assert.match(js,/International options/);
+  assert.match(js,/rights vary/);
+});
+
 test('global kickoff guide includes countdown and responsive mobile layout',()=>{
   const js=read('media-timecodes-v14.js'),css=read('media-timecodes-v14.css'),html=read('index.html'),sw=read('sw.js');
   assert.match(js,/STARTS IN/);
