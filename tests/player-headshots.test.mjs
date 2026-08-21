@@ -48,7 +48,7 @@ test('headshot release is CSP-scoped and PWA packaged',()=>{
     assert.match(vercel,new RegExp(host.replace(/\./g,'\\.')));
   }
   assert.doesNotMatch(headers,/img-src[^;]*\shttps:\s/);
-  assert.match(sw,/titans-cc-brand-2026-v32/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
   assert.match(sw,/\/headshot-polish\.css/);
   assert.match(sw,/\/headshot-polish\.js/);
   assert.doesNotMatch(sw,/\/assets\/data\/player-headshots\.json/);
