@@ -11,6 +11,7 @@
     zoneListen:'https://www.1045thezone.com/listen/',
     titansWatch:'https://www.tennesseetitans.com/watch-live-games/ways-to-watch',
     nflPlus:'https://www.nfl.com/plus/learn-more',
+    nflInternational:'https://www.nfl.com/international/ways-to-watch/by-country',
     tuneIn:'https://tunein.com/radio/Tennessee-Titans-s252150/',
     sirius:'https://www.siriusxm.com/sports/nfl',
     sundayTicket:'https://tv.youtube.com/learn/nflsundayticket/',
@@ -20,10 +21,13 @@
     espn:'https://www.espn.com/watch/',
     prime:'https://www.amazon.com/gp/video/sports',
     netflix:'https://www.netflix.com/',
+    dazn:'https://www.dazn.com/',
     nflWatch:'https://www.nfl.com/ways-to-watch'
   };
   const RADIO_STREAM='https://playerservices.streamtheworld.com/api/livestream-redirect/WGFXFMAAC.aac';
-  const state={data:null,loading:null,area:localStorage.getItem(AREA_KEY)||'nashville',radioProvider:localStorage.getItem(PLAYER_KEY)||'zone'};
+  const savedArea=localStorage.getItem(AREA_KEY);
+  const initialArea=savedArea==='outside'?'us':['nashville','us','international'].includes(savedArea)?savedArea:'nashville';
+  const state={data:null,loading:null,area:initialArea,radioProvider:localStorage.getItem(PLAYER_KEY)||'zone'};
 
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const validDate=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?null:d};
@@ -40,6 +44,11 @@
   function nextGame(){const now=Date.now();return (state.data?.games||[]).find(g=>{const t=Date.parse(g.date);return Number.isFinite(t)&&t>now&&!/final|bye/i.test(String(g.status||''))})||null}
   function gameLabel(g){if(!g)return'Titans game';return `${g.homeAway==='home'?'vs':'at'} ${g.opponent||g.opponentAbbr||'Opponent'}`}
   function providerCards(g){
+    if(state.area==='international')return [
+      {name:'NFL International',note:'Choose your country for the NFL’s current authorized TV and streaming options.',url:OFFICIAL.nflInternational,badge:'By country'},
+      {name:'NFL Game Pass on DAZN',note:'International Game Pass carries NFL games in supported markets. Availability and local partners vary by country.',url:OFFICIAL.dazn,badge:'International'},
+      {name:'NFL Ways to Watch',note:'Official fallback for current game and territory viewing guidance.',url:OFFICIAL.nflWatch,badge:'Official guide'}
+    ];
     const network=String(g?.network||'').toUpperCase();
     const cards=[];
     const add=(name,note,url,badge='Authorized')=>cards.push({name,note,url,badge});
@@ -57,23 +66,20 @@
   }
 
   function stationAffiliates(){return [
-    ['WGFX','104.5 FM','Nashville flagship'],['WAKM','950 AM','Franklin'],['WANT','98.9 FM','Lebanon'],['WCOR','1490 AM','Lebanon'],['WZNG','100.9 FM / 1400 AM','Shelbyville'],['WQMV','1060 AM','Waverly'],['WMSR','1320 AM','Manchester'],['WGOW','1150 AM','Chattanooga'],['WXSM','640 AM','Tri-Cities'],['WCDT','1340 AM','Winchester']
+    ['WGFX','104.5 FM','Nashville flagship'],['WAKM','950 AM','Franklin'],['WANT','98.9 FM','Lebanon'],['WCOR','1490 AM','Lebanon'],['WZNG','100.9 FM / 1400 AM','Shelbyville'],['WQMV','93.5 FM / 1060 AM','Waverly'],['WMSR','107.9 FM / 1320 AM','Manchester'],['WGOW','102.3 FM / 1150 AM','Chattanooga'],['WXSM','640 AM','Tri-Cities'],['WCDT','1340 AM','Winchester']
   ]}
 
-  function areaSwitch(){return `<div class="media-area-switch" role="group" aria-label="Media area"><button type="button" data-media-area="nashville" class="${state.area==='nashville'?'active':''}">Nashville / Middle Tennessee</button><button type="button" data-media-area="outside" class="${state.area==='outside'?'active':''}">Outside local market</button></div>`}
+  function areaSwitch(){return `<div class="media-area-switch" role="group" aria-label="Media area"><button type="button" data-media-area="nashville" class="${state.area==='nashville'?'active':''}">Nashville / Middle Tennessee</button><button type="button" data-media-area="us" class="${state.area==='us'?'active':''}">Elsewhere in U.S.</button><button type="button" data-media-area="international" class="${state.area==='international'?'active':''}">International</button></div>`}
+
+  function radioProviderGrid(){
+    if(state.area==='international')return `<div class="media-provider-grid"><a class="media-provider" href="${OFFICIAL.nflInternational}" target="_blank" rel="noopener noreferrer"><b>NFL International</b><span>Choose your country for current authorized NFL viewing and streaming partners.</span><em>By country</em></a><a class="media-provider" href="${OFFICIAL.dazn}" target="_blank" rel="noopener noreferrer"><b>NFL Game Pass on DAZN</b><span>International NFL access in supported countries; local rights and availability vary.</span><em>International</em></a><a class="media-provider" href="${OFFICIAL.titansRadio}" target="_blank" rel="noopener noreferrer"><b>Titans Radio</b><span>Open the official Titans audio page. Geographic and digital restrictions may apply.</span><em>Official team</em></a></div>`;
+    return `<div class="media-provider-grid"><a class="media-provider" href="${OFFICIAL.nflPlus}" target="_blank" rel="noopener noreferrer"><b>NFL+</b><span>Every NFL game: home, away & national live audio calls.</span><em>All games</em></a><a class="media-provider" href="${OFFICIAL.tuneIn}" target="_blank" rel="noopener noreferrer"><b>TuneIn Premium</b><span>Live local Titans call all season, per Titans' official watch/listen guide.</span><em>Subscription</em></a><a class="media-provider" href="${OFFICIAL.sirius}" target="_blank" rel="noopener noreferrer"><b>SiriusXM</b><span>Licensed NFL play-by-play with team channels and home/away feeds.</span><em>North America</em></a></div>`;
+  }
 
   function radioSection(g){
-    const local=state.area==='nashville';
-    return `<section class="media-radio-deck">
-      <div class="media-radio-top"><div><small>LISTEN</small><h2>Titans Radio</h2><p>${local?'Nashville flagship: WGFX 104.5 The Zone. Station and NFL digital restrictions still apply.':'For every Titans game outside the Nashville market, use an NFL-licensed all-game audio provider.'}</p></div><div class="media-radio-dial"><span>104.5</span><small>THE ZONE</small></div></div>
-      ${local?`<div class="media-radio-player"><div class="media-onair"><i></i><span>${g?'NEXT TITANS BROADCAST':'NASHVILLE SPORTS RADIO'}</span><strong>${esc(g?gameLabel(g):'104.5 The Zone')}</strong><small>${g?fmt(g.date):'Official station stream'}</small></div><audio id="media-zone-audio" preload="none" controls playsinline src="${RADIO_STREAM}"></audio><p class="media-rights-note">Direct station playback is requested from the station's streaming provider in your browser. Titans Command Center does not proxy, copy or rebroadcast the audio. If the provider blocks playback or a game is digitally restricted, use the official player below.</p><div class="media-action-row"><a class="button primary" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.zonePlayer}">Open official 104.5 player ↗</a><a class="button" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.titansRadio}">Titans live audio page ↗</a></div></div>`:''}
-      <div class="media-provider-grid">
-        <a class="media-provider" href="${OFFICIAL.nflPlus}" target="_blank" rel="noopener noreferrer"><b>NFL+</b><span>Every NFL game: home, away & national live audio calls.</span><em>All games</em></a>
-        <a class="media-provider" href="${OFFICIAL.tuneIn}" target="_blank" rel="noopener noreferrer"><b>TuneIn Premium</b><span>Live local Titans call all season, per Titans' official watch/listen guide.</span><em>Subscription</em></a>
-        <a class="media-provider" href="${OFFICIAL.sirius}" target="_blank" rel="noopener noreferrer"><b>SiriusXM</b><span>Licensed NFL play-by-play with team channels and home/away feeds.</span><em>North America</em></a>
-      </div>
-      <details class="media-affiliates"><summary>Terrestrial Titans Radio affiliates</summary><div>${stationAffiliates().map(x=>`<div><strong>${x[0]}</strong><span>${x[1]}</span><small>${x[2]}</small></div>`).join('')}</div><p>Use your actual radio for AM/FM reception. iPhones do not expose an AM/FM tuner to websites, so web playback uses authorized digital sources instead.</p></details>
-    </section>`
+    const local=state.area==='nashville',international=state.area==='international';
+    const intro=local?'Nashville flagship: WGFX 104.5 The Zone. Station and NFL digital restrictions still apply.':international?'International audio and streaming rights vary by country. Use the official country guide first.':'For Titans games outside the Nashville market in the U.S., use an NFL-licensed all-game audio provider.';
+    return `<section class="media-radio-deck"><div class="media-radio-top"><div><small>LISTEN</small><h2>Titans Radio</h2><p>${intro}</p></div><div class="media-radio-dial"><span>104.5</span><small>THE ZONE</small></div></div>${local?`<div class="media-radio-player"><div class="media-onair"><i></i><span>${g?'NEXT TITANS BROADCAST':'NASHVILLE SPORTS RADIO'}</span><strong>${esc(g?gameLabel(g):'104.5 The Zone')}</strong><small>${g?fmt(g.date):'Official station stream'}</small></div><audio id="media-zone-audio" preload="none" controls playsinline src="${RADIO_STREAM}"></audio><p class="media-rights-note">Direct station playback is requested from the station's streaming provider in your browser. Titans Command Center does not proxy, copy or rebroadcast the audio. If the provider blocks playback or a game is digitally restricted, use the official player below.</p><div class="media-action-row"><a class="button primary" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.zonePlayer}">Open official 104.5 player ↗</a><a class="button" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.titansRadio}">Titans live audio page ↗</a></div></div>`:''}${radioProviderGrid()}<details class="media-affiliates"><summary>Terrestrial Titans Radio affiliates</summary><div>${stationAffiliates().map(x=>`<div><strong>${x[0]}</strong><span>${x[1]}</span><small>${x[2]}</small></div>`).join('')}</div><p>Use your actual radio for AM/FM reception. iPhones do not expose an AM/FM tuner to websites, so web playback uses authorized digital sources instead.</p></details></section>`
   }
 
   function watchSection(g){
@@ -81,10 +87,11 @@
     const heading=g?`How to watch ${esc(gameLabel(g))}`:'How to watch the Titans';
     const scheduleLine=g?`${fmt(g.date)} · ${esc(g.network||'Network TBD')}`:"Authorized viewing options are matched from the game's network and your market.";
     const cards=providers.map(p=>`<a class="media-watch-card" href="${safeUrl(p.url)}" target="_blank" rel="noopener noreferrer"><small>${esc(p.badge)}</small><strong>${esc(p.name)}</strong><span>${esc(p.note)}</span><b>Open provider ↗</b></a>`).join('');
-    return `<section class="media-watch"><header><div><small>WATCH</small><h2>${heading}</h2><p>${scheduleLine}</p></div><a class="button" href="${OFFICIAL.titansWatch}" target="_blank" rel="noopener noreferrer">Official Titans guide ↗</a></header><div class="media-watch-grid">${cards}</div><div class="media-watch-note"><strong>Why we route instead of embedding live games</strong><p>NFL live video is protected by broadcaster authentication, DRM, market rules and commercial media rights. There is no public third-party API that legally hands this site the raw game stream. This page sends fans to the authorized service and can become more precise as we add licensed broadcast/TV-listing data.</p></div></section>`;
+    const internationalNote=state.area==='international'?'<p class="media-rights-note">The U.S. broadcast network shown above is schedule context only. International rights differ by country; use the country guide for the authoritative local provider.</p>':'';
+    return `<section class="media-watch"><header><div><small>WATCH</small><h2>${heading}</h2><p>${scheduleLine}</p></div><a class="button" href="${OFFICIAL.titansWatch}" target="_blank" rel="noopener noreferrer">Official Titans guide ↗</a></header>${internationalNote}<div class="media-watch-grid">${cards}</div><div class="media-watch-note"><strong>Why we route instead of embedding live games</strong><p>NFL live video is protected by broadcaster authentication, DRM, market rules and commercial media rights. There is no public third-party API that legally hands this site the raw game stream. This page sends fans to the authorized service and can become more precise as we add licensed broadcast/TV-listing data.</p></div></section>`;
   }
 
-  function futureSection(){return `<section class="media-future"><div><small>MEDIA ROADMAP</small><h2>What unlocks a true all-games media layer?</h2></div><div class="media-future-grid"><article><strong>1. All-game audio</strong><p>Already solvable today through NFL+, TuneIn Premium and SiriusXM. We can deep-link by game; direct in-app playback would require an approved provider integration or commercial audio rights.</p></article><article><strong>2. Market-aware TV routing</strong><p>Use a licensed listings/broadcast feed such as Gracenote, Sportradar or SportsDataIO to resolve network and market details. The site can then say exactly where a fan should watch without guessing.</p></article><article><strong>3. In-app live video</strong><p>This requires a direct commercial rights agreement with the NFL/broadcaster plus DRM/authentication integration. A normal public developer key is not enough.</p></article><article><strong>4. Official highlights</strong><p>YouTube Data + IFrame APIs can support embeddable official Titans/NFL videos when the rights holder allows embedding. This is a good next media enhancement without touching live-game rights.</p></article></div></section>`}
+  function futureSection(){return `<section class="media-future"><div><small>MEDIA ROADMAP</small><h2>What unlocks a true all-games media layer?</h2></div><div class="media-future-grid"><article><strong>1. All-game audio</strong><p>Already solvable today through NFL+, TuneIn Premium and SiriusXM in supported U.S./North American use cases. International availability must follow country-specific rights.</p></article><article><strong>2. Market-aware TV routing</strong><p>Use a licensed listings/broadcast feed such as Gracenote, Sportradar or SportsDataIO to resolve network and market details. The site can then say exactly where a fan should watch without guessing.</p></article><article><strong>3. In-app live video</strong><p>This requires a direct commercial rights agreement with the NFL/broadcaster plus DRM/authentication integration. A normal public developer key is not enough.</p></article><article><strong>4. Official highlights</strong><p>YouTube Data + IFrame APIs can support embeddable official Titans/NFL videos when the rights holder allows embedding. This is a good next media enhancement without touching live-game rights.</p></article></div></section>`}
 
   function mediaPage(){const g=nextGame();app.innerHTML=`<section class="media-page"><header class="media-hero"><div><div class="eyebrow">TITANS MEDIA CENTER</div><h1>Listen / Watch</h1><p>One simple place to find the Titans broadcast you can legally use — local radio, all-game audio, TV and streaming.</p>${areaSwitch()}</div><div class="media-next"><small>NEXT GAME</small><strong>${esc(gameLabel(g))}</strong><span>${g?fmt(g.date):'Schedule loading'}</span><em>${esc(g?.network||'Network TBD')}</em></div></header>${radioSection(g)}${watchSection(g)}${futureSection()}</section>`;bind()}
 
