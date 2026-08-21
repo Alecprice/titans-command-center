@@ -21,13 +21,28 @@ test('alternate lines are hidden by default and can be revealed',()=>{
   assert.match(ui,/Show.*alternate lines/s);
 });
 
-test('sportsbook and market-type filters are present',()=>{
+test('game sportsbook and market-type filters are present',()=>{
+  assert.match(ui,/id="mh-event-filter"/);
+  assert.match(ui,/All Titans games/);
+  assert.match(ui,/marketUi\.event/);
   assert.match(ui,/id="mh-book-filter"/);
   assert.match(ui,/All sportsbooks/);
   assert.match(ui,/id="mh-category-filter"/);
   assert.match(ui,/Game lines/);
   assert.match(ui,/Player props/);
   assert.match(ui,/Showing <b>/);
+});
+
+test('market rows use stable event-first ordering',()=>{
+  assert.match(ui,/function sortedMarketRows/);
+  assert.match(ui,/eventDate\(ae\)/);
+  assert.match(ui,/String\(a\.book/);
+});
+
+test('refresh language matches quota-aware server behavior',()=>{
+  assert.match(ui,/>Refresh board</);
+  assert.match(ui,/quota-aware and may reuse a recent server response/);
+  assert.doesNotMatch(ui,/>Refresh odds</);
 });
 
 test('book click-out links remain protocol-safe',()=>{
