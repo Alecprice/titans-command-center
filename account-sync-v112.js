@@ -30,7 +30,7 @@
   function schedule(){clearTimeout(timer);timer=setTimeout(push,500);}
   addEventListener('titans:account',event=>{const user=event.detail?.user;if(user)initialSync(user);else lastUser='';});
   addEventListener('storage',event=>{if(KEYS.includes(event.key))schedule();});
-  document.addEventListener('click',event=>{const el=event.target instanceof Element?event.target:null;if(!el)return;if(el.closest('[data-v15-profile-save],[data-v15-alert-save],[data-player-favorite],[data-custom-remove]'))setTimeout(schedule,0);});
+  document.addEventListener('click',event=>{const el=event.target instanceof Element?event.target:null;if(!el)return;if(el.closest('[data-v15-profile-save],[data-v15-alert-save],[data-v16-favorite],[data-custom-remove]'))setTimeout(schedule,0);});
   document.addEventListener('submit',event=>{const form=event.target;if(form instanceof Element&&form.matches('[data-custom-form]'))setTimeout(schedule,0);});
   window.TitansAccountSync={sync:push,keys:[...KEYS]};
 })();
