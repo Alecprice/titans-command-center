@@ -43,6 +43,8 @@
     }catch(error){renderPreview(null,error instanceof Error?error.message:'This backup could not be read.');}
   });
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&previewHost()&&!previewHost().hidden){pending=null;renderPreview(null);}});
-  ensureCss();
+  const mountObserver=new MutationObserver(enhance);
+  mountObserver.observe(document.body,{childList:true,subtree:false});
+  ensureCss();enhance();
   window.TitansAccountImport={enhance,get pending(){return pending?.preview||null;}};
 })();
