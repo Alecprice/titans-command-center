@@ -87,3 +87,13 @@ test('v1.6 remains mobile first and reduced-motion friendly',()=>{
     assert.match(css,/prefers-reduced-motion:reduce/);
   }
 });
+
+test('Cloudflare cannot report full success without v1.6 browser health',()=>{
+  const workflow=read('.github/workflows/cloudflare-deploy.yml');
+  assert.match(workflow,/id: player_gameday_browser/);
+  assert.match(workflow,/python scripts\/player-gameday-browser-smoke\.py/);
+  assert.match(workflow,/if: steps\.player_gameday_browser\.outcome == 'success'/);
+  assert.match(workflow,/PLAYER_GAMEDAY_BROWSER_OUTCOME/);
+  assert.match(workflow,/Player Intelligence \/ Game Day browser regression/);
+  assert.match(workflow,/player-gameday-browser-smoke\.json/);
+});
