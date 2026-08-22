@@ -9,6 +9,7 @@ import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflv
 
 const API_PREFIX='/api/';
 const APP_VERSION='1.0.0';
+const SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
 const SERVER_BINDINGS=['DATABASE_URL','INGEST_SECRET','CRON_SECRET','PROPLINE_API_KEY','ODDS_API_IO_KEY','PROPLINE_BOOKS','PROPLINE_EXTRA_MARKETS','ODDS_API_IO_BOOKS','ODDS_CACHE_SECONDS','TITANS_HISTORY_START','TITANS_HISTORY_END','CONTINUE_ON_IMPORT_ERROR'];
 
 function applyRuntimeEnv(env){
@@ -98,6 +99,19 @@ async function nativeData(request,env){
   return jsonResponse({...data,teamContext},200,headers);
 }
 
+async function nativeScoreboard(request){
+  if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});
+  const headers={'Cache-Control':'public, s-maxage=15, stale-while-revalidate=30'};
+  try{
+    const upstream=await fetch(SCOREBOARD_URL,{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`},signal:AbortSignal.timeout(4500)});
+    if(!upstream.ok)throw new Error(`ESPN ${upstream.status}`);
+    return jsonResponse({ok:true,provider:'ESPN',unofficial:true,available:true,fetchedAt:new Date().toISOString(),payload:await upstream.json()},200,headers);
+  }catch(error){
+    console.error('[cloudflare-scoreboard]',error);
+    return jsonResponse({ok:false,provider:'ESPN',unofficial:true,available:false,error:'Live scoreboard provider unavailable',fetchedAt:new Date().toISOString(),payload:{events:[]}},200,headers);
+  }
+}
+
 async function adapterRoute(request,route,handler,env){
   const req=vercelRequest(request,route);
   const res=vercelResponse();
@@ -112,6 +126,7 @@ async function runApi(request,env){
   try{
     if(route==='health')return await nativeHealth(request,env);
     if(route==='data')return await nativeData(request,env);
+    if(route==='espn-scoreboard')return await nativeScoreboard(request);
     if(route==='preseason-stats')return await adapterRoute(request,route,preseasonStatsRoute,env);
     if(route==='market-data')return await adapterRoute(request,route,marketDataRoute,env);
     if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
