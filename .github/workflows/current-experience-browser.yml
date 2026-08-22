@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: titans-current-experience-${{ github.event.workflow_run.head_sha }}
@@ -27,6 +28,8 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Confirm deployed SHA
+        id: deployed_sha
+        continue-on-error: true
         shell: bash
         run: |
           python - <<'PY'
@@ -47,21 +50,37 @@ jobs:
           PY
 
       - name: Install Selenium
+        if: steps.deployed_sha.outcome == 'success'
         run: python -m pip install --disable-pip-version-check 'selenium>=4.25,<5'
 
       - name: Diagnose Runtime and 365 mobile flow
+        id: runtime_365
+        if: steps.deployed_sha.outcome == 'success'
+        continue-on-error: true
         run: python scripts/runtime-365-diagnostic.py
 
       - name: Audit Smart Search
+        id: smart_search
+        if: steps.deployed_sha.outcome == 'success'
+        continue-on-error: true
         run: python scripts/smart-search-browser-smoke.py
 
       - name: Audit mobile navigation
+        id: mobile_nav
+        if: steps.deployed_sha.outcome == 'success'
+        continue-on-error: true
         run: python scripts/mobile-navigation-browser-smoke.py
 
       - name: Audit Account and Guest flow
+        id: account_guest
+        if: steps.deployed_sha.outcome == 'success'
+        continue-on-error: true
         run: python scripts/account-browser-smoke.py
 
       - name: Audit live markets
+        id: live_markets
+        if: steps.deployed_sha.outcome == 'success'
+        continue-on-error: true
         run: python scripts/market-browser-smoke.py
 
       - name: Upload audit reports
@@ -77,3 +96,53 @@ jobs:
             /tmp/market-browser-smoke.json
           if-no-files-found: ignore
           retention-days: 14
+
+      - name: Publish Current Experience commit status
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          DEPLOYED_SHA_OUTCOME: ${{ steps.deployed_sha.outcome }}
+          RUNTIME_OUTCOME: ${{ steps.runtime_365.outcome }}
+          SEARCH_OUTCOME: ${{ steps.smart_search.outcome }}
+          MOBILE_OUTCOME: ${{ steps.mobile_nav.outcome }}
+          ACCOUNT_OUTCOME: ${{ steps.account_guest.outcome }}
+          MARKET_OUTCOME: ${{ steps.live_markets.outcome }}
+        with:
+          script: |
+            const checks = {
+              deploy: process.env.DEPLOYED_SHA_OUTCOME,
+              runtime: process.env.RUNTIME_OUTCOME,
+              search: process.env.SEARCH_OUTCOME,
+              mobile: process.env.MOBILE_OUTCOME,
+              account: process.env.ACCOUNT_OUTCOME,
+              markets: process.env.MARKET_OUTCOME,
+            };
+            const failed = Object.entries(checks).filter(([, value]) => value !== 'success');
+            const state = failed.length ? 'failure' : 'success';
+            const description = failed.length
+              ? `Failed: ${failed.map(([name]) => name).join(', ')}`.slice(0, 140)
+              : 'Runtime, search, mobile, account and markets passed';
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: context.payload.workflow_run.head_sha,
+              state,
+              context: 'Titans Current Experience',
+              description,
+              target_url: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`,
+            });
+
+      - name: Fail audit when any current-experience check failed
+        if: always()
+        env:
+          DEPLOYED_SHA_OUTCOME: ${{ steps.deployed_sha.outcome }}
+          RUNTIME_OUTCOME: ${{ steps.runtime_365.outcome }}
+          SEARCH_OUTCOME: ${{ steps.smart_search.outcome }}
+          MOBILE_OUTCOME: ${{ steps.mobile_nav.outcome }}
+          ACCOUNT_OUTCOME: ${{ steps.account_guest.outcome }}
+          MARKET_OUTCOME: ${{ steps.live_markets.outcome }}
+        run: |
+          for outcome in "$DEPLOYED_SHA_OUTCOME" "$RUNTIME_OUTCOME" "$SEARCH_OUTCOME" "$MOBILE_OUTCOME" "$ACCOUNT_OUTCOME" "$MARKET_OUTCOME"; do
+            [[ "$outcome" == "success" ]] || exit 1
+          done
