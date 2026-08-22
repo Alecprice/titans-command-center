@@ -2,6 +2,8 @@
   'use strict';
   const sidebar=document.querySelector('#sidebar');
   const dock=document.querySelector('.mobile-nav');
+  const searchButton=document.querySelector('#mobile-search-button');
+  const searchInput=document.querySelector('#global-search');
   if(!sidebar||!dock)return;
   const phone=matchMedia('(max-width:760px)');
   let drag=null;
@@ -14,6 +16,21 @@
   function closeSheet(){
     sidebar.classList.remove('open');
     resetDrag();
+  }
+  function openSearch(){
+    if(!phone.matches||!searchInput)return;
+    closeSheet();
+    document.body.classList.add('pwa-search-open');
+    requestAnimationFrame(()=>{
+      searchInput.focus({preventScroll:true});
+      try{searchInput.setSelectionRange(searchInput.value.length,searchInput.value.length)}catch{}
+    });
+  }
+  function syncSearchState(){
+    const active=document.activeElement===searchInput||searchInput?.getAttribute('aria-expanded')==='true';
+    document.body.classList.toggle('pwa-search-open',Boolean(phone.matches&&active));
+    searchButton?.classList.toggle('active',Boolean(phone.matches&&active));
+    searchButton?.setAttribute('aria-pressed',String(Boolean(phone.matches&&active)));
   }
   function pointerDown(event){
     if(!phone.matches||!sidebar.classList.contains('open')||event.pointerType==='mouse'&&event.button!==0)return;
@@ -41,8 +58,19 @@
   sidebar.addEventListener('pointermove',pointerMove,{passive:false});
   sidebar.addEventListener('pointerup',pointerEnd);
   sidebar.addEventListener('pointercancel',resetDrag);
-  phone.addEventListener?.('change',()=>{if(!phone.matches)resetDrag();syncViewport();});
+  searchButton?.addEventListener('click',openSearch);
+  searchInput?.addEventListener('focus',syncSearchState);
+  searchInput?.addEventListener('blur',()=>setTimeout(syncSearchState,80));
+  searchInput?.addEventListener('input',syncSearchState);
+  addEventListener('hashchange',()=>{closeSheet();document.body.classList.remove('pwa-search-open');searchButton?.classList.remove('active')});
+  document.addEventListener('pointerdown',event=>{
+    if(!phone.matches||!document.body.classList.contains('pwa-search-open'))return;
+    if(event.target.closest?.('.search-wrap')||event.target.closest?.('#mobile-search-button'))return;
+    setTimeout(syncSearchState,0);
+  });
+  phone.addEventListener?.('change',()=>{if(!phone.matches){resetDrag();document.body.classList.remove('pwa-search-open')}syncViewport();});
   window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
   addEventListener('resize',syncViewport,{passive:true});
   syncViewport();
+  syncSearchState();
 })();
