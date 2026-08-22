@@ -5,73 +5,159 @@ from pathlib import Path
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 REPORT=Path('/tmp/market-browser-smoke.json')
 
-def wait_for(driver,script,timeout=15):
-    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(f'return Boolean({script})'))
+
+def driver_for(width=1280,height=900):
+    options=webdriver.ChromeOptions()
+    options.add_argument('--headless=new')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument(f'--window-size={width},{height}')
+    options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+    return webdriver.Chrome(options=options)
+
 
 def prepare_returning_user(driver):
-    driver.execute_script("""
-      localStorage.setItem('titans:v10Onboarded','1');
-      document.querySelector('#v10-onboarding [data-v10-close]')?.click();
+    driver.get(f'{BASE}/')
+    driver.execute_script("localStorage.setItem('titans:v10Onboarded','1')")
+    driver.get(f'{BASE}/#markets')
+
+
+def wait_settled(driver,timeout=18):
+    def ready(d):
+        return d.execute_script("""
+          const app=document.querySelector('#app'),hub=document.querySelector('.market-hub');
+          if(!hub||app?.dataset.marketHub==='loading'||app?.getAttribute('aria-busy')==='true')return null;
+          const status=[...hub.querySelectorAll('.mh-status span')];
+          if(status.length<5||!hub.querySelector('#mh-refresh')||!hub.querySelector('.mh-head h2'))return null;
+          return true;
+        """)
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(ready)
+
+
+def read_summary(driver):
+    return driver.execute_script("""
+      const hub=document.querySelector('.market-hub');if(!hub)return null;
+      const status=[...hub.querySelectorAll('.mh-status span')].map(x=>({text:(x.textContent||'').replace(/\s+/g,' ').trim(),value:x.querySelector('b')?.textContent?.trim()||'',className:x.className||''}));
+      const marketStatus=status.find(x=>x.text.toLowerCase().includes('market rows'));
+      const freshness=status.find(x=>x.text.toLowerCase().includes('freshness'));
+      const result=(hub.querySelector('.mh-results')?.textContent||'').replace(/\s+/g,' ').trim();
+      const resultNumbers=[...hub.querySelectorAll('.mh-results b')].map(x=>Number(x.textContent));
+      const rows=[...hub.querySelectorAll('.mh-row')].map(x=>(x.textContent||'').replace(/\s+/g,' ').trim());
+      const controls=[...hub.querySelectorAll('.mh-controls select,.mh-controls button')].filter(x=>x.offsetParent!==null).map(x=>({id:x.id,tag:x.tagName,disabled:Boolean(x.disabled),height:x.getBoundingClientRect().height,width:x.getBoundingClientRect().width,value:x.value||'',pressed:x.getAttribute('aria-pressed')}));
+      return {
+        title:hub.querySelector('.mh-head h2')?.textContent?.trim()||'',
+        provider:status[0]?.value||'',quality:freshness?.value||'',total:Number(marketStatus?.value),
+        shown:Number.isFinite(resultNumbers[0])?resultNumbers[0]:null,resultTotal:Number.isFinite(resultNumbers[1])?resultNumbers[1]:null,
+        result,rows,controls,
+        referenceNotice:(hub.querySelector('.mh-reference-notice')?.textContent||'').replace(/\s+/g,' ').trim(),
+        empty:(hub.querySelector('.mh-empty')?.textContent||'').replace(/\s+/g,' ').trim(),
+        refreshHeight:hub.querySelector('#mh-refresh')?.getBoundingClientRect().height||0,
+        errorVisible:Boolean(hub.querySelector('.mh-error')),
+        overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+3,
+        viewport:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth
+      };
     """)
-    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding'))
 
-def count(driver,selector): return driver.execute_script('return document.querySelectorAll(arguments[0]).length',selector)
-def overflow(driver): return driver.execute_script('return document.documentElement.scrollWidth > document.documentElement.clientWidth + 3')
-def api_market(driver):
-    return driver.execute_async_script("""const done=arguments[0];fetch('/api/market-data',{headers:{Accept:'application/json'}}).then(async r=>done({status:r.status,body:await r.json()})).catch(error=>done({status:0,error:String(error)}));""")
-def select_first_real_option(driver,selector):
-    return driver.execute_script("""const el=document.querySelector(arguments[0]);if(!el||el.options.length<2)return false;el.selectedIndex=1;el.dispatchEvent(new Event('change',{bubbles:true}));return true;""",selector)
 
-options=webdriver.ChromeOptions();options.add_argument('--headless=new');options.add_argument('--no-sandbox');options.add_argument('--disable-dev-shm-usage');options.add_argument('--disable-gpu');options.add_argument('--window-size=1440,1000');options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
-driver=None;started=time.time();stage='starting'
+def assert_truthful_state(summary,label):
+    if not summary:raise RuntimeError(f'{label}: Market Pulse did not render')
+    if summary['overflow']:raise RuntimeError(f'{label}: horizontal overflow: {summary}')
+    if summary['refreshHeight']<44:raise RuntimeError(f'{label}: refresh target below 44px: {summary}')
+    if summary['errorVisible']:raise RuntimeError(f'{label}: market error panel is visible: {summary}')
+    total=summary['total'];quality=summary['quality']
+    if total is None or total<0:raise RuntimeError(f'{label}: market row total missing: {summary}')
+    if summary['shown'] is not None and summary['resultTotal'] is not None:
+        if summary['shown']>summary['resultTotal'] or summary['resultTotal']!=total:
+            raise RuntimeError(f'{label}: rendered result counts disagree with status total: {summary}')
+    if quality=='Live':
+        if total<1 or not summary['rows']:raise RuntimeError(f'{label}: live market mode has no rendered rows: {summary}')
+        if summary['referenceNotice']:raise RuntimeError(f'{label}: live mode shows a published-reference warning: {summary}')
+    elif quality=='Published reference':
+        if total<1 or not summary['rows'] or 'not live odds' not in summary['referenceNotice'].lower():
+            raise RuntimeError(f'{label}: published reference is not clearly labeled: {summary}')
+    elif quality=='Unavailable':
+        if total!=0 or summary['rows'] or summary['title']!='Titans market status' or not summary['empty'] or summary['referenceNotice']:
+            raise RuntimeError(f'{label}: unavailable market state is ambiguous: {summary}')
+    else:raise RuntimeError(f'{label}: unknown market freshness label {quality!r}: {summary}')
+    return {'quality':quality,'provider':summary['provider'],'shown':summary['shown'],'total':total}
+
+
+def exercise_select(driver,selector):
+    element=driver.find_element(By.CSS_SELECTOR,selector);select=Select(element)
+    if len(select.options)<2:return {'available':False,'options':len(select.options)}
+    chosen=select.options[1].get_attribute('value');before=read_summary(driver)
+    select.select_by_index(1)
+    WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value===arguments[1]",selector,chosen))
+    wait_settled(driver);after=read_summary(driver)
+    if after['shown'] is not None and after['shown']<0:raise RuntimeError(f'{selector}: invalid filtered count: {after}')
+    if not after['rows'] and not after['empty']:raise RuntimeError(f'{selector}: filter rendered neither rows nor a clear empty state: {after}')
+    reset=Select(driver.find_element(By.CSS_SELECTOR,selector));reset.select_by_value('all')
+    WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value==='all'",selector));wait_settled(driver)
+    return {'available':True,'options':len(select.options),'selectedValue':chosen,'before':before['result'],'after':after['result']}
+
+
+def severe_logs(driver):
+    return [row.get('message','') for row in driver.get_log('browser') if row.get('level')=='SEVERE' and 'favicon' not in row.get('message','').lower()]
+
+
+result={'ok':False,'base':BASE,'desktop':{},'mobile':{},'browserWarnings':[]}
+started=time.time();driver=None;stage='starting'
 try:
-    driver=webdriver.Chrome(options=options);driver.set_page_load_timeout(25);driver.set_script_timeout(10)
-    stage='market-load';driver.get(f'{BASE}/#markets');prepare_returning_user(driver)
-    wait_for(driver,"document.querySelector('.market-hub')");wait_for(driver,"document.querySelector('#mh-refresh')")
-    api=api_market(driver)
-    if api.get('status')!=200 or not api.get('body',{}).get('ok'): raise RuntimeError(f"Market API unhealthy: {api}")
-    market=api['body'];initial_rows=count(driver,'.mh-row');empty_visible=count(driver,'.mh-empty')>0
-    if initial_rows<1 and not empty_visible: raise RuntimeError('Market board rendered neither rows nor a clear empty state')
-    if market.get('quality')=='live-provider':
-        validation=market.get('providerValidation') or {}
-        if validation.get('acceptedRows',0)<1: raise RuntimeError('Live provider mode has no validated rows')
-        if initial_rows<1: raise RuntimeError('Validated live market rows did not render')
-    stage='filters';event_options=driver.execute_script("return document.querySelector('#mh-event-filter')?.options.length||0");book_options=driver.execute_script("return document.querySelector('#mh-book-filter')?.options.length||0");category_options=driver.execute_script("return document.querySelector('#mh-category-filter')?.options.length||0")
-    event_filtered=None
-    if select_first_real_option(driver,'#mh-event-filter'):
-        wait_for(driver,"document.querySelector('.mh-results')");event_filtered=count(driver,'.mh-row')
-        if initial_rows>0 and event_filtered<1: raise RuntimeError('Selecting a real Titans game produced an empty board')
-        driver.execute_script("const el=document.querySelector('#mh-event-filter');if(el){el.value='all';el.dispatchEvent(new Event('change',{bubbles:true}))}")
-    book_filtered=None
-    if select_first_real_option(driver,'#mh-book-filter'):
-        wait_for(driver,"document.querySelector('.mh-results')");book_filtered=count(driver,'.mh-row')
-        if initial_rows>0 and book_filtered<1: raise RuntimeError('Selecting a listed sportsbook produced an empty board')
-        driver.execute_script("const el=document.querySelector('#mh-book-filter');if(el){el.value='all';el.dispatchEvent(new Event('change',{bubbles:true}))}")
-    stage='alternates';alt_button=driver.find_elements(By.CSS_SELECTOR,'#mh-alt-toggle');alt_before=count(driver,'.mh-row');alt_after=alt_before;alt_enabled=False
-    if alt_button and alt_button[0].is_enabled():
-        alt_enabled=True;alt_button[0].click();wait_for(driver,"document.querySelector('#mh-alt-toggle')?.getAttribute('aria-pressed')==='true'");alt_after=count(driver,'.mh-row')
-        if alt_after<alt_before: raise RuntimeError('Showing alternate lines reduced visible market rows')
-    stage='mobile';driver.set_window_size(390,844);time.sleep(.25)
-    if overflow(driver): raise RuntimeError('Market board introduced mobile horizontal overflow')
-    targets=driver.execute_script("""return [...document.querySelectorAll('.mh-controls select,.mh-controls button,#mh-refresh')].filter(el=>el.offsetParent!==null).map(el=>({label:(el.labels?.[0]?.innerText||el.innerText||el.id).trim(),h:el.getBoundingClientRect().height,w:el.getBoundingClientRect().width}));""")
-    too_small=[target for target in targets if target.get('h',0)<44]
-    if too_small: raise RuntimeError(f'Market controls below 44px mobile target: {too_small}')
-    stage='console';warnings=[]
-    try:warnings=[entry for entry in driver.get_log('browser') if entry.get('level') in ('SEVERE','WARNING')]
-    except Exception:pass
-    severe=[entry for entry in warnings if entry.get('level')=='SEVERE']
-    if severe: raise RuntimeError(f'Market browser regression has severe console errors: {severe[:3]}')
-    result={'ok':True,'base':BASE,'quality':market.get('quality'),'sourceMode':market.get('sourceMode'),'provider':market.get('provider'),'apiRows':len(market.get('odds') or []),'providerValidation':market.get('providerValidation'),'initialRenderedRows':initial_rows,'eventOptions':event_options,'bookOptions':book_options,'categoryOptions':category_options,'eventFilteredRows':event_filtered,'bookFilteredRows':book_filtered,'alternateToggleEnabled':alt_enabled,'rowsBeforeAlternates':alt_before,'rowsAfterAlternates':alt_after,'mobileTargets':targets,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())};REPORT.write_text(json.dumps(result,indent=2),encoding='utf-8');print(json.dumps(result,indent=2))
+    stage='desktop:launch';driver=driver_for();driver.set_script_timeout(10)
+    stage='desktop:load';prepare_returning_user(driver);wait_settled(driver)
+    stage='desktop:truth';summary=read_summary(driver);state=assert_truthful_state(summary,'desktop')
+    result['desktop']['initial']={'state':state,'summary':summary}
+
+    if state['total']>0:
+        stage='desktop:filters';filters={}
+        for key,selector in [('event','#mh-event-filter'),('book','#mh-book-filter'),('category','#mh-category-filter')]:
+            if driver.find_elements(By.CSS_SELECTOR,selector):filters[key]=exercise_select(driver,selector)
+        result['desktop']['filters']=filters
+
+        stage='desktop:alternates';toggle=driver.find_elements(By.ID,'mh-alt-toggle')
+        if toggle and toggle[0].is_enabled():
+            before=read_summary(driver);before_rows=len(before['rows']);toggle[0].click()
+            WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.find_element(By.ID,'mh-alt-toggle').get_attribute('aria-pressed')=='true');wait_settled(driver)
+            after=read_summary(driver);after_rows=len(after['rows'])
+            if after_rows<before_rows:raise RuntimeError(f'Alternate-line toggle reduced visible rows: before={before_rows} after={after_rows}')
+            result['desktop']['alternateLines']={'available':True,'beforeRows':before_rows,'afterRows':after_rows}
+        else:result['desktop']['alternateLines']={'available':False}
+
+    stage='desktop:refresh';old_hub=driver.find_element(By.CSS_SELECTOR,'.market-hub');driver.find_element(By.ID,'mh-refresh').click()
+    try:WebDriverWait(driver,18,poll_frequency=.1).until(EC.staleness_of(old_hub))
+    except Exception:
+        if driver.find_elements(By.CSS_SELECTOR,'.mh-error'):raise RuntimeError(f'Market refresh failed: {read_summary(driver)}')
+    wait_settled(driver);refreshed=read_summary(driver);refresh_state=assert_truthful_state(refreshed,'desktop refresh')
+    result['desktop']['refresh']={'state':refresh_state,'summary':refreshed}
+
+    stage='mobile:reload';driver.set_window_size(390,844);driver.get(f'{BASE}/#markets');wait_settled(driver)
+    stage='mobile:layout';mobile=read_summary(driver);mobile_state=assert_truthful_state(mobile,'mobile')
+    too_small=[control for control in mobile['controls'] if control['height']<44]
+    if too_small:raise RuntimeError(f'Mobile market controls below 44px: {too_small}')
+    row_geometry=driver.execute_script("return [...document.querySelectorAll('.mh-row')].slice(0,4).map(x=>{const r=x.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height}})")
+    if any(row['left']<-1 or row['right']>391 for row in row_geometry):raise RuntimeError(f'Mobile market row escapes viewport: {row_geometry}')
+    result['mobile']={'state':mobile_state,'summary':mobile,'rowGeometry':row_geometry}
+
+    stage='console';result['browserWarnings']=severe_logs(driver)
+    if result['browserWarnings']:raise RuntimeError(f'Market browser console errors: {result["browserWarnings"][:5]}')
+    result['ok']=True;stage='complete'
 except Exception as exc:
-    state=None
-    if driver:
-        try:state=driver.execute_script("return {hash:location.hash,title:document.querySelector('.page-head h1')?.textContent||document.title,rows:document.querySelectorAll('.mh-row').length,filters:document.querySelectorAll('.mh-controls select').length,altPressed:document.querySelector('#mh-alt-toggle')?.getAttribute('aria-pressed')||null,appText:(document.querySelector('#app')?.innerText||'').slice(0,500)}")
+    result['stage']=stage;result['error']=f'{type(exc).__name__}: {exc}'
+    if driver is not None:
+        try:result['state']=read_summary(driver)
         except Exception:pass
-    result={'ok':False,'base':BASE,'stage':stage,'error':f'{type(exc).__name__}: {exc}','state':state,'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())};REPORT.write_text(json.dumps(result,indent=2),encoding='utf-8');print(json.dumps(result,indent=2));raise
 finally:
-    if driver:driver.quit()
+    if driver is not None:
+        try:driver.quit()
+        except Exception:pass
+    result['durationSeconds']=round(time.time()-started,2);result['testedAt']=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
+    REPORT.write_text(json.dumps(result,indent=2),encoding='utf-8');print(json.dumps(result,indent=2))
+
+if not result['ok']:raise SystemExit(1)
