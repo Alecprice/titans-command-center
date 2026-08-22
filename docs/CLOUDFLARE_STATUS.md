@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + Command Intelligence browser regression failure**
-- Source commit: `06a725f58b3a8eb0f5d1772c62c6d8af1c1d979a`
+- Status: **deployed + Player Intelligence / Game Day browser regression failure**
+- Source commit: `51321189021f8ef89d38fc5c74e025e5d6d73301`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -9,11 +9,12 @@
 - Production regression: success
 - Browser navigation regression: success
 - Listen Watch browser regression: success
-- Command Intelligence browser regression: failure
+- Command Intelligence browser regression: success
+- Player Intelligence / Game Day browser regression: failure
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T00:25:26Z
+- Recorded: 2026-08-22T00:40:08Z
 
 ## Production regression
 
@@ -32,8 +33,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v43",
-  "precachePaths": 75,
+  "serviceWorkerCache": "titans-cc-brand-2026-v44",
+  "precachePaths": 79,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -60,24 +61,24 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 6,
-  "marketMode": "published-reference",
+  "marketRows": 222,
+  "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "06a725f58b3a8eb0f5d1772c62c6d8af1c1d979a",
-    "builtAt": "2026-08-22T00:23:52.187Z"
+    "commit": "51321189021f8ef89d38fc5c74e025e5d6d73301",
+    "builtAt": "2026-08-22T00:39:18.982Z"
   },
-  "deploymentPropagationAttempts": 12,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 107,
-    "health": 922,
-    "data": 630,
-    "stats": 414,
-    "market": 8238,
-    "analytics": 770
+    "root": 67,
+    "health": 1040,
+    "data": 657,
+    "stats": 247,
+    "market": 3656,
+    "analytics": 1196
   },
-  "testedAt": "2026-08-22T00:24:47.932Z",
+  "testedAt": "2026-08-22T00:39:47.767Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -107,8 +108,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 115,
-  "testedAt": "2026-08-22T00:24:48.947Z"
+  "durationMs": 134,
+  "testedAt": "2026-08-22T00:39:49.232Z"
 }```
 
 ## Browser navigation regression
@@ -157,11 +158,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 63,
-  "longTasksOver250ms": 0,
+  "maxLongTaskMs": 324,
+  "longTasksOver250ms": 1,
   "browserWarnings": [],
-  "durationSeconds": 14.37,
-  "testedAt": "2026-08-22T00:25:08Z"
+  "durationSeconds": 8.4,
+  "testedAt": "2026-08-22T00:40:00Z"
 }```
 
 ## Listen Watch browser regression
@@ -194,22 +195,81 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.03,
-  "testedAt": "2026-08-22T00:25:10Z"
+  "durationSeconds": 2.47,
+  "testedAt": "2026-08-22T00:40:03Z"
 }```
 
 ## Command Intelligence browser regression
 
 ```json
 {
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "tabsVisited": [
+    "changes",
+    "press",
+    "scheme",
+    "global",
+    "stadium",
+    "gm",
+    "history"
+  ],
+  "addonsVerified": [
+    "changes",
+    "scheme",
+    "global",
+    "gm"
+  ],
+  "spoilerToggle": true,
+  "mediaTuneGuideAfterPushState": true,
+  "mobileTabTargets": [
+    {
+      "h": 48,
+      "label": "Changes"
+    },
+    {
+      "h": 48,
+      "label": "Press Room"
+    },
+    {
+      "h": 48,
+      "label": "Scheme Lab"
+    },
+    {
+      "h": 48,
+      "label": "Global Fans"
+    },
+    {
+      "h": 48,
+      "label": "Stadium"
+    },
+    {
+      "h": 48,
+      "label": "Fan GM"
+    },
+    {
+      "h": 48,
+      "label": "Time Machine"
+    }
+  ],
+  "mobileViewport": 375,
+  "browserWarnings": [],
+  "durationSeconds": 2.5,
+  "testedAt": "2026-08-22T00:40:06Z"
+}```
+
+## Player Intelligence / Game Day browser regression
+
+```json
+{
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "mobile:command",
-  "error": "TimeoutException: Message: \n",
-  "durationSeconds": 16.08,
-  "testedAt": "2026-08-22T00:25:26Z",
-  "hash": "#command",
-  "pageText": "TITANS COMMAND INTELLIGENCE\nWhat changed. Why it matters. What comes next.\n\nA Titans-specific intelligence layer built around context instead of another wall of headlines.\n\nListen / Watch\nGame Day\nFan Hub\nChanges\nPress Room\nScheme Lab\nGlobal Fans\nStadium\nFan GM\nTime Machine\nGLOBAL FAN DESK\nBe a Titans fan anywhere\n\nKickoff translation, media routing, a local fan passport and spoiler controls without assuming everyone lives in Nashville.\n\nOpen Listen / Watch \u2192\nNext-game concierge\nTitans vs Seattle Seahawks\nYour device \u00b7 Mon, Aug 24, 12:00 AM UTC\nEastern \u00b7 Sun, Aug 23, 8:00 PM EDT\nNashville \u00b7 Sun, Aug 23, 7:00 PM CDT\nUTC \u00b7 Mon, Aug 24, 12:00 AM UTC\nFOX\nFan passport\nMy city\nCountry\nMy watch-party note\nSave on this device\nSPOILER-FREE MODE\nWatching later?\n\nMask common score elements across Command Center until you turn them back on.\n\nReveal scores\n\nCommunity map / nearby-fan counts are intentionally not fabricated. That feature needs an opt-in community backend and moderation before it can be trustworthy.\n\nMY TITANS\nPersonal fan profile\nFavorite player\nNo favorite selected\nAamil Wagner\nAlontae Taylor\nAmani Hooker\nAndre James\nAnthony Hill Jr.\nAustin Deculus\nAustin Schlottmann\nBishop Fitzgerald\nBrandon Crenshaw-Dickson\nBryce Oliver\nCalvin Ridley\nCam Ward\nCarnell Tate\nCedric Gray\nChimere Dike\nCody Barton\nCor'Dale Flott\nCordell Volson\nCorey Mayfield Jr.\nCourtney Jackson\nD'Ernest Johnson\nDan Moore Jr.\nDaniel Bellinger\nDavid Martin-Robinson\nDerrick Canteen\nDominique Hampton\nDorian Mausi\nDrew Moss\nEarnest Brown IV\nElic Ayomanor\nErick Hallett II\nFernando Carmona Jr.\nGarrett Dellinger\nG",
+  "stage": "player:find",
+  "error": "RuntimeError: Could not resolve player route: #roster",
+  "durationSeconds": 1.0,
+  "testedAt": "2026-08-22T00:40:07Z",
+  "hash": "#roster",
+  "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nROSTER\nDEPTH CHART\nSTAFF\nRoster coverage: 95 player records are loaded from the official Titans roster snapshot audited Aug. 19, 2026: 91 Active + 4 Reserve/Injured. This is a dated snapshot and will change as preseason moves occur. View the official current roster \u2197\nCONTENT AUDIT: AUG. 19, 2026\nAll units\nOffense\nDefense\nSpecial Teams\nSTATUS\nALL\nACTIVE\nRESERVE / INJURED\nCLEAR FILTERS\n95 of 95 players shown\n61\nAndre James\n\nC \u00b7 Offense\n\nActive\n51\nAustin Schlottmann\n\nC \u00b7 Offense\n\nActive\n79\nPat Coogan\n\nC \u00b7 Offense\n\nActive\n73\nCordell Volson\n\nG \u00b7 Offense\n\nActive\n67\nDrew Moss\n\nG \u00b7 Offense\n\nActive\n66\nFernando Carmona Jr.\n\nG \u00b7 Offense\n\nActive\n71\nGarrett Dellinger\n\nG \u00b7 Offense\n\nActive\n64\nJackson Slater\n\nG \u00b7 Offense\n\nActive\n77\nPeter Skoronski\n\nG \u00b7 Offense\n\nActive\n1\nCam Ward\n\nQB \u00b7 Offense\n\nActive\n16\nHendon Hooker\n\nQB \u00b7 Offense\n\nActive\n10\nMitchell Trubisky\n\nQB \u00b7 Offense\n\nActive\n8\nWill Levis\n\nQB \u00b7 Offense\n\nActive\n21\nD'Ernest Johnson\n\nRB \u00b7 Offense\n\nActive\n36\nJulius Chestnut\n\nRB \u00b7 Offense\n\nActive\n31\nKalel Mullings\n\nRB \u00b7 Offense\n\nActive\n35\nMichael Carter\n\nRB \u00b7 Offense\n\nActive\n32\nNicholas Singleton\n\nRB \u00b7 Offense\n\nActive\n20\nTony Pollard\n\nRB \u00b7 Offense\n\nActive\n2\nTyjae Spears\n\nRB \u00b7 Offense\n\nActive\n69\nAamil Wagner\n\nT \u00b7 Offense\n\nActive\n76\nAustin Deculus\n\nT \u00b7 Offense\n\nActive\n78\nBrandon Crenshaw-Dickson\n\nT \u00b7 Offense\n\nActive\n75\nDan Moore Jr.\n\nT \u00b7 Offense\n\nActive\n55\nJC Latham\n\nT \u00b7 Offense\n\nActive\n62\nRasheed Miller\n\nT \u00b7 Offense\n\nActive\n72\nZachary Thomas\n\nT \u00b7 Offense\n\nActive\n82\nDaniel Bellinger\n\nTE \u00b7 Offense\n\nActive\n88\nDavid Martin-Robinson\n\nTE \u00b7 Offense\n\nActive\n84\nGunnar Helm\n\nTE \u00b7 Offense\n\nActive\n81\nJaren Kanak\n\nTE \u00b7 Offense\n\nReserve/Injured\n83\nJoel Wilson\n\nTE \u00b7 Offense\n\nActive\n86\nKylen Granson\n\nTE \u00b7 Of",
   "browserWarnings": []
 }```
 
