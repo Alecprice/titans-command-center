@@ -125,9 +125,16 @@ jobs:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: python scripts/runtime-365-browser-smoke.py
 
+      - name: Run data freshness browser regression
+        id: freshness_browser
+        if: steps.runtime_365_browser.outcome == 'success'
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: python scripts/freshness-browser-smoke.py
+
       - name: Run Account and Guest browser regression
         id: account_browser
-        if: steps.runtime_365_browser.outcome == 'success'
+        if: steps.freshness_browser.outcome == 'success'
         env:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: python scripts/account-browser-smoke.py
@@ -162,6 +169,7 @@ jobs:
           ASK_BROWSER_OUTCOME: ${{ steps.ask_browser.outcome }}
           CHANGE_BROWSER_OUTCOME: ${{ steps.change_browser.outcome }}
           RUNTIME_365_BROWSER_OUTCOME: ${{ steps.runtime_365_browser.outcome }}
+          FRESHNESS_BROWSER_OUTCOME: ${{ steps.freshness_browser.outcome }}
           ACCOUNT_BROWSER_OUTCOME: ${{ steps.account_browser.outcome }}
           ANALYTICS_BROWSER_OUTCOME: ${{ steps.analytics_browser.outcome }}
           HEADSHOT_BROWSER_OUTCOME: ${{ steps.headshot_browser.outcome }}
@@ -179,9 +187,10 @@ jobs:
           elif [[ "$ASK_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Ask Titans browser regression ${ASK_BROWSER_OUTCOME:-not-run}";
           elif [[ "$CHANGE_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Change Intelligence browser regression ${CHANGE_BROWSER_OUTCOME:-not-run}";
           elif [[ "$RUNTIME_365_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + runtime / 365 Mode browser regression ${RUNTIME_365_BROWSER_OUTCOME:-not-run}";
+          elif [[ "$FRESHNESS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + data freshness browser regression ${FRESHNESS_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ACCOUNT_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Account / Guest browser regression ${ACCOUNT_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ANALYTICS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + advanced analytics browser regression ${ANALYTICS_BROWSER_OUTCOME:-not-run}";
-          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + account + analytics + player headshot regressions passed';
+          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
           else STATUS="deployed + player headshot browser regression ${HEADSHOT_BROWSER_OUTCOME:-not-run}"; fi
           {
             echo '# Cloudflare deployment status'
@@ -200,6 +209,7 @@ jobs:
             echo "- Ask Titans browser regression: ${ASK_BROWSER_OUTCOME:-not-run}"
             echo "- Change Intelligence browser regression: ${CHANGE_BROWSER_OUTCOME:-not-run}"
             echo "- Runtime / 365 Mode browser regression: ${RUNTIME_365_BROWSER_OUTCOME:-not-run}"
+            echo "- Data freshness browser regression: ${FRESHNESS_BROWSER_OUTCOME:-not-run}"
             echo "- Account / Guest browser regression: ${ACCOUNT_BROWSER_OUTCOME:-not-run}"
             echo "- Advanced analytics browser regression: ${ANALYTICS_BROWSER_OUTCOME:-not-run}"
             echo "- Player headshot browser regression: ${HEADSHOT_BROWSER_OUTCOME:-not-run}"
@@ -220,6 +230,7 @@ jobs:
             if [[ -f /tmp/ask-titans-browser-smoke.json ]]; then echo; echo '## Ask Titans browser regression'; echo; echo '```json'; cat /tmp/ask-titans-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/change-intelligence-browser-smoke.json ]]; then echo; echo '## Change Intelligence browser regression'; echo; echo '```json'; cat /tmp/change-intelligence-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/runtime-365-browser-smoke.json ]]; then echo; echo '## Runtime / 365 Mode browser regression'; echo; echo '```json'; cat /tmp/runtime-365-browser-smoke.json; echo '```'; fi
+            if [[ -f /tmp/freshness-browser-smoke.json ]]; then echo; echo '## Data freshness browser regression'; echo; echo '```json'; cat /tmp/freshness-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/account-browser-smoke.json ]]; then echo; echo '## Account / Guest browser regression'; echo; echo '```json'; cat /tmp/account-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/analytics-browser-smoke.json ]]; then echo; echo '## Advanced analytics browser regression'; echo; echo '```json'; cat /tmp/analytics-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/headshot-browser-smoke.json ]]; then echo; echo '## Player headshot browser regression'; echo; echo '```json'; cat /tmp/headshot-browser-smoke.json; echo '```'; fi
