@@ -15,10 +15,25 @@ for(const path of ['scripts/smart-search-browser-smoke.py','scripts/mobile-navig
   });
 }
 
-test('mobile and account smokes wait for settled More-sheet geometry',()=>{
+test('mobile and account smokes suppress test-only sheet motion and verify settled geometry',()=>{
   const nav=read('scripts/mobile-navigation-browser-smoke.py'),account=read('scripts/account-browser-smoke.py');
-  assert.match(nav,/def wait_sheet_settled\(driver/);assert.match(nav,/r\.bottom>dr\.top\+2/);
-  assert.match(account,/def wait_sheet_settled\(driver/);assert.match(account,/r\.bottom<=dr\.top\+2/);assert.match(account,/def wait_account_panel\(driver/);
+  assert.match(nav,/def stabilize_mobile_sheet\(driver\):/);
+  assert.match(nav,/transition:none!important;animation:none!important/);
+  assert.match(nav,/def wait_sheet_settled\(driver/);
+  assert.match(nav,/r\.bottom>dr\.top\+2/);
+  assert.match(account,/def disable_sidebar_motion\(driver\):/);
+  assert.match(account,/transition:none!important;animation:none!important/);
+  assert.match(account,/def wait_sheet_settled\(driver/);
+  assert.match(account,/r\.bottom<=dr\.top\+2/);
+  assert.match(account,/def wait_account_panel\(driver/);
+});
+
+test('account smoke reports explicit stage and browser state on failure',()=>{
+  const source=read('scripts/account-browser-smoke.py');
+  assert.match(source,/stage='starting'/);
+  assert.match(source,/stage='wait-more'/);
+  assert.match(source,/stage='wait-account-panel'/);
+  assert.match(source,/result\['state'\]=state\(d\)/);
 });
 
 test('runtime diagnostic records a named stage and failure state',()=>{
@@ -50,4 +65,13 @@ test('post-deploy audit targets the exact deployed SHA and runs current experien
   assert.ok(audit.includes('/build-meta.json'));
   for(const command of ['python scripts/runtime-365-diagnostic.py','python scripts/smart-search-browser-smoke.py','python scripts/mobile-navigation-browser-smoke.py','python scripts/account-browser-smoke.py','python scripts/market-browser-smoke.py'])assert.ok(audit.includes(command),`${command} missing from audit workflow`);
   assert.ok(audit.includes('actions/upload-artifact@v4'));
+});
+
+test('post-deploy audit publishes an inspectable commit status and still fails on regressions',()=>{
+  assert.match(audit,/statuses: write/);
+  assert.match(audit,/continue-on-error: true/);
+  assert.match(audit,/createCommitStatus/);
+  assert.match(audit,/context: 'Titans Current Experience'/);
+  assert.match(audit,/target_url:/);
+  assert.match(audit,/Fail audit when any current-experience check failed/);
 });
