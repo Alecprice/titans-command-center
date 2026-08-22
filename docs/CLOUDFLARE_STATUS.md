@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Player Intelligence / Game Day browser regression failure**
-- Source commit: `51321189021f8ef89d38fc5c74e025e5d6d73301`
+- Source commit: `356fd3e1f80ba9fedd1aa30bc50eeb28ffbdc7a9`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -14,7 +14,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T00:40:08Z
+- Recorded: 2026-08-22T00:51:52Z
 
 ## Production regression
 
@@ -66,19 +66,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "51321189021f8ef89d38fc5c74e025e5d6d73301",
-    "builtAt": "2026-08-22T00:39:18.982Z"
+    "commit": "356fd3e1f80ba9fedd1aa30bc50eeb28ffbdc7a9",
+    "builtAt": "2026-08-22T00:50:39.328Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 6,
   "responseMs": {
-    "root": 67,
-    "health": 1040,
-    "data": 657,
-    "stats": 247,
-    "market": 3656,
-    "analytics": 1196
+    "root": 141,
+    "health": 955,
+    "data": 616,
+    "stats": 254,
+    "market": 6132,
+    "analytics": 1091
   },
-  "testedAt": "2026-08-22T00:39:47.767Z",
+  "testedAt": "2026-08-22T00:51:20.593Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -108,8 +108,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 134,
-  "testedAt": "2026-08-22T00:39:49.232Z"
+  "durationMs": 128,
+  "testedAt": "2026-08-22T00:51:21.954Z"
 }```
 
 ## Browser navigation regression
@@ -158,11 +158,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 324,
-  "longTasksOver250ms": 1,
+  "maxLongTaskMs": 197,
+  "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 8.4,
-  "testedAt": "2026-08-22T00:40:00Z"
+  "durationSeconds": 15.51,
+  "testedAt": "2026-08-22T00:51:42Z"
 }```
 
 ## Listen Watch browser regression
@@ -195,8 +195,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.47,
-  "testedAt": "2026-08-22T00:40:03Z"
+  "durationSeconds": 2.46,
+  "testedAt": "2026-08-22T00:51:45Z"
 }```
 
 ## Command Intelligence browser regression
@@ -254,8 +254,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.5,
-  "testedAt": "2026-08-22T00:40:06Z"
+  "durationSeconds": 2.89,
+  "testedAt": "2026-08-22T00:51:48Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -264,12 +264,12 @@
 {
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "player:find",
-  "error": "RuntimeError: Could not resolve player route: #roster",
-  "durationSeconds": 1.0,
-  "testedAt": "2026-08-22T00:40:07Z",
-  "hash": "#roster",
-  "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nROSTER\nDEPTH CHART\nSTAFF\nRoster coverage: 95 player records are loaded from the official Titans roster snapshot audited Aug. 19, 2026: 91 Active + 4 Reserve/Injured. This is a dated snapshot and will change as preseason moves occur. View the official current roster \u2197\nCONTENT AUDIT: AUG. 19, 2026\nAll units\nOffense\nDefense\nSpecial Teams\nSTATUS\nALL\nACTIVE\nRESERVE / INJURED\nCLEAR FILTERS\n95 of 95 players shown\n61\nAndre James\n\nC \u00b7 Offense\n\nActive\n51\nAustin Schlottmann\n\nC \u00b7 Offense\n\nActive\n79\nPat Coogan\n\nC \u00b7 Offense\n\nActive\n73\nCordell Volson\n\nG \u00b7 Offense\n\nActive\n67\nDrew Moss\n\nG \u00b7 Offense\n\nActive\n66\nFernando Carmona Jr.\n\nG \u00b7 Offense\n\nActive\n71\nGarrett Dellinger\n\nG \u00b7 Offense\n\nActive\n64\nJackson Slater\n\nG \u00b7 Offense\n\nActive\n77\nPeter Skoronski\n\nG \u00b7 Offense\n\nActive\n1\nCam Ward\n\nQB \u00b7 Offense\n\nActive\n16\nHendon Hooker\n\nQB \u00b7 Offense\n\nActive\n10\nMitchell Trubisky\n\nQB \u00b7 Offense\n\nActive\n8\nWill Levis\n\nQB \u00b7 Offense\n\nActive\n21\nD'Ernest Johnson\n\nRB \u00b7 Offense\n\nActive\n36\nJulius Chestnut\n\nRB \u00b7 Offense\n\nActive\n31\nKalel Mullings\n\nRB \u00b7 Offense\n\nActive\n35\nMichael Carter\n\nRB \u00b7 Offense\n\nActive\n32\nNicholas Singleton\n\nRB \u00b7 Offense\n\nActive\n20\nTony Pollard\n\nRB \u00b7 Offense\n\nActive\n2\nTyjae Spears\n\nRB \u00b7 Offense\n\nActive\n69\nAamil Wagner\n\nT \u00b7 Offense\n\nActive\n76\nAustin Deculus\n\nT \u00b7 Offense\n\nActive\n78\nBrandon Crenshaw-Dickson\n\nT \u00b7 Offense\n\nActive\n75\nDan Moore Jr.\n\nT \u00b7 Offense\n\nActive\n55\nJC Latham\n\nT \u00b7 Offense\n\nActive\n62\nRasheed Miller\n\nT \u00b7 Offense\n\nActive\n72\nZachary Thomas\n\nT \u00b7 Offense\n\nActive\n82\nDaniel Bellinger\n\nTE \u00b7 Offense\n\nActive\n88\nDavid Martin-Robinson\n\nTE \u00b7 Offense\n\nActive\n84\nGunnar Helm\n\nTE \u00b7 Offense\n\nActive\n81\nJaren Kanak\n\nTE \u00b7 Offense\n\nReserve/Injured\n83\nJoel Wilson\n\nTE \u00b7 Offense\n\nActive\n86\nKylen Granson\n\nTE \u00b7 Of",
+  "stage": "gameday:desktop",
+  "error": "RuntimeError: Game Day source/tune contract failed: {'fakeLive': False, 'phase': 'postgame', 'text': 'POSTGAME\\nGame Day 3.0 \u00b7 source-aware\\nPOSTGAME COMMAND\\nFinal result \u00b7 TEN \u2014 \u2014 OPP \u2014\\n\\nTitans game \u00b7 TBD\\n\\nFull schedule \u2192\\nTURNING POINTS\\nBiggest loaded swings\\n\\nNo trustworthy turning-point rows are loaded yet.\\n\\nWHAT CHANGED?\\nBecause of this game\\n\\nRoster, injury and depth consequences populate through Command Intel as verified updates arrive.\\n\\nOpen Change Engine \u2192\\nTOP PERFORMERS\\nFinal loaded leaders\\n0 players\\nPostgame player stats are awaiting ingest.\\nThe page will populate automatically when the warehouse has them.', 'tune': False}",
+  "durationSeconds": 3.13,
+  "testedAt": "2026-08-22T00:51:51Z",
+  "hash": "#live",
+  "pageText": "GAME DAY\nGAME DAY CENTER\n\nA focused live view for the current or next Titans game \u2014 scoreboard first, context second.\n\nSchedule \u00b7 updated this minute\nGAME DAY PULSE\nTEN vs SEA\n1d 23h 8m\nKICKOFF\nSun, Aug 23, 7:00 PM\nBROADCAST\nFOX\nVENUE\nNissan Stadium\nWEATHER\nWeather awaiting update\nFull schedule\nRoster\nAdd to calendar\nGAME DAY PULSE\nTEN vs SEA\n1d 23h 8m\nKICKOFF\nSun, Aug 23, 7:00 PM\nBROADCAST\nFOX\nVENUE\nNissan Stadium\nWEATHER\nWeather awaiting update\nFull schedule\nRoster\nAdd to calendar\nGAME DAY PULSE\nTEN vs SEA\n1d 23h 8m\nKICKOFF\nSun, Aug 23, 7:00 PM\nBROADCAST\nFOX\nVENUE\nNissan Stadium\nWEATHER\nWeather awaiting update\nFull schedule\nRoster\nAdd to calendar\nGAME DAY PULSE\nTEN vs SEA\n1d 23h 8m\nKICKOFF\nSun, Aug 23, 7:00 PM\nBROADCAST\nFOX\nVENUE\nNissan Stadium\nWEATHER\nWeather awaiting update\nFull schedule\nRoster\nAdd to calendar\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nGAME WEEK BRIEF\nTEN vs SEA\n\nSun, Aug 23, 7:00 PM \u00b7 Nissan Stadium \u00b7 FOX\n\nFULL SCHEDULE \u2192\nROSTER\n95 players loaded\nWEATHER\nForecast not loaded yet\nMARKETS\nNo market lines loaded yet\nINJURIES\nNo injury report loaded yet\nROSTER MOVES\nAug 19, 2026 latest official move\nSITE DATA\nLive updates available\nQUICK READ\nvs Seattle Seahawks \u00b7 Mon, Aug 24, 12:00 AM UTC\nKickoff in 47 hours. Open Listen / Watch for your local kickoff time and legal broadcast options.\nListen / Watch\nOpponent + fan hub\nPOSTGAME\nGame Day 3.0 \u00b7 source-aware\nPOSTGAME COMMAND\nFinal result \u00b7 TEN \u2014 \u2014 OPP \u2014\n\nTitans game \u00b7 TBD\n\nFull schedule \u2192\nTURNING POINTS\nBiggest loaded swings\n\nNo trustworthy turning-point rows are loaded yet",
   "browserWarnings": []
 }```
 
