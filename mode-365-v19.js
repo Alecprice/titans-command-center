@@ -3,6 +3,9 @@
   const runtime=window.TitansRuntime;
   const app=document.querySelector('#app');
   if(!runtime||!app)return;
+  if(!document.querySelector('link[data-v19-365-style]')){
+    const link=document.createElement('link');link.rel='stylesheet';link.href='/mode-365-v19.css?v=1';link.dataset.v19_365Style='1';link.setAttribute('data-v19-365-style','1');document.head.appendChild(link);
+  }
 
   const arr=v=>Array.isArray(v)?v:[];
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
