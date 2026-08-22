@@ -41,7 +41,7 @@
     return{key:'offseason',label:'OFFSEASON',title:'Team-building mode',copy:'Roster construction, development and the next major NFL calendar milestone come first.',accent:'Team'};
   }
 
-  const fmtDate=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'Time TBD':new Intl.DateTimeFormat(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(d)};
+  const fmtDate=value=>runtime.formatTeamKickoff(value);
   function priorityCards(p){
     const g=nextGame(),last=latestFinal(),move=moves()[0],inj=injuries(),stand=standings().find(x=>x.abbreviation==='TEN'),depth=depthChanges();
     const base={
