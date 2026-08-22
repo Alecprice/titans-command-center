@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + runtime / 365 Mode browser regression failure**
-- Source commit: `d7c3efd20e098c2d7ffb4a74acb1190136264b45`
+- Source commit: `2a46d32820308d966b33629cd08caea178a70e55`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -17,7 +17,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T05:19:24Z
+- Recorded: 2026-08-22T05:21:58Z
 
 ## Production regression
 
@@ -36,8 +36,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v51",
-  "precachePaths": 87,
+  "serviceWorkerCache": "titans-cc-brand-2026-v57",
+  "precachePaths": 94,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -69,19 +69,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "d7c3efd20e098c2d7ffb4a74acb1190136264b45",
-    "builtAt": "2026-08-22T05:18:18.619Z"
+    "commit": "2a46d32820308d966b33629cd08caea178a70e55",
+    "builtAt": "2026-08-22T05:20:55.938Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 31,
-    "health": 206,
-    "data": 299,
+    "root": 55,
+    "health": 248,
+    "data": 273,
     "stats": 242,
-    "market": 768,
-    "analytics": 555
+    "market": 2497,
+    "analytics": 446
   },
-  "testedAt": "2026-08-22T05:18:47.085Z",
+  "testedAt": "2026-08-22T05:21:22.373Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -111,8 +111,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 139,
-  "testedAt": "2026-08-22T05:18:47.914Z"
+  "durationMs": 129,
+  "testedAt": "2026-08-22T05:21:23.031Z"
 }```
 
 ## Browser navigation regression
@@ -125,47 +125,43 @@
   "transactionChecks": 12,
   "mobileChecks": 14,
   "smallPhoneChecks": 2,
-  "searchQuickJump": true,
+  "smartSearchQuickJump": true,
   "mobileDrawerInert": true,
+  "fiveActionDock": true,
   "teamRoomChecks": 4,
   "rosterFilterReset": true,
   "mobileTargets": [
     {
-      "height": 48,
-      "label": "\u2302Home",
-      "width": 59.15625
+      "height": 60,
+      "label": "Home",
+      "width": 69.796875
     },
     {
-      "height": 48,
-      "label": "\u25cfGame",
-      "width": 59.171875
+      "height": 60,
+      "label": "Roster",
+      "width": 69.796875
     },
     {
-      "height": 48,
-      "label": "\u25ceRoster",
-      "width": 59.171875
+      "height": 60,
+      "label": "Game",
+      "width": 69.796875
     },
     {
-      "height": 48,
-      "label": "\u21c4Moves",
-      "width": 59.15625
+      "height": 60,
+      "label": "Search",
+      "width": 69.796875
     },
     {
-      "height": 48,
-      "label": "\u2197Stats",
-      "width": 59.171875
-    },
-    {
-      "height": 48,
-      "label": "\u2630More",
-      "width": 59.171875
+      "height": 60,
+      "label": "More",
+      "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 86,
+  "maxLongTaskMs": 239,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 16.4,
-  "testedAt": "2026-08-22T05:19:09Z"
+  "durationSeconds": 15.5,
+  "testedAt": "2026-08-22T05:21:42Z"
 }```
 
 ## Listen Watch browser regression
@@ -198,8 +194,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.02,
-  "testedAt": "2026-08-22T05:19:11Z"
+  "durationSeconds": 2.15,
+  "testedAt": "2026-08-22T05:21:44Z"
 }```
 
 ## Command Intelligence browser regression
@@ -257,8 +253,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.14,
-  "testedAt": "2026-08-22T05:19:13Z"
+  "durationSeconds": 2.25,
+  "testedAt": "2026-08-22T05:21:47Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -308,8 +304,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.9,
-  "testedAt": "2026-08-22T05:19:17Z"
+  "durationSeconds": 3.56,
+  "testedAt": "2026-08-22T05:21:51Z"
 }```
 
 ## Ask Titans browser regression
@@ -386,8 +382,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.71,
-  "testedAt": "2026-08-22T05:19:19Z"
+  "durationSeconds": 1.55,
+  "testedAt": "2026-08-22T05:21:52Z"
 }```
 
 ## Change Intelligence browser regression
@@ -424,8 +420,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.59,
-  "testedAt": "2026-08-22T05:19:22Z"
+  "durationSeconds": 2.39,
+  "testedAt": "2026-08-22T05:21:55Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -437,8 +433,8 @@
   "desktop": {},
   "mobile": {},
   "browserWarnings": [],
-  "error": "ElementClickInterceptedException: Message: element click intercepted: Element <button class=\"icon-button\" id=\"refresh-button\" aria-label=\"Refresh scoreboard\" title=\"Refresh scoreboard\">...</button> is not clickable at point (1064, 34). Other element would receive the click: <div class=\"v10-modal-backdrop\" data-v10-close=\"\"></div>\n  (Session info: chrome=151.0.7922.137); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#elementclickinterceptedexception\nStacktrace:\n#0 0x55659e9f136a <unknown>\n#1 0x55659e364f49 <unknown>\n#2 0x55659e3c1415 <unknown>\n#3 0x55659e3bf4f2 <unknown>\n#4 0x55659e3bcedc <unknown>\n#5 0x55659e3bbfd7 <unknown>\n#6 0x55659e3afc42 <unknown>\n#7 0x55659e3af587 <unknown>\n#8 0x55659e4030c3 <unknown>\n#9 0x55659e3adc92 <unknown>\n#10 0x55659e3aeb11 <unknown>\n#11 0x55659e9b68d0 <unknown>\n#12 0x55659e9b4f3a <unknown>\n#13 0x55659e99f9b5 <unknown>\n#14 0x55659e9b5c0a <unknown>\n#15 0x55659e987740 <unknown>\n#16 0x55659e9dc9a8 <unknown>\n#17 0x55659e9dcb45 <unknown>\n#18 0x55659e9eff1e <unknown>\n#19 0x7f776949cb84 <unknown>\n#20 0x7f7769529d6c <unknown>\n",
-  "durationSeconds": 2.19
+  "error": "ElementClickInterceptedException: Message: element click intercepted: Element <button class=\"icon-button\" id=\"refresh-button\" aria-label=\"Refresh scoreboard\" title=\"Refresh scoreboard\">...</button> is not clickable at point (1064, 34). Other element would receive the click: <div class=\"v10-modal-backdrop\" data-v10-close=\"\"></div>\n  (Session info: chrome=151.0.7922.137); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#elementclickinterceptedexception\nStacktrace:\n#0 0x5578c181d36a <unknown>\n#1 0x5578c1190f49 <unknown>\n#2 0x5578c11ed415 <unknown>\n#3 0x5578c11eb4f2 <unknown>\n#4 0x5578c11e8edc <unknown>\n#5 0x5578c11e7fd7 <unknown>\n#6 0x5578c11dbc42 <unknown>\n#7 0x5578c11db587 <unknown>\n#8 0x5578c122f0c3 <unknown>\n#9 0x5578c11d9c92 <unknown>\n#10 0x5578c11dab11 <unknown>\n#11 0x5578c17e28d0 <unknown>\n#12 0x5578c17e0f3a <unknown>\n#13 0x5578c17cb9b5 <unknown>\n#14 0x5578c17e1c0a <unknown>\n#15 0x5578c17b3740 <unknown>\n#16 0x5578c18089a8 <unknown>\n#17 0x5578c1808b45 <unknown>\n#18 0x5578c181bf1e <unknown>\n#19 0x7fc787a9cb84 <unknown>\n#20 0x7fc787b29d6c <unknown>\n",
+  "durationSeconds": 2.69
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
