@@ -67,6 +67,13 @@ test('post-deploy audit targets the exact deployed SHA and runs current experien
   assert.ok(audit.includes('actions/upload-artifact@v4'));
 });
 
+test('post-deploy SHA probe uses the Node fetch path accepted by production',()=>{
+  assert.match(audit,/node - <<'NODE'/);
+  assert.match(audit,/await fetch\(`/);
+  assert.match(audit,/user-agent': 'Titans-Current-Experience-Audit\/1\.0'/);
+  assert.doesNotMatch(audit,/urllib\.request/);
+});
+
 test('post-deploy audit publishes an inspectable commit status and still fails on regressions',()=>{
   assert.match(audit,/statuses: write/);
   assert.match(audit,/continue-on-error: true/);
