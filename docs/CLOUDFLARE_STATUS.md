@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Account / Guest browser regression failure**
-- Source commit: `1193bb48f3e1b5eb1029c42843f2e5f7fb275e4a`
+- Source commit: `fc7b0d5dbe5cdbc91a5d859ee0c807ba48bc87f2`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -18,7 +18,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T06:01:45Z
+- Recorded: 2026-08-22T06:11:10Z
 
 ## Production regression
 
@@ -70,19 +70,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "1193bb48f3e1b5eb1029c42843f2e5f7fb275e4a",
-    "builtAt": "2026-08-22T06:00:33.433Z"
+    "commit": "fc7b0d5dbe5cdbc91a5d859ee0c807ba48bc87f2",
+    "builtAt": "2026-08-22T06:09:39.509Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 9,
   "responseMs": {
-    "root": 20,
-    "health": 199,
-    "data": 222,
-    "stats": 225,
-    "market": 513,
-    "analytics": 400
+    "root": 34,
+    "health": 871,
+    "data": 386,
+    "stats": 237,
+    "market": 1550,
+    "analytics": 601
   },
-  "testedAt": "2026-08-22T06:00:57.602Z",
+  "testedAt": "2026-08-22T06:10:27.521Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -112,8 +112,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 134,
-  "testedAt": "2026-08-22T06:00:58.238Z"
+  "durationMs": 173,
+  "testedAt": "2026-08-22T06:10:28.401Z"
 }```
 
 ## Browser navigation regression
@@ -158,11 +158,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 107,
+  "maxLongTaskMs": 109,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 16.79,
-  "testedAt": "2026-08-22T06:01:19Z"
+  "durationSeconds": 16.87,
+  "testedAt": "2026-08-22T06:10:50Z"
 }```
 
 ## Listen Watch browser regression
@@ -195,8 +195,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.98,
-  "testedAt": "2026-08-22T06:01:21Z"
+  "durationSeconds": 2.0,
+  "testedAt": "2026-08-22T06:10:53Z"
 }```
 
 ## Command Intelligence browser regression
@@ -254,8 +254,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.09,
-  "testedAt": "2026-08-22T06:01:23Z"
+  "durationSeconds": 2.26,
+  "testedAt": "2026-08-22T06:10:55Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -305,8 +305,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.96,
-  "testedAt": "2026-08-22T06:01:27Z"
+  "durationSeconds": 2.62,
+  "testedAt": "2026-08-22T06:10:58Z"
 }```
 
 ## Ask Titans browser regression
@@ -383,8 +383,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.58,
-  "testedAt": "2026-08-22T06:01:29Z"
+  "durationSeconds": 1.45,
+  "testedAt": "2026-08-22T06:11:00Z"
 }```
 
 ## Change Intelligence browser regression
@@ -421,8 +421,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.24,
-  "testedAt": "2026-08-22T06:01:31Z"
+  "durationSeconds": 2.77,
+  "testedAt": "2026-08-22T06:11:03Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -454,23 +454,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787378523493,
+          "expiresAt": 1787379095753,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787378493493,
+          "updatedAt": 1787379065753,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787378523409,
+          "expiresAt": 1787379095679,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787378493409,
+          "updatedAt": 1787379065679,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-22T06:01:33.248Z",
+        "at": "2026-08-22T06:11:05.523Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -597,7 +597,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.65
+  "durationSeconds": 4.03
 }```
 
 ## Account / Guest browser regression
@@ -607,8 +607,8 @@
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "browserWarnings": [],
-  "stage": "wait-account-panel",
-  "error": "TimeoutException: Message: \n",
+  "stage": "open-account",
+  "error": "ElementClickInterceptedException: Message: element click intercepted: Element is not clickable at point (235, 1208)\n  (Session info: chrome=151.0.7922.137); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#elementclickinterceptedexception\nStacktrace:\n#0 0x55cffd08736a <unknown>\n#1 0x55cffc9faf49 <unknown>\n#2 0x55cffca57415 <unknown>\n#3 0x55cffca554f2 <unknown>\n#4 0x55cffca52edc <unknown>\n#5 0x55cffca51fd7 <unknown>\n#6 0x55cffca46102 <unknown>\n#7 0x55cffca45587 <unknown>\n#8 0x55cffca990c3 <unknown>\n#9 0x55cffca43c92 <unknown>\n#10 0x55cffca44b11 <unknown>\n#11 0x55cffd04c8d0 <unknown>\n#12 0x55cffd04af3a <unknown>\n#13 0x55cffd0359b5 <unknown>\n#14 0x55cffd04bc0a <unknown>\n#15 0x55cffd01d740 <unknown>\n#16 0x55cffd0729a8 <unknown>\n#17 0x55cffd072b45 <unknown>\n#18 0x55cffd085f1e <unknown>\n#19 0x7f1dcb09cb84 <unknown>\n#20 0x7f1dcb129d6c <unknown>\n",
   "state": {
     "accountApi": true,
     "accountCard": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up",
@@ -622,16 +622,16 @@
       "width": 465
     },
     "hash": "#home",
-    "moreExpanded": "true",
+    "moreExpanded": "false",
     "onboarding": false,
     "ready": "complete",
     "sidebar": {
-      "inert": false,
-      "open": true,
+      "inert": true,
+      "open": false,
       "rect": {
-        "bottom": 611,
+        "bottom": 1231.71875,
         "height": 504.71875,
-        "top": 106.28125,
+        "top": 727,
         "width": 469
       }
     },
@@ -640,7 +640,7 @@
       "w": 500
     }
   },
-  "durationSeconds": 9.44
+  "durationSeconds": 2.29
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
