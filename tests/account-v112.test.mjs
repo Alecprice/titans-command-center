@@ -46,6 +46,24 @@ test('account sync reports progress success and local-safe failure states',()=>{
   assert.match(css,/\.account-sync-status\.syncing/);assert.match(css,/\.account-sync-status\.synced/);assert.match(css,/\.account-sync-status\.error/);
 });
 
+test('production deployment gates on guest and account browser health',()=>{
+  const deploy=read('.github/workflows/cloudflare-deploy.yml');
+  assert.match(deploy,/id: account_browser/);
+  assert.match(deploy,/python scripts\/account-browser-smoke\.py/);
+  assert.match(deploy,/ACCOUNT_BROWSER_OUTCOME/);
+  assert.match(deploy,/Account \/ Guest browser regression/);
+  assert.match(deploy,/if: steps\.account_browser\.outcome == 'success'/);
+});
+
+test('runtime 365 regression preserves current returning-user and five-action dock contract',()=>{
+  const smoke=read('scripts/runtime-365-browser-smoke.py');
+  assert.match(smoke,/prepare_returning_user/);
+  assert.match(smoke,/titans:v10Onboarded/);
+  assert.match(smoke,/len\(mobile\['dockTargets'\]\)!=5/);
+  assert.match(smoke,/\{'Home','Roster','Game','Search','More'\}/);
+  assert.doesNotMatch(smoke,/len\(mobile\['dockTargets'\]\)!=6/);
+});
+
 test('saved media link copy is accurate for guests and signed-in users',()=>{
   const media=read('media-custom-links-v14.js');assert.match(media,/Guest links stay on this device/);assert.match(media,/signed-in users can sync saved links/);assert.doesNotMatch(media,/stored only on this device/);
 });
