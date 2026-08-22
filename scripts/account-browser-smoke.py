@@ -17,12 +17,20 @@ def driver_for(width=390,height=844):
 def wait(driver,script,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(script))
 
+def prepare_returning_user(driver):
+    driver.execute_script("""
+      localStorage.setItem('titans:v10Onboarded','1');
+      document.querySelector('#v10-onboarding [data-v10-close]')?.click();
+    """)
+    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding'))
+
 def severe(driver):
     return [r.get('message','') for r in driver.get_log('browser') if r.get('level')=='SEVERE' and 'favicon' not in r.get('message','').lower()]
 
 result={'ok':False,'base':BASE,'browserWarnings':[]};start=time.time();d=driver_for()
 try:
     d.get(f'{BASE}/#home')
+    prepare_returning_user(d)
     guest=wait(d,"""
       const card=document.querySelector('.account-sheet-card'),app=document.querySelector('#app');
       if(!card||!app?.firstElementChild)return null;
