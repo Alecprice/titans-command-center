@@ -96,6 +96,10 @@ try:
     driver.set_window_size(390, 844)
     driver.get(f'{BASE}/#command')
     wait_for(driver, "document.querySelector('.v15-command') && document.querySelectorAll('[data-v15-tab]').length === 7", timeout=14)
+    # The app intentionally restores the previously selected tab. Desktop testing leaves Global Fans selected,
+    # so switch explicitly to Changes before asserting a Changes-only add-on.
+    driver.execute_script("document.querySelector('[data-v15-tab=\"changes\"]')?.click()")
+    wait_for(driver, "document.querySelector('[data-v15-tab=\"changes\"]')?.getAttribute('aria-selected') === 'true'", timeout=14)
     wait_for(driver, "(document.querySelector('.v15-addon-root')?.innerText || '').includes('ONE-MINUTE TITANS')", timeout=14)
     no_overflow(driver, '390px command')
     mobile = driver.execute_script("""
