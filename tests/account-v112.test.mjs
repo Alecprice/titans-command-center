@@ -55,11 +55,12 @@ test('production deployment gates on guest and account browser health',()=>{
   assert.match(deploy,/if: steps\.account_browser\.outcome == 'success'/);
 });
 
-test('runtime 365 regression dismisses transient modal and expects the five-action mobile dock',()=>{
+test('runtime 365 regression preserves current returning-user and five-action dock contract',()=>{
   const smoke=read('scripts/runtime-365-browser-smoke.py');
-  assert.match(smoke,/dismiss_transient_modal/);
-  assert.match(smoke,/data-v10-close/);
+  assert.match(smoke,/prepare_returning_user/);
+  assert.match(smoke,/titans:v10Onboarded/);
   assert.match(smoke,/len\(mobile\['dockTargets'\]\)!=5/);
+  assert.match(smoke,/\{'Home','Roster','Game','Search','More'\}/);
   assert.doesNotMatch(smoke,/len\(mobile\['dockTargets'\]\)!=6/);
 });
 
