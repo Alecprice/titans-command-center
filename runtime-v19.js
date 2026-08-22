@@ -1,3 +1,5 @@
+import {formatTeamKickoff,TEAM_TIME_LABEL,TEAM_TIME_ZONE} from './team-time-v21.js';
+
 (() => {
   'use strict';
 
@@ -90,6 +92,9 @@
     onRefresh,
     onRoute,
     onAppRender,
+    formatTeamKickoff,
+    teamTimeZone:TEAM_TIME_ZONE,
+    teamTimeLabel:TEAM_TIME_LABEL,
     refreshInfo:()=>({epoch:refreshEpoch,last:lastRefresh}),
     apiCacheInfo:()=>[...apiCache.entries()].map(([url,x])=>({url,hasValue:Boolean(x.value),inflight:Boolean(x.inflight),expiresAt:x.expiresAt,updatedAt:x.updatedAt}))
   };
