@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
+from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -37,9 +38,33 @@ def wait_sheet_settled(driver,timeout=8):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
       const s=document.querySelector('#sidebar'),m=document.querySelector('#mobile-more-button'),dock=document.querySelector('.mobile-nav');
       const r=s?.getBoundingClientRect(),dr=dock?.getBoundingClientRect();
-      if(!s?.classList.contains('open')||m?.getAttribute('aria-expanded')!=='true'||!r||!dr||r.width<=0||r.height<=0)return null;
+      if(!s?.classList.contains('open')||s.inert||m?.getAttribute('aria-expanded')!=='true'||!r||!dr||r.width<=0||r.height<=0)return null;
       return r.top<innerHeight&&r.bottom<=dr.top+2?{top:r.top,bottom:r.bottom,dockTop:dr.top}:null;
     """))
+
+def open_account_from_sheet(driver,attempts=3):
+    last_error=None
+    for _ in range(attempts):
+        opened=driver.execute_script("return document.querySelector('#sidebar')?.classList.contains('open')&&!document.querySelector('#sidebar')?.inert")
+        if not opened:
+            driver.find_element(By.ID,'mobile-more-button').click()
+            wait_sheet_settled(driver)
+        try:
+            button=WebDriverWait(driver,4,poll_frequency=.1).until(lambda d:d.find_element(By.CSS_SELECTOR,'.account-sheet-card [data-account-open]'))
+            driver.execute_script("arguments[0].scrollIntoView({block:'nearest',inline:'nearest'});",button)
+            WebDriverWait(driver,4,poll_frequency=.1).until(lambda d:d.execute_script("""
+              const b=document.querySelector('.account-sheet-card [data-account-open]'),s=document.querySelector('#sidebar');
+              if(!b||!s?.classList.contains('open')||s.inert)return false;
+              const r=b.getBoundingClientRect(),sr=s.getBoundingClientRect(),style=getComputedStyle(b);
+              return style.visibility!=='hidden'&&style.display!=='none'&&r.width>=44&&r.height>=44&&r.top>=sr.top-1&&r.bottom<=sr.bottom+1;
+            """))
+            button.click()
+            return True
+        except (ElementNotInteractableException,StaleElementReferenceException) as exc:
+            last_error=exc
+            time.sleep(.12)
+    if last_error:raise last_error
+    raise RuntimeError('account entry did not become interactable')
 
 def wait_account_panel(driver,timeout=8):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
@@ -86,7 +111,7 @@ try:
 
     stage='open-more';d.find_element(By.ID,'mobile-more-button').click()
     stage='wait-more';sheet=wait_sheet_settled(d)
-    stage='open-account';d.find_element(By.CSS_SELECTOR,'.account-sheet-card [data-account-open]').click()
+    stage='open-account';open_account_from_sheet(d)
     stage='wait-account-panel';panel=wait_account_panel(d)
     if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')
     stage='close-account';d.find_element(By.CSS_SELECTOR,'.account-panel [data-account-close]').click()
