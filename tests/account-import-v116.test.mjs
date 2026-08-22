@@ -9,6 +9,14 @@ test('v1.16 backup restore is loaded through the stable account module and packa
   assert.match(sw,/account-import-v116\.js/);assert.match(sw,/account-import-v116\.css/);assert.match(sw,/titans-cc-brand-2026-v59/);
 });
 
+test('backup restore enhancement mounts whenever the account modal is inserted',()=>{
+  const ui=read('account-import-v116.js');
+  assert.match(ui,/const mountObserver=new MutationObserver\(enhance\)/);
+  assert.match(ui,/mountObserver\.observe\(document\.body,\{childList:true,subtree:false\}\)/);
+  assert.match(ui,/ensureCss\(\);enhance\(\)/);
+  assert.match(ui,/tools\.dataset\.importV116==='true'/);
+});
+
 test('backup parser accepts only the versioned Titans format and known preference namespaces',()=>{
   const sync=read('account-sync-v112.js');
   assert.match(sync,/MAX_IMPORT_BYTES=32000/);
