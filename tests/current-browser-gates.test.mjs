@@ -15,10 +15,15 @@ for(const path of ['scripts/smart-search-browser-smoke.py','scripts/mobile-navig
   });
 }
 
-test('mobile and account smokes wait for settled More-sheet geometry',()=>{
+test('mobile and account smokes stabilize and verify settled More-sheet geometry',()=>{
   const nav=read('scripts/mobile-navigation-browser-smoke.py'),account=read('scripts/account-browser-smoke.py');
-  assert.match(nav,/def wait_sheet_settled\(driver/);assert.match(nav,/r\.bottom>dr\.top\+2/);
-  assert.match(account,/def wait_sheet_settled\(driver/);assert.match(account,/r\.bottom<=dr\.top\+2/);assert.match(account,/def wait_account_panel\(driver/);
+  assert.match(nav,/def stabilize_mobile_sheet\(driver\):/);assert.match(nav,/transition:none!important/);assert.match(nav,/def wait_sheet_settled\(driver/);assert.match(nav,/r\.bottom>dr\.top\+2/);
+  assert.match(account,/def stabilize_mobile_sheet\(driver\):/);assert.match(account,/transition:none!important/);assert.match(account,/def wait_sheet_settled\(driver/);assert.match(account,/r\.bottom<=dr\.top\+2/);assert.match(account,/def wait_account_panel\(driver/);
+});
+
+test('account smoke reports an explicit stage and browser state on failure',()=>{
+  const source=read('scripts/account-browser-smoke.py');
+  assert.match(source,/'stage':'starting'/);assert.match(source,/wait-more-sheet/);assert.match(source,/wait-account-panel/);assert.match(source,/failureState/);assert.match(source,/browser_state/);
 });
 
 test('runtime diagnostic records a named stage and failure state',()=>{
