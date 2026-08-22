@@ -40,6 +40,18 @@ test('Ask Titans keeps advanced metrics explanatory instead of grading players',
   assert.match(js,/Advanced metrics are context tools, not standalone player grades/);
 });
 
+test('Ask Titans re-resolves the live result host after async hydration',()=>{
+  const js=read('ask-titans-v17.js');
+  assert.match(js,/const token=\+\+state\.serial/);
+  assert.match(js,/await load\(\)/);
+  assert.match(js,/token!==state\.serial\|\|route\(\)!=='fan'/);
+  assert.match(js,/upgrade\(\);/);
+  assert.match(js,/const liveOut=document\.querySelector\('\.v17-ask \[data-v17-result\]'\)/);
+  assert.match(js,/!liveOut\|\|!liveOut\.isConnected/);
+  assert.match(js,/liveOut\.innerHTML=renderAnswer/);
+  assert.doesNotMatch(js,/await load\(\);if\(route\(\)!=='fan'\|\|!document\.querySelector\('\.v17-ask'\)\)return;\s*out\.innerHTML/);
+});
+
 test('Ask Titans uses a narrow two-level observer strategy',()=>{
   const js=read('ask-titans-v17.js');
   assert.match(js,/state\.viewObserver\.observe\(view,\{childList:true,subtree:false\}\)/);
