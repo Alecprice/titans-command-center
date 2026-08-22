@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + analytics + player headshot regressions passed**
-- Source commit: `f6cd6eb0f432c7055b463c5bdd0e20a063166fbb`
+- Status: **deployed + runtime / 365 Mode browser regression failure**
+- Source commit: `d7c3efd20e098c2d7ffb4a74acb1190136264b45`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -13,11 +13,11 @@
 - Player Intelligence / Game Day browser regression: success
 - Ask Titans browser regression: success
 - Change Intelligence browser regression: success
-- Runtime / 365 Mode browser regression: success
-- Advanced analytics browser regression: success
-- Player headshot browser regression: success
+- Runtime / 365 Mode browser regression: failure
+- Advanced analytics browser regression: skipped
+- Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T03:57:03Z
+- Recorded: 2026-08-22T05:19:24Z
 
 ## Production regression
 
@@ -36,7 +36,7 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v50",
+  "serviceWorkerCache": "titans-cc-brand-2026-v51",
   "precachePaths": 87,
   "pwaIcons": {
     "icon192": {
@@ -64,24 +64,24 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 6,
-  "marketMode": "published-reference",
+  "marketRows": 238,
+  "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "f6cd6eb0f432c7055b463c5bdd0e20a063166fbb",
-    "builtAt": "2026-08-22T03:55:54.202Z"
+    "commit": "d7c3efd20e098c2d7ffb4a74acb1190136264b45",
+    "builtAt": "2026-08-22T05:18:18.619Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 29,
-    "health": 816,
-    "data": 336,
-    "stats": 167,
-    "market": 7242,
-    "analytics": 756
+    "root": 31,
+    "health": 206,
+    "data": 299,
+    "stats": 242,
+    "market": 768,
+    "analytics": 555
   },
-  "testedAt": "2026-08-22T03:56:25.972Z",
+  "testedAt": "2026-08-22T05:18:47.085Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -111,8 +111,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 141,
-  "testedAt": "2026-08-22T03:56:26.989Z"
+  "durationMs": 139,
+  "testedAt": "2026-08-22T05:18:47.914Z"
 }```
 
 ## Browser navigation regression
@@ -161,11 +161,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 54,
+  "maxLongTaskMs": 86,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 7.98,
-  "testedAt": "2026-08-22T03:56:39Z"
+  "durationSeconds": 16.4,
+  "testedAt": "2026-08-22T05:19:09Z"
 }```
 
 ## Listen Watch browser regression
@@ -198,8 +198,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.01,
-  "testedAt": "2026-08-22T03:56:42Z"
+  "durationSeconds": 2.02,
+  "testedAt": "2026-08-22T05:19:11Z"
 }```
 
 ## Command Intelligence browser regression
@@ -257,8 +257,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.49,
-  "testedAt": "2026-08-22T03:56:45Z"
+  "durationSeconds": 2.14,
+  "testedAt": "2026-08-22T05:19:13Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -308,8 +308,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.28,
-  "testedAt": "2026-08-22T03:56:48Z"
+  "durationSeconds": 2.9,
+  "testedAt": "2026-08-22T05:19:17Z"
 }```
 
 ## Ask Titans browser regression
@@ -386,8 +386,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.65,
-  "testedAt": "2026-08-22T03:56:50Z"
+  "durationSeconds": 1.71,
+  "testedAt": "2026-08-22T05:19:19Z"
 }```
 
 ## Change Intelligence browser regression
@@ -424,154 +424,21 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.69,
-  "testedAt": "2026-08-22T03:56:53Z"
+  "durationSeconds": 2.59,
+  "testedAt": "2026-08-22T05:19:22Z"
 }```
 
 ## Runtime / 365 Mode browser regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktop": {
-    "phase": "preseason",
-    "cards": 4,
-    "runtimeVersion": "1.9.0",
-    "routeCycle": true,
-    "singlePanel": true,
-    "cacheUrls": [
-      "/api/data",
-      "/api/fan-intel"
-    ],
-    "panel": {
-      "cards": 4,
-      "display": "block",
-      "height": 328.734375,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 969
-    },
-    "returnPanel": {
-      "cards": 4,
-      "display": "block",
-      "height": 328.734375,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 984
-    }
-  },
-  "mobile": {
-    "overflow": false,
-    "panelHeight": 765.171875,
-    "panelWidth": 461,
-    "reviewHeight": 48,
-    "targets": [
-      {
-        "h": 112,
-        "label": "NEXT GAME",
-        "w": 427
-      },
-      {
-        "h": 122.9375,
-        "label": "WHAT CHANGED?",
-        "w": 427
-      },
-      {
-        "h": 122.9375,
-        "label": "ROSTER",
-        "w": 427
-      },
-      {
-        "h": 112,
-        "label": "AVAILABILITY",
-        "w": 427
-      }
-    ],
-    "viewport": 500,
-    "panelState": {
-      "cards": 4,
-      "display": "block",
-      "height": 765.171875,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 461
-    }
-  },
+  "desktop": {},
+  "mobile": {},
   "browserWarnings": [],
-  "durationSeconds": 3.37
-}```
-
-## Advanced analytics browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "metricCount": 4,
-  "metricValues": [
-    {
-      "detail": "#30 of 32",
-      "label": "Offensive EPA / play",
-      "value": "-0.148"
-    },
-    {
-      "detail": "#28 of 32",
-      "label": "Defensive EPA / play allowed",
-      "value": "+0.104"
-    },
-    {
-      "detail": "#11 of 32",
-      "label": "Pace",
-      "value": "28.9 sec/play"
-    },
-    {
-      "detail": "Latest loaded week: 18",
-      "label": "Rest days",
-      "value": "7 days"
-    }
-  ],
-  "situationFields": [
-    "Down & distance",
-    "Field position",
-    "Formation",
-    "Personnel",
-    "Score diff",
-    "TEN EPA",
-    "Time remaining"
-  ],
-  "initialPlayCards": 60,
-  "offenseFilteredPlayCards": 39,
-  "mobileMetricCount": 4,
-  "browserWarnings": [],
-  "durationSeconds": 1.66,
-  "testedAt": "2026-08-22T03:56:59Z"
-}```
-
-## Player headshot browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "rosterCards": 95,
-  "rosterDecoratedHeadshots": 82,
-  "rosterLoadedHeadshots": 46,
-  "statsPlayerRows": 95,
-  "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 8,
-  "mobileLoadedHeadshots": 8,
-  "richPlayer": "Austin Schlottmann",
-  "richPlayerHeadshotLoaded": true,
-  "browserWarnings": [],
-  "durationSeconds": 3.22,
-  "testedAt": "2026-08-22T03:57:02Z"
+  "error": "ElementClickInterceptedException: Message: element click intercepted: Element <button class=\"icon-button\" id=\"refresh-button\" aria-label=\"Refresh scoreboard\" title=\"Refresh scoreboard\">...</button> is not clickable at point (1064, 34). Other element would receive the click: <div class=\"v10-modal-backdrop\" data-v10-close=\"\"></div>\n  (Session info: chrome=151.0.7922.137); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#elementclickinterceptedexception\nStacktrace:\n#0 0x55659e9f136a <unknown>\n#1 0x55659e364f49 <unknown>\n#2 0x55659e3c1415 <unknown>\n#3 0x55659e3bf4f2 <unknown>\n#4 0x55659e3bcedc <unknown>\n#5 0x55659e3bbfd7 <unknown>\n#6 0x55659e3afc42 <unknown>\n#7 0x55659e3af587 <unknown>\n#8 0x55659e4030c3 <unknown>\n#9 0x55659e3adc92 <unknown>\n#10 0x55659e3aeb11 <unknown>\n#11 0x55659e9b68d0 <unknown>\n#12 0x55659e9b4f3a <unknown>\n#13 0x55659e99f9b5 <unknown>\n#14 0x55659e9b5c0a <unknown>\n#15 0x55659e987740 <unknown>\n#16 0x55659e9dc9a8 <unknown>\n#17 0x55659e9dcb45 <unknown>\n#18 0x55659e9eff1e <unknown>\n#19 0x7f776949cb84 <unknown>\n#20 0x7f7769529d6c <unknown>\n",
+  "durationSeconds": 2.19
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
