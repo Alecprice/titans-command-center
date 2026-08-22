@@ -4,12 +4,14 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('freshness truth layer is isolated and non-blocking',()=>{
+test('freshness truth layer is isolated non-blocking and narrowly observed',()=>{
   const runtime=read('usability-runtime.js');
   const js=read('freshness-truth-v20.js');
   assert.match(runtime,/import\('\.\/freshness-truth-v20\.js'\)\.catch\(\(\)=>\{\}\)/);
   assert.match(js,/const STALE_AFTER_MS=48\*60\*60\*1000/);
   assert.match(js,/fetch\('\/api\/data',\{cache:'no-store'/);
+  assert.match(js,/observe\(app,\{childList:true\}\)/);
+  assert.doesNotMatch(js,/observe\(app,\{childList:true,subtree:true\}\)/);
   assert.doesNotMatch(js,/DATABASE_URL|PROPLINE_API_KEY|ODDS_API_IO_KEY/);
 });
 
