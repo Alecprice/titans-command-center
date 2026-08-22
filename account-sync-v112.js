@@ -8,10 +8,13 @@
   const apply=values=>{if(!values||typeof values!=='object')return;for(const key of KEYS){if(!(key in values))continue;try{localStorage.setItem(key,JSON.stringify(values[key]))}catch{}}};
   const same=(a,b)=>{try{return JSON.stringify(a)===JSON.stringify(b)}catch{return false}};
   const status=(state,message)=>window.dispatchEvent(new CustomEvent('titans:sync-status',{detail:{state,message,at:new Date().toISOString()}}));
+  const failureStatus=error=>error?.code==='PREFERENCE_STORAGE_NOT_READY'?{state:'local',message:'Account sync isn’t enabled yet. Your settings are saved on this device.'}:{state:'error',message:'Couldn’t sync right now. Your settings are still saved on this device.'};
+  function reportFailure(error){const detail=failureStatus(error);console.warn('[account-sync]',error instanceof Error?error.message:'sync unavailable');status(detail.state,detail.message);}
   async function request(method='GET',preferences){
     const res=await fetch('/api/account/preferences',{method,credentials:'same-origin',cache:'no-store',headers:method==='PUT'?{'Content-Type':'application/json'}:undefined,body:method==='PUT'?JSON.stringify({preferences}):undefined});
-    if(!res.ok)throw new Error(`Preference sync ${res.status}`);
-    return res.json();
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){const error=new Error(data?.error||`Preference sync ${res.status}`);error.code=String(data?.code||'');error.localOnly=Boolean(data?.localOnly);throw error;}
+    return data;
   }
   async function initialSync(user){
     const id=String(user?.id||'');if(!id||syncing||id===lastUser)return;
@@ -28,14 +31,14 @@
       status('synced','Your Titans settings are synced.');
       window.dispatchEvent(new CustomEvent('titans:preferences-synced',{detail:{keys:Object.keys(merged)}}));
       if(refreshV10)setTimeout(()=>location.reload(),120);
-    }catch(err){console.warn('[account-sync]',err instanceof Error?err.message:'sync unavailable');status('error','Couldn’t sync right now. Your settings are still saved on this device.');}
+    }catch(err){reportFailure(err);}
     finally{syncing=false;}
   }
   async function push(){
     if(syncing||!window.TitansAccount?.user)return false;
     syncing=true;status('syncing','Syncing your Titans settings…');
     try{await request('PUT',snapshot());status('synced','Your Titans settings are synced.');return true;}
-    catch(err){console.warn('[account-sync]',err instanceof Error?err.message:'sync unavailable');status('error','Couldn’t sync right now. Your settings are still saved on this device.');return false;}
+    catch(err){reportFailure(err);return false;}
     finally{syncing=false;}
   }
   function schedule(){clearTimeout(timer);timer=setTimeout(push,500);}
