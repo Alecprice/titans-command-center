@@ -42,9 +42,12 @@ test('runtime diagnostic records a named stage and failure state',()=>{
   assert.match(source,/wait-sheet-settled/);assert.match(source,/wait-search-results/);assert.match(source,/failureState/);
 });
 
-test('live market smoke validates provider rows filters alternates and mobile safety',()=>{
+test('market smoke validates truthful live reference unavailable modes and real controls',()=>{
   const source=read('scripts/market-browser-smoke.py');
-  for(const token of ['/api/market-data','live-provider','providerValidation','#mh-event-filter','#mh-book-filter','#mh-alt-toggle','horizontal overflow','44px mobile target','SEVERE'])assert.ok(source.includes(token),`${token} missing from market smoke`);
+  for(const token of ["quality=='Live'","quality=='Published reference'","quality=='Unavailable'",'#mh-event-filter','#mh-book-filter','#mh-category-filter','#mh-alt-toggle','desktop:refresh','EC.staleness_of','Mobile market controls below 44px','horizontal overflow','SEVERE'])assert.ok(source.includes(token),`${token} missing from market smoke`);
+  assert.match(source,/Select\(element\)/);
+  assert.match(source,/select\.select_by_index\(1\)/);
+  assert.match(source,/find_element\(By\.ID,'mh-refresh'\)\.click\(\)/);
 });
 
 test('market controls meet the 44px touch target floor',()=>{
