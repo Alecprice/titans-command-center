@@ -34,6 +34,17 @@ def disable_sidebar_motion(driver):
       document.head.appendChild(style);
     """)
 
+def wait_mobile_shell_ready(driver,timeout=8):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const sidebar=document.querySelector('#sidebar'),more=document.querySelector('#mobile-more-button'),dock=document.querySelector('.mobile-nav');
+      if(document.readyState!=='complete'||!window.TitansRuntime||!sidebar||!more||!dock)return null;
+      const mr=more.getBoundingClientRect(),dr=dock.getBoundingClientRect(),style=getComputedStyle(more);
+      if(sidebar.getAttribute('aria-hidden')!=='true'||!sidebar.inert||sidebar.classList.contains('open'))return null;
+      if(more.getAttribute('aria-expanded')!=='false'||style.display==='none'||style.visibility==='hidden'||style.pointerEvents==='none'||mr.width<44||mr.height<44)return null;
+      if(dr.width<=0||dr.height<60||mr.bottom>innerHeight+1)return null;
+      return {runtime:window.TitansRuntime.version,more:{w:mr.width,h:mr.height,top:mr.top,bottom:mr.bottom},dock:{w:dr.width,h:dr.height,top:dr.top},sidebarHidden:sidebar.getAttribute('aria-hidden'),sidebarInert:Boolean(sidebar.inert)};
+    """))
+
 def wait_sheet_settled(driver,timeout=8):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
       const s=document.querySelector('#sidebar'),m=document.querySelector('#mobile-more-button'),dock=document.querySelector('.mobile-nav');
@@ -88,13 +99,14 @@ def state(driver):
             viewport:{w:innerWidth,h:innerHeight},
             ready:document.readyState,
             onboarding:Boolean(document.querySelector('#v10-onboarding')),
+            runtimeVersion:window.TitansRuntime?.version||null,
             accountApi:Boolean(window.TitansAccount),
             accountGuest:window.TitansAccount?.guest??null,
             accountCard:card?.textContent?.trim()||'',
             accountCardAtSidebarTop:Boolean(document.querySelector('#sidebar > .account-sheet-card')),
             accountEntry:er?{top:er.top,bottom:er.bottom,width:er.width,height:er.height}:null,
             accountPanel:ar?{top:ar.top,bottom:ar.bottom,width:ar.width,height:ar.height,text:(account?.textContent||'').slice(0,180)}:null,
-            sidebar:{open:Boolean(sidebar?.classList.contains('open')),inert:Boolean(sidebar?.inert),rect:sr?{top:sr.top,bottom:sr.bottom,width:sr.width,height:sr.height}:null},
+            sidebar:{open:Boolean(sidebar?.classList.contains('open')),inert:Boolean(sidebar?.inert),ariaHidden:sidebar?.getAttribute('aria-hidden')||null,rect:sr?{top:sr.top,bottom:sr.bottom,width:sr.width,height:sr.height}:null},
             moreExpanded:document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded')||null,
             dock:dr?{top:dr.top,bottom:dr.bottom,width:dr.width,height:dr.height}:null,
             appText:(document.querySelector('#app')?.innerText||'').slice(0,300)
@@ -114,6 +126,7 @@ try:
     stage='wait-guest'
     guest=wait(d,"""const card=document.querySelector('.account-sheet-card'),app=document.querySelector('#app');if(!card||!app?.firstElementChild||!window.TitansAccount)return null;return {text:card.textContent.trim(),route:location.hash,accountGuest:Boolean(window.TitansAccount.guest)};""")
     if 'GUEST' not in guest['text'].upper() or not guest['accountGuest']: raise RuntimeError(f'guest state missing: {guest}')
+    stage='wait-mobile-shell';shell=wait_mobile_shell_ready(d)
 
     stage='open-more';d.find_element(By.ID,'mobile-more-button').click()
     stage='wait-more';sheet=wait_sheet_settled(d)
@@ -137,7 +150,7 @@ try:
     if roster['route']!='#roster': raise RuntimeError(f'guest navigation blocked: {roster}')
     stage='console';result['browserWarnings']=severe(d)
     if result['browserWarnings']: raise RuntimeError(f'Browser console errors: {result["browserWarnings"][:5]}')
-    result.update({'ok':True,'guest':guest,'sheet':sheet,'accountEntry':entry,'panel':panel,'authOutage':outage,'roster':roster});stage='complete'
+    result.update({'ok':True,'guest':guest,'mobileShell':shell,'sheet':sheet,'accountEntry':entry,'panel':panel,'authOutage':outage,'roster':roster});stage='complete'
 except Exception as exc:
     result['stage']=stage;result['error']=f'{type(exc).__name__}: {exc}'
     if d is not None:result['state']=state(d)
