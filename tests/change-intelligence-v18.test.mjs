@@ -10,7 +10,7 @@ test('Change Intelligence 2.0 loads after Command Intelligence and is precached'
   assert.ok(base>=0&&change>base);
   assert.match(sw,/change-intelligence-v18\.css/);
   assert.match(sw,/change-intelligence-v18\.js/);
-  assert.match(sw,/titans-cc-brand-2026-v47/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
 });
 
 test('reviewed snapshot changes only when fan explicitly marks current state reviewed',()=>{
