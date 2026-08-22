@@ -62,6 +62,17 @@ test('365 and premium surfaces subscribe to shared refresh without migrating sta
   assert.doesNotMatch(change,/TitansRuntime/);
 });
 
+test('runtime 365 browser smoke uses returning-user setup and current five-action dock contract',()=>{
+  const smoke=read('scripts/runtime-365-browser-smoke.py');
+  assert.match(smoke,/def prepare_returning_user\(driver\):/);
+  assert.match(smoke,/titans:v10Onboarded/);
+  assert.match(smoke,/prepare_returning_user\(d\)/);
+  assert.match(smoke,/prepare_returning_user\(m\)/);
+  assert.match(smoke,/len\(mobile\['dockTargets'\]\)!=5/);
+  assert.match(smoke,/\{'Home','Roster','Game','Search','More'\}/);
+  assert.doesNotMatch(smoke,/len\(mobile\['dockTargets'\]\)!=6/);
+});
+
 test('PWA precaches the runtime and 365 assets',()=>{
   const sw=read('sw.js');
   assert.match(sw,/titans-cc-brand-2026-v\d+/);
