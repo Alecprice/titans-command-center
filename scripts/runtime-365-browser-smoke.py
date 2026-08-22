@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 OUT=Path('/tmp/runtime-365-browser-smoke.json')
 
+
 def driver_for(width=1280,height=900):
     options=Options()
     options.add_argument('--headless=new')
@@ -21,8 +22,25 @@ def driver_for(width=1280,height=900):
     options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
     return webdriver.Chrome(options=options)
 
+
 def wait_css(driver,selector,timeout=15):
     return WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR,selector)))
+
+
+def prepare_returning_user(driver):
+    # Each Selenium session starts with empty localStorage, which intentionally
+    # triggers the v1.0 first-run onboarding modal. This smoke exercises the
+    # shared runtime / 365 Mode rather than onboarding, so make the profile a
+    # returning user before interacting with shell controls. The second
+    # localStorage check inside onboarding() prevents a late async modal open.
+    driver.execute_script("""
+      localStorage.setItem('titans:v10Onboarded','1');
+      document.querySelector('#v10-onboarding [data-v10-close]')?.click();
+    """)
+    WebDriverWait(driver,5,poll_frequency=.1).until(
+        lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding')
+    )
+
 
 def wait_365_panel(driver,timeout=15):
     def read_state(d):
@@ -37,6 +55,7 @@ def wait_365_panel(driver,timeout=15):
           return {text,visible,display:style.display,visibility:style.visibility,opacity:style.opacity,width:rect.width,height:rect.height,cards:cards.length};
         """)
     return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_state)
+
 
 def wait_refresh(driver,previous_epoch,timeout=15):
     def read_refresh(d):
@@ -53,6 +72,7 @@ def wait_refresh(driver,previous_epoch,timeout=15):
         """,previous_epoch)
     return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_refresh)
 
+
 def severe_logs(driver):
     rows=[]
     for row in driver.get_log('browser'):
@@ -60,12 +80,14 @@ def severe_logs(driver):
             rows.append(row.get('message',''))
     return rows
 
+
 result={'ok':False,'base':BASE,'desktop':{},'mobile':{},'browserWarnings':[]}
 start=time.time()
 try:
     d=driver_for()
     try:
         d.get(f'{BASE}/#home')
+        prepare_returning_user(d)
         panel_state=wait_365_panel(d)
         runtime=d.execute_script("return window.TitansRuntime ? {version:window.TitansRuntime.version,route:window.TitansRuntime.route(),cache:window.TitansRuntime.apiCacheInfo(),refresh:window.TitansRuntime.refreshInfo()} : null")
         phase=d.execute_script("return document.body.dataset.v19Phase || ''")
@@ -78,6 +100,7 @@ try:
 
         previous_epoch=(runtime.get('refresh') or {}).get('epoch',0)
         refresh_button=wait_css(d,'#refresh-button')
+        WebDriverWait(d,5,poll_frequency=.1).until(lambda driver:not driver.find_elements(By.CSS_SELECTOR,'.v10-modal'))
         refresh_button.click()
         refresh_state=wait_refresh(d,previous_epoch)
         refreshed_panel=wait_365_panel(d)
@@ -97,6 +120,7 @@ try:
     m=driver_for(390,844)
     try:
         m.get(f'{BASE}/#home')
+        prepare_returning_user(m)
         mobile_panel=wait_365_panel(m)
         mobile=m.execute_script("""
           const panel=document.querySelector('.v19-365');
@@ -121,7 +145,9 @@ try:
         if any(x['h']<44 for x in mobile['targets']): raise RuntimeError(f'Mobile 365 card target too small: {mobile}')
         if not mobile['menu'] or mobile['menu']['display']=='none' or mobile['menu']['w']<44 or mobile['menu']['h']<44 or mobile['menu']['x']<0 or mobile['menu']['y']<0: raise RuntimeError(f'Mobile menu unreachable: {mobile}')
         if not mobile['dock'] or mobile['dock']['display']=='none' or mobile['dock']['h']<60 or mobile['dock']['x']<0 or mobile['dock']['x']+mobile['dock']['w']>mobile['viewport']+1: raise RuntimeError(f'Mobile dock invalid: {mobile}')
-        if len(mobile['dockTargets'])!=6 or any(x['h']<44 or x['w']<44 for x in mobile['dockTargets']): raise RuntimeError(f'Mobile dock targets invalid: {mobile}')
+        if len(mobile['dockTargets'])!=5 or any(x['h']<44 or x['w']<44 for x in mobile['dockTargets']): raise RuntimeError(f'Mobile five-action dock targets invalid: {mobile}')
+        dock_labels={x['label'] for x in mobile['dockTargets']}
+        if not {'Home','Roster','Game','Search','More'}.issubset(dock_labels): raise RuntimeError(f'Mobile five-action dock labels invalid: {mobile}')
 
         m.find_element(By.ID,'mobile-more-button').click()
         sheet=WebDriverWait(m,10,poll_frequency=.1).until(lambda driver:driver.execute_script("""
