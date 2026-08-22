@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Account / Guest browser regression failure**
-- Source commit: `c91d8f257ee3ecd0d18abf6c7070dffe37afbb11`
+- Source commit: `1193bb48f3e1b5eb1029c42843f2e5f7fb275e4a`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -18,7 +18,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T05:56:43Z
+- Recorded: 2026-08-22T06:01:45Z
 
 ## Production regression
 
@@ -70,19 +70,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "c91d8f257ee3ecd0d18abf6c7070dffe37afbb11",
-    "builtAt": "2026-08-22T05:55:37.547Z"
+    "commit": "1193bb48f3e1b5eb1029c42843f2e5f7fb275e4a",
+    "builtAt": "2026-08-22T06:00:33.433Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 21,
-    "health": 1023,
-    "data": 451,
-    "stats": 324,
-    "market": 657,
-    "analytics": 628
+    "root": 20,
+    "health": 199,
+    "data": 222,
+    "stats": 225,
+    "market": 513,
+    "analytics": 400
   },
-  "testedAt": "2026-08-22T05:56:04.176Z",
+  "testedAt": "2026-08-22T06:00:57.602Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -112,8 +112,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 127,
-  "testedAt": "2026-08-22T05:56:05.031Z"
+  "durationMs": 134,
+  "testedAt": "2026-08-22T06:00:58.238Z"
 }```
 
 ## Browser navigation regression
@@ -158,11 +158,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 115,
+  "maxLongTaskMs": 107,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 15.15,
-  "testedAt": "2026-08-22T05:56:25Z"
+  "durationSeconds": 16.79,
+  "testedAt": "2026-08-22T06:01:19Z"
 }```
 
 ## Listen Watch browser regression
@@ -195,8 +195,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.94,
-  "testedAt": "2026-08-22T05:56:27Z"
+  "durationSeconds": 1.98,
+  "testedAt": "2026-08-22T06:01:21Z"
 }```
 
 ## Command Intelligence browser regression
@@ -254,8 +254,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.06,
-  "testedAt": "2026-08-22T05:56:29Z"
+  "durationSeconds": 2.09,
+  "testedAt": "2026-08-22T06:01:23Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -305,8 +305,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.03,
-  "testedAt": "2026-08-22T05:56:33Z"
+  "durationSeconds": 2.96,
+  "testedAt": "2026-08-22T06:01:27Z"
 }```
 
 ## Ask Titans browser regression
@@ -383,8 +383,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.54,
-  "testedAt": "2026-08-22T05:56:35Z"
+  "durationSeconds": 1.58,
+  "testedAt": "2026-08-22T06:01:29Z"
 }```
 
 ## Change Intelligence browser regression
@@ -421,8 +421,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.46,
-  "testedAt": "2026-08-22T05:56:37Z"
+  "durationSeconds": 2.24,
+  "testedAt": "2026-08-22T06:01:31Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -454,23 +454,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787378229603,
+          "expiresAt": 1787378523493,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787378199603,
+          "updatedAt": 1787378493493,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787378229542,
+          "expiresAt": 1787378523409,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787378199542,
+          "updatedAt": 1787378493409,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-22T05:56:39.390Z",
+        "at": "2026-08-22T06:01:33.248Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -597,7 +597,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.6
+  "durationSeconds": 3.65
 }```
 
 ## Account / Guest browser regression
@@ -607,8 +607,8 @@
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "browserWarnings": [],
-  "stage": "open-account",
-  "error": "ElementNotInteractableException: Message: element not interactable\n  (Session info: chrome=151.0.7922.137); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#elementnotinteractableexception\nStacktrace:\n#0 0x55c71860836a <unknown>\n#1 0x55c717f7bd00 <unknown>\n#2 0x55c717fd2c45 <unknown>\n#3 0x55c717fc6c42 <unknown>\n#4 0x55c717fc6587 <unknown>\n#5 0x55c71801a0c3 <unknown>\n#6 0x55c717fc4c92 <unknown>\n#7 0x55c717fc5b11 <unknown>\n#8 0x55c7185cd8d0 <unknown>\n#9 0x55c7185cbf3a <unknown>\n#10 0x55c7185b69b5 <unknown>\n#11 0x55c7185ccc0a <unknown>\n#12 0x55c71859e740 <unknown>\n#13 0x55c7185f39a8 <unknown>\n#14 0x55c7185f3b45 <unknown>\n#15 0x55c718606f1e <unknown>\n#16 0x7f537049cb84 <unknown>\n#17 0x7f5370529d6c <unknown>\n",
+  "stage": "wait-account-panel",
+  "error": "TimeoutException: Message: \n",
   "state": {
     "accountApi": true,
     "accountCard": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up",
@@ -622,16 +622,16 @@
       "width": 465
     },
     "hash": "#home",
-    "moreExpanded": "false",
+    "moreExpanded": "true",
     "onboarding": false,
     "ready": "complete",
     "sidebar": {
-      "inert": true,
-      "open": false,
+      "inert": false,
+      "open": true,
       "rect": {
-        "bottom": 1231.71875,
+        "bottom": 611,
         "height": 504.71875,
-        "top": 727,
+        "top": 106.28125,
         "width": 469
       }
     },
@@ -640,7 +640,7 @@
       "w": 500
     }
   },
-  "durationSeconds": 1.3
+  "durationSeconds": 9.44
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
