@@ -4,8 +4,8 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 
 test('account layer is explicitly loaded and packaged offline',()=>{
-  const html=read('index.html'),sw=read('sw.js'),quality=read('.github/workflows/quality.yml');
-  assert.match(html,/account-sync-v112\.js\?v=1/);assert.match(html,/account-v112\.js\?v=2/);assert.match(sw,/account-sync-v112\.js/);assert.match(sw,/account-v112\.js/);assert.match(sw,/account-v112\.css/);assert.match(sw,/titans-cc-brand-2026-v57/);assert.match(quality,/scripts\/account-browser-smoke\.py/);
+  const html=read('index.html'),sw=read('sw.js'),quality=read('.github/workflows/quality.yml'),ui=read('account-v112.js');
+  assert.match(html,/account-sync-v112\.js\?v=2/);assert.match(html,/account-v112\.js\?v=3/);assert.match(ui,/account-v112\.css\?v=3/);assert.match(sw,/account-sync-v112\.js/);assert.match(sw,/account-v112\.js/);assert.match(sw,/account-v112\.css/);assert.match(sw,/titans-cc-brand-2026-v57/);assert.match(quality,/scripts\/account-browser-smoke\.py/);
 });
 
 test('guest access is the default and auth does not gate public routes',()=>{
@@ -24,9 +24,9 @@ test('signed-in preferences sync only approved local preference keys and real sa
   assert.match(sync,/\/api\/account\/preferences/);assert.match(sync,/titans:account/);assert.match(sync,/titans:preferences-synced/);assert.match(sync,/data-v16-favorite/);assert.match(player,/data-v16-favorite/);assert.match(sync,/data-v15-profile-save/);assert.match(sync,/data-v15-alert-save/);assert.match(sync,/data-custom-remove/);assert.match(api,/sanitizePreferences/);assert.match(api,/Authentication required/);assert.match(api,/\$\{encoded\}::jsonb/);assert.match(worker,/accountPreferencesRoute/);
 });
 
-test('account sync reports progress success and local-safe failure states',()=>{
-  const sync=read('account-sync-v112.js'),ui=read('account-v112.js'),css=read('account-v112.css');
-  assert.match(sync,/titans:sync-status/);assert.match(sync,/Syncing your Titans settings/);assert.match(sync,/Your Titans settings are synced/);assert.match(sync,/Your settings are still saved on this device/);assert.match(ui,/account-sync-status/);assert.match(ui,/titans:sync-status/);assert.match(ui,/syncStatus/);assert.match(css,/\.account-sync-status\.syncing/);assert.match(css,/\.account-sync-status\.synced/);assert.match(css,/\.account-sync-status\.error/);
+test('account sync reports progress success explicit local-only capability and local-safe failure states',()=>{
+  const sync=read('account-sync-v112.js'),ui=read('account-v112.js'),css=read('account-v112.css'),api=read('src/account-api.mjs');
+  assert.match(sync,/titans:sync-status/);assert.match(sync,/Syncing your Titans settings/);assert.match(sync,/Your Titans settings are synced/);assert.match(sync,/Account sync isn’t enabled yet\. Your settings are saved on this device\./);assert.match(sync,/Your settings are still saved on this device/);assert.match(sync,/state:'local'/);assert.match(api,/PREFERENCE_STORAGE_NOT_READY/);assert.match(api,/localOnly:true/);assert.match(ui,/account-sync-status/);assert.match(ui,/titans:sync-status/);assert.match(ui,/syncStatus/);assert.match(css,/\.account-sync-status\.syncing/);assert.match(css,/\.account-sync-status\.synced/);assert.match(css,/\.account-sync-status\.local/);assert.match(css,/\.account-sync-status\.error/);
 });
 
 test('production deployment gates on guest and account browser health',()=>{
@@ -42,6 +42,6 @@ test('runtime 365 regression preserves current returning-user and five-action do
   const smoke=read('scripts/runtime-365-browser-smoke.py');assert.match(smoke,/prepare_returning_user/);assert.match(smoke,/titans:v10Onboarded/);assert.match(smoke,/len\(mobile\['dockTargets'\]\)!=5/);assert.match(smoke,/\{'Home','Roster','Game','Search','More'\}/);assert.doesNotMatch(smoke,/len\(mobile\['dockTargets'\]\)!=6/);
 });
 
-test('saved media link copy is accurate for guests and signed-in users',()=>{const media=read('media-custom-links-v14.js');assert.match(media,/Guest links stay on this device/);assert.match(media,/signed-in users can sync saved links/);assert.doesNotMatch(media,/stored only on this device/);});
+test('saved media link copy stays accurate while preference storage is optional',()=>{const media=read('media-custom-links-v14.js');assert.match(media,/Guest links stay on this device/);assert.match(media,/when account sync is available/);assert.doesNotMatch(media,/stored only on this device/);});
 test('auth failure gracefully falls back to guest instead of breaking the PWA',()=>{const js=read('account-v112.js');assert.match(js,/catch\{state\.session=null;\}/);assert.match(js,/window\.TitansAccount/);});
 test('account UI is mobile safe and modal controls meet touch target expectations',()=>{const css=read('account-v112.css');assert.match(css,/@media\(max-width:760px\)/);assert.match(css,/env\(safe-area-inset-bottom\)/);assert.match(css,/min-height:48px/);assert.match(css,/min-height:50px/);assert.match(css,/width:44px;height:44px/);assert.match(css,/:focus-visible/);});
