@@ -1,21 +1,23 @@
 (() => {
   'use strict';
+  const runtime=window.TitansRuntime;
   const app=document.querySelector('#app');
+  if(!runtime||!app)return;
   const SNAP_KEY='titans:v18ReviewedSnapshot',PROFILE_KEY='titans:v15MyTitans';
-  const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
+  const route=runtime.route;
   const arr=v=>Array.isArray(v)?v:[];
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const norm=v=>String(v??'').trim().toLowerCase();
-  const getJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}};
-  const setJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
+  const getJson=(key,fallback)=>runtime.storage.getJSON(key,fallback);
+  const setJson=(key,value)=>runtime.storage.setJSON(key,value);
   let state={data:null,fan:null,loading:null,serial:0,viewObserver:null};
 
   async function load(){
     if(state.data&&state.fan)return state;
     if(state.loading)return state.loading;
     state.loading=Promise.all([
-      fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
-      fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+      runtime.apiJson('/api/data',{ttl:30000}),
+      runtime.apiJson('/api/fan-intel',{ttl:30000})
     ]).then(([data,fan])=>{state.data=data?.ok?data:{};state.fan=fan?.ok?fan:{};return state}).finally(()=>state.loading=null);
     return state.loading;
   }
@@ -50,7 +52,7 @@
     for(const [id,x] of newInj){const old=oldInj.get(id);if(!old)out.push(change('Injury / availability',x.name,'No weekly report row in reviewed snapshot',`${x.practice||x.report||x.injury||'Reported'}${x.injury?` · ${x.injury}`:''}`,x));else if(key(old.practice,old.report,old.injury)!==key(x.practice,x.report,x.injury))out.push(change('Injury / availability',x.name,`${old.practice||old.report||'Reported'}${old.injury?` · ${old.injury}`:''}`,`${x.practice||x.report||'Reported'}${x.injury?` · ${x.injury}`:''}`,x))}
     for(const [id,x] of oldInj)if(!newInj.has(id))out.push(change('Injury / availability',x.name,`${x.practice||x.report||'Reported'}${x.injury?` · ${x.injury}`:''}`,'No longer present in current weekly-report rows',x));
 
-    const oldDepth=new Set(arr(oldSnap.depth).map(x=>x.key));for(const x of current.depth)if(x.key&&!oldDepth.has(x.key))out.push(change('Depth chart',x.name, x.from||'Previous role not loaded',x.to||x.type||'Changed',x));
+    const oldDepth=new Set(arr(oldSnap.depth).map(x=>x.key));for(const x of current.depth)if(x.key&&!oldDepth.has(x.key))out.push(change('Depth chart',x.name,x.from||'Previous role not loaded',x.to||x.type||'Changed',x));
 
     const oldGames=mapBy(oldSnap.games),newGames=mapBy(current.games);for(const [id,g] of newGames){const old=oldGames.get(id);if(!old)continue;if(key(old.date,old.network,old.status)!==key(g.date,g.network,g.status))out.push(change('Schedule / broadcast',g.opponent,`${old.date||'TBD'} · ${old.network||'TV TBD'} · ${old.status||'status TBD'}`,`${g.date||'TBD'} · ${g.network||'TV TBD'} · ${g.status||'status TBD'}`,g))}
     return out.sort((a,b)=>({favorite:0,important:1,normal:2}[a.priority]-{favorite:0,important:1,normal:2}[b.priority]));
@@ -64,7 +66,7 @@
   function bind(root,current){root.querySelector('[data-v18-review]')?.addEventListener('click',()=>{if(setJson(SNAP_KEY,current)){render(true)}});root.querySelectorAll('[data-v18-filter]').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('[data-v18-filter]').forEach(x=>x.classList.toggle('active',x===btn));const filter=btn.dataset.v18Filter;root.querySelectorAll('[data-v18-kind]').forEach(card=>card.hidden=filter!=='All'&&card.dataset.v18Kind!==filter)}))}
   async function render(force=false){if(route()!=='command')return;const currentTab=document.querySelector('[data-v15-tab].active')?.dataset.v15Tab||'';if(currentTab&&currentTab!=='changes')return;const host=document.querySelector('.v15-command-view');if(!host)return;if(!force&&host.querySelector('.v18-change-intel'))return;const token=++state.serial;await load();if(token!==state.serial||route()!=='command')return;const current=snapshot(),reviewed=getJson(SNAP_KEY,null),changes=diff(reviewed,current);host.querySelector('.v18-change-intel')?.remove();const wrap=document.createElement('div');wrap.innerHTML=shell(current,reviewed,changes);const root=wrap.firstElementChild;host.prepend(root);bind(root,current)}
   function watchView(){state.viewObserver?.disconnect();state.viewObserver=null;if(route()!=='command')return;const host=document.querySelector('.v15-command-view');if(!host)return;render();state.viewObserver=new MutationObserver(()=>queueMicrotask(render));state.viewObserver.observe(host,{childList:true,subtree:false})}
-  if(app)new MutationObserver(()=>queueMicrotask(watchView)).observe(app,{childList:true,subtree:false});
-  addEventListener('hashchange',()=>{state.serial++;setTimeout(watchView,60)});
+  runtime.onAppRender(()=>queueMicrotask(watchView));
+  runtime.onRoute(()=>{state.serial++;setTimeout(watchView,60)});
   setTimeout(watchView,140);
 })();
