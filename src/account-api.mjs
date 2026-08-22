@@ -7,12 +7,16 @@ function json(payload,status=200,headers={}){
   return new Response(JSON.stringify(payload),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers}});
 }
 
+function authHeaders(request){
+  const headers=new Headers();
+  for(const key of ['cookie','content-type','accept']){const value=request.headers.get(key);if(value)headers.set(key,value);}
+  headers.set('origin',new URL(AUTH_ORIGIN).origin);
+  return headers;
+}
+
 async function authSession(request){
   try{
-    const headers=new Headers();
-    const cookie=request.headers.get('cookie');
-    if(cookie)headers.set('cookie',cookie);
-    const upstream=await fetch(`${AUTH_ORIGIN}/get-session`,{headers,redirect:'manual'});
+    const upstream=await fetch(`${AUTH_ORIGIN}/get-session`,{headers:authHeaders(request),redirect:'manual'});
     if(!upstream.ok)return null;
     const data=await upstream.json().catch(()=>null);
     return data?.user?data:data?.data?.user?data.data:null;
@@ -22,12 +26,11 @@ async function authSession(request){
 export async function accountAuthProxy(request,subpath){
   const safe=String(subpath||'').replace(/^\/+|\/+$/g,'');
   if(!['get-session','sign-in/email','sign-up/email','sign-out'].includes(safe))return json({ok:false,error:'Unknown account route'},404);
-  if(request.method!=='GET'&&request.method!=='POST')return json({ok:false,error:'Method not allowed'},405,{Allow:'GET, POST'});
-  const headers=new Headers();
-  for(const key of ['cookie','content-type','accept']){const value=request.headers.get(key);if(value)headers.set(key,value);}
+  const allowedMethod=safe==='get-session'?'GET':'POST';
+  if(request.method!==allowedMethod)return json({ok:false,error:'Method not allowed'},405,{Allow:allowedMethod});
   const body=request.method==='GET'?undefined:await request.arrayBuffer();
   try{
-    const upstream=await fetch(`${AUTH_ORIGIN}/${safe}`,{method:request.method,headers,body,redirect:'manual'});
+    const upstream=await fetch(`${AUTH_ORIGIN}/${safe}`,{method:request.method,headers:authHeaders(request),body,redirect:'manual'});
     const outHeaders=new Headers(upstream.headers);
     outHeaders.set('Cache-Control','no-store');
     outHeaders.delete('access-control-allow-origin');
@@ -70,7 +73,7 @@ export async function accountPreferencesRoute(request,env){
     if(encoded.length>24000)return json({ok:false,error:'Preferences too large'},413);
     const [row]=await sql`
       insert into fan_user_preferences(user_id,preferences,schema_version,updated_at)
-      values(${String(user.id)},${preferences},1,now())
+      values(${String(user.id)},${encoded}::jsonb,1,now())
       on conflict(user_id) do update set preferences=excluded.preferences,schema_version=excluded.schema_version,updated_at=now()
       returning updated_at
     `;
