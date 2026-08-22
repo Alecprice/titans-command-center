@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + runtime / 365 Mode browser regression failure**
-- Source commit: `d9c11caea3fc19ef5b9239caa7bf75d185e56293`
+- Source commit: `767e64a6bdc075cd453b593d735ba43e64b0abb8`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -14,10 +14,11 @@
 - Ask Titans browser regression: success
 - Change Intelligence browser regression: success
 - Runtime / 365 Mode browser regression: failure
+- Account / Guest browser regression: skipped
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T05:24:28Z
+- Recorded: 2026-08-22T05:27:24Z
 
 ## Production regression
 
@@ -69,19 +70,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "d9c11caea3fc19ef5b9239caa7bf75d185e56293",
-    "builtAt": "2026-08-22T05:23:21.968Z"
+    "commit": "767e64a6bdc075cd453b593d735ba43e64b0abb8",
+    "builtAt": "2026-08-22T05:26:18.503Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 20,
-    "health": 272,
-    "data": 669,
-    "stats": 713,
-    "market": 604,
-    "analytics": 615
+    "root": 192,
+    "health": 178,
+    "data": 199,
+    "stats": 183,
+    "market": 1517,
+    "analytics": 372
   },
-  "testedAt": "2026-08-22T05:23:50.471Z",
+  "testedAt": "2026-08-22T05:26:47.720Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -111,8 +112,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 126,
-  "testedAt": "2026-08-22T05:23:51.347Z"
+  "durationMs": 161,
+  "testedAt": "2026-08-22T05:26:48.385Z"
 }```
 
 ## Browser navigation regression
@@ -157,11 +158,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 67,
+  "maxLongTaskMs": 66,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 15.18,
-  "testedAt": "2026-08-22T05:24:11Z"
+  "durationSeconds": 13.14,
+  "testedAt": "2026-08-22T05:27:05Z"
 }```
 
 ## Listen Watch browser regression
@@ -194,8 +195,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.02,
-  "testedAt": "2026-08-22T05:24:13Z"
+  "durationSeconds": 2.13,
+  "testedAt": "2026-08-22T05:27:07Z"
 }```
 
 ## Command Intelligence browser regression
@@ -253,8 +254,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.15,
-  "testedAt": "2026-08-22T05:24:16Z"
+  "durationSeconds": 2.13,
+  "testedAt": "2026-08-22T05:27:10Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -304,8 +305,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.13,
-  "testedAt": "2026-08-22T05:24:19Z"
+  "durationSeconds": 3.06,
+  "testedAt": "2026-08-22T05:27:13Z"
 }```
 
 ## Ask Titans browser regression
@@ -382,8 +383,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.66,
-  "testedAt": "2026-08-22T05:24:21Z"
+  "durationSeconds": 1.98,
+  "testedAt": "2026-08-22T05:27:15Z"
 }```
 
 ## Change Intelligence browser regression
@@ -420,8 +421,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.84,
-  "testedAt": "2026-08-22T05:24:24Z"
+  "durationSeconds": 2.74,
+  "testedAt": "2026-08-22T05:27:18Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -453,23 +454,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787376296691,
+          "expiresAt": 1787376471482,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787376266691,
+          "updatedAt": 1787376441482,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787376296592,
+          "expiresAt": 1787376471325,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787376266592,
+          "updatedAt": 1787376441325,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-22T05:24:26.322Z",
+        "at": "2026-08-22T05:27:20.735Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -498,8 +499,8 @@
   },
   "mobile": {},
   "browserWarnings": [],
-  "error": "RuntimeError: Mobile sheet overlaps dock: sheet={'bottom': 1231.71875, 'height': 504.71875, 'links': 13, 'top': 727} mobile={'dock': {'display': 'grid', 'h': 72, 'w': 465, 'x': 10, 'y': 621}, 'dockTargets': [{'h': 58, 'label': 'Home', 'w': 89.796875}, {'h': 58, 'label': 'Roster', 'w': 89.796875}, {'h': 58, 'label': 'Game', 'w': 89.796875}, {'h': 58, 'label': 'Search', 'w': 89.796875}, {'h': 58, 'label': 'More', 'w': 89.8125}], 'menu': {'display': 'grid', 'h': 46, 'w': 46, 'x': 10, 'y': 8}, 'overflow': False, 'panelHeight': 765.171875, 'panelWidth': 461, 'reviewHeight': 48, 'targets': [{'h': 112, 'label': 'NEXT GAME', 'w': 427}, {'h': 122.9375, 'label': 'WHAT CHANGED?', 'w': 427}, {'h': 122.9375, 'label': 'ROSTER', 'w': 427}, {'h': 112, 'label': 'AVAILABILITY', 'w': 427}], 'viewport': 500}",
-  "durationSeconds": 3.85
+  "error": "RuntimeError: Mobile sheet overlaps dock: sheet={'bottom': 904.5098876953125, 'height': 504.7187805175781, 'links': 13, 'top': 399.7911071777344} mobile={'dock': {'display': 'grid', 'h': 72, 'w': 465, 'x': 10, 'y': 621}, 'dockTargets': [{'h': 58, 'label': 'Home', 'w': 89.796875}, {'h': 58, 'label': 'Roster', 'w': 89.796875}, {'h': 58, 'label': 'Game', 'w': 89.796875}, {'h': 58, 'label': 'Search', 'w': 89.796875}, {'h': 58, 'label': 'More', 'w': 89.8125}], 'menu': {'display': 'grid', 'h': 46, 'w': 46, 'x': 10, 'y': 8}, 'overflow': False, 'panelHeight': 765.171875, 'panelWidth': 461, 'reviewHeight': 48, 'targets': [{'h': 112, 'label': 'NEXT GAME', 'w': 427}, {'h': 122.9375, 'label': 'WHAT CHANGED?', 'w': 427}, {'h': 122.9375, 'label': 'ROSTER', 'w': 427}, {'h': 112, 'label': 'AVAILABILITY', 'w': 427}], 'viewport': 500}",
+  "durationSeconds": 5.1
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
