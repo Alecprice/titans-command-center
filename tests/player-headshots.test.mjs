@@ -39,6 +39,15 @@ test('headshot decorator covers roster, Stats Lab and rich player views without 
   assert.doesNotMatch(js,/observe\(hsApp,\{childList:true,subtree:true\}\)/);
 });
 
+test('headshot browser regression follows a real roster player interaction',()=>{
+  const smoke=read('scripts/headshot-browser-smoke.py');
+  assert.match(smoke,/from selenium\.webdriver\.common\.by import By/);
+  assert.match(smoke,/find_element\(By\.CSS_SELECTOR,'\.player-card:has\(\.jersey\.has-headshot img\)'\)/);
+  assert.match(smoke,/player_link\.click\(\)/);
+  assert.match(smoke,/location\.hash\.startsWith\('#player'\)/);
+  assert.doesNotMatch(smoke,/location\.hash=arguments\[0\]/);
+});
+
 test('headshot release is CSP-scoped and PWA packaged',()=>{
   const html=read('index.html'),headers=read('_headers'),vercel=read('vercel.json'),sw=read('sw.js');
   assert.match(html,/href="\/headshot-polish\.css\?v=31"/);

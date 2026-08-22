@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
@@ -50,9 +51,10 @@ try:
     if overflow(driver): raise RuntimeError('Roster headshots introduced horizontal overflow')
 
     stage='rich-player'
-    href=driver.execute_script("return document.querySelector('.player-card:has(.jersey.has-headshot img)')?.getAttribute('href')||''")
-    if not href: raise RuntimeError('No photo-backed roster player link found')
-    driver.execute_script("location.hash=arguments[0].replace(/^#/,'')",href)
+    player_link=driver.find_element(By.CSS_SELECTOR,'.player-card:has(.jersey.has-headshot img)')
+    driver.execute_script("arguments[0].scrollIntoView({block:'center'})",player_link)
+    player_link.click()
+    wait_for(driver,"location.hash.startsWith('#player')",timeout=6)
     wait_for(driver,"document.querySelector('.player-profile-rich')")
     rich_photo=wait_for_loaded_images(driver,'.player-rich-number.has-headshot img')
     rich_name=driver.execute_script("return document.querySelector('.player-rich-copy h1')?.textContent?.trim()||''")
