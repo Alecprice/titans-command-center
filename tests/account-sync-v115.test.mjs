@@ -79,8 +79,13 @@ test('mobile Account entry is promoted above the long More navigation and stays 
   assert.match(css,/#sidebar>\.account-sheet-card button\{min-height:44px\}/);
 });
 
-test('account production smoke requires a visible real mobile-sheet click without scripted scrolling',()=>{
+test('account production smoke waits for shell readiness then requires real mobile interactions',()=>{
   const smoke=read('scripts/account-browser-smoke.py');
+  assert.match(smoke,/def wait_mobile_shell_ready\(driver,timeout=8\):/);
+  assert.match(smoke,/window\.TitansRuntime/);
+  assert.match(smoke,/sidebar\.getAttribute\('aria-hidden'\)!=='true'/);
+  assert.match(smoke,/mr\.width<44\|\|mr\.height<44/);
+  assert.match(smoke,/d\.find_element\(By\.ID,'mobile-more-button'\)\.click\(\)/);
   assert.match(smoke,/def wait_account_entry\(driver,timeout=5\):/);
   assert.match(smoke,/#sidebar > \.account-sheet-card \[data-account-open\]/);
   assert.match(smoke,/r\.bottom>visibleBottom\+1/);
@@ -89,6 +94,7 @@ test('account production smoke requires a visible real mobile-sheet click withou
   assert.match(smoke,/ElementNotInteractableException/);
   assert.match(smoke,/StaleElementReferenceException/);
   assert.doesNotMatch(smoke,/scrollIntoView/);
+  assert.doesNotMatch(smoke,/execute_script\([^\n]*mobile-more-button[^\n]*\.click\(\)/);
   assert.doesNotMatch(smoke,/execute_script\([^\n]*data-account-open[^\n]*\.click\(\)/);
 });
 
