@@ -1,3 +1,5 @@
+import './account-import-v116.js?v=1';
+
 (() => {
   'use strict';
   if(window.__TitansAccountV112)return;

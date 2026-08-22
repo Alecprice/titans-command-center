@@ -2,6 +2,7 @@
   'use strict';
   const V10_PREF_KEY='titans:v10Prefs';
   const KEYS=['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY];
+  const MAX_IMPORT_BYTES=32000;
   let syncing=false,timer=0,lastUser='';
   const parse=key=>{try{const raw=localStorage.getItem(key);return raw==null?undefined:JSON.parse(raw)}catch{return undefined}};
   const snapshot=()=>Object.fromEntries(KEYS.map(key=>[key,parse(key)]).filter(([,value])=>value!==undefined));
@@ -55,6 +56,35 @@
     status(window.TitansAccount?.user?'synced':'guest','Settings export created from this device.');
     return payload;
   }
+  function prepareImport(payload){
+    if(!payload||typeof payload!=='object'||Array.isArray(payload))throw new Error('This is not a Titans Command Center settings backup.');
+    if(payload.format!=='titans-command-center-settings'||payload.version!==1)throw new Error('This backup format or version is not supported.');
+    const preferences=payload.preferences;
+    if(!preferences||typeof preferences!=='object'||Array.isArray(preferences))throw new Error('This backup does not contain valid settings.');
+    const keys=Object.keys(preferences);
+    const unknown=keys.filter(key=>!KEYS.includes(key));
+    if(unknown.length)throw new Error('This backup contains settings this version does not recognize.');
+    const encoded=JSON.stringify(preferences);
+    if(encoded.length>MAX_IMPORT_BYTES)throw new Error('This settings backup is too large to import safely.');
+    for(const [key,value] of Object.entries(preferences)){
+      if(value===undefined||typeof value==='function'||typeof value==='symbol')throw new Error(`Invalid setting value: ${key}`);
+      JSON.stringify(value);
+    }
+    return {preferences:Object.fromEntries(keys.map(key=>[key,preferences[key]])),keys,exportedAt:String(payload.exportedAt||''),scope:String(payload.scope||'unknown'),accountEmail:String(payload.account?.email||'')};
+  }
+  async function importSettings(payload){
+    const prepared=prepareImport(payload);
+    apply(prepared.preferences);
+    window.dispatchEvent(new CustomEvent('titans:preferences-imported',{detail:{keys:[...prepared.keys],scope:prepared.scope}}));
+    if(!window.TitansAccount?.user){status('guest',`Imported ${prepared.keys.length} setting group${prepared.keys.length===1?'':'s'} on this device.`);setTimeout(()=>location.reload(),160);return {ok:true,synced:false,...prepared};}
+    status('syncing','Imported on this device. Syncing your Titans settings…');
+    try{await request('PUT',snapshot());status('synced','Imported settings are synced to your account.');setTimeout(()=>location.reload(),160);return {ok:true,synced:true,...prepared};}
+    catch(err){
+      const localOnly=err?.code==='PREFERENCE_STORAGE_NOT_READY'&&err?.localOnly;
+      status(localOnly?'local':'error',localOnly?'Imported on this device. Account sync is not enabled yet.':'Imported on this device, but cloud sync did not complete yet.');
+      console.warn('[account-import]',err instanceof Error?err.message:'sync unavailable');setTimeout(()=>location.reload(),220);return {ok:true,synced:false,...prepared};
+    }
+  }
   async function resetSettings(){
     if(syncing)return false;
     const signedIn=Boolean(window.TitansAccount?.user);
@@ -76,5 +106,5 @@
   addEventListener('storage',event=>{if(KEYS.includes(event.key))schedule();});
   document.addEventListener('click',event=>{const el=event.target instanceof Element?event.target:null;if(!el)return;if(el.closest('[data-v15-profile-save],[data-v15-alert-save],[data-v16-favorite],[data-custom-remove],[data-save-settings]'))setTimeout(schedule,0);});
   document.addEventListener('submit',event=>{const form=event.target;if(form instanceof Element&&form.matches('[data-custom-form]'))setTimeout(schedule,0);});
-  window.TitansAccountSync={sync:push,exportSettings,resetSettings,exportPayload,keys:[...KEYS]};
+  window.TitansAccountSync={sync:push,exportSettings,resetSettings,exportPayload,prepareImport,importSettings,keys:[...KEYS]};
 })();
