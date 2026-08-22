@@ -39,6 +39,13 @@ test('signed-in preferences sync only approved local preference keys and real sa
   assert.match(api,/sanitizePreferences/);assert.match(api,/Authentication required/);assert.match(api,/\$\{encoded\}::jsonb/);assert.match(worker,/accountPreferencesRoute/);
 });
 
+test('account sync reports progress success and local-safe failure states',()=>{
+  const sync=read('account-sync-v112.js'),ui=read('account-v112.js'),css=read('account-v112.css');
+  assert.match(sync,/titans:sync-status/);assert.match(sync,/Syncing your Titans settings/);assert.match(sync,/Your Titans settings are synced/);assert.match(sync,/Your settings are still saved on this device/);
+  assert.match(ui,/account-sync-status/);assert.match(ui,/titans:sync-status/);assert.match(ui,/syncStatus/);
+  assert.match(css,/\.account-sync-status\.syncing/);assert.match(css,/\.account-sync-status\.synced/);assert.match(css,/\.account-sync-status\.error/);
+});
+
 test('saved media link copy is accurate for guests and signed-in users',()=>{
   const media=read('media-custom-links-v14.js');assert.match(media,/Guest links stay on this device/);assert.match(media,/signed-in users can sync saved links/);assert.doesNotMatch(media,/stored only on this device/);
 });
