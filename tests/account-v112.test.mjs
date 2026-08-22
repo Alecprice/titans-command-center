@@ -21,7 +21,7 @@ test('guest access is the default and auth does not gate public routes',()=>{
 
 test('account flow uses same-origin managed auth proxy',()=>{
   const js=read('account-v112.js'),api=read('src/account-api.mjs'),worker=read('cloudflare/worker.mjs');
-  assert.match(js,/const AUTH='\/api\/account\/auth'/);assert.match(js,/get-session/);assert.match(js,/sign-up\/email/);assert.match(js,/sign-in\/email/);assert.match(js,/sign-out/);assert.match(js,/credentials:'same-origin'/);assert.match(js,/type=\\"password\\"/);assert.doesNotMatch(js,/localStorage.*password/);
+  assert.match(js,/const AUTH='\/api\/account\/auth'/);assert.match(js,/get-session/);assert.match(js,/sign-up\/email/);assert.match(js,/sign-in\/email/);assert.match(js,/sign-out/);assert.match(js,/credentials:'same-origin'/);assert.ok(js.includes('type="password"'));assert.doesNotMatch(js,/localStorage.*password/);
   assert.match(api,/accountAuthProxy/);assert.match(api,/\['get-session','sign-in\/email','sign-up\/email','sign-out'\]/);assert.match(worker,/route\.startsWith\('account\/auth\/'\)/);
 });
 
