@@ -4,7 +4,7 @@
   const app=document.querySelector('#app');
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const arr=value=>Array.isArray(value)?value:[];
-  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num=value=>Number.isFinite(Number(value))?Number(value):null;
   const state={data:null,fan:null,score:null,loading:null,viewObserver:null,serial:0};
   const METRICS={
