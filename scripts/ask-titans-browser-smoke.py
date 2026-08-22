@@ -60,6 +60,16 @@ try:
             raise RuntimeError(f'Incomplete structured answer for {question}: {payload}')
         answers.append({'question':question,**payload})
 
+    stage='kickoff-timezone'
+    team_time_verified=[]
+    for row in [x for x in answers if x['question'] in ('Who is next?','How do I watch?')]:
+        answer=row['answer']
+        if 'not available' in answer.lower() or 'not loaded' in answer.lower():
+            continue
+        if 'Nashville time' not in answer or ' UTC' in answer or not ('CDT' in answer or 'CST' in answer):
+            raise RuntimeError(f'Ask Titans kickoff is not rendered in Nashville time: {row}')
+        team_time_verified.append(row['question'])
+
     stage='unsupported'
     driver.execute_script("const i=document.querySelector('#v17-ask-input');i.value='Tell me the secret play call for Sunday';document.querySelector('[data-v17-ask]').click()")
     wait_for(driver,"document.querySelector('.v17-ask-answer h4')?.textContent?.includes('could not map')")
@@ -86,7 +96,7 @@ try:
     severe=[x for x in warnings if x.get('level')=='SEVERE']
     if severe: raise RuntimeError(f'Ask Titans console has severe errors: {severe[:4]}')
 
-    result={'ok':True,'base':BASE,'answers':answers,'unsupportedRefused':True,'mobileTargets':mobile,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    result={'ok':True,'base':BASE,'answers':answers,'teamTimeVerified':team_time_verified,'unsupportedRefused':True,'mobileTargets':mobile,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     write(result);print(json.dumps(result,indent=2))
 except Exception as exc:
     result={'ok':False,'base':BASE,'stage':stage,'error':f'{type(exc).__name__}: {exc}','durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
