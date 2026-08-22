@@ -6,6 +6,7 @@
   const parse=key=>{try{const raw=localStorage.getItem(key);return raw==null?undefined:JSON.parse(raw)}catch{return undefined}};
   const snapshot=()=>Object.fromEntries(KEYS.map(key=>[key,parse(key)]).filter(([,value])=>value!==undefined));
   const apply=values=>{if(!values||typeof values!=='object')return;for(const key of KEYS){if(!(key in values))continue;try{localStorage.setItem(key,JSON.stringify(values[key]))}catch{}}};
+  const clearLocal=()=>{for(const key of KEYS){try{localStorage.removeItem(key)}catch{}}};
   const same=(a,b)=>{try{return JSON.stringify(a)===JSON.stringify(b)}catch{return false}};
   const status=(state,message)=>window.dispatchEvent(new CustomEvent('titans:sync-status',{detail:{state,message,at:new Date().toISOString()}}));
   const failureStatus=error=>error?.code==='PREFERENCE_STORAGE_NOT_READY'?{state:'local',message:'Account sync isn’t enabled yet. Your settings are saved on this device.'}:{state:'error',message:'Couldn’t sync right now. Your settings are still saved on this device.'};
@@ -41,10 +42,39 @@
     catch(err){reportFailure(err);return false;}
     finally{syncing=false;}
   }
+  function exportPayload(){
+    const user=window.TitansAccount?.user||null;
+    return {format:'titans-command-center-settings',version:1,exportedAt:new Date().toISOString(),scope:user?'signed-in-device':'guest-device',account:user?{name:user.name||null,email:user.email||null}:null,preferences:snapshot()};
+  }
+  function exportSettings(){
+    const payload=exportPayload();
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download=`titans-command-center-settings-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    status(window.TitansAccount?.user?'synced':'guest','Settings export created from this device.');
+    return payload;
+  }
+  async function resetSettings(){
+    if(syncing)return false;
+    const signedIn=Boolean(window.TitansAccount?.user);
+    if(!signedIn){clearLocal();status('guest','Guest settings reset. This device will use defaults.');window.dispatchEvent(new CustomEvent('titans:preferences-reset',{detail:{scope:'guest'}}));setTimeout(()=>location.reload(),120);return true;}
+    syncing=true;status('syncing','Resetting your synced Titans settings…');
+    try{
+      await request('PUT',{});
+      clearLocal();lastUser=String(window.TitansAccount?.user?.id||'');
+      status('synced','Synced settings reset. This device will use defaults.');
+      window.dispatchEvent(new CustomEvent('titans:preferences-reset',{detail:{scope:'account'}}));
+      setTimeout(()=>location.reload(),120);return true;
+    }catch(err){
+      if(err?.code==='PREFERENCE_STORAGE_NOT_READY'&&err?.localOnly){clearLocal();status('local','Device settings reset. Account sync is not enabled yet.');window.dispatchEvent(new CustomEvent('titans:preferences-reset',{detail:{scope:'local'}}));setTimeout(()=>location.reload(),120);return true;}
+      console.warn('[account-reset]',err instanceof Error?err.message:'reset unavailable');status('error','Couldn’t reset synced settings. Nothing was changed.');return false;
+    }finally{syncing=false;}
+  }
   function schedule(){clearTimeout(timer);timer=setTimeout(push,500);}
   addEventListener('titans:account',event=>{const user=event.detail?.user;if(user)initialSync(user);else{lastUser='';status('guest','Guest settings stay on this device.')}});
   addEventListener('storage',event=>{if(KEYS.includes(event.key))schedule();});
   document.addEventListener('click',event=>{const el=event.target instanceof Element?event.target:null;if(!el)return;if(el.closest('[data-v15-profile-save],[data-v15-alert-save],[data-v16-favorite],[data-custom-remove],[data-save-settings]'))setTimeout(schedule,0);});
   document.addEventListener('submit',event=>{const form=event.target;if(form instanceof Element&&form.matches('[data-custom-form]'))setTimeout(schedule,0);});
-  window.TitansAccountSync={sync:push,keys:[...KEYS]};
+  window.TitansAccountSync={sync:push,exportSettings,resetSettings,exportPayload,keys:[...KEYS]};
 })();
