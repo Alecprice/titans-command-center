@@ -56,3 +56,12 @@ test('post-deploy audit targets the exact deployed SHA and runs current experien
   for(const command of ['python scripts/runtime-365-diagnostic.py','python scripts/smart-search-browser-smoke.py','python scripts/mobile-navigation-browser-smoke.py','python scripts/account-browser-smoke.py','python scripts/market-browser-smoke.py'])assert.ok(audit.includes(command),`${command} missing from audit workflow`);
   assert.ok(audit.includes('actions/upload-artifact@v4'));
 });
+
+test('post-deploy audit publishes an inspectable commit status and still fails on regressions',()=>{
+  assert.match(audit,/statuses: write/);
+  assert.match(audit,/createCommitStatus/);
+  assert.match(audit,/context: 'Titans Current Experience'/);
+  assert.match(audit,/target_url:/);
+  assert.match(audit,/continue-on-error: true/);
+  assert.match(audit,/Fail audit when any current-experience check failed/);
+});
