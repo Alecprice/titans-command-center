@@ -32,22 +32,39 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          python - <<'PY'
-          import json,time,urllib.request,os,sys
-          base=os.environ['WORKER_URL'].rstrip('/')
-          expected=os.environ['EXPECTED_SHA']
-          last=None
-          for attempt in range(1,16):
-              try:
-                  with urllib.request.urlopen(f'{base}/build-meta.json?audit={attempt}',timeout=10) as response:
-                      data=json.load(response);last=data.get('commit')
-                      if last==expected:
-                          print(json.dumps({'ok':True,'commit':last,'attempt':attempt}));sys.exit(0)
-              except Exception as exc:
-                  last=f'{type(exc).__name__}: {exc}'
-              time.sleep(2)
-          raise SystemExit(f'Expected deployed SHA {expected}; last observed {last}')
-          PY
+          node - <<'NODE'
+          const base = process.env.WORKER_URL.replace(/\/$/, '');
+          const expected = process.env.EXPECTED_SHA;
+          let last = null;
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          for (let attempt = 1; attempt <= 15; attempt++) {
+            try {
+              const response = await fetch(`${base}/build-meta.json?audit=${attempt}`, {
+                cache: 'no-store',
+                headers: {
+                  accept: 'application/json',
+                  'user-agent': 'Titans-Current-Experience-Audit/1.0',
+                },
+              });
+              const text = await response.text();
+              if (!response.ok) {
+                last = `HTTP ${response.status}: ${text.slice(0, 160)}`;
+              } else {
+                const data = JSON.parse(text);
+                last = data?.commit || null;
+                if (last === expected) {
+                  console.log(JSON.stringify({ok: true, commit: last, attempt}));
+                  process.exit(0);
+                }
+              }
+            } catch (error) {
+              last = `${error?.name || 'Error'}: ${error?.message || String(error)}`;
+            }
+            await sleep(2000);
+          }
+          console.error(`Expected deployed SHA ${expected}; last observed ${last}`);
+          process.exit(1);
+          NODE
 
       - name: Install Selenium
         if: steps.deployed_sha.outcome == 'success'
