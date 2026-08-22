@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Change Intelligence browser regression failure**
-- Source commit: `7e1877a8c13ac1b2369aadf0687eb894b6e3a51f`
+- Source commit: `7cbe5c52f0164c44b34cd5c6fbc87d44e47fb19f`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -16,7 +16,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T02:01:01Z
+- Recorded: 2026-08-22T02:09:22Z
 
 ## Production regression
 
@@ -36,7 +36,7 @@
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
   "serviceWorkerCache": "titans-cc-brand-2026-v47",
-  "precachePaths": 83,
+  "precachePaths": 84,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -68,19 +68,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "7e1877a8c13ac1b2369aadf0687eb894b6e3a51f",
-    "builtAt": "2026-08-22T01:59:29.390Z"
+    "commit": "7cbe5c52f0164c44b34cd5c6fbc87d44e47fb19f",
+    "builtAt": "2026-08-22T02:08:03.671Z"
   },
-  "deploymentPropagationAttempts": 8,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 64,
-    "health": 852,
-    "data": 340,
-    "stats": 197,
-    "market": 5903,
-    "analytics": 704
+    "root": 55,
+    "health": 926,
+    "data": 625,
+    "stats": 219,
+    "market": 590,
+    "analytics": 1224
   },
-  "testedAt": "2026-08-22T02:00:13.227Z",
+  "testedAt": "2026-08-22T02:08:29.779Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -110,8 +110,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 126,
-  "testedAt": "2026-08-22T02:00:14.189Z"
+  "durationMs": 137,
+  "testedAt": "2026-08-22T02:08:31.273Z"
 }```
 
 ## Browser navigation regression
@@ -160,11 +160,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 85,
+  "maxLongTaskMs": 234,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 14.65,
-  "testedAt": "2026-08-22T02:00:34Z"
+  "durationSeconds": 18.21,
+  "testedAt": "2026-08-22T02:08:54Z"
 }```
 
 ## Listen Watch browser regression
@@ -197,8 +197,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.95,
-  "testedAt": "2026-08-22T02:00:36Z"
+  "durationSeconds": 2.09,
+  "testedAt": "2026-08-22T02:08:57Z"
 }```
 
 ## Command Intelligence browser regression
@@ -256,8 +256,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.08,
-  "testedAt": "2026-08-22T02:00:39Z"
+  "durationSeconds": 2.19,
+  "testedAt": "2026-08-22T02:08:59Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -307,8 +307,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.68,
-  "testedAt": "2026-08-22T02:00:42Z"
+  "durationSeconds": 3.46,
+  "testedAt": "2026-08-22T02:09:03Z"
 }```
 
 ## Ask Titans browser regression
@@ -385,8 +385,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.56,
-  "testedAt": "2026-08-22T02:00:43Z"
+  "durationSeconds": 1.61,
+  "testedAt": "2026-08-22T02:09:05Z"
 }```
 
 ## Change Intelligence browser regression
@@ -398,7 +398,7 @@
   "stage": "load",
   "error": "TimeoutException: Message: \n",
   "durationSeconds": 16.91,
-  "testedAt": "2026-08-22T02:01:01Z",
+  "testedAt": "2026-08-22T02:09:22Z",
   "hash": "#command",
   "pageText": "TITANS COMMAND INTELLIGENCE\nWhat changed. Why it matters. What comes next.\n\nA Titans-specific intelligence layer built around context instead of another wall of headlines.\n\nListen / Watch\nGame Day\nFan Hub\nChanges\nPress Room\nScheme Lab\nGlobal Fans\nStadium\nFan GM\nTime Machine\nSIGNATURE FEATURE\nTitans Change Engine\n\nWhat changed, when it changed, and why a fan should care.\n\n0\nCHANGES\nBaseline created.\nCome back after data changes and this page will show before/after differences instead of making you hunt across sections.\nLatest roster movement\nTransaction\nAug 19, 2026, 12:00 AM\nTransaction\nAug 17, 2026, 12:00 AM\nTransaction\nAug 16, 2026, 12:00 AM\nTransaction\nAug 10, 2026, 12:00 AM\nTransaction\nAug 6, 2026, 12:00 AM\nTransaction\nAug 2, 2026, 12:00 AM\nOpen transactions \u2192\nSource reliability\n\nEvidence tiers show what a source is. We do not invent an accuracy percentage without a verified history.\n\nEXTERNAL\nTitans Command Center\nNeeds cross-check \u00b7 Preseason sample size warning\nVERIFIED\nTennessee Titans\nOfficial team / league \u00b7 Titans continue official preseason roster moves\nVERIFIED\nTennessee Titans\nOfficial team / league \u00b7 Titans win preseason opener 19-13 over San Francisco\nVERIFIED\nTennessee Titans\nOfficial team / league \u00b7 First unofficial 2026 depth chart is out\nVERIFIED\nTennessee Titans\nOfficial team / league \u00b7 Robert Saleh talks camp ramp-up and Cam Ward\nOpen source registry \u2192\nPLAYER JOURNEY + CONNECTIONS\nAamil Wagner\nPlayer\nAamil Wagner\nAlontae Taylor\nAmani Hooker\nAndre James\nAnthony Hill Jr.\nAustin Deculus\nAustin Schlottmann\nBishop Fitzgerald\nBrandon Crenshaw-Dickson\nBryce Oliver\nCalvin Ridley\nCam Ward\nCarnell Tate\nCedric Gray\nChimere Dike\nCody Barton\nCor'Dale Flott\nCordell Volson\nCorey Mayfield Jr.\nCourtney Jackson\nD'Ernest Johnson\nDan Moore Jr.\nDaniel Bellinger\nDavid Martin-Robinson\nDerrick Canteen\nDominique Hampton\nDorian Mausi\nDrew Moss\nEarnest Brown IV\nElic Ayomanor\nErick Hallett II\nFernando Carmona Jr.\nGarrett Dellinger\nGunnar Helm\nHank Beatty\nHendon Hooker\nJackie Marshall\nJackson Slater\nJacob Martin\nJalen McMurray\nJalyn Holmes\nJames Williams Sr.\nJaren Kanak\nJaylen Harrell\nJC Latham\nJeffery Simmons\nJermaine Johnson II\nJerrick Reed II\nJoel Wilson\nJoey Slye\nJ",
   "browserWarnings": []
