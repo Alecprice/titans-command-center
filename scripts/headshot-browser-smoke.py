@@ -15,6 +15,12 @@ def wait_for(driver,script,timeout=12):
 def loaded_images(driver,selector):
     return driver.execute_script("""return [...document.querySelectorAll(arguments[0])].filter(img=>img.complete&&img.naturalWidth>20&&img.naturalHeight>20).length""",selector)
 
+def wait_for_loaded_images(driver,selector,minimum=1,timeout=12):
+    def ready(d):
+        count=loaded_images(d,selector)
+        return count if count>=minimum else False
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(ready)
+
 def overflow(driver):
     return driver.execute_script("return document.documentElement.scrollWidth > document.documentElement.clientWidth + 3")
 
@@ -37,10 +43,9 @@ try:
     wait_for(driver,"document.querySelectorAll('.player-card').length >= 90")
     wait_for(driver,"document.querySelectorAll('.player-card .jersey.has-headshot img').length >= 60")
     driver.execute_script("document.querySelector('.player-card .jersey.has-headshot img')?.scrollIntoView({block:'center'})")
-    wait_for(driver,"document.querySelector('.player-card .jersey.has-headshot img')?.complete && document.querySelector('.player-card .jersey.has-headshot img')?.naturalWidth > 20")
+    roster_photos=wait_for_loaded_images(driver,'.player-card .jersey.has-headshot img')
     roster_total=driver.execute_script("return document.querySelectorAll('.player-card').length")
     roster_decorated=driver.execute_script("return document.querySelectorAll('.player-card .jersey.has-headshot img').length")
-    roster_photos=loaded_images(driver,'.player-card .jersey.has-headshot img')
     if roster_photos < 1: raise RuntimeError('No visible roster headshot loaded successfully')
     if overflow(driver): raise RuntimeError('Roster headshots introduced horizontal overflow')
 
@@ -49,9 +54,8 @@ try:
     if not href: raise RuntimeError('No photo-backed roster player link found')
     driver.execute_script("location.hash=arguments[0].replace(/^#/,'')",href)
     wait_for(driver,"document.querySelector('.player-profile-rich')")
-    wait_for(driver,"document.querySelector('.player-rich-number.has-headshot img')?.complete && document.querySelector('.player-rich-number.has-headshot img')?.naturalWidth > 20")
+    rich_photo=wait_for_loaded_images(driver,'.player-rich-number.has-headshot img')
     rich_name=driver.execute_script("return document.querySelector('.player-rich-copy h1')?.textContent?.trim()||''")
-    rich_photo=loaded_images(driver,'.player-rich-number.has-headshot img')
 
     stage='stats-load'
     driver.get(f'{BASE}/#stats')
@@ -59,10 +63,9 @@ try:
     wait_for(driver,"document.querySelectorAll('.ps-player').length >= 90",timeout=15)
     wait_for(driver,"document.querySelectorAll('.ps-player .ps-number.has-headshot img').length >= 50",timeout=15)
     driver.execute_script("document.querySelector('.ps-player .ps-number.has-headshot img')?.scrollIntoView({block:'center'})")
-    wait_for(driver,"document.querySelector('.ps-player .ps-number.has-headshot img')?.complete && document.querySelector('.ps-player .ps-number.has-headshot img')?.naturalWidth > 20",timeout=15)
+    stats_photos=wait_for_loaded_images(driver,'.ps-player .ps-number.has-headshot img',timeout=15)
     stats_total=driver.execute_script("return document.querySelectorAll('.ps-player').length")
     stats_decorated=driver.execute_script("return document.querySelectorAll('.ps-player .ps-number.has-headshot img').length")
-    stats_photos=loaded_images(driver,'.ps-player .ps-number.has-headshot img')
     if stats_photos < 1: raise RuntimeError('No visible Stats Lab headshot loaded successfully')
     if overflow(driver): raise RuntimeError('Stats headshots introduced desktop horizontal overflow')
 
@@ -70,9 +73,8 @@ try:
     driver.set_window_size(390,844)
     time.sleep(.3)
     driver.execute_script("document.querySelector('.ps-player .ps-number.has-headshot img')?.scrollIntoView({block:'center'})")
-    wait_for(driver,"document.querySelector('.ps-player .ps-number.has-headshot img')?.complete && document.querySelector('.ps-player .ps-number.has-headshot img')?.naturalWidth > 20")
+    mobile_photos=wait_for_loaded_images(driver,'.ps-player .ps-number.has-headshot img')
     if overflow(driver): raise RuntimeError('Stats headshots introduced mobile horizontal overflow')
-    mobile_photos=loaded_images(driver,'.ps-player .ps-number.has-headshot img')
 
     stage='console'
     warnings=[]
@@ -81,7 +83,7 @@ try:
     severe=[entry for entry in warnings if entry.get('level')=='SEVERE']
     if severe: raise RuntimeError(f'Headshot browser regression has severe console errors: {severe[:3]}')
 
-    result={'ok':True,'base':BASE,'rosterCards':roster_total,'rosterDecoratedHeadshots':roster_decorated,'rosterLoadedHeadshots':roster_photos,'statsPlayerRows':stats_total,'statsDecoratedHeadshots':stats_decorated,'statsLoadedHeadshots':stats_photos,'mobileLoadedHeadshots':mobile_photos,'richPlayer':rich_name,'richPlayerHeadshotLoaded':rich_photo==1,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    result={'ok':True,'base':BASE,'rosterCards':roster_total,'rosterDecoratedHeadshots':roster_decorated,'rosterLoadedHeadshots':roster_photos,'statsPlayerRows':stats_total,'statsDecoratedHeadshots':stats_decorated,'statsLoadedHeadshots':stats_photos,'mobileLoadedHeadshots':mobile_photos,'richPlayer':rich_name,'richPlayerHeadshotLoaded':rich_photo>=1,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     REPORT.write_text(json.dumps(result,indent=2),encoding='utf-8')
     print(json.dumps(result,indent=2))
 except Exception as exc:
