@@ -21,6 +21,14 @@ def prepare_returning_user(driver):
     """)
     WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding'))
 
+def stabilize_mobile_sheet(driver):
+    driver.execute_script("""
+      if(!document.querySelector('style[data-mobile-nav-smoke-stable-sheet]')){
+        const style=document.createElement('style');style.dataset.mobileNavSmokeStableSheet='';
+        style.textContent='@media(max-width:760px){#sidebar{transition:none!important}}';document.head.appendChild(style);
+      }
+    """)
+
 def wait(driver,script,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(script))
 
@@ -41,7 +49,7 @@ try:
     for width,height in [(390,844),(360,800)]:
         d=driver_for(width,height)
         try:
-            d.get(f'{BASE}/#home');prepare_returning_user(d)
+            d.get(f'{BASE}/#home');prepare_returning_user(d);stabilize_mobile_sheet(d)
             state=wait(d,"""const menu=document.querySelector('#menu-button'),dock=document.querySelector('.mobile-nav'),more=document.querySelector('#mobile-more-button'),game=document.querySelector('.mobile-game-action'),search=document.querySelector('#mobile-search-button');if(!menu||!dock||!more||!game||!search)return null;const mr=menu.getBoundingClientRect(),dr=dock.getBoundingClientRect(),gr=game.querySelector('span').getBoundingClientRect();return {vw:innerWidth,vh:innerHeight,overflow:document.documentElement.scrollWidth>innerWidth+1,menu:{x:mr.x,y:mr.y,w:mr.width,h:mr.height,display:getComputedStyle(menu).display},dock:{x:dr.x,y:dr.y,w:dr.width,h:dr.height,display:getComputedStyle(dock).display},gameIcon:{y:gr.y,h:gr.height},targets:[...dock.querySelectorAll('a,button')].map(x=>({h:x.getBoundingClientRect().height,w:x.getBoundingClientRect().width,label:x.textContent.trim()})),active:[...dock.querySelectorAll('.active')].map(x=>x.textContent.trim())};""")
             if state['overflow']: raise RuntimeError(f'horizontal overflow at {width}: {state}')
             if state['menu']['w']<44 or state['menu']['h']<44 or state['menu']['x']<0 or state['menu']['y']<0: raise RuntimeError(f'menu unreachable at {width}: {state}')
