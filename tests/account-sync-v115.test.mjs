@@ -33,6 +33,26 @@ test('remote v1.0 preferences refresh the live fan shell once only when changed'
   assert.match(sync,/const merged=\{\.\.\.local,\.\.\.remotePreferences\}/);
 });
 
+test('account preference storage capability is explicit and local-safe when the migration is absent',()=>{
+  const api=read('src/account-api.mjs');
+  const sync=read('account-sync-v112.js');
+  const ui=read('account-v112.js');
+  const css=read('account-v112.css');
+  assert.match(api,/function preferenceStorageNotReady\(error\)/);
+  assert.match(api,/code==='42P01'/);
+  assert.match(api,/PREFERENCE_STORAGE_NOT_READY/);
+  assert.match(api,/localOnly:true/);
+  assert.match(api,/PREFERENCE_SYNC_UNAVAILABLE/);
+  assert.match(api,/DATABASE_UNAVAILABLE/);
+  assert.match(sync,/error\.code=String\(data\?\.code\|\|''\)/);
+  assert.match(sync,/error\.localOnly=Boolean\(data\?\.localOnly\)/);
+  assert.match(sync,/PREFERENCE_STORAGE_NOT_READY/);
+  assert.match(sync,/state:'local'/);
+  assert.match(sync,/Account sync isn’t enabled yet\. Your settings are saved on this device\./);
+  assert.match(ui,/Selected settings can sync when account storage is available\./);
+  assert.match(css,/\.account-sync-status\.local i\{background:#86d2ff\}/);
+});
+
 test('account module has one canonical entry path and sync is registered first',()=>{
   const html=read('index.html');
   const nav=read('mobile-navigation-v112.js');
@@ -42,8 +62,9 @@ test('account module has one canonical entry path and sync is registered first',
   assert.match(runtime,/import '\.\/mobile-navigation-v112\.js\?v=2';/);
   assert.match(account,/if\(window\.__TitansAccountV112\)return;/);
   assert.match(account,/window\.__TitansAccountV112=true;/);
-  const syncIndex=html.indexOf('/account-sync-v112.js?v=1');
-  const accountIndex=html.indexOf('/account-v112.js?v=2');
+  assert.match(account,/account-v112\.css\?v=3/);
+  const syncIndex=html.indexOf('/account-sync-v112.js?v=2');
+  const accountIndex=html.indexOf('/account-v112.js?v=3');
   assert.ok(syncIndex>=0&&accountIndex>syncIndex,'account sync must register before the account module announces session state');
 });
 
