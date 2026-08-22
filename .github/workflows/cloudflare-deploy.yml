@@ -125,9 +125,37 @@ jobs:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: python scripts/runtime-365-browser-smoke.py
 
+      - name: Run Smart Search browser regression
+        id: smart_search_browser
+        if: steps.runtime_365_browser.outcome == 'success'
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: python scripts/smart-search-browser-smoke.py
+
+      - name: Run mobile navigation browser regression
+        id: mobile_nav_browser
+        if: steps.smart_search_browser.outcome == 'success'
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: python scripts/mobile-navigation-browser-smoke.py
+
+      - name: Run guest and account browser regression
+        id: account_browser
+        if: steps.mobile_nav_browser.outcome == 'success'
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: python scripts/account-browser-smoke.py
+
+      - name: Run live market browser regression
+        id: market_browser
+        if: steps.account_browser.outcome == 'success'
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: python scripts/market-browser-smoke.py
+
       - name: Run advanced analytics browser regression
         id: analytics_browser
-        if: steps.runtime_365_browser.outcome == 'success'
+        if: steps.market_browser.outcome == 'success'
         env:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: python scripts/analytics-browser-smoke.py
@@ -155,6 +183,10 @@ jobs:
           ASK_BROWSER_OUTCOME: ${{ steps.ask_browser.outcome }}
           CHANGE_BROWSER_OUTCOME: ${{ steps.change_browser.outcome }}
           RUNTIME_365_BROWSER_OUTCOME: ${{ steps.runtime_365_browser.outcome }}
+          SMART_SEARCH_BROWSER_OUTCOME: ${{ steps.smart_search_browser.outcome }}
+          MOBILE_NAV_BROWSER_OUTCOME: ${{ steps.mobile_nav_browser.outcome }}
+          ACCOUNT_BROWSER_OUTCOME: ${{ steps.account_browser.outcome }}
+          MARKET_BROWSER_OUTCOME: ${{ steps.market_browser.outcome }}
           ANALYTICS_BROWSER_OUTCOME: ${{ steps.analytics_browser.outcome }}
           HEADSHOT_BROWSER_OUTCOME: ${{ steps.headshot_browser.outcome }}
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
@@ -171,8 +203,12 @@ jobs:
           elif [[ "$ASK_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Ask Titans browser regression ${ASK_BROWSER_OUTCOME:-not-run}";
           elif [[ "$CHANGE_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Change Intelligence browser regression ${CHANGE_BROWSER_OUTCOME:-not-run}";
           elif [[ "$RUNTIME_365_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + runtime / 365 Mode browser regression ${RUNTIME_365_BROWSER_OUTCOME:-not-run}";
+          elif [[ "$SMART_SEARCH_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Smart Search browser regression ${SMART_SEARCH_BROWSER_OUTCOME:-not-run}";
+          elif [[ "$MOBILE_NAV_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + mobile navigation browser regression ${MOBILE_NAV_BROWSER_OUTCOME:-not-run}";
+          elif [[ "$ACCOUNT_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + guest / account browser regression ${ACCOUNT_BROWSER_OUTCOME:-not-run}";
+          elif [[ "$MARKET_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + live market browser regression ${MARKET_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ANALYTICS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + advanced analytics browser regression ${ANALYTICS_BROWSER_OUTCOME:-not-run}";
-          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + analytics + player headshot regressions passed';
+          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + Smart Search + mobile navigation + guest/accounts + markets + analytics + player headshot regressions passed';
           else STATUS="deployed + player headshot browser regression ${HEADSHOT_BROWSER_OUTCOME:-not-run}"; fi
           {
             echo '# Cloudflare deployment status'
@@ -191,6 +227,10 @@ jobs:
             echo "- Ask Titans browser regression: ${ASK_BROWSER_OUTCOME:-not-run}"
             echo "- Change Intelligence browser regression: ${CHANGE_BROWSER_OUTCOME:-not-run}"
             echo "- Runtime / 365 Mode browser regression: ${RUNTIME_365_BROWSER_OUTCOME:-not-run}"
+            echo "- Smart Search browser regression: ${SMART_SEARCH_BROWSER_OUTCOME:-not-run}"
+            echo "- Mobile navigation browser regression: ${MOBILE_NAV_BROWSER_OUTCOME:-not-run}"
+            echo "- Guest / account browser regression: ${ACCOUNT_BROWSER_OUTCOME:-not-run}"
+            echo "- Live market browser regression: ${MARKET_BROWSER_OUTCOME:-not-run}"
             echo "- Advanced analytics browser regression: ${ANALYTICS_BROWSER_OUTCOME:-not-run}"
             echo "- Player headshot browser regression: ${HEADSHOT_BROWSER_OUTCOME:-not-run}"
             [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: existing deployment remains unchanged'
@@ -210,6 +250,10 @@ jobs:
             if [[ -f /tmp/ask-titans-browser-smoke.json ]]; then echo; echo '## Ask Titans browser regression'; echo; echo '```json'; cat /tmp/ask-titans-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/change-intelligence-browser-smoke.json ]]; then echo; echo '## Change Intelligence browser regression'; echo; echo '```json'; cat /tmp/change-intelligence-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/runtime-365-browser-smoke.json ]]; then echo; echo '## Runtime / 365 Mode browser regression'; echo; echo '```json'; cat /tmp/runtime-365-browser-smoke.json; echo '```'; fi
+            if [[ -f /tmp/smart-search-browser-smoke.json ]]; then echo; echo '## Smart Search browser regression'; echo; echo '```json'; cat /tmp/smart-search-browser-smoke.json; echo '```'; fi
+            if [[ -f /tmp/mobile-navigation-browser-smoke.json ]]; then echo; echo '## Mobile navigation browser regression'; echo; echo '```json'; cat /tmp/mobile-navigation-browser-smoke.json; echo '```'; fi
+            if [[ -f /tmp/account-browser-smoke.json ]]; then echo; echo '## Guest / account browser regression'; echo; echo '```json'; cat /tmp/account-browser-smoke.json; echo '```'; fi
+            if [[ -f /tmp/market-browser-smoke.json ]]; then echo; echo '## Live market browser regression'; echo; echo '```json'; cat /tmp/market-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/analytics-browser-smoke.json ]]; then echo; echo '## Advanced analytics browser regression'; echo; echo '```json'; cat /tmp/analytics-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/headshot-browser-smoke.json ]]; then echo; echo '## Player headshot browser regression'; echo; echo '```json'; cat /tmp/headshot-browser-smoke.json; echo '```'; fi
             echo
