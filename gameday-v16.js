@@ -2,6 +2,7 @@
   'use strict';
 
   const app=document.querySelector('#app');
+  const POSTGAME_WINDOW_MS=18*3600000;
   let state={data:null,fan:null,espn:null,loading:null,serial:0};
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const arr=v=>Array.isArray(v)?v:[];
@@ -28,10 +29,10 @@
   const drives=()=>arr(state.fan?.gameDay?.drives);
   const plays=()=>arr(state.fan?.gameDay?.plays);
   const playerStats=()=>arr(state.fan?.playerStats);
-  const metrics=()=>arr(state.fan?.gameDay?.teamMetrics);
 
   function nextGame(){const now=Date.now();return games().find(g=>{const t=Date.parse(g.date);return Number.isFinite(t)&&t>now&&!/final|bye/i.test(String(g.status||''))})||null}
   function latestFinal(){return games().slice().reverse().find(g=>/final/i.test(String(g.status||'')))||null}
+  function recentFinal(){const g=latestFinal(),t=Date.parse(g?.date);return g&&Number.isFinite(t)&&Date.now()>=t&&Date.now()-t<=POSTGAME_WINDOW_MS?g:null}
   function currentDbGame(){const now=Date.now();return games().find(g=>{const t=Date.parse(g.date);return Number.isFinite(t)&&t<=now+5*3600000&&t>=now-5*3600000&&!/final|bye/i.test(String(g.status||''))})||null}
 
   function espnGame(){
@@ -51,6 +52,7 @@
   function phase(){
     const eg=espnGame(),db=currentDbGame();
     if(eg&&/in progress|halftime|end of/i.test(`${eg.status} ${eg.detail}`))return['live',db||nextGame()||latestFinal(),eg];
+    const justFinished=recentFinal();if(justFinished)return['postgame',justFinished,eg];
     const next=nextGame();if(next)return['pregame',next,eg];
     return['postgame',latestFinal(),eg];
   }
