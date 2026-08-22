@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + runtime / 365 Mode browser regression failure**
-- Source commit: `2a46d32820308d966b33629cd08caea178a70e55`
+- Source commit: `d9c11caea3fc19ef5b9239caa7bf75d185e56293`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -17,7 +17,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T05:21:58Z
+- Recorded: 2026-08-22T05:24:28Z
 
 ## Production regression
 
@@ -69,19 +69,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "2a46d32820308d966b33629cd08caea178a70e55",
-    "builtAt": "2026-08-22T05:20:55.938Z"
+    "commit": "d9c11caea3fc19ef5b9239caa7bf75d185e56293",
+    "builtAt": "2026-08-22T05:23:21.968Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 55,
-    "health": 248,
-    "data": 273,
-    "stats": 242,
-    "market": 2497,
-    "analytics": 446
+    "root": 20,
+    "health": 272,
+    "data": 669,
+    "stats": 713,
+    "market": 604,
+    "analytics": 615
   },
-  "testedAt": "2026-08-22T05:21:22.373Z",
+  "testedAt": "2026-08-22T05:23:50.471Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -111,8 +111,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 129,
-  "testedAt": "2026-08-22T05:21:23.031Z"
+  "durationMs": 126,
+  "testedAt": "2026-08-22T05:23:51.347Z"
 }```
 
 ## Browser navigation regression
@@ -157,11 +157,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 239,
+  "maxLongTaskMs": 67,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 15.5,
-  "testedAt": "2026-08-22T05:21:42Z"
+  "durationSeconds": 15.18,
+  "testedAt": "2026-08-22T05:24:11Z"
 }```
 
 ## Listen Watch browser regression
@@ -194,8 +194,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.15,
-  "testedAt": "2026-08-22T05:21:44Z"
+  "durationSeconds": 2.02,
+  "testedAt": "2026-08-22T05:24:13Z"
 }```
 
 ## Command Intelligence browser regression
@@ -253,8 +253,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.25,
-  "testedAt": "2026-08-22T05:21:47Z"
+  "durationSeconds": 2.15,
+  "testedAt": "2026-08-22T05:24:16Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -304,8 +304,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.56,
-  "testedAt": "2026-08-22T05:21:51Z"
+  "durationSeconds": 3.13,
+  "testedAt": "2026-08-22T05:24:19Z"
 }```
 
 ## Ask Titans browser regression
@@ -382,8 +382,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.55,
-  "testedAt": "2026-08-22T05:21:52Z"
+  "durationSeconds": 1.66,
+  "testedAt": "2026-08-22T05:24:21Z"
 }```
 
 ## Change Intelligence browser regression
@@ -420,8 +420,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.39,
-  "testedAt": "2026-08-22T05:21:55Z"
+  "durationSeconds": 2.84,
+  "testedAt": "2026-08-22T05:24:24Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -430,11 +430,76 @@
 {
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktop": {},
+  "desktop": {
+    "phase": "preseason",
+    "cards": 4,
+    "runtimeVersion": "1.10.0",
+    "routeCycle": true,
+    "singlePanel": true,
+    "cacheUrls": [
+      "/api/data",
+      "/api/fan-intel"
+    ],
+    "panel": {
+      "cards": 4,
+      "display": "block",
+      "height": 328.734375,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 969
+    },
+    "refresh": {
+      "cache": [
+        {
+          "expiresAt": 1787376296691,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1787376266691,
+          "url": "/api/data"
+        },
+        {
+          "expiresAt": 1787376296592,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1787376266592,
+          "url": "/api/fan-intel"
+        }
+      ],
+      "epoch": 1,
+      "last": {
+        "at": "2026-08-22T05:24:26.322Z",
+        "epoch": 1,
+        "reason": "scoreboard-control",
+        "urls": null
+      }
+    },
+    "refreshedPanel": {
+      "cards": 4,
+      "display": "block",
+      "height": 328.734375,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 969
+    },
+    "returnPanel": {
+      "cards": 4,
+      "display": "block",
+      "height": 328.734375,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 969
+    }
+  },
   "mobile": {},
   "browserWarnings": [],
-  "error": "ElementClickInterceptedException: Message: element click intercepted: Element <button class=\"icon-button\" id=\"refresh-button\" aria-label=\"Refresh scoreboard\" title=\"Refresh scoreboard\">...</button> is not clickable at point (1064, 34). Other element would receive the click: <div class=\"v10-modal-backdrop\" data-v10-close=\"\"></div>\n  (Session info: chrome=151.0.7922.137); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#elementclickinterceptedexception\nStacktrace:\n#0 0x5578c181d36a <unknown>\n#1 0x5578c1190f49 <unknown>\n#2 0x5578c11ed415 <unknown>\n#3 0x5578c11eb4f2 <unknown>\n#4 0x5578c11e8edc <unknown>\n#5 0x5578c11e7fd7 <unknown>\n#6 0x5578c11dbc42 <unknown>\n#7 0x5578c11db587 <unknown>\n#8 0x5578c122f0c3 <unknown>\n#9 0x5578c11d9c92 <unknown>\n#10 0x5578c11dab11 <unknown>\n#11 0x5578c17e28d0 <unknown>\n#12 0x5578c17e0f3a <unknown>\n#13 0x5578c17cb9b5 <unknown>\n#14 0x5578c17e1c0a <unknown>\n#15 0x5578c17b3740 <unknown>\n#16 0x5578c18089a8 <unknown>\n#17 0x5578c1808b45 <unknown>\n#18 0x5578c181bf1e <unknown>\n#19 0x7fc787a9cb84 <unknown>\n#20 0x7fc787b29d6c <unknown>\n",
-  "durationSeconds": 2.69
+  "error": "RuntimeError: Mobile sheet overlaps dock: sheet={'bottom': 1231.71875, 'height': 504.71875, 'links': 13, 'top': 727} mobile={'dock': {'display': 'grid', 'h': 72, 'w': 465, 'x': 10, 'y': 621}, 'dockTargets': [{'h': 58, 'label': 'Home', 'w': 89.796875}, {'h': 58, 'label': 'Roster', 'w': 89.796875}, {'h': 58, 'label': 'Game', 'w': 89.796875}, {'h': 58, 'label': 'Search', 'w': 89.796875}, {'h': 58, 'label': 'More', 'w': 89.8125}], 'menu': {'display': 'grid', 'h': 46, 'w': 46, 'x': 10, 'y': 8}, 'overflow': False, 'panelHeight': 765.171875, 'panelWidth': 461, 'reviewHeight': 48, 'targets': [{'h': 112, 'label': 'NEXT GAME', 'w': 427}, {'h': 122.9375, 'label': 'WHAT CHANGED?', 'w': 427}, {'h': 122.9375, 'label': 'ROSTER', 'w': 427}, {'h': 112, 'label': 'AVAILABILITY', 'w': 427}], 'viewport': 500}",
+  "durationSeconds": 3.85
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
