@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Command Intelligence browser regression failure**
-- Source commit: `472e45e2255eb0bfadbd01272e81a0d78a24ed7d`
+- Source commit: `0d95438bc11fd0d0b9b31cd35313b71447ff136a`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -13,7 +13,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-21T23:35:02Z
+- Recorded: 2026-08-22T00:18:59Z
 
 ## Production regression
 
@@ -32,8 +32,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v42",
-  "precachePaths": 74,
+  "serviceWorkerCache": "titans-cc-brand-2026-v43",
+  "precachePaths": 75,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -65,19 +65,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "472e45e2255eb0bfadbd01272e81a0d78a24ed7d",
-    "builtAt": "2026-08-21T23:33:44.050Z"
+    "commit": "0d95438bc11fd0d0b9b31cd35313b71447ff136a",
+    "builtAt": "2026-08-22T00:18:01.234Z"
   },
   "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 177,
-    "health": 887,
-    "data": 460,
-    "stats": 345,
-    "market": 3744,
-    "analytics": 711
+    "root": 15,
+    "health": 808,
+    "data": 335,
+    "stats": 148,
+    "market": 422,
+    "analytics": 690
   },
-  "testedAt": "2026-08-21T23:34:16.952Z",
+  "testedAt": "2026-08-22T00:18:26.951Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -107,8 +107,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 139,
-  "testedAt": "2026-08-21T23:34:17.916Z"
+  "durationMs": 121,
+  "testedAt": "2026-08-22T00:18:27.891Z"
 }```
 
 ## Browser navigation regression
@@ -157,11 +157,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 261,
-  "longTasksOver250ms": 1,
+  "maxLongTaskMs": 0,
+  "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 23.4,
-  "testedAt": "2026-08-21T23:34:47Z"
+  "durationSeconds": 8.29,
+  "testedAt": "2026-08-22T00:18:40Z"
 }```
 
 ## Listen Watch browser regression
@@ -194,8 +194,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.78,
-  "testedAt": "2026-08-21T23:34:49Z"
+  "durationSeconds": 1.94,
+  "testedAt": "2026-08-22T00:18:43Z"
 }```
 
 ## Command Intelligence browser regression
@@ -204,12 +204,12 @@
 {
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "desktop:command",
+  "stage": "mobile:command",
   "error": "TimeoutException: Message: \n",
-  "durationSeconds": 12.9,
-  "testedAt": "2026-08-21T23:35:02Z",
+  "durationSeconds": 16.03,
+  "testedAt": "2026-08-22T00:18:59Z",
   "hash": "#command",
-  "pageText": "2026 SEASON \u00b7 PRESEASON \u00b7 FAN-BUILT HQ\nTENNESSEE FOOTBALL.\nEVERY ANGLE.\n\nGame day, roster movement, official team updates, stats, free market data, and the franchise history that made Titans blue mean something. Built as a fan destination \u2014 not a generic dashboard.\n\nENTER GAME DAY \u2192\nEXPLORE THE LEGACY\nNEXT UP \u00b7 VS SEATTLE SEAHAWKS \u00b7 SUN, AUG 23, 7:00 PM\n2026 IDENTITY \u00b7 THE SHIELD\nPRESEASON\n1\u20130\n1 finals indexed\nNEXT OPPONENT\nSEA\nMon, Aug 24\nROSTER INDEXED\n95\nlive roster feed\nDATA SOURCES\n14/22\nlive\nGAME WEEK COMMAND\nNEXT GAME\nFull schedule \u2192\nPRESEASON 2\nLIVE DATA\nTEN\nTennessee\nVS\nSEA\nSeattle Seahawks\nNissan Stadium\nNashville, TN\nSun, Aug 23, 7:00 PM\nFOX \u00b7 2d away\nTITANS NOW\nAll intel \u2192\nPreseason sample size warning\n\nEarly preseason efficiency should be segmented by starter/back-up snaps before drawing conclusions.\n\nTITANS COMMAND CENTER\nCOMMAND CENTER ANALYSIS\nANALYTICS\nGAMES\n3d ago\nTitans continue official preseason roster moves\n\nTennessee has continued making dated preseason roster moves. Use the Transactions page for the current official chronology.\n\nTENNESSEE TITANS\nOFFICIAL\nTRANSACTIONS\nROSTER\n4d ago\nTitans win preseason opener 19-13 over San Francisco\n\nTennessee opened the 2026 preseason with a road win. Cam Ward played roughly the first quarter-plus before the backups took over.\n\nTENNESSEE TITANS\nOFFICIAL\nGAMES\nCAM-WARD\n8d ago\nFirst unofficial 2026 depth chart is out\n\nThe first unofficial depth chart gives an early snapshot of camp roles and position battles.\n\nTENNESSEE TITANS\nOFFICIAL\nDEPTH-CHART\nROSTER\n10d ago\nRobert Saleh talks camp ramp-up and Cam Ward\n\nCoach pres",
+  "pageText": "TITANS COMMAND INTELLIGENCE\nWhat changed. Why it matters. What comes next.\n\nA Titans-specific intelligence layer built around context instead of another wall of headlines.\n\nListen / Watch\nGame Day\nFan Hub\nChanges\nPress Room\nScheme Lab\nGlobal Fans\nStadium\nFan GM\nTime Machine\nGLOBAL FAN DESK\nBe a Titans fan anywhere\n\nKickoff translation, media routing, a local fan passport and spoiler controls without assuming everyone lives in Nashville.\n\nOpen Listen / Watch \u2192\nNext-game concierge\nTitans vs Seattle Seahawks\nYour device \u00b7 Mon, Aug 24, 12:00 AM UTC\nEastern \u00b7 Sun, Aug 23, 8:00 PM EDT\nNashville \u00b7 Sun, Aug 23, 7:00 PM CDT\nUTC \u00b7 Mon, Aug 24, 12:00 AM UTC\nFOX\nFan passport\nMy city\nCountry\nMy watch-party note\nSave on this device\nSPOILER-FREE MODE\nWatching later?\n\nMask common score elements across Command Center until you turn them back on.\n\nReveal scores\n\nCommunity map / nearby-fan counts are intentionally not fabricated. That feature needs an opt-in community backend and moderation before it can be trustworthy.\n\nMY TITANS\nPersonal fan profile\nFavorite player\nNo favorite selected\nAamil Wagner\nAlontae Taylor\nAmani Hooker\nAndre James\nAnthony Hill Jr.\nAustin Deculus\nAustin Schlottmann\nBishop Fitzgerald\nBrandon Crenshaw-Dickson\nBryce Oliver\nCalvin Ridley\nCam Ward\nCarnell Tate\nCedric Gray\nChimere Dike\nCody Barton\nCor'Dale Flott\nCordell Volson\nCorey Mayfield Jr.\nCourtney Jackson\nD'Ernest Johnson\nDan Moore Jr.\nDaniel Bellinger\nDavid Martin-Robinson\nDerrick Canteen\nDominique Hampton\nDorian Mausi\nDrew Moss\nEarnest Brown IV\nElic Ayomanor\nErick Hallett II\nFernando Carmona Jr.\nGarrett Dellinger\nG",
   "browserWarnings": []
 }```
 
