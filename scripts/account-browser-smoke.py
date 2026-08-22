@@ -11,18 +11,48 @@ from selenium.webdriver.support.ui import WebDriverWait
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 OUT=Path('/tmp/account-browser-smoke.json')
 
+
 def driver_for(width=390,height=844):
     options=Options();options.add_argument('--headless=new');options.add_argument('--no-sandbox');options.add_argument('--disable-dev-shm-usage');options.add_argument(f'--window-size={width},{height}');options.set_capability('goog:loggingPrefs',{'browser':'ALL'});return webdriver.Chrome(options=options)
+
+
+def prepare_returning_user(driver):
+    driver.execute_script("""
+      localStorage.setItem('titans:v10Onboarded','1');
+      document.querySelector('#v10-onboarding [data-v10-close]')?.click();
+    """)
+    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding'))
+
 
 def wait(driver,script,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(script))
 
+
+def wait_sheet_settled(driver,timeout=10):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const s=document.querySelector('#sidebar'),m=document.querySelector('#mobile-more-button'),dock=document.querySelector('.mobile-nav');
+      const r=s?.getBoundingClientRect(),dr=dock?.getBoundingClientRect();
+      if(!s?.classList.contains('open')||m?.getAttribute('aria-expanded')!=='true'||!r||!dr||r.width<=0||r.height<=0)return null;
+      return r.bottom<=dr.top+2?{top:r.top,bottom:r.bottom,dockTop:dr.top}:null;
+    """))
+
+
+def wait_account_panel(driver,timeout=10):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const p=document.querySelector('.account-panel');if(!p)return null;
+      const r=p.getBoundingClientRect(),style=getComputedStyle(p);
+      if(style.visibility==='hidden'||style.display==='none'||r.width<300||r.height<=0||r.bottom>innerHeight+1)return null;
+      return {text:p.textContent.trim(),w:r.width,h:r.height,bottom:r.bottom,vh:innerHeight};
+    """))
+
+
 def severe(driver):
     return [r.get('message','') for r in driver.get_log('browser') if r.get('level')=='SEVERE' and 'favicon' not in r.get('message','').lower()]
 
+
 result={'ok':False,'base':BASE,'browserWarnings':[]};start=time.time();d=driver_for()
 try:
-    d.get(f'{BASE}/#home')
+    d.get(f'{BASE}/#home');prepare_returning_user(d)
     guest=wait(d,"""
       const card=document.querySelector('.account-sheet-card'),app=document.querySelector('#app');
       if(!card||!app?.firstElementChild)return null;
@@ -31,10 +61,10 @@ try:
     if 'GUEST' not in guest['text'].upper() or not guest['accountGuest']: raise RuntimeError(f'guest state missing: {guest}')
 
     d.find_element(By.ID,'mobile-more-button').click()
-    wait(d,"return document.querySelector('#sidebar')?.classList.contains('open')")
+    wait_sheet_settled(d)
     d.find_element(By.CSS_SELECTOR,'[data-account-open]').click()
-    panel=wait(d,"""const p=document.querySelector('.account-panel');if(!p)return null;const r=p.getBoundingClientRect();return {text:p.textContent.trim(),w:r.width,h:r.height,bottom:r.bottom,vh:innerHeight};""")
-    if 'Continue as guest' not in panel['text'] or panel['w']<300 or panel['bottom']>panel['vh']+1: raise RuntimeError(f'account panel unusable: {panel}')
+    panel=wait_account_panel(d)
+    if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')
     d.find_element(By.CSS_SELECTOR,'[data-account-close]').click()
 
     outage=d.execute_async_script("""
