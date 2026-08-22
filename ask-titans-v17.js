@@ -170,10 +170,15 @@
   function shell(){return `<section class="v17-ask" aria-label="Ask Titans 2.0"><header><div><small>ASK TITANS 2.0</small><h3>Ask the Command Center</h3><p>Plain-English answers from loaded Titans data — with evidence, freshness, and no made-up certainty.</p></div><span>STRUCTURED DATA</span></header><div class="v17-ask-form"><label for="v17-ask-input">What do you want to know?</label><div><input id="v17-ask-input" type="search" autocomplete="off" placeholder="Example: What changed? How is Cam Ward doing?"><button type="button" class="button primary" data-v17-ask>Ask</button></div></div><div class="v17-quick" aria-label="Quick questions"><button type="button" data-v17-q="What changed?">What changed?</button><button type="button" data-v17-q="Who is next?">Who is next?</button><button type="button" data-v17-q="Any injuries?">Injuries</button><button type="button" data-v17-q="How do I watch?">Watch</button><button type="button" data-v17-q="Cam Ward">Cam Ward</button><button type="button" data-v17-q="What is EPA?">Explain EPA</button></div><div class="v17-ask-result" data-v17-result aria-live="polite"><div class="v17-ask-empty"><strong>Ask a Titans question.</strong><span>I will show the answer, why it matters, supporting facts, source, and freshness.</span></div></div></section>`}
 
   async function ask(query){
-    const out=document.querySelector('[data-v17-result]');if(!out)return;
-    out.innerHTML='<div class="v17-ask-empty"><strong>Checking loaded Titans data…</strong><span>Roster, game, injury, depth and scoreboard context.</span></div>';
-    await load();if(route()!=='fan'||!document.querySelector('.v17-ask'))return;
-    out.innerHTML=renderAnswer(answer(query));
+    const token=++state.serial;
+    const initialOut=document.querySelector('.v17-ask [data-v17-result]');if(!initialOut)return;
+    initialOut.innerHTML='<div class="v17-ask-empty"><strong>Checking loaded Titans data…</strong><span>Roster, game, injury, depth and scoreboard context.</span></div>';
+    await load();
+    if(token!==state.serial||route()!=='fan')return;
+    upgrade();
+    const liveOut=document.querySelector('.v17-ask [data-v17-result]');
+    if(!liveOut||!liveOut.isConnected)return;
+    liveOut.innerHTML=renderAnswer(answer(query));
   }
 
   function bind(root){
