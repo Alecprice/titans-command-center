@@ -96,6 +96,6 @@
 
   addEventListener('hashchange',queue);
   addEventListener('online',()=>{snapshot=null;queue();});
-  if(app)new MutationObserver(queue).observe(app,{childList:true,subtree:true});
+  if(app)new MutationObserver(queue).observe(app,{childList:true});
   queue();
 })();
