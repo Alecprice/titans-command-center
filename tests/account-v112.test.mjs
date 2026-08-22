@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 
-test('account layer is loaded through the existing mobile runtime and packaged offline',()=>{
-  const mobile=read('mobile-navigation-v112.js'),sw=read('sw.js');
-  assert.match(mobile,/import '\.\/account-v112\.js';/);
+test('account layer is explicitly loaded and packaged offline',()=>{
+  const html=read('index.html'),sw=read('sw.js');
+  assert.match(html,/account-sync-v112\.js\?v=1/);
+  assert.match(html,/account-v112\.js\?v=2/);
+  assert.match(sw,/account-sync-v112\.js/);
   assert.match(sw,/account-v112\.js/);
   assert.match(sw,/account-v112\.css/);
-  assert.match(sw,/titans-cc-brand-2026-v56/);
+  assert.match(sw,/titans-cc-brand-2026-v57/);
 });
 
 test('guest access is the default and auth does not gate public routes',()=>{
@@ -21,15 +23,30 @@ test('guest access is the default and auth does not gate public routes',()=>{
   assert.doesNotMatch(js,/auth\.protect/);
 });
 
-test('account flow supports session signup signin and signout with managed auth cookies',()=>{
-  const js=read('account-v112.js');
+test('account flow uses same-origin managed auth proxy',()=>{
+  const js=read('account-v112.js'),api=read('src/account-api.mjs'),worker=read('cloudflare/worker.mjs');
+  assert.match(js,/const AUTH='\/api\/account\/auth'/);
   assert.match(js,/get-session/);
   assert.match(js,/sign-up\/email/);
   assert.match(js,/sign-in\/email/);
   assert.match(js,/sign-out/);
-  assert.match(js,/credentials:'include'/);
+  assert.match(js,/credentials:'same-origin'/);
   assert.match(js,/type=\\"password\\"/);
   assert.doesNotMatch(js,/localStorage.*password/);
+  assert.match(api,/accountAuthProxy/);
+  assert.match(api,/\['get-session','sign-in\/email','sign-up\/email','sign-out'\]/);
+  assert.match(worker,/route\.startsWith\('account\/auth\/'\)/);
+});
+
+test('signed-in preferences sync only approved local preference keys',()=>{
+  const sync=read('account-sync-v112.js'),api=read('src/account-api.mjs'),worker=read('cloudflare/worker.mjs');
+  for(const key of ['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks']){assert.match(sync,new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));assert.match(api,new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));}
+  assert.match(sync,/\/api\/account\/preferences/);
+  assert.match(sync,/titans:account/);
+  assert.match(sync,/titans:preferences-synced/);
+  assert.match(api,/sanitizePreferences/);
+  assert.match(api,/Authentication required/);
+  assert.match(worker,/accountPreferencesRoute/);
 });
 
 test('auth failure gracefully falls back to guest instead of breaking the PWA',()=>{
