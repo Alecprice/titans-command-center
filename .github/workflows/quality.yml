@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '20'
       - name: Validate browser regression scripts
-        run: python -m py_compile scripts/browser-navigation-smoke.py scripts/media-browser-smoke.py scripts/command-intelligence-browser-smoke.py scripts/player-gameday-browser-smoke.py scripts/ask-titans-browser-smoke.py scripts/analytics-browser-smoke.py scripts/headshot-browser-smoke.py
+        run: python -m py_compile scripts/browser-navigation-smoke.py scripts/media-browser-smoke.py scripts/command-intelligence-browser-smoke.py scripts/player-gameday-browser-smoke.py scripts/ask-titans-browser-smoke.py scripts/change-intelligence-browser-smoke.py scripts/analytics-browser-smoke.py scripts/headshot-browser-smoke.py
       - name: Install dependencies
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: Run Titans quality gate
