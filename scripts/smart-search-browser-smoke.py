@@ -28,12 +28,28 @@ def severe_logs(driver):
 def wait_for(driver,script,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(script))
 
+def desktop_hit_areas(driver):
+    return driver.execute_script("""
+      const input=document.querySelector('#global-search'),shortcut=document.querySelector('.search-wrap kbd');
+      if(!input||!shortcut)return null;
+      const i=input.getBoundingClientRect(),k=shortcut.getBoundingClientRect();
+      return {
+        input:{left:i.left,right:i.right,top:i.top,bottom:i.bottom,width:i.width,height:i.height},
+        shortcut:{left:k.left,right:k.right,top:k.top,bottom:k.bottom,width:k.width,height:k.height},
+        overlap:Math.max(0,Math.min(i.right,k.right)-Math.max(i.left,k.left))*Math.max(0,Math.min(i.bottom,k.bottom)-Math.max(i.top,k.top))
+      };
+    """)
+
 result={'ok':False,'base':BASE,'desktop':{},'mobile':{},'browserWarnings':[]};start=time.time()
 try:
     d=driver_for()
     try:
         d.get(f'{BASE}/#home');prepare_returning_user(d)
         search=WebDriverWait(d,15).until(lambda x:x.find_element(By.ID,'global-search'))
+        hit=desktop_hit_areas(d)
+        if not hit or hit['input']['width']<120 or hit['input']['height']<32: raise RuntimeError(f'Desktop search input geometry invalid: {hit}')
+        if hit['shortcut']['width']<24 or hit['shortcut']['height']<20: raise RuntimeError(f'Desktop command shortcut geometry invalid: {hit}')
+        if hit['overlap']>0.5: raise RuntimeError(f'Desktop search input overlaps command shortcut: {hit}')
         search.click();search.send_keys('Cam Ward')
         rows=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].map(x=>({kind:x.querySelector('small')?.textContent||'',label:x.querySelector('strong')?.textContent||'',href:x.getAttribute('href')}))")
         players=[r for r in rows if r['kind']=='PLAYER']
@@ -44,7 +60,7 @@ try:
         d.execute_script("location.hash='#home'");wait_for(d,"return location.hash==='#home'")
         d.find_element(By.ID,'global-search').click()
         quick=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].slice(0,6).map(x=>x.querySelector('strong')?.textContent||'')")
-        result['desktop']={'playerResult':players[0]['label'],'playerRoute':player_route,'quickJump':quick};result['browserWarnings']+=severe_logs(d)
+        result['desktop']={'playerResult':players[0]['label'],'playerRoute':player_route,'quickJump':quick,'hitAreas':hit};result['browserWarnings']+=severe_logs(d)
     finally:d.quit()
     m=driver_for(390,844)
     try:
