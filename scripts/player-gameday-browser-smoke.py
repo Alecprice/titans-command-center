@@ -39,8 +39,17 @@ try:
     stage='player:find'
     driver.get(f'{BASE}/#roster')
     wait_for(driver,"document.querySelectorAll('.player-card').length > 20")
-    player_href=driver.execute_script("return [...document.querySelectorAll('.player-card')].find(x=>x.querySelector('h3')?.textContent?.includes('Cam Ward'))?.getAttribute('href') || document.querySelector('.player-card')?.getAttribute('href')")
-    if not player_href or '#player?id=' not in player_href: raise RuntimeError(f'Could not resolve player route: {player_href}')
+    # The first paint can be the audited fallback roster. Those cards intentionally
+    # do not have database UUIDs, so wait for /api/data hydration before resolving
+    # a real player route instead of mistaking #roster for the final state.
+    wait_for(driver,"document.querySelector('.player-card[href*=\"#player?id=\"]')",timeout=18)
+    player_href=driver.execute_script("""
+      const cards=[...document.querySelectorAll('.player-card[href*="#player?id="]')];
+      return cards.find(x=>x.querySelector('h3')?.textContent?.includes('Cam Ward'))?.getAttribute('href')
+        || cards[0]?.getAttribute('href')
+        || '';
+    """)
+    if not player_href or '#player?id=' not in player_href: raise RuntimeError(f'Could not resolve hydrated player route: {player_href}')
 
     stage='player:desktop'
     driver.get(f'{BASE}/{player_href}')
@@ -113,7 +122,7 @@ try:
     if severe: raise RuntimeError(f'v1.6 browser console has severe errors: {severe[:4]}')
 
     result={
-      'ok':True,'base':BASE,'playerRoute':player_href,'playerTabs':tabs,'favoriteToggle':[before,after,restored],
+      'ok':True,'base':BASE,'playerRoute':player_href,'playerRouteHydrated':True,'playerTabs':tabs,'favoriteToggle':[before,after,restored],
       'playerMobileTargets':mobile_player['tabs'],'playerHeadshotLoaded':mobile_player['headshot'],
       'gameDayPhase':game['phase'],'gameDayTuneLink':game['tune'],'gameDayMobileViewport':mobile_game['viewport'],
       'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),
