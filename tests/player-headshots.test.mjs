@@ -39,12 +39,16 @@ test('headshot decorator covers roster, Stats Lab and rich player views without 
   assert.doesNotMatch(js,/observe\(hsApp,\{childList:true,subtree:true\}\)/);
 });
 
-test('headshot browser regression follows a real roster player interaction',()=>{
+test('headshot browser regression isolates onboarding and follows a real roster player interaction',()=>{
   const smoke=read('scripts/headshot-browser-smoke.py');
   assert.match(smoke,/from selenium\.webdriver\.common\.by import By/);
+  assert.match(smoke,/def prepare_returning_user\(driver\):/);
+  assert.match(smoke,/localStorage\.setItem\('titans:v10Onboarded','1'\)/);
+  assert.match(smoke,/prepare_returning_user\(driver\)/);
   assert.match(smoke,/find_element\(By\.CSS_SELECTOR,'\.player-card:has\(\.jersey\.has-headshot img\)'\)/);
   assert.match(smoke,/player_link\.click\(\)/);
   assert.match(smoke,/location\.hash\.startsWith\('#player'\)/);
+  assert.match(smoke,/onboarding:Boolean\(document\.querySelector\('#v10-onboarding'\)\)/);
   assert.doesNotMatch(smoke,/location\.hash=arguments\[0\]/);
 });
 
