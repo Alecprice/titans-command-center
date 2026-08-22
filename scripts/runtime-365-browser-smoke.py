@@ -117,12 +117,16 @@ try:
         stage='desktop:prepare-returning-user';prepare_returning_user(d)
         stage='desktop:wait-365-panel';panel_state=wait_365_panel(d)
         stage='desktop:read-runtime'
-        runtime=d.execute_script("return window.TitansRuntime ? {version:window.TitansRuntime.version,route:window.TitansRuntime.route(),cache:window.TitansRuntime.apiCacheInfo(),refresh:window.TitansRuntime.refreshInfo()} : null")
+        runtime=d.execute_script("return window.TitansRuntime ? {version:window.TitansRuntime.version,route:window.TitansRuntime.route(),teamTimeZone:window.TitansRuntime.teamTimeZone,teamTimeLabel:window.TitansRuntime.teamTimeLabel,cache:window.TitansRuntime.apiCacheInfo(),refresh:window.TitansRuntime.refreshInfo()} : null")
         phase=d.execute_script("return document.body.dataset.v19Phase || ''")
         cards=d.find_elements(By.CSS_SELECTOR,'.v19-365-grid > a')
         if not runtime or runtime.get('version')!='1.10.0': raise RuntimeError(f'Runtime missing or wrong version: {runtime}')
         if runtime.get('route')!='home': raise RuntimeError(f'Runtime route mismatch: {runtime}')
+        if runtime.get('teamTimeZone')!='America/Chicago' or runtime.get('teamTimeLabel')!='Nashville time': raise RuntimeError(f'Team-time runtime contract missing: {runtime}')
         if not phase or len(cards)!=4: raise RuntimeError(f'365 panel contract failed: phase={phase} cards={len(cards)} state={panel_state}')
+        if 'NEXT GAME' in panel_state['text'] and 'Next game TBD' not in panel_state['text']:
+            if ' UTC' in panel_state['text'] or not ('CDT' in panel_state['text'] or 'CST' in panel_state['text']):
+                raise RuntimeError(f'365 Mode kickoff is not rendered in Nashville time: {panel_state}')
         urls={row.get('url') for row in runtime.get('cache',[])}
         if '/api/data' not in urls or '/api/fan-intel' not in urls: raise RuntimeError(f'Shared API cache missing core rows: {runtime}')
 
@@ -139,7 +143,7 @@ try:
         stage='desktop:return-home';d.execute_script("location.hash='#home'");return_state=wait_365_panel(d)
         count=d.execute_script("return document.querySelectorAll('.v19-365').length")
         if count!=1: raise RuntimeError(f'365 panel duplicated after route cycle: {count}')
-        result['desktop']={'phase':phase,'cards':len(cards),'runtimeVersion':runtime['version'],'routeCycle':True,'singlePanel':True,'cacheUrls':sorted(urls),'panel':panel_state,'refresh':refresh_state,'refreshedPanel':refreshed_panel,'returnPanel':return_state}
+        result['desktop']={'phase':phase,'cards':len(cards),'runtimeVersion':runtime['version'],'teamTimeZone':runtime['teamTimeZone'],'teamTimeLabel':runtime['teamTimeLabel'],'routeCycle':True,'singlePanel':True,'cacheUrls':sorted(urls),'panel':panel_state,'refresh':refresh_state,'refreshedPanel':refreshed_panel,'returnPanel':return_state}
         result['browserWarnings'].extend(severe_logs(d))
     finally:
         d.quit();d=None
