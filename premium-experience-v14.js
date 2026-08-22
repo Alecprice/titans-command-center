@@ -1,8 +1,9 @@
 (() => {
   'use strict';
+  const runtime=window.TitansRuntime;
   const app=document.querySelector('#app');
   const topActions=document.querySelector('.top-actions');
-  const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
+  const route=runtime?.route||(()=>location.hash.replace(/^#/,'').split('?')[0]||'home');
   const state={data:null,intel:null,loading:null};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const TERMS={
@@ -18,7 +19,18 @@
     'Rest days':'Days between games. It can help explain short-week or extra-rest situations.'
   };
 
-  async function load(){if(state.data&&state.intel)return;if(state.loading)return state.loading;state.loading=Promise.all([fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)]).then(([data,intel])=>{state.data=data?.ok?data:null;state.intel=intel?.ok?intel:null}).finally(()=>state.loading=null);return state.loading}
+  async function load(){
+    if(state.data&&state.intel)return;
+    if(state.loading)return state.loading;
+    const request=runtime?[
+      runtime.apiJson('/api/data',{ttl:30000}),
+      runtime.apiJson('/api/fan-intel',{ttl:30000})
+    ]:[
+      fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+    ];
+    state.loading=Promise.all(request).then(([data,intel])=>{state.data=data?.ok?data:null;state.intel=intel?.ok?intel:null}).finally(()=>state.loading=null);return state.loading
+  }
   const valid=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?null:d};
   const nextGame=()=>{const now=Date.now();return (state.data?.games||[]).find(g=>{const t=Date.parse(g.date);return Number.isFinite(t)&&t>now&&!/final|bye/i.test(String(g.status||''))})||null};
   const latestFinal=()=>[...(state.data?.games||[])].reverse().find(g=>/final/i.test(String(g.status||'')))||null;
@@ -42,7 +54,7 @@
 
   function applyPhase(){document.body.dataset.v14Season=seasonPhase().toLowerCase().replace(/\s+/g,'-')}
   async function enhance(){await load();addTermsButton();applyPhase();homeNow();gameDayQuick();statsHelp();playerHelp()}
-  window.addEventListener('hashchange',()=>setTimeout(enhance,40));
-  if(app)new MutationObserver(()=>queueMicrotask(()=>{homeNow();gameDayQuick();statsHelp();playerHelp()})).observe(app,{childList:true,subtree:false});
+  if(runtime){runtime.onRoute(()=>setTimeout(enhance,40));runtime.onAppRender(()=>queueMicrotask(()=>{homeNow();gameDayQuick();statsHelp();playerHelp()}));}
+  else {window.addEventListener('hashchange',()=>setTimeout(enhance,40));if(app)new MutationObserver(()=>queueMicrotask(()=>{homeNow();gameDayQuick();statsHelp();playerHelp()})).observe(app,{childList:true,subtree:false});}
   setTimeout(enhance,100);
 })();
