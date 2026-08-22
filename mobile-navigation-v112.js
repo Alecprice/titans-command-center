@@ -1,5 +1,7 @@
 (() => {
   'use strict';
+  if(window.__TitansMobileNavigationV112)return;
+  window.__TitansMobileNavigationV112=true;
   const sidebar=document.querySelector('#sidebar');
   const dock=document.querySelector('.mobile-nav');
   const searchButton=document.querySelector('#mobile-search-button');
