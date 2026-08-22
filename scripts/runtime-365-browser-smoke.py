@@ -28,11 +28,6 @@ def wait_css(driver,selector,timeout=15):
 
 
 def prepare_returning_user(driver):
-    # Each Selenium session starts with empty localStorage, which intentionally
-    # triggers the v1.0 first-run onboarding modal. This smoke exercises the
-    # shared runtime / 365 Mode rather than onboarding, so make the profile a
-    # returning user before interacting with shell controls. The second
-    # localStorage check inside onboarding() prevents a late async modal open.
     driver.execute_script("""
       localStorage.setItem('titans:v10Onboarded','1');
       document.querySelector('#v10-onboarding [data-v10-close]')?.click();
@@ -151,12 +146,13 @@ try:
 
         m.find_element(By.ID,'mobile-more-button').click()
         sheet=WebDriverWait(m,10,poll_frequency=.1).until(lambda driver:driver.execute_script("""
-          const s=document.querySelector('#sidebar'),more=document.querySelector('#mobile-more-button');
-          const r=s?.getBoundingClientRect();
-          if(!s?.classList.contains('open')||more?.getAttribute('aria-expanded')!=='true'||!r||r.width<=0||r.height<=0)return null;
-          return {top:r.top,bottom:r.bottom,height:r.height,links:[...s.querySelectorAll('.nav a')].length};
+          const s=document.querySelector('#sidebar'),more=document.querySelector('#mobile-more-button'),dock=document.querySelector('.mobile-nav');
+          const r=s?.getBoundingClientRect(),dr=dock?.getBoundingClientRect();
+          if(!s?.classList.contains('open')||more?.getAttribute('aria-expanded')!=='true'||!r||!dr||r.width<=0||r.height<=0)return null;
+          if(r.top>=innerHeight||r.bottom>dr.top+2)return null;
+          return {top:r.top,bottom:r.bottom,height:r.height,links:[...s.querySelectorAll('.nav a')].length,dockTop:dr.top};
         """))
-        if sheet['bottom']>mobile['dock']['y']+2: raise RuntimeError(f'Mobile sheet overlaps dock: sheet={sheet} mobile={mobile}')
+        if sheet['bottom']>sheet['dockTop']+2: raise RuntimeError(f'Mobile sheet overlaps dock after settle: sheet={sheet} mobile={mobile}')
         m.execute_script("document.querySelector('#app').click()")
         WebDriverWait(m,5).until(lambda driver:not driver.find_element(By.ID,'sidebar').get_attribute('class').split().__contains__('open'))
 
