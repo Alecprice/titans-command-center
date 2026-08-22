@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Player Intelligence / Game Day browser regression failure**
-- Source commit: `356fd3e1f80ba9fedd1aa30bc50eeb28ffbdc7a9`
+- Source commit: `a0bec9c38a4f66d850abc04708b5ffc8ee4ddd47`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -11,10 +11,12 @@
 - Listen Watch browser regression: success
 - Command Intelligence browser regression: success
 - Player Intelligence / Game Day browser regression: failure
+- Ask Titans browser regression: skipped
+- Change Intelligence browser regression: skipped
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T00:51:52Z
+- Recorded: 2026-08-22T01:23:20Z
 
 ## Production regression
 
@@ -33,8 +35,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v44",
-  "precachePaths": 79,
+  "serviceWorkerCache": "titans-cc-brand-2026-v47",
+  "precachePaths": 83,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -66,19 +68,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "356fd3e1f80ba9fedd1aa30bc50eeb28ffbdc7a9",
-    "builtAt": "2026-08-22T00:50:39.328Z"
+    "commit": "a0bec9c38a4f66d850abc04708b5ffc8ee4ddd47",
+    "builtAt": "2026-08-22T01:22:28.781Z"
   },
-  "deploymentPropagationAttempts": 6,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 141,
-    "health": 955,
-    "data": 616,
-    "stats": 254,
-    "market": 6132,
-    "analytics": 1091
+    "root": 67,
+    "health": 123,
+    "data": 116,
+    "stats": 158,
+    "market": 539,
+    "analytics": 350
   },
-  "testedAt": "2026-08-22T00:51:20.593Z",
+  "testedAt": "2026-08-22T01:22:54.123Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -108,8 +110,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 128,
-  "testedAt": "2026-08-22T00:51:21.954Z"
+  "durationMs": 143,
+  "testedAt": "2026-08-22T01:22:54.748Z"
 }```
 
 ## Browser navigation regression
@@ -158,11 +160,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 197,
+  "maxLongTaskMs": 54,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 15.51,
-  "testedAt": "2026-08-22T00:51:42Z"
+  "durationSeconds": 12.98,
+  "testedAt": "2026-08-22T01:23:11Z"
 }```
 
 ## Listen Watch browser regression
@@ -195,8 +197,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.46,
-  "testedAt": "2026-08-22T00:51:45Z"
+  "durationSeconds": 2.05,
+  "testedAt": "2026-08-22T01:23:13Z"
 }```
 
 ## Command Intelligence browser regression
@@ -254,8 +256,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.89,
-  "testedAt": "2026-08-22T00:51:48Z"
+  "durationSeconds": 2.86,
+  "testedAt": "2026-08-22T01:23:17Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -264,12 +266,12 @@
 {
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "gameday:desktop",
-  "error": "RuntimeError: Game Day source/tune contract failed: {'fakeLive': False, 'phase': 'postgame', 'text': 'POSTGAME\\nGame Day 3.0 \u00b7 source-aware\\nPOSTGAME COMMAND\\nFinal result \u00b7 TEN \u2014 \u2014 OPP \u2014\\n\\nTitans game \u00b7 TBD\\n\\nFull schedule \u2192\\nTURNING POINTS\\nBiggest loaded swings\\n\\nNo trustworthy turning-point rows are loaded yet.\\n\\nWHAT CHANGED?\\nBecause of this game\\n\\nRoster, injury and depth consequences populate through Command Intel as verified updates arrive.\\n\\nOpen Change Engine \u2192\\nTOP PERFORMERS\\nFinal loaded leaders\\n0 players\\nPostgame player stats are awaiting ingest.\\nThe page will populate automatically when the warehouse has them.', 'tune': False}",
-  "durationSeconds": 3.13,
-  "testedAt": "2026-08-22T00:51:51Z",
+  "stage": "console",
+  "error": "RuntimeError: v1.6 browser console has severe errors: [{'level': 'SEVERE', 'message': 'https://titans-command-center.alecjordanprice.workers.dev/api/espn-scoreboard - Failed to load resource: the server responded with a status of 502 ()', 'source': 'network', 'timestamp': 1787361799936}]",
+  "durationSeconds": 2.64,
+  "testedAt": "2026-08-22T01:23:20Z",
   "hash": "#live",
-  "pageText": "GAME DAY\nGAME DAY CENTER\n\nA focused live view for the current or next Titans game \u2014 scoreboard first, context second.\n\nSchedule \u00b7 updated this minute\nGAME DAY PULSE\nTEN vs SEA\n1d 23h 8m\nKICKOFF\nSun, Aug 23, 7:00 PM\nBROADCAST\nFOX\nVENUE\nNissan Stadium\nWEATHER\nWeather awaiting update\nFull schedule\nRoster\nAdd to calendar\nGAME DAY PULSE\nTEN vs SEA\n1d 23h 8m\nKICKOFF\nSun, Aug 23, 7:00 PM\nBROADCAST\nFOX\nVENUE\nNissan Stadium\nWEATHER\nWeather awaiting update\nFull schedule\nRoster\nAdd to calendar\nGAME DAY PULSE\nTEN vs SEA\n1d 23h 8m\nKICKOFF\nSun, Aug 23, 7:00 PM\nBROADCAST\nFOX\nVENUE\nNissan Stadium\nWEATHER\nWeather awaiting update\nFull schedule\nRoster\nAdd to calendar\nGAME DAY PULSE\nTEN vs SEA\n1d 23h 8m\nKICKOFF\nSun, Aug 23, 7:00 PM\nBROADCAST\nFOX\nVENUE\nNissan Stadium\nWEATHER\nWeather awaiting update\nFull schedule\nRoster\nAdd to calendar\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nGAME WEEK BRIEF\nTEN vs SEA\n\nSun, Aug 23, 7:00 PM \u00b7 Nissan Stadium \u00b7 FOX\n\nFULL SCHEDULE \u2192\nROSTER\n95 players loaded\nWEATHER\nForecast not loaded yet\nMARKETS\nNo market lines loaded yet\nINJURIES\nNo injury report loaded yet\nROSTER MOVES\nAug 19, 2026 latest official move\nSITE DATA\nLive updates available\nQUICK READ\nvs Seattle Seahawks \u00b7 Mon, Aug 24, 12:00 AM UTC\nKickoff in 47 hours. Open Listen / Watch for your local kickoff time and legal broadcast options.\nListen / Watch\nOpponent + fan hub\nPOSTGAME\nGame Day 3.0 \u00b7 source-aware\nPOSTGAME COMMAND\nFinal result \u00b7 TEN \u2014 \u2014 OPP \u2014\n\nTitans game \u00b7 TBD\n\nFull schedule \u2192\nTURNING POINTS\nBiggest loaded swings\n\nNo trustworthy turning-point rows are loaded yet",
+  "pageText": "GAME DAY\nGAME DAY CENTER\n\nA focused live view for the current or next Titans game \u2014 scoreboard first, context second.\n\nSchedule \u00b7 updated this minute\nGAME WEEK COMMAND\nTEN vs Seattle Seahawks\nUPCOMING\nWHEN / WHERE\nSunday, Aug 23, 7:00 PM\n\nNissan Stadium \u00b7 FOX\n\nWEATHER\nForecast awaiting update\n\nForecast feed\n\nMARKET\nNo current market rows\n\nInformational only\n\nCURRENT LEADERS\nPlayer production\nFull Stats Lab \u2192\n0\nCam Ward\n57\n1\nJulius Chestnut\n47\n2\nWan'Dale Robinson\n19\n3\nCor'Dale Flott\n5\n4\nJalyn Holmes\n1\n5\nJoey Slye\n13\nAdd to calendar\nRoster\nIntel\nAnalytics\nGAME WEEK COMMAND\nTEN vs Seattle Seahawks\nUPCOMING\nWHEN / WHERE\nSunday, Aug 23, 7:00 PM\n\nNissan Stadium \u00b7 FOX\n\nWEATHER\nForecast awaiting update\n\nForecast feed\n\nMARKET\nNo current market rows\n\nInformational only\n\nCURRENT LEADERS\nPlayer production\nFull Stats Lab \u2192\n0\nCam Ward\n57\n1\nJulius Chestnut\n47\n2\nWan'Dale Robinson\n19\n3\nCor'Dale Flott\n5\n4\nJalyn Holmes\n1\n5\nJoey Slye\n13\nAdd to calendar\nRoster\nIntel\nAnalytics\nGAME WEEK COMMAND\nTEN vs Seattle Seahawks\nUPCOMING\nWHEN / WHERE\nSunday, Aug 23, 7:00 PM\n\nNissan Stadium \u00b7 FOX\n\nWEATHER\nForecast awaiting update\n\nForecast feed\n\nMARKET\nNo current market rows\n\nInformational only\n\nCURRENT LEADERS\nPlayer production\nFull Stats Lab \u2192\n0\nCam Ward\n57\n1\nJulius Chestnut\n47\n2\nWan'Dale Robinson\n19\n3\nCor'Dale Flott\n5\n4\nJalyn Holmes\n1\n5\nJoey Slye\n13\nAdd to calendar\nRoster\nIntel\nAnalytics\nGAME WEEK COMMAND\nTEN vs Seattle Seahawks\nUPCOMING\nWHEN / WHERE\nSunday, Aug 23, 7:00 PM\n\nNissan Stadium \u00b7 FOX\n\nWEATHER\nForecast awaiting update\n\nForecast feed\n\nMARKET\nNo current market rows\n\nInformational only\n\nCURRENT LEADERS\nPlayer production\nFull Stats Lab \u2192\n0\nCam Ward\n57\n1\nJulius Chestnut\n47\n2\nWan'Dale Robinson\n19\n3\nCor'Dale Flott\n5\n4\nJalyn Holmes\n1\n5\nJoey Slye\n13\nAdd to calendar\nRoster\nIntel\nAnalytics\nGAME DAY P",
   "browserWarnings": []
 }```
 
