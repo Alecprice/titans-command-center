@@ -60,6 +60,9 @@ try:
     driver.execute_script("document.querySelector('[data-v16-favorite]')?.click()")
     after=driver.execute_script("return document.querySelector('[data-v16-favorite]')?.getAttribute('aria-pressed')")
     if before==after: raise RuntimeError(f'Favorite did not toggle: {before} -> {after}')
+    driver.execute_script("document.querySelector('[data-v16-favorite]')?.click()")
+    restored=driver.execute_script("return document.querySelector('[data-v16-favorite]')?.getAttribute('aria-pressed')")
+    if restored!=before: raise RuntimeError(f'Favorite did not toggle back: {before} -> {after} -> {restored}')
 
     stage='player:mobile'
     driver.set_window_size(390,844)
@@ -110,7 +113,7 @@ try:
     if severe: raise RuntimeError(f'v1.6 browser console has severe errors: {severe[:4]}')
 
     result={
-      'ok':True,'base':BASE,'playerRoute':player_href,'playerTabs':tabs,'favoriteToggle':[before,after],
+      'ok':True,'base':BASE,'playerRoute':player_href,'playerTabs':tabs,'favoriteToggle':[before,after,restored],
       'playerMobileTargets':mobile_player['tabs'],'playerHeadshotLoaded':mobile_player['headshot'],
       'gameDayPhase':game['phase'],'gameDayTuneLink':game['tune'],'gameDayMobileViewport':mobile_game['viewport'],
       'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),
