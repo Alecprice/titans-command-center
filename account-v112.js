@@ -3,6 +3,7 @@
   if(window.__TitansAccountV112)return;
   window.__TitansAccountV112=true;
   const AUTH='/api/account/auth';
+  const phone=matchMedia('(max-width:760px)');
   const state={session:null,loading:true,mode:'signin',sync:{state:'idle',message:'Selected settings sync when you sign in.'}};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   async function auth(path,{method='GET',body}={}){
@@ -14,6 +15,11 @@
   function ensureCss(){if(document.querySelector('link[data-account-v112]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='/account-v112.css?v=2';link.dataset.accountV112='';document.head.appendChild(link);}
   function user(){return state.session?.user||state.session?.data?.user||null;}
   function announce(){window.dispatchEvent(new CustomEvent('titans:account',{detail:{user:user()}}));}
+  function placeEntryCard(card){
+    const sidebar=document.querySelector('#sidebar'),nav=sidebar?.querySelector('.nav'),foot=sidebar?.querySelector('.sidebar-foot');
+    if(!card||!sidebar||!nav||!foot)return;
+    if(phone.matches)nav.before(card);else foot.prepend(card);
+  }
   function renderEntry(){
     const u=user();
     let btn=document.querySelector('#account-button');
@@ -21,7 +27,8 @@
     btn.textContent=u?(u.name||u.email||'Account'):'Guest';
     btn.setAttribute('aria-label',u?'Open account':'Sign in or create account');
     let card=document.querySelector('.account-sheet-card');
-    if(!card){card=document.createElement('section');card.className='account-sheet-card';document.querySelector('#sidebar .sidebar-foot')?.prepend(card);}
+    if(!card){card=document.createElement('section');card.className='account-sheet-card';}
+    placeEntryCard(card);
     card.innerHTML=u?`<small>SIGNED IN</small><strong>${esc(u.name||u.email||'Titans fan')}</strong><span class="account-mini-status">${esc(state.sync.message)}</span><button type="button" data-account-open>Account</button>`:`<small>VIEWING AS GUEST</small><strong>No account required</strong><span class="account-mini-status">Settings stay on this device.</span><button type="button" data-account-open>Sign in / Sign up</button>`;
   }
   function syncStatusMarkup(){return `<div class="account-sync-status ${esc(state.sync.state)}" role="status" aria-live="polite"><i aria-hidden="true"></i><span>${esc(state.sync.message)}</span></div>`;}
@@ -48,6 +55,7 @@
     catch(err){error.textContent=err instanceof Error?err.message:'Could not complete account request.';}finally{submit.disabled=false;}
   });
   addEventListener('titans:sync-status',event=>{state.sync={state:event.detail?.state||'idle',message:event.detail?.message||'Sync status unavailable.'};renderEntry();refreshOpenStatus();});
+  phone.addEventListener?.('change',()=>{const card=document.querySelector('.account-sheet-card');if(card)placeEntryCard(card);});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.account-modal'))close();});
   ensureCss();refresh();
   window.TitansAccount={open,refresh,get user(){return user();},get guest(){return !user();},get syncStatus(){return {...state.sync}}};
