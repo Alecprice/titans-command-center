@@ -54,6 +54,32 @@ try:
     wait_for(driver, "document.querySelectorAll('.advanced-analytics-hub .ah-personnel-grid section').length === 2")
     assert_no_horizontal_overflow(driver, 'desktop advanced Stats Lab')
 
+    stage = 'desktop:season-context'
+    season_context = driver.execute_script("""
+      const root=document.querySelector('.advanced-analytics-hub');
+      const banner=root?.querySelector('.ah-season-context');
+      return {
+        requestedSeason:root?.dataset?.requestedSeason||'',
+        dataSeason:root?.dataset?.dataSeason||'',
+        seasonFallback:root?.dataset?.seasonFallback||'',
+        heading:root?.querySelector('.ah-head h2')?.textContent?.trim()||'',
+        bannerText:(banner?.textContent||'').replace(/\s+/g,' ').trim(),
+        bannerRole:banner?.getAttribute('role')||'',
+        bannerVisible:Boolean(banner&&banner.getBoundingClientRect().width>0&&banner.getBoundingClientRect().height>0)
+      };
+    """)
+    if season_context['seasonFallback'] == 'true':
+        if not season_context['dataSeason'] or not season_context['requestedSeason'] or season_context['dataSeason'] == season_context['requestedSeason']:
+            raise RuntimeError(f'Analytics fallback metadata is inconsistent: {season_context}')
+        expected_baseline = f"{season_context['dataSeason']} regular-season baseline"
+        expected_not_current = f"Not {season_context['requestedSeason']} performance"
+        if not season_context['bannerVisible'] or season_context['bannerRole'] != 'note' or expected_baseline not in season_context['bannerText'] or expected_not_current not in season_context['bannerText']:
+            raise RuntimeError(f'Analytics fallback is not unmistakably labeled: {season_context}')
+        if season_context['dataSeason'] not in season_context['heading'] or 'baseline' not in season_context['heading'].lower():
+            raise RuntimeError(f'Analytics fallback heading is ambiguous: {season_context}')
+    elif season_context['bannerVisible']:
+        raise RuntimeError(f'Historical fallback banner shown for current-season analytics: {season_context}')
+
     stage = 'desktop:metric-values'
     metrics = driver.execute_script("""
       return [...document.querySelectorAll('.advanced-analytics-hub .ah-metric')].map(card=>({
@@ -103,6 +129,12 @@ try:
     mobile_metric_count = driver.execute_script("return document.querySelectorAll('.advanced-analytics-hub .ah-metric').length")
     if mobile_metric_count != 4:
         raise RuntimeError(f'Mobile advanced metric count was {mobile_metric_count}')
+    mobile_season_banner = driver.execute_script("""
+      const root=document.querySelector('.advanced-analytics-hub'),banner=root?.querySelector('.ah-season-context');
+      return {fallback:root?.dataset?.seasonFallback||'',visible:Boolean(banner&&banner.getBoundingClientRect().width>0&&banner.getBoundingClientRect().height>0),text:(banner?.textContent||'').replace(/\s+/g,' ').trim()};
+    """)
+    if season_context['seasonFallback'] == 'true' and (not mobile_season_banner['visible'] or season_context['dataSeason'] not in mobile_season_banner['text']):
+        raise RuntimeError(f'Mobile analytics fallback context is missing: {mobile_season_banner}')
 
     stage = 'console'
     console = []
@@ -117,6 +149,8 @@ try:
     result = {
         'ok': True,
         'base': BASE,
+        'seasonContext': season_context,
+        'mobileSeasonContext': mobile_season_banner,
         'metricCount': len(metrics),
         'metricValues': metrics,
         'situationFields': sorted(labels),
