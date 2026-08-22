@@ -73,12 +73,16 @@ test('runtime 365 browser smoke uses returning-user setup and current five-actio
   assert.doesNotMatch(smoke,/len\(mobile\['dockTargets'\]\)!=6/);
 });
 
-test('runtime 365 mobile sheet check waits for transition geometry to settle',()=>{
+test('runtime 365 mobile sheet check is deterministic and records precise failure stages',()=>{
   const smoke=read('scripts/runtime-365-browser-smoke.py');
+  assert.match(smoke,/def disable_sidebar_motion\(driver\):/);
+  assert.match(smoke,/#sidebar\{transition:none!important;animation:none!important\}/);
+  assert.match(smoke,/stage='mobile:more-settle'/);
+  assert.match(smoke,/stage='mobile:search-panel'/);
+  assert.match(smoke,/result\['stage'\]=stage/);
+  assert.match(smoke,/result\['mobileState'\]=mobile_state\(m\)/);
   assert.match(smoke,/r\.bottom>dr\.top\+2/);
-  assert.match(smoke,/r\.top>=innerHeight/);
   assert.match(smoke,/dockTop:dr\.top/);
-  assert.match(smoke,/overlaps dock after settle/);
 });
 
 test('PWA precaches the runtime and 365 assets',()=>{
