@@ -11,12 +11,13 @@ test('Change Intelligence late-mount recovery loads after v1.8 and is available 
   assert.match(sw,/change-intelligence-loadfix-v18\.js/);
 });
 
-test('late-mount recovery is bounded and only wakes the existing top-level observer',()=>{
+test('late-mount recovery is bounded and wakes the existing route lifecycle directly',()=>{
   const js=read('change-intelligence-loadfix-v18.js');
   assert.match(js,/\[120,360,900,1800,3200\]/);
   assert.match(js,/document\.querySelector\('\.v15-command-view'\)/);
   assert.match(js,/document\.querySelector\('\.v18-change-intel'\)/);
-  assert.match(js,/createComment\('v18-late-mount'\)/);
+  assert.match(js,/dispatchEvent\(new Event\('hashchange'\)\)/);
+  assert.doesNotMatch(js,/createComment/);
   assert.doesNotMatch(js,/MutationObserver/);
   assert.doesNotMatch(js,/setInterval/);
 });
