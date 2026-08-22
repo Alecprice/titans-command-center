@@ -52,6 +52,8 @@ test('Game Day 3.0 has pregame live and postgame state models',()=>{
   assert.match(js,/\['live'/);
   assert.match(js,/\['pregame'/);
   assert.match(js,/\['postgame'/);
+  assert.match(js,/POSTGAME_WINDOW_MS=18\*3600000/);
+  assert.match(js,/const justFinished=recentFinal\(\);if\(justFinished\)return\['postgame'/);
   assert.match(js,/PREGAME COMMAND/);
   assert.match(js,/WHAT JUST HAPPENED/);
   assert.match(js,/CURRENT DRIVE/);
