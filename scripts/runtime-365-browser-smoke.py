@@ -38,6 +38,21 @@ def wait_365_panel(driver,timeout=15):
         """)
     return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_state)
 
+def wait_refresh(driver,previous_epoch,timeout=15):
+    def read_refresh(d):
+        return d.execute_script("""
+          const runtime=window.TitansRuntime;
+          if(!runtime)return null;
+          const info=runtime.refreshInfo?.();
+          const cache=runtime.apiCacheInfo?.()||[];
+          const urls=new Set(cache.filter(x=>x.hasValue).map(x=>x.url));
+          const panel=document.querySelector('.v19-365');
+          if(!info||info.epoch<=arguments[0]||info.last?.reason!=='scoreboard-control'||!panel||!panel.isConnected)return null;
+          if(!urls.has('/api/data')||!urls.has('/api/fan-intel'))return null;
+          return {epoch:info.epoch,last:info.last,cache};
+        """,previous_epoch)
+    return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_refresh)
+
 def severe_logs(driver):
     rows=[]
     for row in driver.get_log('browser'):
@@ -52,21 +67,29 @@ try:
     try:
         d.get(f'{BASE}/#home')
         panel_state=wait_365_panel(d)
-        runtime=d.execute_script("return window.TitansRuntime ? {version:window.TitansRuntime.version,route:window.TitansRuntime.route(),cache:window.TitansRuntime.apiCacheInfo()} : null")
+        runtime=d.execute_script("return window.TitansRuntime ? {version:window.TitansRuntime.version,route:window.TitansRuntime.route(),cache:window.TitansRuntime.apiCacheInfo(),refresh:window.TitansRuntime.refreshInfo()} : null")
         phase=d.execute_script("return document.body.dataset.v19Phase || ''")
         cards=d.find_elements(By.CSS_SELECTOR,'.v19-365-grid > a')
-        if not runtime or runtime.get('version')!='1.9.0': raise RuntimeError(f'Runtime missing or wrong version: {runtime}')
+        if not runtime or runtime.get('version')!='1.10.0': raise RuntimeError(f'Runtime missing or wrong version: {runtime}')
         if runtime.get('route')!='home': raise RuntimeError(f'Runtime route mismatch: {runtime}')
         if not phase or len(cards)!=4: raise RuntimeError(f'365 panel contract failed: phase={phase} cards={len(cards)} state={panel_state}')
         urls={row.get('url') for row in runtime.get('cache',[])}
         if '/api/data' not in urls or '/api/fan-intel' not in urls: raise RuntimeError(f'Shared API cache missing core rows: {runtime}')
+
+        previous_epoch=(runtime.get('refresh') or {}).get('epoch',0)
+        refresh_button=wait_css(d,'#refresh-button')
+        refresh_button.click()
+        refresh_state=wait_refresh(d,previous_epoch)
+        refreshed_panel=wait_365_panel(d)
+        if refresh_state['epoch']!=previous_epoch+1: raise RuntimeError(f'Unexpected refresh epoch: before={previous_epoch} after={refresh_state}')
+
         d.execute_script("location.hash='#command'")
         wait_css(d,'.v15-command')
         d.execute_script("location.hash='#home'")
         return_state=wait_365_panel(d)
         count=d.execute_script("return document.querySelectorAll('.v19-365').length")
         if count!=1: raise RuntimeError(f'365 panel duplicated after route cycle: {count}')
-        result['desktop']={'phase':phase,'cards':len(cards),'runtimeVersion':runtime['version'],'routeCycle':True,'singlePanel':True,'cacheUrls':sorted(urls),'panel':panel_state,'returnPanel':return_state}
+        result['desktop']={'phase':phase,'cards':len(cards),'runtimeVersion':runtime['version'],'routeCycle':True,'singlePanel':True,'cacheUrls':sorted(urls),'panel':panel_state,'refresh':refresh_state,'refreshedPanel':refreshed_panel,'returnPanel':return_state}
         result['browserWarnings'].extend(severe_logs(d))
     finally:
         d.quit()
