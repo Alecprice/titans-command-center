@@ -53,3 +53,14 @@ test('Change Intelligence uses narrow observers and mobile-safe targets',()=>{
   assert.match(css,/min-height:48px/);
   assert.match(css,/prefers-reduced-motion:reduce/);
 });
+
+test('Change Intelligence mounts synchronously and resolves the live host after async hydration',()=>{
+  const js=read('change-intelligence-v18.js');
+  assert.match(js,/data-v18-loading/);
+  assert.match(js,/ensureMount\(firstHost\)/);
+  assert.match(js,/state\.rendering/);
+  assert.match(js,/const host=document\.querySelector\('\.v15-command-view'\);/);
+  assert.match(js,/!host\|\|!host\.isConnected/);
+  assert.match(js,/routeEpoch/);
+  assert.doesNotMatch(js,/const token=\+\+state\.serial/);
+});
