@@ -28,17 +28,30 @@ try:
       if(!card||!app?.firstElementChild)return null;
       return {text:card.textContent.trim(),route:location.hash,accountGuest:Boolean(window.TitansAccount?.guest)};
     """)
-    if 'GUEST' not in guest['text'].upper(): raise RuntimeError(f'guest state missing: {guest}')
+    if 'GUEST' not in guest['text'].upper() or not guest['accountGuest']: raise RuntimeError(f'guest state missing: {guest}')
+
     d.find_element(By.ID,'mobile-more-button').click()
     wait(d,"return document.querySelector('#sidebar')?.classList.contains('open')")
     d.find_element(By.CSS_SELECTOR,'[data-account-open]').click()
     panel=wait(d,"""const p=document.querySelector('.account-panel');if(!p)return null;const r=p.getBoundingClientRect();return {text:p.textContent.trim(),w:r.width,h:r.height,bottom:r.bottom,vh:innerHeight};""")
     if 'Continue as guest' not in panel['text'] or panel['w']<300 or panel['bottom']>panel['vh']+1: raise RuntimeError(f'account panel unusable: {panel}')
     d.find_element(By.CSS_SELECTOR,'[data-account-close]').click()
+
+    outage=d.execute_async_script("""
+      const done=arguments[arguments.length-1],real=window.fetch;
+      window.fetch=(input,init)=>String(input).includes('/api/account/auth/')?Promise.reject(new TypeError('simulated auth outage')):real(input,init);
+      window.TitansAccount.refresh().then(()=>{
+        const card=document.querySelector('.account-sheet-card');
+        const out={guest:Boolean(window.TitansAccount.guest),text:card?.textContent?.trim()||''};
+        window.fetch=real;done(out);
+      }).catch(error=>{window.fetch=real;done({error:String(error)})});
+    """)
+    if outage.get('error') or not outage.get('guest') or 'GUEST' not in outage.get('text','').upper(): raise RuntimeError(f'auth outage did not preserve guest mode: {outage}')
+
     d.execute_script("location.hash='#roster'")
     roster=wait(d,"return location.hash==='#roster'&&document.querySelector('#app')?.firstElementChild?{route:location.hash,text:document.querySelector('#app').textContent.slice(0,120)}:null")
     if roster['route']!='#roster': raise RuntimeError(f'guest navigation blocked: {roster}')
-    result['guest']=guest;result['panel']=panel;result['roster']=roster;result['browserWarnings']=severe(d)
+    result['guest']=guest;result['panel']=panel;result['authOutage']=outage;result['roster']=roster;result['browserWarnings']=severe(d)
     if result['browserWarnings']: raise RuntimeError(f'Browser console errors: {result["browserWarnings"][:5]}')
     result['ok']=True
 except Exception as exc:result['error']=f'{type(exc).__name__}: {exc}'
