@@ -47,16 +47,27 @@ test('account module has one canonical entry path and sync is registered first',
   assert.ok(syncIndex>=0&&accountIndex>syncIndex,'account sync must register before the account module announces session state');
 });
 
-test('account production smoke retries the real mobile sheet entry instead of bypassing it',()=>{
+test('mobile Account entry is promoted above the long More navigation and stays desktop-footer compatible',()=>{
+  const account=read('account-v112.js');
+  const css=read('account-v112.css');
+  assert.match(account,/const phone=matchMedia\('\(max-width:760px\)'\)/);
+  assert.match(account,/function placeEntryCard\(card\)/);
+  assert.match(account,/if\(phone\.matches\)nav\.before\(card\);else foot\.prepend\(card\)/);
+  assert.match(account,/phone\.addEventListener\?\.\('change'/);
+  assert.match(css,/#sidebar>\.account-sheet-card\{flex:0 0 auto/);
+  assert.match(css,/#sidebar>\.account-sheet-card button\{min-height:44px\}/);
+});
+
+test('account production smoke requires a visible real mobile-sheet click without scripted scrolling',()=>{
   const smoke=read('scripts/account-browser-smoke.py');
-  assert.match(smoke,/def open_account_from_sheet\(driver,attempts=3\):/);
-  assert.match(smoke,/if not opened:/);
-  assert.match(smoke,/wait_sheet_settled\(driver\)/);
-  assert.match(smoke,/scrollIntoView/);
+  assert.match(smoke,/def wait_account_entry\(driver,timeout=5\):/);
+  assert.match(smoke,/#sidebar > \.account-sheet-card \[data-account-open\]/);
+  assert.match(smoke,/r\.bottom>visibleBottom\+1/);
   assert.match(smoke,/button\.click\(\)/);
-  assert.match(smoke,/s\.inert/);
+  assert.match(smoke,/ElementClickInterceptedException/);
   assert.match(smoke,/ElementNotInteractableException/);
   assert.match(smoke,/StaleElementReferenceException/);
+  assert.doesNotMatch(smoke,/scrollIntoView/);
   assert.doesNotMatch(smoke,/execute_script\([^\n]*data-account-open[^\n]*\.click\(\)/);
 });
 

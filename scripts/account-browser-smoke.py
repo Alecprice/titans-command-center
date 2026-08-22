@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException
+from selenium.common.exceptions import ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -42,6 +42,16 @@ def wait_sheet_settled(driver,timeout=8):
       return r.top<innerHeight&&r.bottom<=dr.top+2?{top:r.top,bottom:r.bottom,dockTop:dr.top}:null;
     """))
 
+def wait_account_entry(driver,timeout=5):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const b=document.querySelector('#sidebar > .account-sheet-card [data-account-open]'),s=document.querySelector('#sidebar'),dock=document.querySelector('.mobile-nav');
+      if(!b||!s?.classList.contains('open')||s.inert)return null;
+      const r=b.getBoundingClientRect(),sr=s.getBoundingClientRect(),dr=dock?.getBoundingClientRect(),style=getComputedStyle(b);
+      const visibleTop=Math.max(0,sr.top),visibleBottom=Math.min(innerHeight,sr.bottom,dr?.top??innerHeight);
+      if(style.visibility==='hidden'||style.display==='none'||r.width<44||r.height<44||r.top<visibleTop-1||r.bottom>visibleBottom+1)return null;
+      return {top:r.top,bottom:r.bottom,w:r.width,h:r.height,visibleTop,visibleBottom,parent:document.querySelector('#sidebar > .account-sheet-card')?'sidebar':'other'};
+    """))
+
 def open_account_from_sheet(driver,attempts=3):
     last_error=None
     for _ in range(attempts):
@@ -50,17 +60,11 @@ def open_account_from_sheet(driver,attempts=3):
             driver.find_element(By.ID,'mobile-more-button').click()
             wait_sheet_settled(driver)
         try:
-            button=WebDriverWait(driver,4,poll_frequency=.1).until(lambda d:d.find_element(By.CSS_SELECTOR,'.account-sheet-card [data-account-open]'))
-            driver.execute_script("arguments[0].scrollIntoView({block:'nearest',inline:'nearest'});",button)
-            WebDriverWait(driver,4,poll_frequency=.1).until(lambda d:d.execute_script("""
-              const b=document.querySelector('.account-sheet-card [data-account-open]'),s=document.querySelector('#sidebar');
-              if(!b||!s?.classList.contains('open')||s.inert)return false;
-              const r=b.getBoundingClientRect(),sr=s.getBoundingClientRect(),style=getComputedStyle(b);
-              return style.visibility!=='hidden'&&style.display!=='none'&&r.width>=44&&r.height>=44&&r.top>=sr.top-1&&r.bottom<=sr.bottom+1;
-            """))
+            geometry=wait_account_entry(driver)
+            button=driver.find_element(By.CSS_SELECTOR,'#sidebar > .account-sheet-card [data-account-open]')
             button.click()
-            return True
-        except (ElementNotInteractableException,StaleElementReferenceException) as exc:
+            return geometry
+        except (ElementClickInterceptedException,ElementNotInteractableException,StaleElementReferenceException) as exc:
             last_error=exc
             time.sleep(.12)
     if last_error:raise last_error
@@ -77,8 +81,8 @@ def wait_account_panel(driver,timeout=8):
 def state(driver):
     try:
         return driver.execute_script("""
-          const sidebar=document.querySelector('#sidebar'),dock=document.querySelector('.mobile-nav'),account=document.querySelector('.account-panel'),card=document.querySelector('.account-sheet-card');
-          const sr=sidebar?.getBoundingClientRect(),dr=dock?.getBoundingClientRect(),ar=account?.getBoundingClientRect();
+          const sidebar=document.querySelector('#sidebar'),dock=document.querySelector('.mobile-nav'),account=document.querySelector('.account-panel'),card=document.querySelector('.account-sheet-card'),entry=card?.querySelector('[data-account-open]');
+          const sr=sidebar?.getBoundingClientRect(),dr=dock?.getBoundingClientRect(),ar=account?.getBoundingClientRect(),er=entry?.getBoundingClientRect();
           return {
             hash:location.hash,
             viewport:{w:innerWidth,h:innerHeight},
@@ -87,6 +91,8 @@ def state(driver):
             accountApi:Boolean(window.TitansAccount),
             accountGuest:window.TitansAccount?.guest??null,
             accountCard:card?.textContent?.trim()||'',
+            accountCardAtSidebarTop:Boolean(document.querySelector('#sidebar > .account-sheet-card')),
+            accountEntry:er?{top:er.top,bottom:er.bottom,width:er.width,height:er.height}:null,
             accountPanel:ar?{top:ar.top,bottom:ar.bottom,width:ar.width,height:ar.height,text:(account?.textContent||'').slice(0,180)}:null,
             sidebar:{open:Boolean(sidebar?.classList.contains('open')),inert:Boolean(sidebar?.inert),rect:sr?{top:sr.top,bottom:sr.bottom,width:sr.width,height:sr.height}:null},
             moreExpanded:document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded')||null,
@@ -111,7 +117,7 @@ try:
 
     stage='open-more';d.find_element(By.ID,'mobile-more-button').click()
     stage='wait-more';sheet=wait_sheet_settled(d)
-    stage='open-account';open_account_from_sheet(d)
+    stage='open-account';entry=open_account_from_sheet(d)
     stage='wait-account-panel';panel=wait_account_panel(d)
     if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')
     stage='close-account';d.find_element(By.CSS_SELECTOR,'.account-panel [data-account-close]').click()
@@ -131,7 +137,7 @@ try:
     if roster['route']!='#roster': raise RuntimeError(f'guest navigation blocked: {roster}')
     stage='console';result['browserWarnings']=severe(d)
     if result['browserWarnings']: raise RuntimeError(f'Browser console errors: {result["browserWarnings"][:5]}')
-    result.update({'ok':True,'guest':guest,'sheet':sheet,'panel':panel,'authOutage':outage,'roster':roster});stage='complete'
+    result.update({'ok':True,'guest':guest,'sheet':sheet,'accountEntry':entry,'panel':panel,'authOutage':outage,'roster':roster});stage='complete'
 except Exception as exc:
     result['stage']=stage;result['error']=f'{type(exc).__name__}: {exc}'
     if d is not None:result['state']=state(d)
