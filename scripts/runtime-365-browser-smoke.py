@@ -73,6 +73,16 @@ def wait_refresh(driver,previous_epoch,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_refresh)
 
 
+def wait_mobile_sheet(driver,timeout=10):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const s=document.querySelector('#sidebar'),more=document.querySelector('#mobile-more-button'),dock=document.querySelector('.mobile-nav');
+      const r=s?.getBoundingClientRect(),dr=dock?.getBoundingClientRect();
+      if(!s?.classList.contains('open')||more?.getAttribute('aria-expanded')!=='true'||!r||!dr||r.width<=0||r.height<=0)return null;
+      if(r.bottom>dr.top+2)return null;
+      return {top:r.top,bottom:r.bottom,height:r.height,links:[...s.querySelectorAll('.nav a')].length,dockTop:dr.top,transform:getComputedStyle(s).transform};
+    """))
+
+
 def severe_logs(driver):
     rows=[]
     for row in driver.get_log('browser'):
@@ -150,13 +160,7 @@ try:
         if not {'Home','Roster','Game','Search','More'}.issubset(dock_labels): raise RuntimeError(f'Mobile five-action dock labels invalid: {mobile}')
 
         m.find_element(By.ID,'mobile-more-button').click()
-        sheet=WebDriverWait(m,10,poll_frequency=.1).until(lambda driver:driver.execute_script("""
-          const s=document.querySelector('#sidebar'),more=document.querySelector('#mobile-more-button');
-          const r=s?.getBoundingClientRect();
-          if(!s?.classList.contains('open')||more?.getAttribute('aria-expanded')!=='true'||!r||r.width<=0||r.height<=0)return null;
-          return {top:r.top,bottom:r.bottom,height:r.height,links:[...s.querySelectorAll('.nav a')].length};
-        """))
-        if sheet['bottom']>mobile['dock']['y']+2: raise RuntimeError(f'Mobile sheet overlaps dock: sheet={sheet} mobile={mobile}')
+        sheet=wait_mobile_sheet(m)
         m.execute_script("document.querySelector('#app').click()")
         WebDriverWait(m,5).until(lambda driver:not driver.find_element(By.ID,'sidebar').get_attribute('class').split().__contains__('open'))
 
