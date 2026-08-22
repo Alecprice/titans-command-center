@@ -1,0 +1,47 @@
+(() => {
+  'use strict';
+  const AUTH='https://ep-cold-moon-a6z7a2ag.neonauth.us-west-2.aws.neon.tech/neondb/auth';
+  const state={session:null,loading:true,mode:'signin'};
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  async function auth(path,{method='GET',body}={}){
+    const res=await fetch(`${AUTH}/${path}`,{method,credentials:'include',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});
+    let data={};try{data=await res.json()}catch{}
+    if(!res.ok)throw new Error(data?.message||data?.error||'Account request failed');
+    return data;
+  }
+  function ensureCss(){if(document.querySelector('link[data-account-v112]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='/account-v112.css?v=1';link.dataset.accountV112='';document.head.appendChild(link);}
+  function user(){return state.session?.user||state.session?.data?.user||null;}
+  function renderEntry(){
+    const u=user();
+    let btn=document.querySelector('#account-button');
+    if(!btn){btn=document.createElement('button');btn.type='button';btn.id='account-button';btn.className='account-button';document.querySelector('.top-actions')?.prepend(btn);}
+    btn.textContent=u?(u.name||u.email||'Account'):'Guest';
+    btn.setAttribute('aria-label',u?'Open account':'Sign in or create account');
+    let card=document.querySelector('.account-sheet-card');
+    if(!card){card=document.createElement('section');card.className='account-sheet-card';document.querySelector('#sidebar .sidebar-foot')?.prepend(card);}
+    card.innerHTML=u?`<small>SIGNED IN</small><strong>${esc(u.name||u.email||'Titans fan')}</strong><button type="button" data-account-open>Account</button>`:`<small>VIEWING AS GUEST</small><strong>No account required</strong><button type="button" data-account-open>Sign in / Sign up</button>`;
+  }
+  function close(){document.querySelector('.account-modal')?.remove();document.body.classList.remove('account-open');}
+  function open(mode='signin'){
+    state.mode=mode;close();
+    const u=user(),modal=document.createElement('div');modal.className='account-modal';modal.innerHTML=`<div class="account-backdrop" data-account-close></div><section class="account-panel" role="dialog" aria-modal="true" aria-labelledby="account-title"><button class="account-close" data-account-close aria-label="Close account">×</button>${u?`<small class="account-eyebrow">YOUR TITANS ACCOUNT</small><h2 id="account-title">${esc(u.name||'Signed in')}</h2><p>${esc(u.email||'')}</p><div class="account-benefits"><span>Favorites can sync across devices.</span><span>Saved preferences can follow your account.</span><span>Guest browsing stays available anytime.</span></div><button class="account-primary" data-account-signout type="button">Sign out</button>`:`<small class="account-eyebrow">OPTIONAL ACCOUNT</small><h2 id="account-title">${mode==='signup'?'Create your account':'Welcome back'}</h2><p>Everything is still available as a guest. Sign in only if you want synced favorites and preferences.</p><div class="account-tabs" role="tablist"><button type="button" data-account-mode="signin" class="${mode==='signin'?'active':''}">Log in</button><button type="button" data-account-mode="signup" class="${mode==='signup'?'active':''}">Sign up</button></div><form class="account-form">${mode==='signup'?'<label>Name<input name="name" autocomplete="name" required maxlength="80"></label>':''}<label>Email<input name="email" type="email" autocomplete="email" required></label><label>Password<input name="password" type="password" autocomplete="${mode==='signup'?'new-password':'current-password'}" required minlength="8"></label><div class="account-error" role="alert"></div><button class="account-primary" type="submit">${mode==='signup'?'Create account':'Log in'}</button><button class="account-guest" type="button" data-account-close>Continue as guest</button></form>`}</section>`;
+    document.body.appendChild(modal);document.body.classList.add('account-open');modal.querySelector('input')?.focus();
+  }
+  async function refresh(){state.loading=true;try{state.session=await auth('get-session');}catch{state.session=null;}state.loading=false;renderEntry();window.dispatchEvent(new CustomEvent('titans:account',{detail:{user:user()}}));}
+  document.addEventListener('click',async e=>{
+    const t=e.target instanceof Element?e.target:null;if(!t)return;
+    if(t.closest('#account-button,[data-account-open]')){open(user()?'account':'signin');return;}
+    if(t.closest('[data-account-close]')){close();return;}
+    const mode=t.closest('[data-account-mode]')?.dataset.accountMode;if(mode){open(mode);return;}
+    if(t.closest('[data-account-signout]')){try{await auth('sign-out',{method:'POST'});}catch{}state.session=null;close();renderEntry();return;}
+  });
+  document.addEventListener('submit',async e=>{
+    const form=e.target;if(!(form instanceof HTMLFormElement)||!form.classList.contains('account-form'))return;e.preventDefault();
+    const fd=new FormData(form),error=form.querySelector('.account-error'),submit=form.querySelector('.account-primary');error.textContent='';submit.disabled=true;
+    try{const email=String(fd.get('email')||'').trim(),password=String(fd.get('password')||'');if(state.mode==='signup')await auth('sign-up/email',{method:'POST',body:{name:String(fd.get('name')||'Titans fan').trim(),email,password}});else await auth('sign-in/email',{method:'POST',body:{email,password}});await refresh();close();}
+    catch(err){error.textContent=err instanceof Error?err.message:'Could not complete account request.';}finally{submit.disabled=false;}
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.account-modal'))close();});
+  ensureCss();refresh();
+  window.TitansAccount={open,refresh,get user(){return user();},get guest(){return !user();}};
+})();
