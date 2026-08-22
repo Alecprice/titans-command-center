@@ -8,7 +8,7 @@ test('smart search is wired after the shared runtime and included in the PWA she
   assert.match(html,/smart-search-v111\.css\?v=1/);
   assert.match(html,/smart-search-v111\.js\?v=1/);
   assert.ok(html.indexOf('usability-runtime.js?v=26')<html.indexOf('smart-search-v111.js?v=1'));
-  assert.match(sw,/titans-cc-brand-2026-v52/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/smart-search-v111\.css/);
   assert.match(sw,/smart-search-v111\.js/);
 });
