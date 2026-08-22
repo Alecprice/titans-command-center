@@ -73,6 +73,14 @@ test('runtime 365 browser smoke uses returning-user setup and current five-actio
   assert.doesNotMatch(smoke,/len\(mobile\['dockTargets'\]\)!=6/);
 });
 
+test('runtime 365 mobile sheet check waits for transition geometry to settle',()=>{
+  const smoke=read('scripts/runtime-365-browser-smoke.py');
+  assert.match(smoke,/r\.bottom>dr\.top\+2/);
+  assert.match(smoke,/r\.top>=innerHeight/);
+  assert.match(smoke,/dockTop:dr\.top/);
+  assert.match(smoke,/overlaps dock after settle/);
+});
+
 test('PWA precaches the runtime and 365 assets',()=>{
   const sw=read('sw.js');
   assert.match(sw,/titans-cc-brand-2026-v\d+/);
