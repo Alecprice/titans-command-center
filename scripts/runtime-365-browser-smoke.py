@@ -53,6 +53,13 @@ def wait_refresh(driver,previous_epoch,timeout=15):
         """,previous_epoch)
     return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_refresh)
 
+def dismiss_transient_modal(driver):
+    driver.execute_script("""
+      const close=document.querySelector('[data-v10-close]');
+      if(close)close.click();
+    """)
+    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:d.execute_script("return !document.querySelector('.v10-modal-backdrop')"))
+
 def severe_logs(driver):
     rows=[]
     for row in driver.get_log('browser'):
@@ -77,6 +84,7 @@ try:
         if '/api/data' not in urls or '/api/fan-intel' not in urls: raise RuntimeError(f'Shared API cache missing core rows: {runtime}')
 
         previous_epoch=(runtime.get('refresh') or {}).get('epoch',0)
+        dismiss_transient_modal(d)
         refresh_button=wait_css(d,'#refresh-button')
         refresh_button.click()
         refresh_state=wait_refresh(d,previous_epoch)
@@ -121,7 +129,7 @@ try:
         if any(x['h']<44 for x in mobile['targets']): raise RuntimeError(f'Mobile 365 card target too small: {mobile}')
         if not mobile['menu'] or mobile['menu']['display']=='none' or mobile['menu']['w']<44 or mobile['menu']['h']<44 or mobile['menu']['x']<0 or mobile['menu']['y']<0: raise RuntimeError(f'Mobile menu unreachable: {mobile}')
         if not mobile['dock'] or mobile['dock']['display']=='none' or mobile['dock']['h']<60 or mobile['dock']['x']<0 or mobile['dock']['x']+mobile['dock']['w']>mobile['viewport']+1: raise RuntimeError(f'Mobile dock invalid: {mobile}')
-        if len(mobile['dockTargets'])!=6 or any(x['h']<44 or x['w']<44 for x in mobile['dockTargets']): raise RuntimeError(f'Mobile dock targets invalid: {mobile}')
+        if len(mobile['dockTargets'])!=5 or any(x['h']<44 or x['w']<44 for x in mobile['dockTargets']): raise RuntimeError(f'Mobile dock targets invalid: {mobile}')
 
         m.find_element(By.ID,'mobile-more-button').click()
         sheet=WebDriverWait(m,10,poll_frequency=.1).until(lambda driver:driver.execute_script("""
