@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Command Intelligence browser regression failure**
-- Source commit: `0d95438bc11fd0d0b9b31cd35313b71447ff136a`
+- Source commit: `06a725f58b3a8eb0f5d1772c62c6d8af1c1d979a`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -13,7 +13,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T00:18:59Z
+- Recorded: 2026-08-22T00:25:26Z
 
 ## Production regression
 
@@ -60,24 +60,24 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 222,
-  "marketMode": "configured-provider",
+  "marketRows": 6,
+  "marketMode": "published-reference",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "0d95438bc11fd0d0b9b31cd35313b71447ff136a",
-    "builtAt": "2026-08-22T00:18:01.234Z"
+    "commit": "06a725f58b3a8eb0f5d1772c62c6d8af1c1d979a",
+    "builtAt": "2026-08-22T00:23:52.187Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 12,
   "responseMs": {
-    "root": 15,
-    "health": 808,
-    "data": 335,
-    "stats": 148,
-    "market": 422,
-    "analytics": 690
+    "root": 107,
+    "health": 922,
+    "data": 630,
+    "stats": 414,
+    "market": 8238,
+    "analytics": 770
   },
-  "testedAt": "2026-08-22T00:18:26.951Z",
+  "testedAt": "2026-08-22T00:24:47.932Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -107,8 +107,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 121,
-  "testedAt": "2026-08-22T00:18:27.891Z"
+  "durationMs": 115,
+  "testedAt": "2026-08-22T00:24:48.947Z"
 }```
 
 ## Browser navigation regression
@@ -157,11 +157,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 0,
+  "maxLongTaskMs": 63,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 8.29,
-  "testedAt": "2026-08-22T00:18:40Z"
+  "durationSeconds": 14.37,
+  "testedAt": "2026-08-22T00:25:08Z"
 }```
 
 ## Listen Watch browser regression
@@ -194,8 +194,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.94,
-  "testedAt": "2026-08-22T00:18:43Z"
+  "durationSeconds": 2.03,
+  "testedAt": "2026-08-22T00:25:10Z"
 }```
 
 ## Command Intelligence browser regression
@@ -206,8 +206,8 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "stage": "mobile:command",
   "error": "TimeoutException: Message: \n",
-  "durationSeconds": 16.03,
-  "testedAt": "2026-08-22T00:18:59Z",
+  "durationSeconds": 16.08,
+  "testedAt": "2026-08-22T00:25:26Z",
   "hash": "#command",
   "pageText": "TITANS COMMAND INTELLIGENCE\nWhat changed. Why it matters. What comes next.\n\nA Titans-specific intelligence layer built around context instead of another wall of headlines.\n\nListen / Watch\nGame Day\nFan Hub\nChanges\nPress Room\nScheme Lab\nGlobal Fans\nStadium\nFan GM\nTime Machine\nGLOBAL FAN DESK\nBe a Titans fan anywhere\n\nKickoff translation, media routing, a local fan passport and spoiler controls without assuming everyone lives in Nashville.\n\nOpen Listen / Watch \u2192\nNext-game concierge\nTitans vs Seattle Seahawks\nYour device \u00b7 Mon, Aug 24, 12:00 AM UTC\nEastern \u00b7 Sun, Aug 23, 8:00 PM EDT\nNashville \u00b7 Sun, Aug 23, 7:00 PM CDT\nUTC \u00b7 Mon, Aug 24, 12:00 AM UTC\nFOX\nFan passport\nMy city\nCountry\nMy watch-party note\nSave on this device\nSPOILER-FREE MODE\nWatching later?\n\nMask common score elements across Command Center until you turn them back on.\n\nReveal scores\n\nCommunity map / nearby-fan counts are intentionally not fabricated. That feature needs an opt-in community backend and moderation before it can be trustworthy.\n\nMY TITANS\nPersonal fan profile\nFavorite player\nNo favorite selected\nAamil Wagner\nAlontae Taylor\nAmani Hooker\nAndre James\nAnthony Hill Jr.\nAustin Deculus\nAustin Schlottmann\nBishop Fitzgerald\nBrandon Crenshaw-Dickson\nBryce Oliver\nCalvin Ridley\nCam Ward\nCarnell Tate\nCedric Gray\nChimere Dike\nCody Barton\nCor'Dale Flott\nCordell Volson\nCorey Mayfield Jr.\nCourtney Jackson\nD'Ernest Johnson\nDan Moore Jr.\nDaniel Bellinger\nDavid Martin-Robinson\nDerrick Canteen\nDominique Hampton\nDorian Mausi\nDrew Moss\nEarnest Brown IV\nElic Ayomanor\nErick Hallett II\nFernando Carmona Jr.\nGarrett Dellinger\nG",
   "browserWarnings": []
