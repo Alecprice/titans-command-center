@@ -11,21 +11,33 @@ from selenium.webdriver.support.ui import WebDriverWait
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 OUT=Path('/tmp/mobile-navigation-browser-smoke.json')
 
+
 def driver_for(width,height):
     options=Options();options.add_argument('--headless=new');options.add_argument('--no-sandbox');options.add_argument('--disable-dev-shm-usage');options.add_argument(f'--window-size={width},{height}');options.set_capability('goog:loggingPrefs',{'browser':'ALL'});return webdriver.Chrome(options=options)
+
+
+def prepare_returning_user(driver):
+    driver.execute_script("""
+      localStorage.setItem('titans:v10Onboarded','1');
+      document.querySelector('#v10-onboarding [data-v10-close]')?.click();
+    """)
+    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding'))
+
 
 def wait(driver,script,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(script))
 
+
 def severe(driver):
     return [r.get('message','') for r in driver.get_log('browser') if r.get('level')=='SEVERE' and 'favicon' not in r.get('message','').lower()]
+
 
 result={'ok':False,'base':BASE,'devices':{},'browserWarnings':[]};start=time.time()
 try:
     for width,height in [(390,844),(360,800)]:
         d=driver_for(width,height)
         try:
-            d.get(f'{BASE}/#home')
+            d.get(f'{BASE}/#home');prepare_returning_user(d)
             state=wait(d,"""
               const menu=document.querySelector('#menu-button'),dock=document.querySelector('.mobile-nav'),more=document.querySelector('#mobile-more-button'),game=document.querySelector('.mobile-game-action'),search=document.querySelector('#mobile-search-button');
               if(!menu||!dock||!more||!game||!search)return null;
