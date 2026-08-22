@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + analytics + player headshot regressions passed**
-- Source commit: `4ca2cf5b69675348122bf35c8392869a3c36834b`
+- Source commit: `f6cd6eb0f432c7055b463c5bdd0e20a063166fbb`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -17,7 +17,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T03:22:23Z
+- Recorded: 2026-08-22T03:57:03Z
 
 ## Production regression
 
@@ -64,24 +64,24 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 224,
-  "marketMode": "configured-provider",
+  "marketRows": 6,
+  "marketMode": "published-reference",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "4ca2cf5b69675348122bf35c8392869a3c36834b",
-    "builtAt": "2026-08-22T03:21:07.898Z"
+    "commit": "f6cd6eb0f432c7055b463c5bdd0e20a063166fbb",
+    "builtAt": "2026-08-22T03:55:54.202Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 57,
-    "health": 227,
-    "data": 263,
-    "stats": 246,
-    "market": 653,
-    "analytics": 929
+    "root": 29,
+    "health": 816,
+    "data": 336,
+    "stats": 167,
+    "market": 7242,
+    "analytics": 756
   },
-  "testedAt": "2026-08-22T03:21:37.088Z",
+  "testedAt": "2026-08-22T03:56:25.972Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -111,8 +111,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 134,
-  "testedAt": "2026-08-22T03:21:38.294Z"
+  "durationMs": 141,
+  "testedAt": "2026-08-22T03:56:26.989Z"
 }```
 
 ## Browser navigation regression
@@ -161,11 +161,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 55,
+  "maxLongTaskMs": 54,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 15.59,
-  "testedAt": "2026-08-22T03:21:58Z"
+  "durationSeconds": 7.98,
+  "testedAt": "2026-08-22T03:56:39Z"
 }```
 
 ## Listen Watch browser regression
@@ -198,8 +198,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.56,
-  "testedAt": "2026-08-22T03:22:01Z"
+  "durationSeconds": 2.01,
+  "testedAt": "2026-08-22T03:56:42Z"
 }```
 
 ## Command Intelligence browser regression
@@ -257,8 +257,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.41,
-  "testedAt": "2026-08-22T03:22:04Z"
+  "durationSeconds": 2.49,
+  "testedAt": "2026-08-22T03:56:45Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -308,8 +308,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.52,
-  "testedAt": "2026-08-22T03:22:08Z"
+  "durationSeconds": 3.28,
+  "testedAt": "2026-08-22T03:56:48Z"
 }```
 
 ## Ask Titans browser regression
@@ -386,8 +386,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.78,
-  "testedAt": "2026-08-22T03:22:10Z"
+  "durationSeconds": 1.65,
+  "testedAt": "2026-08-22T03:56:50Z"
 }```
 
 ## Change Intelligence browser regression
@@ -424,8 +424,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.66,
-  "testedAt": "2026-08-22T03:22:13Z"
+  "durationSeconds": 2.69,
+  "testedAt": "2026-08-22T03:56:53Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -452,7 +452,7 @@
       "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
-      "width": 984
+      "width": 969
     },
     "returnPanel": {
       "cards": 4,
@@ -505,7 +505,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.22
+  "durationSeconds": 3.37
 }```
 
 ## Advanced analytics browser regression
@@ -550,8 +550,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.15,
-  "testedAt": "2026-08-22T03:22:19Z"
+  "durationSeconds": 1.66,
+  "testedAt": "2026-08-22T03:56:59Z"
 }```
 
 ## Player headshot browser regression
@@ -570,8 +570,8 @@
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.34,
-  "testedAt": "2026-08-22T03:22:23Z"
+  "durationSeconds": 3.22,
+  "testedAt": "2026-08-22T03:57:02Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
