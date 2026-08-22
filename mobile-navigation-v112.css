@@ -7,6 +7,7 @@
   .menu-button:before{content:'☰';font-size:20px;line-height:1;color:#f5f9ff}
   .menu-button:active{transform:scale(.96)}
   .menu-button[aria-expanded=true]{background:linear-gradient(145deg,#4b92db,#286ba7)!important;border-color:transparent!important}
+  .menu-button:focus-visible{outline:3px solid #86d2ff!important;outline-offset:3px!important}
   .topbar-wordmark{min-width:0}.topbar-wordmark span{font-size:10px}.topbar-wordmark strong{font-size:11px;white-space:nowrap}
   .search-wrap{height:42px;min-width:0!important;border-radius:14px!important}.search-wrap kbd{display:none}
   .top-actions{gap:6px}.top-actions .official-link,.top-actions .install-button{display:none!important}.top-actions .icon-button:not(#refresh-button){display:none!important}
@@ -14,7 +15,8 @@
 
   .mobile-nav{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;left:max(var(--pwa-edge),env(safe-area-inset-left));right:max(var(--pwa-edge),env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));height:var(--pwa-dock-h);z-index:60;padding:6px;border:1px solid rgba(134,210,255,.18);border-radius:22px;background:linear-gradient(180deg,rgba(15,39,63,.97),rgba(6,22,38,.98));box-shadow:0 18px 50px rgba(0,0,0,.46),inset 0 1px rgba(255,255,255,.055);backdrop-filter:blur(20px);overflow:visible}
   .mobile-nav a,.mobile-nav button{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:56px!important;padding:5px 2px!important;border:0!important;border-radius:16px!important;background:transparent!important;color:#8ea7be!important;font-size:9px!important;font-weight:800!important;line-height:1;letter-spacing:.01em;transition:transform .14s ease,background .14s ease,color .14s ease;touch-action:manipulation}
-  .mobile-nav a span,.mobile-nav button span{display:grid;place-items:center;width:27px;height:27px;border-radius:10px;font-size:17px!important;line-height:1;background:transparent;transition:background .14s ease,transform .14s ease}
+  .mobile-nav a span,.mobile-nav button span{display:grid;place-items:center;width:27px;height:27px;border-radius:10px;line-height:1;background:transparent;transition:background .14s ease,transform .14s ease}
+  .mobile-nav svg{width:18px;height:18px;display:block;fill:currentColor;stroke:none}
   .mobile-nav a.active,.mobile-nav button.active{color:#f7fbff!important;background:rgba(75,146,219,.13)!important}
   .mobile-nav a.active span,.mobile-nav button.active span{background:linear-gradient(145deg,#4b92db,#2f73ae);box-shadow:0 5px 16px rgba(75,146,219,.28);transform:translateY(-1px)}
   .mobile-nav a.active:after,.mobile-nav button.active:after{content:'';position:absolute;bottom:3px;width:16px;height:2px;border-radius:999px;background:#86d2ff}
@@ -32,6 +34,6 @@
   .toast{left:12px;right:12px;bottom:calc(var(--pwa-dock-h) + 24px + env(safe-area-inset-bottom));text-align:center}
 }
 @media(max-width:430px){
-  .topbar{padding-left:61px!important;padding-right:8px!important}.topbar-wordmark{display:none!important}.search-wrap{max-width:none}.mobile-nav{left:6px;right:6px;bottom:calc(6px + env(safe-area-inset-bottom));padding:5px;border-radius:20px}.mobile-nav a,.mobile-nav button{font-size:8px!important}.mobile-nav a span,.mobile-nav button span{width:25px;height:25px;font-size:15px!important}.sidebar{left:6px!important;right:6px!important;border-radius:21px!important}.sidebar .nav{grid-template-columns:1fr 1fr}.sidebar .nav a{min-height:48px}}
-@media(max-width:360px){.mobile-nav a,.mobile-nav button{font-size:7px!important}.mobile-nav a span,.mobile-nav button span{width:23px;height:23px}.sidebar .nav{grid-template-columns:1fr}}
+  .topbar{padding-left:61px!important;padding-right:8px!important}.topbar-wordmark{display:none!important}.search-wrap{max-width:none}.mobile-nav{left:6px;right:6px;bottom:calc(6px + env(safe-area-inset-bottom));padding:5px;border-radius:20px}.mobile-nav a,.mobile-nav button{font-size:8px!important}.mobile-nav a span,.mobile-nav button span{width:25px;height:25px}.mobile-nav svg{width:17px;height:17px}.sidebar{left:6px!important;right:6px!important;border-radius:21px!important}.sidebar .nav{grid-template-columns:1fr 1fr}.sidebar .nav a{min-height:48px}}
+@media(max-width:360px){.mobile-nav a,.mobile-nav button{font-size:7px!important}.mobile-nav a span,.mobile-nav button span{width:23px;height:23px}.mobile-nav svg{width:16px;height:16px}.sidebar .nav{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.sidebar,.mobile-nav a,.mobile-nav button,.mobile-nav a span,.mobile-nav button span,.menu-button{transition:none!important}}
