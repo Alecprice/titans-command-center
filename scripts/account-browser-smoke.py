@@ -89,6 +89,15 @@ def wait_account_panel(driver,timeout=8):
       return {text:p.textContent.trim(),w:r.width,h:r.height,bottom:r.bottom,vh:innerHeight};
     """))
 
+def wait_guest_tools(driver,timeout=8):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const panel=document.querySelector('.account-panel'),exp=panel?.querySelector('[data-account-export]'),reset=panel?.querySelector('[data-account-reset]');
+      if(!panel||!exp||!reset)return null;
+      const er=exp.getBoundingClientRect(),rr=reset.getBoundingClientRect();
+      if(er.height<44||rr.height<44||er.width<44||rr.width<44)return null;
+      return {exportLabel:exp.textContent.trim(),resetLabel:reset.textContent.trim(),exportHeight:er.height,resetHeight:rr.height,guest:Boolean(window.TitansAccount?.guest)};
+    """))
+
 def state(driver):
     try:
         return driver.execute_script("""
@@ -105,7 +114,7 @@ def state(driver):
             accountCard:card?.textContent?.trim()||'',
             accountCardAtSidebarTop:Boolean(document.querySelector('#sidebar > .account-sheet-card')),
             accountEntry:er?{top:er.top,bottom:er.bottom,width:er.width,height:er.height}:null,
-            accountPanel:ar?{top:ar.top,bottom:ar.bottom,width:ar.width,height:ar.height,text:(account?.textContent||'').slice(0,180)}:null,
+            accountPanel:ar?{top:ar.top,bottom:ar.bottom,width:ar.width,height:ar.height,text:(account?.textContent||'').slice(0,220)}:null,
             sidebar:{open:Boolean(sidebar?.classList.contains('open')),inert:Boolean(sidebar?.inert),ariaHidden:sidebar?.getAttribute('aria-hidden')||null,rect:sr?{top:sr.top,bottom:sr.bottom,width:sr.width,height:sr.height}:null},
             moreExpanded:document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded')||null,
             dock:dr?{top:dr.top,bottom:dr.bottom,width:dr.width,height:dr.height}:null,
@@ -133,6 +142,13 @@ try:
     stage='open-account';entry=open_account_from_sheet(d)
     stage='wait-account-panel';panel=wait_account_panel(d)
     if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')
+
+    stage='guest-portability-tools';tools=wait_guest_tools(d)
+    if tools['exportLabel']!='Export this device' or tools['resetLabel']!='Reset this device' or not tools['guest']: raise RuntimeError(f'guest portability tools invalid: {tools}')
+    stage='arm-reset';d.find_element(By.CSS_SELECTOR,'.account-panel [data-account-reset]').click()
+    armed=wait(d,"""const b=document.querySelector('.account-panel [data-account-reset]'),h=document.querySelector('.account-reset-hint');return b?.dataset.armed==='true'&&b.textContent.trim()==='Confirm reset'?{label:b.textContent.trim(),hint:h?.textContent.trim()||'',guest:Boolean(window.TitansAccount?.guest),hash:location.hash}:null;""",5)
+    if 'within 6 seconds' not in armed['hint'] or not armed['guest'] or armed['hash']!='#home': raise RuntimeError(f'reset confirmation invalid: {armed}')
+
     stage='close-account';d.find_element(By.CSS_SELECTOR,'.account-panel [data-account-close]').click()
     wait(d,"return !document.querySelector('.account-modal')",5)
 
@@ -150,7 +166,7 @@ try:
     if roster['route']!='#roster': raise RuntimeError(f'guest navigation blocked: {roster}')
     stage='console';result['browserWarnings']=severe(d)
     if result['browserWarnings']: raise RuntimeError(f'Browser console errors: {result["browserWarnings"][:5]}')
-    result.update({'ok':True,'guest':guest,'mobileShell':shell,'sheet':sheet,'accountEntry':entry,'panel':panel,'authOutage':outage,'roster':roster});stage='complete'
+    result.update({'ok':True,'guest':guest,'mobileShell':shell,'sheet':sheet,'accountEntry':entry,'panel':panel,'portabilityTools':tools,'resetArmed':armed,'authOutage':outage,'roster':roster});stage='complete'
 except Exception as exc:
     result['stage']=stage;result['error']=f'{type(exc).__name__}: {exc}'
     if d is not None:result['state']=state(d)
