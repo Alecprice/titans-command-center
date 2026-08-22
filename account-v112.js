@@ -1,8 +1,10 @@
 (() => {
   'use strict';
+  if(window.__TitansAccountV112)return;
+  window.__TitansAccountV112=true;
   const AUTH='/api/account/auth';
   const state={session:null,loading:true,mode:'signin',sync:{state:'idle',message:'Selected settings sync when you sign in.'}};
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   async function auth(path,{method='GET',body}={}){
     const res=await fetch(`${AUTH}/${path}`,{method,credentials:'same-origin',cache:'no-store',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});
     let data={};try{data=await res.json()}catch{}
