@@ -24,38 +24,40 @@ def prepare_returning_user(driver):
     """)
     WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding'))
 
+def wait_sheet_settled(driver,timeout=10):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const s=document.querySelector('#sidebar'),m=document.querySelector('#mobile-more-button'),dock=document.querySelector('.mobile-nav');
+      const r=s?.getBoundingClientRect(),dr=dock?.getBoundingClientRect();
+      if(!s?.classList.contains('open')||m?.getAttribute('aria-expanded')!=='true'||!r||!dr||r.width<=0||r.height<=0)return null;
+      return r.bottom<=dr.top+2?{top:r.top,bottom:r.bottom,dockTop:dr.top}:null;
+    """))
+
+def wait_account_panel(driver,timeout=10):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const p=document.querySelector('.account-panel');if(!p)return null;
+      const r=p.getBoundingClientRect(),style=getComputedStyle(p);
+      if(style.visibility==='hidden'||style.display==='none'||r.width<300||r.height<=0||r.bottom>innerHeight+1)return null;
+      return {text:p.textContent.trim(),w:r.width,h:r.height,bottom:r.bottom,vh:innerHeight};
+    """))
+
 def severe(driver):
     return [r.get('message','') for r in driver.get_log('browser') if r.get('level')=='SEVERE' and 'favicon' not in r.get('message','').lower()]
 
 result={'ok':False,'base':BASE,'browserWarnings':[]};start=time.time();d=driver_for()
 try:
-    d.get(f'{BASE}/#home')
-    prepare_returning_user(d)
-    guest=wait(d,"""
-      const card=document.querySelector('.account-sheet-card'),app=document.querySelector('#app');
-      if(!card||!app?.firstElementChild)return null;
-      return {text:card.textContent.trim(),route:location.hash,accountGuest:Boolean(window.TitansAccount?.guest)};
-    """)
+    d.get(f'{BASE}/#home');prepare_returning_user(d)
+    guest=wait(d,"""const card=document.querySelector('.account-sheet-card'),app=document.querySelector('#app');if(!card||!app?.firstElementChild)return null;return {text:card.textContent.trim(),route:location.hash,accountGuest:Boolean(window.TitansAccount?.guest)};""")
     if 'GUEST' not in guest['text'].upper() or not guest['accountGuest']: raise RuntimeError(f'guest state missing: {guest}')
-
-    d.find_element(By.ID,'mobile-more-button').click()
-    wait(d,"return document.querySelector('#sidebar')?.classList.contains('open')")
-    d.find_element(By.CSS_SELECTOR,'[data-account-open]').click()
-    panel=wait(d,"""const p=document.querySelector('.account-panel');if(!p)return null;const r=p.getBoundingClientRect();return {text:p.textContent.trim(),w:r.width,h:r.height,bottom:r.bottom,vh:innerHeight};""")
-    if 'Continue as guest' not in panel['text'] or panel['w']<300 or panel['bottom']>panel['vh']+1: raise RuntimeError(f'account panel unusable: {panel}')
+    d.find_element(By.ID,'mobile-more-button').click();wait_sheet_settled(d)
+    d.find_element(By.CSS_SELECTOR,'[data-account-open]').click();panel=wait_account_panel(d)
+    if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')
     d.find_element(By.CSS_SELECTOR,'[data-account-close]').click()
-
     outage=d.execute_async_script("""
       const done=arguments[arguments.length-1],real=window.fetch;
       window.fetch=(input,init)=>String(input).includes('/api/account/auth/')?Promise.reject(new TypeError('simulated auth outage')):real(input,init);
-      window.TitansAccount.refresh().then(()=>{
-        const card=document.querySelector('.account-sheet-card');
-        const out={guest:Boolean(window.TitansAccount.guest),text:card?.textContent?.trim()||''};
-        window.fetch=real;done(out);
-      }).catch(error=>{window.fetch=real;done({error:String(error)})});
+      window.TitansAccount.refresh().then(()=>{const card=document.querySelector('.account-sheet-card');const out={guest:Boolean(window.TitansAccount.guest),text:card?.textContent?.trim()||''};window.fetch=real;done(out);}).catch(error=>{window.fetch=real;done({error:String(error)})});
     """)
     if outage.get('error') or not outage.get('guest') or 'GUEST' not in outage.get('text','').upper(): raise RuntimeError(f'auth outage did not preserve guest mode: {outage}')
-
     d.execute_script("location.hash='#roster'")
     roster=wait(d,"return location.hash==='#roster'&&document.querySelector('#app')?.firstElementChild?{route:location.hash,text:document.querySelector('#app').textContent.slice(0,120)}:null")
     if roster['route']!='#roster': raise RuntimeError(f'guest navigation blocked: {roster}')
