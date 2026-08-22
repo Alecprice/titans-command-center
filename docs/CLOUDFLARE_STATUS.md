@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + Ask Titans browser regression failure**
-- Source commit: `17cc3cc4d1836ade031a39ce9417e674c98d2215`
+- Status: **deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + analytics + player headshot regressions passed**
+- Source commit: `e422410708381e8532b9875b5b07c2b115e5243a`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -11,12 +11,12 @@
 - Listen Watch browser regression: success
 - Command Intelligence browser regression: success
 - Player Intelligence / Game Day browser regression: success
-- Ask Titans browser regression: failure
-- Change Intelligence browser regression: skipped
-- Advanced analytics browser regression: skipped
-- Player headshot browser regression: skipped
+- Ask Titans browser regression: success
+- Change Intelligence browser regression: success
+- Advanced analytics browser regression: success
+- Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T02:56:34Z
+- Recorded: 2026-08-22T03:03:33Z
 
 ## Production regression
 
@@ -35,7 +35,7 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v48",
+  "serviceWorkerCache": "titans-cc-brand-2026-v49",
   "precachePaths": 84,
   "pwaIcons": {
     "icon192": {
@@ -68,19 +68,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "17cc3cc4d1836ade031a39ce9417e674c98d2215",
-    "builtAt": "2026-08-22T02:55:15.053Z"
+    "commit": "e422410708381e8532b9875b5b07c2b115e5243a",
+    "builtAt": "2026-08-22T03:02:28.122Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 16,
-    "health": 870,
-    "data": 414,
-    "stats": 238,
-    "market": 2262,
-    "analytics": 1194
+    "root": 160,
+    "health": 883,
+    "data": 384,
+    "stats": 225,
+    "market": 493,
+    "analytics": 535
   },
-  "testedAt": "2026-08-22T02:55:42.939Z",
+  "testedAt": "2026-08-22T03:02:56.279Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -110,8 +110,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 123,
-  "testedAt": "2026-08-22T02:55:44.396Z"
+  "durationMs": 140,
+  "testedAt": "2026-08-22T03:02:57.082Z"
 }```
 
 ## Browser navigation regression
@@ -160,11 +160,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 136,
+  "maxLongTaskMs": 0,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 17.83,
-  "testedAt": "2026-08-22T02:56:07Z"
+  "durationSeconds": 14.91,
+  "testedAt": "2026-08-22T03:03:16Z"
 }```
 
 ## Listen Watch browser regression
@@ -197,8 +197,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.94,
-  "testedAt": "2026-08-22T02:56:10Z"
+  "durationSeconds": 1.92,
+  "testedAt": "2026-08-22T03:03:19Z"
 }```
 
 ## Command Intelligence browser regression
@@ -256,8 +256,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.57,
-  "testedAt": "2026-08-22T02:56:12Z"
+  "durationSeconds": 1.99,
+  "testedAt": "2026-08-22T03:03:21Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -307,23 +307,190 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.53,
-  "testedAt": "2026-08-22T02:56:16Z"
+  "durationSeconds": 2.84,
+  "testedAt": "2026-08-22T03:03:24Z"
 }```
 
 ## Ask Titans browser regression
 
 ```json
 {
-  "ok": false,
+  "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "ask:Who is next?",
-  "error": "TimeoutException: Message: \n",
-  "durationSeconds": 17.32,
-  "testedAt": "2026-08-22T02:56:34Z",
-  "hash": "#fan",
-  "pageText": "FAN HUB\nEverything Titans.\nEasy to use.\n\nStart simple. Open more detail only when you want it.\n\nSimple view\nToday\nGame\nTeam\nSeason\nOffseason\nHistory\nToday\n\nThe important stuff first. No hunting around.\n\nNext game\nVS Seattle Seahawks\nAug 23, 7:00 PM\nFOX \u00b7 Nissan Stadium\nGame Day\nWhat changed?\nNo major tracked changes since your last Fan Hub visit\nRoster moves\nYour players\nPick a favorite player\n\nOpen the roster and favorite a player. Their updates will show here.\n\nRoster\nLatest move\n\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\n\nAug 18, 7:00 PM\nFan pulse\ngames\n2 recent mentions\nroster\n2 recent mentions\ncam-ward\n2 recent mentions\nanalytics\n1 recent mention\ntransactions\n1 recent mention\nMarket pulse\nMarket pulse waiting\n\nNo current cached market row is available.\n\nMarkets\nFan picks\nSeason MVP\nChoose\n#61 Andre James \u00b7 C\n#51 Austin Schlottmann \u00b7 C\n#79 Pat Coogan \u00b7 C\n#73 Cordell Volson \u00b7 G\n#67 Drew Moss \u00b7 G\n#66 Fernando Carmona Jr. \u00b7 G\n#71 Garrett Dellinger \u00b7 G\n#64 Jackson Slater \u00b7 G\n#77 Peter Skoronski \u00b7 G\n#1 Cam Ward \u00b7 QB\n#16 Hendon Hooker \u00b7 QB\n#10 Mitchell Trubisky \u00b7 QB\n#8 Will Levis \u00b7 QB\n#21 D'Ernest Johnson \u00b7 RB\n#36 Julius Chestnut \u00b7 RB\n#31 Kalel Mullings \u00b7 RB\n#35 Michael Carter \u00b7 RB\n#32 Nicholas Singleton \u00b7 RB\n#20 Tony Pollard \u00b7 RB\n#2 Tyjae Spears \u00b7 RB\n#69 Aamil Wagner \u00b7 T\n#76 Austin Deculus \u00b7 T\n#78 Brandon Crenshaw-Dickson \u00b7 T\n#75 Dan Moore Jr. \u00b7 T\n#55 JC Latham \u00b7 T\n#62 Rasheed Miller \u00b7 T\n#72 Zachary Thomas \u00b7 T\n#82 Daniel Bellinger \u00b7 TE\n#88 David Martin-Robinson \u00b7 TE\n#84 Gunnar Helm \u00b7 TE\n#81 Jaren Kanak \u00b7 TE\n#83 Joel Wilson \u00b7 TE\n#86 Kylen Granson \u00b7 TE\n#47 Matt Lauter \u00b7 TE\n#80 Bryce Oliver \u00b7 WR\n#0 Calvin Ridley \u00b7 WR\n#14 Carnell Tate \u00b7 WR\n#17 Chimere Dike \u00b7 WR\n#39 Courtney Jackson \u00b7 WR\n#5 Elic Ayomanor \u00b7 WR\n#13 Hank Beatty \u00b7 WR\n#85 K.J. Osborn \u00b7 WR\n#89 Lance McCutcheon \u00b7 WR\n#12 Mason Kinsey \u00b7 WR\n#19 Tyren Montgomery \u00b7 WR\n#4 Wan'Dale Robinson \u00b7 WR\n#87 Xavier Restrepo \u00b7 WR\n#24 Alontae Taylor \u00b7 CB\n#18 Cor'Dale Flott \u00b7 CB\n#13 Corey Mayfield Jr. \u00b7 CB\n#16 Jalen McMurray \u00b7 CB\n#25 Joshua Williams \u00b7 CB\n#29 Keydrain Calligan \u00b7 CB\n#26 Marcus Harris \u00b7 CB\n#35 Mario Goodrich III \u00b7 CB\n#21 Micah Robinson \u00b7 CB\n#42 Derrick Canteen \u00b7 DB\n#30 Kendell Brooks",
-  "browserWarnings": []
+  "answers": [
+    {
+      "question": "Who is next?",
+      "action": "#live",
+      "answer": "Tennessee is next scheduled to host Seattle Seahawks on Mon, Aug 24, 12:00 AM UTC.",
+      "facts": 4,
+      "sources": 1,
+      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. FOX is the listed network."
+    },
+    {
+      "question": "Cam Ward",
+      "action": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
+      "answer": "Cam Ward is listed as QB #1 with roster status Active.",
+      "facts": 2,
+      "sources": 2,
+      "why": "No recent structured player-game rows are loaded, so I am not treating missing stats as zero production."
+    },
+    {
+      "question": "What is EPA?",
+      "action": "#stats",
+      "answer": "EPA: Expected Points Added estimates how much a play helped or hurt scoring expectation.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Advanced metrics are context tools, not standalone player grades. Command Center labels model-derived metrics and keeps them behind plain-English explanations."
+    },
+    {
+      "question": "How do I watch?",
+      "action": "#media",
+      "answer": "The next game is Mon, Aug 24, 12:00 AM UTC and the loaded TV listing is FOX. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
+    }
+  ],
+  "unsupportedRefused": true,
+  "mobileTargets": {
+    "askButton": 50,
+    "input": 50,
+    "quick": [
+      {
+        "h": 48,
+        "label": "What changed?"
+      },
+      {
+        "h": 48,
+        "label": "Who is next?"
+      },
+      {
+        "h": 48,
+        "label": "Injuries"
+      },
+      {
+        "h": 48,
+        "label": "Watch"
+      },
+      {
+        "h": 48,
+        "label": "Cam Ward"
+      },
+      {
+        "h": 48,
+        "label": "Explain EPA"
+      }
+    ],
+    "viewport": 375,
+    "width": 355
+  },
+  "browserWarnings": [],
+  "durationSeconds": 1.26,
+  "testedAt": "2026-08-22T03:03:26Z"
+}```
+
+## Change Intelligence browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "detectedBeforeReview": 121,
+  "categories": [
+    "Roster",
+    "Transaction"
+  ],
+  "favoritePriority": "Added to loaded roster",
+  "rosterFilterVisible": 95,
+  "clearedAfterReview": true,
+  "mobileTargets": {
+    "filters": [
+      {
+        "h": 48,
+        "label": "All"
+      },
+      {
+        "h": 48,
+        "label": "Roster \u00b7 95"
+      },
+      {
+        "h": 48,
+        "label": "Transaction \u00b7 26"
+      }
+    ],
+    "review": 48,
+    "viewport": 375,
+    "width": 355
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.06,
+  "testedAt": "2026-08-22T03:03:28Z"
+}```
+
+## Advanced analytics browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "metricCount": 4,
+  "metricValues": [
+    {
+      "detail": "#30 of 32",
+      "label": "Offensive EPA / play",
+      "value": "-0.148"
+    },
+    {
+      "detail": "#28 of 32",
+      "label": "Defensive EPA / play allowed",
+      "value": "+0.104"
+    },
+    {
+      "detail": "#11 of 32",
+      "label": "Pace",
+      "value": "28.9 sec/play"
+    },
+    {
+      "detail": "Latest loaded week: 18",
+      "label": "Rest days",
+      "value": "7 days"
+    }
+  ],
+  "situationFields": [
+    "Down & distance",
+    "Field position",
+    "Formation",
+    "Personnel",
+    "Score diff",
+    "TEN EPA",
+    "Time remaining"
+  ],
+  "initialPlayCards": 60,
+  "offenseFilteredPlayCards": 39,
+  "mobileMetricCount": 4,
+  "browserWarnings": [],
+  "durationSeconds": 1.79,
+  "testedAt": "2026-08-22T03:03:30Z"
+}```
+
+## Player headshot browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "rosterCards": 95,
+  "rosterDecoratedHeadshots": 82,
+  "rosterLoadedHeadshots": 46,
+  "statsPlayerRows": 95,
+  "statsDecoratedHeadshots": 82,
+  "statsLoadedHeadshots": 7,
+  "mobileLoadedHeadshots": 7,
+  "richPlayer": "Austin Schlottmann",
+  "richPlayerHeadshotLoaded": true,
+  "browserWarnings": [],
+  "durationSeconds": 2.71,
+  "testedAt": "2026-08-22T03:03:33Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
