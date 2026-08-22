@@ -25,7 +25,7 @@ The project follows a **content-integrity first** model. Current facts are check
 - Customizable home command deck with reorderable/hideable game, favorite-player, roster-move, intel, market, and freshness cards.
 - Player intelligence, favorites, position-aware comparison, schedule detail expansion, Game Day, analytics, market context, Listen / Watch, legacy navigation, and change intelligence.
 - Optional accounts with guest-first access. Signing in is never required to browse the app.
-- Selected signed-in preferences can sync across devices through the account preference API; guest settings remain browser-local.
+- Selected signed-in preferences can sync across devices when server-side account preference storage is provisioned and available; guest settings remain browser-local, and signed-in settings remain device-local if sync storage is unavailable.
 - Browser/PWA reliability includes saved data fallback, offline messaging, pull-to-refresh, route recovery, scroll restoration, service-worker update handling, and production browser smoke coverage.
 - API/auth responses are never PWA-cached.
 
@@ -107,7 +107,7 @@ Public and protected API routes are dispatched by `cloudflare/worker.mjs`. Core 
 - `POST /api/sync?job=...` — protected
 - `GET /api/cron-refresh` — protected scheduled source check
 - `/api/account/auth/*` — narrow same-origin managed-auth proxy
-- `GET|PUT /api/account/preferences` — authenticated optional preference sync
+- `GET|PUT /api/account/preferences` — authenticated optional preference sync; returns an explicit local-only capability response when server-side preference storage is not provisioned or temporarily unavailable
 
 ## Free/no-card policy
 
@@ -121,7 +121,7 @@ Notable migrations include:
 
 - `008_content_integrity_20260819.sql` — initial schedule/roster/transaction integrity corrections.
 - `009_current_audit_20260819.sql` — Aug. 19 roster move, Reliant Stadium correction, and honest integration-status metadata.
-- `20260822_fan_user_preferences.sql` — optional account-synced fan preferences. It is intentionally **manual**; Cloudflare deployment does not apply database migrations automatically.
+- `20260822_fan_user_preferences.sql` — optional account-synced fan preferences. It is intentionally **manual**; Cloudflare deployment does not apply database migrations automatically. Until this migration is provisioned, the account UI keeps preferences local and labels sync as unavailable instead of presenting a generic failure.
 
 ## Branding
 
