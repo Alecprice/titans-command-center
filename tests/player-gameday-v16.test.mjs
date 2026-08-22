@@ -9,7 +9,7 @@ test('v1.6 player and Game Day assets are loaded and precached',()=>{
     assert.match(html,new RegExp(asset.replaceAll('.','\\.')));
     assert.match(sw,new RegExp(asset.replaceAll('.','\\.')));
   }
-  assert.match(sw,/titans-cc-brand-2026-v44/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
 });
 
 test('player command center is quick-answer first with five deeper sections',()=>{

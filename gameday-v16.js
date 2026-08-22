@@ -111,7 +111,7 @@
   }
 
   function render(){
-    if(route()!=='live')return;const target=document.querySelector('.v14-gameday-quick')||document.querySelector('.page-head');if(!target||document.querySelector('.v16-gameday'))return;
+    if(route()!=='live'||!state.data||!state.fan)return;const target=document.querySelector('.v14-gameday-quick')||document.querySelector('.page-head');if(!target||document.querySelector('.v16-gameday'))return;
     const [mode,g,eg]=phase(),root=document.createElement('section');root.className='v16-gameday';root.dataset.phase=mode;root.innerHTML=`<div class="v16-gd-mode"><span class="active">${mode==='pregame'?'Pregame':mode==='live'?'Live':'Postgame'}</span><small>Game Day 3.0 · source-aware</small></div>${mode==='live'?live(g,eg):mode==='postgame'?postgame(g):pregame(g)}`;target.insertAdjacentElement('afterend',root);
   }
 
