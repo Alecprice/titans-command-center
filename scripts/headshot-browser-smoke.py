@@ -25,6 +25,10 @@ def wait_for_loaded_images(driver,selector,minimum=1,timeout=12):
 def overflow(driver):
     return driver.execute_script("return document.documentElement.scrollWidth > document.documentElement.clientWidth + 3")
 
+def prepare_returning_user(driver):
+    driver.get(f'{BASE}/')
+    driver.execute_script("localStorage.setItem('titans:v10Onboarded','1')")
+
 options=webdriver.ChromeOptions()
 options.add_argument('--headless=new')
 options.add_argument('--no-sandbox')
@@ -38,6 +42,7 @@ try:
     driver=webdriver.Chrome(options=options)
     driver.set_page_load_timeout(20)
     driver.set_script_timeout(5)
+    prepare_returning_user(driver)
 
     stage='roster-load'
     driver.get(f'{BASE}/#roster')
@@ -91,7 +96,7 @@ try:
 except Exception as exc:
     state=None
     if driver:
-        try: state=driver.execute_script("return {hash:location.hash,title:document.querySelector('.page-head h1')?.textContent||document.title,rosterCards:document.querySelectorAll('.player-card').length,rosterPhotos:document.querySelectorAll('.player-card .has-headshot img').length,rosterLoaded:[...document.querySelectorAll('.player-card .has-headshot img')].filter(img=>img.complete&&img.naturalWidth>20).length,statsRows:document.querySelectorAll('.ps-player').length,statsPhotos:document.querySelectorAll('.ps-player .has-headshot img').length,statsLoaded:[...document.querySelectorAll('.ps-player .has-headshot img')].filter(img=>img.complete&&img.naturalWidth>20).length,firstSrc:document.querySelector('.has-headshot img')?.currentSrc||'',appText:(document.querySelector('#app')?.innerText||'').slice(0,350)}")
+        try: state=driver.execute_script("return {hash:location.hash,title:document.querySelector('.page-head h1')?.textContent||document.title,onboarding:Boolean(document.querySelector('#v10-onboarding')),rosterCards:document.querySelectorAll('.player-card').length,rosterPhotos:document.querySelectorAll('.player-card .has-headshot img').length,rosterLoaded:[...document.querySelectorAll('.player-card .has-headshot img')].filter(img=>img.complete&&img.naturalWidth>20).length,statsRows:document.querySelectorAll('.ps-player').length,statsPhotos:document.querySelectorAll('.ps-player .has-headshot img').length,statsLoaded:[...document.querySelectorAll('.ps-player .has-headshot img')].filter(img=>img.complete&&img.naturalWidth>20).length,firstSrc:document.querySelector('.has-headshot img')?.currentSrc||'',appText:(document.querySelector('#app')?.innerText||'').slice(0,350)}")
         except Exception: pass
     result={'ok':False,'base':BASE,'stage':stage,'error':f'{type(exc).__name__}: {exc}','state':state,'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     REPORT.write_text(json.dumps(result,indent=2),encoding='utf-8')
