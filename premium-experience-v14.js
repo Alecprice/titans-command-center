@@ -54,7 +54,12 @@
 
   function applyPhase(){document.body.dataset.v14Season=seasonPhase().toLowerCase().replace(/\s+/g,'-')}
   async function enhance(){await load();addTermsButton();applyPhase();homeNow();gameDayQuick();statsHelp();playerHelp()}
-  if(runtime){runtime.onRoute(()=>setTimeout(enhance,40));runtime.onAppRender(()=>queueMicrotask(()=>{homeNow();gameDayQuick();statsHelp();playerHelp()}));}
+  function refreshPremium(){
+    state.data=null;state.intel=null;state.loading=null;
+    document.querySelectorAll('.v14-now,.v14-gameday-quick,.v14-stats-help,.v14-player-help').forEach(node=>node.remove());
+    setTimeout(enhance,0);
+  }
+  if(runtime){runtime.onRoute(()=>setTimeout(enhance,40));runtime.onAppRender(()=>queueMicrotask(()=>{homeNow();gameDayQuick();statsHelp();playerHelp()}));runtime.onRefresh(refreshPremium);}
   else {window.addEventListener('hashchange',()=>setTimeout(enhance,40));if(app)new MutationObserver(()=>queueMicrotask(()=>{homeNow();gameDayQuick();statsHelp();playerHelp()})).observe(app,{childList:true,subtree:false});}
   setTimeout(enhance,100);
 })();
