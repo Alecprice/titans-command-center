@@ -90,8 +90,8 @@ def assert_truthful_state(summary,label):
 
 
 def exercise_select(driver,selector):
-    element=driver.find_element(By.CSS_SELECTOR,selector);select=Select(element)
-    if len(select.options)<2:return {'available':False,'options':len(select.options)}
+    element=driver.find_element(By.CSS_SELECTOR,selector);select=Select(element);option_count=len(select.options)
+    if option_count<2:return {'available':False,'options':option_count}
     chosen=select.options[1].get_attribute('value');before=read_summary(driver)
     select.select_by_index(1)
     WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value===arguments[1]",selector,chosen))
@@ -100,7 +100,7 @@ def exercise_select(driver,selector):
     if not after['rows'] and not after['empty']:raise RuntimeError(f'{selector}: filter rendered neither rows nor a clear empty state: {after}')
     reset=Select(driver.find_element(By.CSS_SELECTOR,selector));reset.select_by_value('all')
     WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value==='all'",selector));wait_settled(driver)
-    return {'available':True,'options':len(select.options),'selectedValue':chosen,'before':before['result'],'after':after['result']}
+    return {'available':True,'options':option_count,'selectedValue':chosen,'before':before['result'],'after':after['result']}
 
 
 def severe_logs(driver):
