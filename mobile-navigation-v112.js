@@ -1,5 +1,3 @@
-import './account-v112.js';
-
 (() => {
   'use strict';
   if(window.__TitansMobileNavigationV112)return;
