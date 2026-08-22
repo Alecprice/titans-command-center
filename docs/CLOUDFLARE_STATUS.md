@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + Account / Guest browser regression failure**
-- Source commit: `54aed36b914c84e6009892d18c2519c843e15a8e`
+- Status: **deployed + runtime / 365 Mode browser regression failure**
+- Source commit: `d878533cdde08dceec8a625533a01c40a5f13636`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -13,12 +13,12 @@
 - Player Intelligence / Game Day browser regression: success
 - Ask Titans browser regression: success
 - Change Intelligence browser regression: success
-- Runtime / 365 Mode browser regression: success
-- Account / Guest browser regression: failure
+- Runtime / 365 Mode browser regression: failure
+- Account / Guest browser regression: skipped
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T05:30:06Z
+- Recorded: 2026-08-22T05:33:47Z
 
 ## Production regression
 
@@ -70,19 +70,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "54aed36b914c84e6009892d18c2519c843e15a8e",
-    "builtAt": "2026-08-22T05:28:54.397Z"
+    "commit": "d878533cdde08dceec8a625533a01c40a5f13636",
+    "builtAt": "2026-08-22T05:32:13.218Z"
   },
-  "deploymentPropagationAttempts": 4,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 44,
-    "health": 324,
-    "data": 222,
-    "stats": 214,
-    "market": 621,
-    "analytics": 411
+    "root": 64,
+    "health": 429,
+    "data": 2750,
+    "stats": 326,
+    "market": 434,
+    "analytics": 586
   },
-  "testedAt": "2026-08-22T05:29:23.671Z",
+  "testedAt": "2026-08-22T05:32:49.568Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -112,8 +112,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 113,
-  "testedAt": "2026-08-22T05:29:24.291Z"
+  "durationMs": 174,
+  "testedAt": "2026-08-22T05:32:50.427Z"
 }```
 
 ## Browser navigation regression
@@ -158,11 +158,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 156,
+  "maxLongTaskMs": 120,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 17.58,
-  "testedAt": "2026-08-22T05:29:46Z"
+  "durationSeconds": 25.17,
+  "testedAt": "2026-08-22T05:33:19Z"
 }```
 
 ## Listen Watch browser regression
@@ -195,8 +195,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.94,
-  "testedAt": "2026-08-22T05:29:48Z"
+  "durationSeconds": 2.17,
+  "testedAt": "2026-08-22T05:33:22Z"
 }```
 
 ## Command Intelligence browser regression
@@ -254,8 +254,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.33,
-  "testedAt": "2026-08-22T05:29:51Z"
+  "durationSeconds": 2.26,
+  "testedAt": "2026-08-22T05:33:24Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -305,8 +305,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.09,
-  "testedAt": "2026-08-22T05:29:54Z"
+  "durationSeconds": 3.23,
+  "testedAt": "2026-08-22T05:33:28Z"
 }```
 
 ## Ask Titans browser regression
@@ -383,8 +383,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.54,
-  "testedAt": "2026-08-22T05:29:56Z"
+  "durationSeconds": 1.73,
+  "testedAt": "2026-08-22T05:33:30Z"
 }```
 
 ## Change Intelligence browser regression
@@ -421,15 +421,15 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.42,
-  "testedAt": "2026-08-22T05:29:59Z"
+  "durationSeconds": 2.85,
+  "testedAt": "2026-08-22T05:33:33Z"
 }```
 
 ## Runtime / 365 Mode browser regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "desktop": {
     "phase": "preseason",
@@ -454,23 +454,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787376631524,
+          "expiresAt": 1787376845310,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787376601524,
+          "updatedAt": 1787376815310,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787376631502,
+          "expiresAt": 1787376845153,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787376601502,
+          "updatedAt": 1787376815153,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-22T05:30:01.296Z",
+        "at": "2026-08-22T05:33:34.945Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -497,116 +497,10 @@
       "width": 969
     }
   },
-  "mobile": {
-    "dock": {
-      "display": "grid",
-      "h": 72,
-      "w": 465,
-      "x": 10,
-      "y": 621
-    },
-    "dockTargets": [
-      {
-        "h": 58,
-        "label": "Home",
-        "w": 89.796875
-      },
-      {
-        "h": 58,
-        "label": "Roster",
-        "w": 89.796875
-      },
-      {
-        "h": 58,
-        "label": "Game",
-        "w": 89.796875
-      },
-      {
-        "h": 58,
-        "label": "Search",
-        "w": 89.796875
-      },
-      {
-        "h": 58,
-        "label": "More",
-        "w": 89.8125
-      }
-    ],
-    "menu": {
-      "display": "grid",
-      "h": 46,
-      "w": 46,
-      "x": 10,
-      "y": 8
-    },
-    "overflow": false,
-    "panelHeight": 765.171875,
-    "panelWidth": 461,
-    "reviewHeight": 48,
-    "targets": [
-      {
-        "h": 112,
-        "label": "NEXT GAME",
-        "w": 427
-      },
-      {
-        "h": 122.9375,
-        "label": "WHAT CHANGED?",
-        "w": 427
-      },
-      {
-        "h": 122.9375,
-        "label": "ROSTER",
-        "w": 427
-      },
-      {
-        "h": 112,
-        "label": "AVAILABILITY",
-        "w": 427
-      }
-    ],
-    "viewport": 500,
-    "panelState": {
-      "cards": 4,
-      "display": "block",
-      "height": 765.171875,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 461
-    },
-    "sheet": {
-      "bottom": 611.6901397705078,
-      "dockTop": 621,
-      "height": 504.71875,
-      "links": 13,
-      "top": 106.97138977050781
-    },
-    "smartSearch": {
-      "height": 110,
-      "left": 10,
-      "right": 475,
-      "rows": 1,
-      "targets": [
-        58
-      ],
-      "width": 465
-    }
-  },
+  "mobile": {},
   "browserWarnings": [],
-  "durationSeconds": 3.95
-}```
-
-## Account / Guest browser regression
-
-```json
-{
-  "ok": false,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "browserWarnings": [],
-  "error": "ElementClickInterceptedException: Message: element click intercepted: Element <button id=\"mobile-more-button\" type=\"button\" aria-label=\"Open more navigation\" aria-controls=\"sidebar\" aria-expanded=\"false\" aria-pressed=\"false\">...</button> is not clickable at point (422, 657). Other element would receive the click: <div class=\"v10-modal-body\">...</div>\n  (Session info: chrome=151.0.7922.137); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#elementclickinterceptedexception\nStacktrace:\n#0 0x562ef86be36a <unknown>\n#1 0x562ef8031f49 <unknown>\n#2 0x562ef808e415 <unknown>\n#3 0x562ef808c4f2 <unknown>\n#4 0x562ef8089edc <unknown>\n#5 0x562ef8088fd7 <unknown>\n#6 0x562ef807cc42 <unknown>\n#7 0x562ef807c587 <unknown>\n#8 0x562ef80d00c3 <unknown>\n#9 0x562ef807ac92 <unknown>\n#10 0x562ef807bb11 <unknown>\n#11 0x562ef86838d0 <unknown>\n#12 0x562ef8681f3a <unknown>\n#13 0x562ef866c9b5 <unknown>\n#14 0x562ef8682c0a <unknown>\n#15 0x562ef8654740 <unknown>\n#16 0x562ef86a99a8 <unknown>\n#17 0x562ef86a9b45 <unknown>\n#18 0x562ef86bcf1e <unknown>\n#19 0x7fcef169cb84 <unknown>\n#20 0x7fcef1729d6c <unknown>\n",
-  "durationSeconds": 2.19
+  "error": "TimeoutException: Message: \n",
+  "durationSeconds": 14.22
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
