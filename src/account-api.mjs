@@ -1,7 +1,13 @@
 import {getSql} from './db.mjs';
 
 const AUTH_ORIGIN='https://ep-cold-moon-a6z7a2ag.neonauth.us-west-2.aws.neon.tech/neondb/auth';
-const PREF_KEYS=new Set(['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks']);
+const V10_PREF_KEY='titans:v10Prefs';
+const PREF_KEYS=new Set(['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY]);
+const HOME_KEYS=['game','favorites','moves','intel','markets','freshness'];
+const HOME_KEY_SET=new Set(HOME_KEYS);
+const V10_THEMES=new Set(['system','dark','light']);
+const V10_DENSITIES=new Set(['comfortable','compact']);
+const V10_NOTIFICATION_KEYS=['kickoff','final','transactions','news'];
 
 function json(payload,status=200,headers={}){
   return new Response(JSON.stringify(payload),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers}});
@@ -42,14 +48,48 @@ export async function accountAuthProxy(request,subpath){
   }
 }
 
+function uniqueHomeKeys(value){
+  if(!Array.isArray(value))return null;
+  const seen=new Set(),clean=[];
+  for(const entry of value){
+    const key=String(entry||'');
+    if(!HOME_KEY_SET.has(key)||seen.has(key))continue;
+    seen.add(key);clean.push(key);
+  }
+  return clean;
+}
+
+function sanitizeV10Prefs(value){
+  if(!value||typeof value!=='object'||Array.isArray(value))return null;
+  const clean={};
+  if(V10_THEMES.has(value.theme))clean.theme=value.theme;
+  if(V10_DENSITIES.has(value.density))clean.density=value.density;
+  if(typeof value.reducedMotion==='boolean')clean.reducedMotion=value.reducedMotion;
+  if(typeof value.showMarkets==='boolean')clean.showMarkets=value.showMarkets;
+  const order=uniqueHomeKeys(value.homeOrder);
+  if(order)clean.homeOrder=[...order,...HOME_KEYS.filter(key=>!order.includes(key))];
+  const hidden=uniqueHomeKeys(value.homeHidden);
+  if(hidden)clean.homeHidden=hidden;
+  if(value.notifications&&typeof value.notifications==='object'&&!Array.isArray(value.notifications)){
+    const notifications={};
+    for(const key of V10_NOTIFICATION_KEYS){if(typeof value.notifications[key]==='boolean')notifications[key]=value.notifications[key];}
+    if(Object.keys(notifications).length)clean.notifications=notifications;
+  }
+  return clean;
+}
+
 function sanitizePreferences(input){
   const source=input&&typeof input==='object'&&!Array.isArray(input)?input:{};
   const clean={};
   for(const key of PREF_KEYS){
     if(!(key in source))continue;
-    const value=source[key];
+    let value=source[key];
+    if(key===V10_PREF_KEY){
+      value=sanitizeV10Prefs(value);
+      if(!value||!Object.keys(value).length)continue;
+    }
     const encoded=JSON.stringify(value);
-    if(encoded.length>12000)continue;
+    if(typeof encoded!=='string'||encoded.length>12000)continue;
     clean[key]=value;
   }
   return clean;
