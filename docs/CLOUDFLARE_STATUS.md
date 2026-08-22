@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + Player Intelligence / Game Day browser regression failure**
-- Source commit: `a0bec9c38a4f66d850abc04708b5ffc8ee4ddd47`
+- Status: **deployed + Change Intelligence browser regression failure**
+- Source commit: `7e1877a8c13ac1b2369aadf0687eb894b6e3a51f`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -10,13 +10,13 @@
 - Browser navigation regression: success
 - Listen Watch browser regression: success
 - Command Intelligence browser regression: success
-- Player Intelligence / Game Day browser regression: failure
-- Ask Titans browser regression: skipped
-- Change Intelligence browser regression: skipped
+- Player Intelligence / Game Day browser regression: success
+- Ask Titans browser regression: success
+- Change Intelligence browser regression: failure
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T01:23:20Z
+- Recorded: 2026-08-22T02:01:01Z
 
 ## Production regression
 
@@ -68,19 +68,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "a0bec9c38a4f66d850abc04708b5ffc8ee4ddd47",
-    "builtAt": "2026-08-22T01:22:28.781Z"
+    "commit": "7e1877a8c13ac1b2369aadf0687eb894b6e3a51f",
+    "builtAt": "2026-08-22T01:59:29.390Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 8,
   "responseMs": {
-    "root": 67,
-    "health": 123,
-    "data": 116,
-    "stats": 158,
-    "market": 539,
-    "analytics": 350
+    "root": 64,
+    "health": 852,
+    "data": 340,
+    "stats": 197,
+    "market": 5903,
+    "analytics": 704
   },
-  "testedAt": "2026-08-22T01:22:54.123Z",
+  "testedAt": "2026-08-22T02:00:13.227Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -110,8 +110,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 143,
-  "testedAt": "2026-08-22T01:22:54.748Z"
+  "durationMs": 126,
+  "testedAt": "2026-08-22T02:00:14.189Z"
 }```
 
 ## Browser navigation regression
@@ -160,11 +160,11 @@
       "width": 59.171875
     }
   ],
-  "maxLongTaskMs": 54,
+  "maxLongTaskMs": 85,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 12.98,
-  "testedAt": "2026-08-22T01:23:11Z"
+  "durationSeconds": 14.65,
+  "testedAt": "2026-08-22T02:00:34Z"
 }```
 
 ## Listen Watch browser regression
@@ -197,8 +197,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.05,
-  "testedAt": "2026-08-22T01:23:13Z"
+  "durationSeconds": 1.95,
+  "testedAt": "2026-08-22T02:00:36Z"
 }```
 
 ## Command Intelligence browser regression
@@ -256,22 +256,151 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.86,
-  "testedAt": "2026-08-22T01:23:17Z"
+  "durationSeconds": 2.08,
+  "testedAt": "2026-08-22T02:00:39Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
 
 ```json
 {
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "playerRoute": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
+  "playerRouteHydrated": true,
+  "playerTabs": [
+    "overview",
+    "games",
+    "trends",
+    "career",
+    "timeline"
+  ],
+  "favoriteToggle": [
+    "false",
+    "true",
+    "false"
+  ],
+  "playerMobileTargets": [
+    {
+      "h": 48,
+      "label": "Overview"
+    },
+    {
+      "h": 48,
+      "label": "Game Log"
+    },
+    {
+      "h": 48,
+      "label": "Trends"
+    },
+    {
+      "h": 48,
+      "label": "Career + Contract"
+    },
+    {
+      "h": 48,
+      "label": "Timeline"
+    }
+  ],
+  "playerHeadshotLoaded": true,
+  "gameDayPhase": "pregame",
+  "gameDayTuneLink": true,
+  "gameDayMobileViewport": 375,
+  "browserWarnings": [],
+  "durationSeconds": 2.68,
+  "testedAt": "2026-08-22T02:00:42Z"
+}```
+
+## Ask Titans browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "answers": [
+    {
+      "question": "Who is next?",
+      "action": "#live",
+      "answer": "Tennessee is next scheduled to host Seattle Seahawks on Mon, Aug 24, 12:00 AM UTC.",
+      "facts": 4,
+      "sources": 1,
+      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. FOX is the listed network."
+    },
+    {
+      "question": "Cam Ward",
+      "action": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
+      "answer": "Cam Ward is listed as QB #1 with roster status Active.",
+      "facts": 2,
+      "sources": 2,
+      "why": "No recent structured player-game rows are loaded, so I am not treating missing stats as zero production."
+    },
+    {
+      "question": "What is EPA?",
+      "action": "#stats",
+      "answer": "EPA: Expected Points Added estimates how much a play helped or hurt scoring expectation.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Advanced metrics are context tools, not standalone player grades. Command Center labels model-derived metrics and keeps them behind plain-English explanations."
+    },
+    {
+      "question": "How do I watch?",
+      "action": "#media",
+      "answer": "The next game is Mon, Aug 24, 12:00 AM UTC and the loaded TV listing is FOX. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
+    }
+  ],
+  "unsupportedRefused": true,
+  "mobileTargets": {
+    "askButton": 50,
+    "input": 50,
+    "quick": [
+      {
+        "h": 48,
+        "label": "What changed?"
+      },
+      {
+        "h": 48,
+        "label": "Who is next?"
+      },
+      {
+        "h": 48,
+        "label": "Injuries"
+      },
+      {
+        "h": 48,
+        "label": "Watch"
+      },
+      {
+        "h": 48,
+        "label": "Cam Ward"
+      },
+      {
+        "h": 48,
+        "label": "Explain EPA"
+      }
+    ],
+    "viewport": 375,
+    "width": 355
+  },
+  "browserWarnings": [],
+  "durationSeconds": 1.56,
+  "testedAt": "2026-08-22T02:00:43Z"
+}```
+
+## Change Intelligence browser regression
+
+```json
+{
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "console",
-  "error": "RuntimeError: v1.6 browser console has severe errors: [{'level': 'SEVERE', 'message': 'https://titans-command-center.alecjordanprice.workers.dev/api/espn-scoreboard - Failed to load resource: the server responded with a status of 502 ()', 'source': 'network', 'timestamp': 1787361799936}]",
-  "durationSeconds": 2.64,
-  "testedAt": "2026-08-22T01:23:20Z",
-  "hash": "#live",
-  "pageText": "GAME DAY\nGAME DAY CENTER\n\nA focused live view for the current or next Titans game \u2014 scoreboard first, context second.\n\nSchedule \u00b7 updated this minute\nGAME WEEK COMMAND\nTEN vs Seattle Seahawks\nUPCOMING\nWHEN / WHERE\nSunday, Aug 23, 7:00 PM\n\nNissan Stadium \u00b7 FOX\n\nWEATHER\nForecast awaiting update\n\nForecast feed\n\nMARKET\nNo current market rows\n\nInformational only\n\nCURRENT LEADERS\nPlayer production\nFull Stats Lab \u2192\n0\nCam Ward\n57\n1\nJulius Chestnut\n47\n2\nWan'Dale Robinson\n19\n3\nCor'Dale Flott\n5\n4\nJalyn Holmes\n1\n5\nJoey Slye\n13\nAdd to calendar\nRoster\nIntel\nAnalytics\nGAME WEEK COMMAND\nTEN vs Seattle Seahawks\nUPCOMING\nWHEN / WHERE\nSunday, Aug 23, 7:00 PM\n\nNissan Stadium \u00b7 FOX\n\nWEATHER\nForecast awaiting update\n\nForecast feed\n\nMARKET\nNo current market rows\n\nInformational only\n\nCURRENT LEADERS\nPlayer production\nFull Stats Lab \u2192\n0\nCam Ward\n57\n1\nJulius Chestnut\n47\n2\nWan'Dale Robinson\n19\n3\nCor'Dale Flott\n5\n4\nJalyn Holmes\n1\n5\nJoey Slye\n13\nAdd to calendar\nRoster\nIntel\nAnalytics\nGAME WEEK COMMAND\nTEN vs Seattle Seahawks\nUPCOMING\nWHEN / WHERE\nSunday, Aug 23, 7:00 PM\n\nNissan Stadium \u00b7 FOX\n\nWEATHER\nForecast awaiting update\n\nForecast feed\n\nMARKET\nNo current market rows\n\nInformational only\n\nCURRENT LEADERS\nPlayer production\nFull Stats Lab \u2192\n0\nCam Ward\n57\n1\nJulius Chestnut\n47\n2\nWan'Dale Robinson\n19\n3\nCor'Dale Flott\n5\n4\nJalyn Holmes\n1\n5\nJoey Slye\n13\nAdd to calendar\nRoster\nIntel\nAnalytics\nGAME WEEK COMMAND\nTEN vs Seattle Seahawks\nUPCOMING\nWHEN / WHERE\nSunday, Aug 23, 7:00 PM\n\nNissan Stadium \u00b7 FOX\n\nWEATHER\nForecast awaiting update\n\nForecast feed\n\nMARKET\nNo current market rows\n\nInformational only\n\nCURRENT LEADERS\nPlayer production\nFull Stats Lab \u2192\n0\nCam Ward\n57\n1\nJulius Chestnut\n47\n2\nWan'Dale Robinson\n19\n3\nCor'Dale Flott\n5\n4\nJalyn Holmes\n1\n5\nJoey Slye\n13\nAdd to calendar\nRoster\nIntel\nAnalytics\nGAME DAY P",
+  "stage": "load",
+  "error": "TimeoutException: Message: \n",
+  "durationSeconds": 16.91,
+  "testedAt": "2026-08-22T02:01:01Z",
+  "hash": "#command",
+  "pageText": "TITANS COMMAND INTELLIGENCE\nWhat changed. Why it matters. What comes next.\n\nA Titans-specific intelligence layer built around context instead of another wall of headlines.\n\nListen / Watch\nGame Day\nFan Hub\nChanges\nPress Room\nScheme Lab\nGlobal Fans\nStadium\nFan GM\nTime Machine\nSIGNATURE FEATURE\nTitans Change Engine\n\nWhat changed, when it changed, and why a fan should care.\n\n0\nCHANGES\nBaseline created.\nCome back after data changes and this page will show before/after differences instead of making you hunt across sections.\nLatest roster movement\nTransaction\nAug 19, 2026, 12:00 AM\nTransaction\nAug 17, 2026, 12:00 AM\nTransaction\nAug 16, 2026, 12:00 AM\nTransaction\nAug 10, 2026, 12:00 AM\nTransaction\nAug 6, 2026, 12:00 AM\nTransaction\nAug 2, 2026, 12:00 AM\nOpen transactions \u2192\nSource reliability\n\nEvidence tiers show what a source is. We do not invent an accuracy percentage without a verified history.\n\nEXTERNAL\nTitans Command Center\nNeeds cross-check \u00b7 Preseason sample size warning\nVERIFIED\nTennessee Titans\nOfficial team / league \u00b7 Titans continue official preseason roster moves\nVERIFIED\nTennessee Titans\nOfficial team / league \u00b7 Titans win preseason opener 19-13 over San Francisco\nVERIFIED\nTennessee Titans\nOfficial team / league \u00b7 First unofficial 2026 depth chart is out\nVERIFIED\nTennessee Titans\nOfficial team / league \u00b7 Robert Saleh talks camp ramp-up and Cam Ward\nOpen source registry \u2192\nPLAYER JOURNEY + CONNECTIONS\nAamil Wagner\nPlayer\nAamil Wagner\nAlontae Taylor\nAmani Hooker\nAndre James\nAnthony Hill Jr.\nAustin Deculus\nAustin Schlottmann\nBishop Fitzgerald\nBrandon Crenshaw-Dickson\nBryce Oliver\nCalvin Ridley\nCam Ward\nCarnell Tate\nCedric Gray\nChimere Dike\nCody Barton\nCor'Dale Flott\nCordell Volson\nCorey Mayfield Jr.\nCourtney Jackson\nD'Ernest Johnson\nDan Moore Jr.\nDaniel Bellinger\nDavid Martin-Robinson\nDerrick Canteen\nDominique Hampton\nDorian Mausi\nDrew Moss\nEarnest Brown IV\nElic Ayomanor\nErick Hallett II\nFernando Carmona Jr.\nGarrett Dellinger\nGunnar Helm\nHank Beatty\nHendon Hooker\nJackie Marshall\nJackson Slater\nJacob Martin\nJalen McMurray\nJalyn Holmes\nJames Williams Sr.\nJaren Kanak\nJaylen Harrell\nJC Latham\nJeffery Simmons\nJermaine Johnson II\nJerrick Reed II\nJoel Wilson\nJoey Slye\nJ",
   "browserWarnings": []
 }```
 
