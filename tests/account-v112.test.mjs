@@ -55,6 +55,14 @@ test('production deployment gates on guest and account browser health',()=>{
   assert.match(deploy,/if: steps\.account_browser\.outcome == 'success'/);
 });
 
+test('account browser smoke isolates account checks from first-run onboarding',()=>{
+  const smoke=read('scripts/account-browser-smoke.py');
+  assert.match(smoke,/def prepare_returning_user\(driver\):/);
+  assert.match(smoke,/titans:v10Onboarded/);
+  assert.match(smoke,/prepare_returning_user\(d\)/);
+  assert.match(smoke,/#v10-onboarding/);
+});
+
 test('runtime 365 regression preserves current returning-user and five-action dock contract',()=>{
   const smoke=read('scripts/runtime-365-browser-smoke.py');
   assert.match(smoke,/prepare_returning_user/);
