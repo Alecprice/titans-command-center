@@ -3,6 +3,7 @@
 
   if(window.TitansRuntime)return;
   const app=document.querySelector('#app');
+  const refreshButton=document.querySelector('#refresh-button');
   const routeListeners=new Set();
   const renderListeners=new Set();
   const refreshListeners=new Set();
@@ -77,6 +78,7 @@
 
   addEventListener('hashchange',emitRoute);
   if(app)new MutationObserver(()=>queueMicrotask(emitRender)).observe(app,{childList:true,subtree:false});
+  refreshButton?.addEventListener('click',()=>refresh({reason:'scoreboard-control'}));
 
   window.TitansRuntime={
     version:'1.10.0',
