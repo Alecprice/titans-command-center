@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + account + analytics + player headshot regressions passed**
-- Source commit: `f13b22972876e50381edecea3cf29cf4d0308bed`
+- Status: **deployed + Account / Guest browser regression failure**
+- Source commit: `6fe3bef185e04c6b3dc7b0d5279f4e2063f9fad5`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -14,11 +14,11 @@
 - Ask Titans browser regression: success
 - Change Intelligence browser regression: success
 - Runtime / 365 Mode browser regression: success
-- Account / Guest browser regression: success
-- Advanced analytics browser regression: success
-- Player headshot browser regression: success
+- Account / Guest browser regression: failure
+- Advanced analytics browser regression: skipped
+- Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T06:36:17Z
+- Recorded: 2026-08-22T06:38:21Z
 
 ## Production regression
 
@@ -70,19 +70,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "f13b22972876e50381edecea3cf29cf4d0308bed",
-    "builtAt": "2026-08-22T06:35:00.215Z"
+    "commit": "6fe3bef185e04c6b3dc7b0d5279f4e2063f9fad5",
+    "builtAt": "2026-08-22T06:37:09.750Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 28,
-    "health": 314,
-    "data": 382,
-    "stats": 378,
-    "market": 753,
-    "analytics": 592
+    "root": 20,
+    "health": 260,
+    "data": 384,
+    "stats": 239,
+    "market": 555,
+    "analytics": 483
   },
-  "testedAt": "2026-08-22T06:35:29.417Z",
+  "testedAt": "2026-08-22T06:37:34.385Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -112,8 +112,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 138,
-  "testedAt": "2026-08-22T06:35:30.290Z"
+  "durationMs": 126,
+  "testedAt": "2026-08-22T06:37:35.099Z"
 }```
 
 ## Browser navigation regression
@@ -158,11 +158,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 300,
-  "longTasksOver250ms": 1,
+  "maxLongTaskMs": 59,
+  "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 14.71,
-  "testedAt": "2026-08-22T06:35:49Z"
+  "durationSeconds": 14.82,
+  "testedAt": "2026-08-22T06:37:54Z"
 }```
 
 ## Listen Watch browser regression
@@ -195,8 +195,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.81,
-  "testedAt": "2026-08-22T06:35:52Z"
+  "durationSeconds": 2.09,
+  "testedAt": "2026-08-22T06:37:57Z"
 }```
 
 ## Command Intelligence browser regression
@@ -254,8 +254,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.61,
-  "testedAt": "2026-08-22T06:35:55Z"
+  "durationSeconds": 2.29,
+  "testedAt": "2026-08-22T06:37:59Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -305,8 +305,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.41,
-  "testedAt": "2026-08-22T06:35:59Z"
+  "durationSeconds": 2.93,
+  "testedAt": "2026-08-22T06:38:03Z"
 }```
 
 ## Ask Titans browser regression
@@ -383,8 +383,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.04,
-  "testedAt": "2026-08-22T06:36:01Z"
+  "durationSeconds": 1.49,
+  "testedAt": "2026-08-22T06:38:04Z"
 }```
 
 ## Change Intelligence browser regression
@@ -421,8 +421,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 3.07,
-  "testedAt": "2026-08-22T06:36:04Z"
+  "durationSeconds": 2.47,
+  "testedAt": "2026-08-22T06:38:07Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -454,23 +454,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787380596969,
+          "expiresAt": 1787380719641,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787380566969,
+          "updatedAt": 1787380689641,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787380596834,
+          "expiresAt": 1787380719517,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787380566834,
+          "updatedAt": 1787380689517,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-22T06:36:06.592Z",
+        "at": "2026-08-22T06:38:09.362Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -597,117 +597,57 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 4.1
+  "durationSeconds": 3.64
 }```
 
 ## Account / Guest browser regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "browserWarnings": [],
-  "guest": {
+  "stage": "wait-more",
+  "error": "TimeoutException: Message: \n",
+  "state": {
+    "accountApi": true,
+    "accountCard": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up",
+    "accountCardAtSidebarTop": true,
+    "accountEntry": {
+      "bottom": 911.25,
+      "height": 44,
+      "top": 867.25,
+      "width": 390
+    },
     "accountGuest": true,
-    "route": "#home",
-    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
-  },
-  "sheet": {
-    "bottom": 611,
-    "dockTop": 621,
-    "top": 106.28125
-  },
-  "accountEntry": {
-    "bottom": 290.53125,
-    "h": 44,
-    "parent": "sidebar",
-    "top": 246.53125,
-    "visibleBottom": 611,
-    "visibleTop": 106.28125,
-    "w": 390
-  },
-  "panel": {
-    "bottom": 701,
-    "h": 574.8125,
-    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordLog inContinue as guest",
-    "vh": 701,
-    "w": 485
-  },
-  "authOutage": {
-    "guest": true,
-    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
-  },
-  "roster": {
-    "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.RosterDepth ChartStaffLoading"
-  },
-  "durationSeconds": 1.51
-}```
-
-## Advanced analytics browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "metricCount": 4,
-  "metricValues": [
-    {
-      "detail": "#30 of 32",
-      "label": "Offensive EPA / play",
-      "value": "-0.148"
+    "accountPanel": null,
+    "appText": "2026 SEASON \u00b7 PRESEASON \u00b7 FAN-BUILT HQ\nTENNESSEE FOOTBALL.\nEVERY ANGLE.\n\nGame day, roster movement, official team updates, stats, free market data, and the franchise history that made Titans blue mean something. Built as a fan destination \u2014 not a generic dashboard.\n\nENTER GAME DAY \u2192\nEXPLORE THE LEGA",
+    "dock": {
+      "bottom": 693,
+      "height": 72,
+      "top": 621,
+      "width": 465
     },
-    {
-      "detail": "#28 of 32",
-      "label": "Defensive EPA / play allowed",
-      "value": "+0.104"
+    "hash": "#home",
+    "moreExpanded": "false",
+    "onboarding": false,
+    "ready": "complete",
+    "sidebar": {
+      "inert": true,
+      "open": false,
+      "rect": {
+        "bottom": 1231.71875,
+        "height": 504.71875,
+        "top": 727,
+        "width": 469
+      }
     },
-    {
-      "detail": "#11 of 32",
-      "label": "Pace",
-      "value": "28.9 sec/play"
-    },
-    {
-      "detail": "Latest loaded week: 18",
-      "label": "Rest days",
-      "value": "7 days"
+    "viewport": {
+      "h": 701,
+      "w": 500
     }
-  ],
-  "situationFields": [
-    "Down & distance",
-    "Field position",
-    "Formation",
-    "Personnel",
-    "Score diff",
-    "TEN EPA",
-    "Time remaining"
-  ],
-  "initialPlayCards": 60,
-  "offenseFilteredPlayCards": 39,
-  "mobileMetricCount": 4,
-  "browserWarnings": [],
-  "durationSeconds": 2.31,
-  "testedAt": "2026-08-22T06:36:13Z"
-}```
-
-## Player headshot browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "rosterCards": 95,
-  "rosterDecoratedHeadshots": 82,
-  "rosterLoadedHeadshots": 41,
-  "statsPlayerRows": 95,
-  "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 8,
-  "mobileLoadedHeadshots": 22,
-  "richPlayer": "Austin Schlottmann",
-  "richPlayerHeadshotLoaded": true,
-  "browserWarnings": [],
-  "durationSeconds": 3.2,
-  "testedAt": "2026-08-22T06:36:17Z"
+  },
+  "durationSeconds": 9.16
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
