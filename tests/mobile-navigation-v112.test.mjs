@@ -9,7 +9,7 @@ test('mobile navigation polish is loaded and packaged offline',()=>{
   assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/mobile-navigation-v112\.css/);
   assert.match(sw,/mobile-navigation-v112\.js/);
-  assert.match(runtime,/import '\.\/mobile-navigation-v112\.js';/);
+  assert.match(runtime,/import '\.\/mobile-navigation-v112\.js\?v=2';/);
 });
 
 test('mobile top menu is safe-area aware and thumb reachable',()=>{
@@ -45,7 +45,7 @@ test('mobile Search is one-handed and the dock yields to the keyboard',()=>{
   assert.match(css,/pointer-events:none/);
 });
 
-test('mobile sidebar becomes a draggable bottom sheet above the dock',()=>{
+test('mobile sidebar becomes a draggable bottom sheet above the dock without stealing control clicks',()=>{
   const css=read('mobile-navigation-v112.css'),js=read('mobile-navigation-v112.js');
   assert.match(css,/bottom:calc\(var\(--pwa-dock-h\) \+ 18px \+ env\(safe-area-inset-bottom\)\)/);
   assert.match(css,/max-height:min\(72dvh,660px,var\(--pwa-viewport-h,100dvh\)\)/);
@@ -56,6 +56,8 @@ test('mobile sidebar becomes a draggable bottom sheet above the dock',()=>{
   assert.match(js,/pointermove/);
   assert.match(js,/dy>=72\|\|velocity>\.55/);
   assert.match(js,/visualViewport/);
+  assert.match(js,/target\?\.closest\('a,button,input,select,textarea,label,\[role="button"\],\[role="link"\]'\)/);
+  assert.ok(js.indexOf('target?.closest')<js.indexOf('sidebar.setPointerCapture'),'interactive controls must be excluded before pointer capture starts');
 });
 
 test('small phone and reduced-motion contracts are explicit',()=>{

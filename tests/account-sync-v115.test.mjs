@@ -33,6 +33,20 @@ test('remote v1.0 preferences refresh the live fan shell once only when changed'
   assert.match(sync,/const merged=\{\.\.\.local,\.\.\.remotePreferences\}/);
 });
 
+test('account module has one canonical entry path and sync is registered first',()=>{
+  const html=read('index.html');
+  const nav=read('mobile-navigation-v112.js');
+  const runtime=read('usability-runtime.js');
+  const account=read('account-v112.js');
+  assert.doesNotMatch(nav,/account-v112\.js/);
+  assert.match(runtime,/import '\.\/mobile-navigation-v112\.js\?v=2';/);
+  assert.match(account,/if\(window\.__TitansAccountV112\)return;/);
+  assert.match(account,/window\.__TitansAccountV112=true;/);
+  const syncIndex=html.indexOf('/account-sync-v112.js?v=1');
+  const accountIndex=html.indexOf('/account-v112.js?v=2');
+  assert.ok(syncIndex>=0&&accountIndex>syncIndex,'account sync must register before the account module announces session state');
+});
+
 test('account production smoke retries the real mobile sheet entry instead of bypassing it',()=>{
   const smoke=read('scripts/account-browser-smoke.py');
   assert.match(smoke,/def open_account_from_sheet\(driver,attempts=3\):/);
