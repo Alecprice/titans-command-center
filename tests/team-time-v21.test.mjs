@@ -41,6 +41,7 @@ test('production browser gates verify Nashville schedule time rather than UTC ho
   const askSmoke=read('scripts/ask-titans-browser-smoke.py');
   const runtimeSmoke=read('scripts/runtime-365-browser-smoke.py');
   assert.match(askSmoke,/stage='kickoff-timezone'/);
+  assert.match(askSmoke,/kickoff_clause=answer\.split\('Open Listen \/ Watch',1\)\[0\]/);
   assert.match(askSmoke,/Nashville time/);
   assert.match(askSmoke,/teamTimeVerified/);
   assert.match(askSmoke,/CDT/);
