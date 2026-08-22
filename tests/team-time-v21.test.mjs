@@ -37,6 +37,20 @@ test('365 Mode and Ask Titans share the team-time contract',()=>{
   assert.doesNotMatch(ask,/new Intl\.DateTimeFormat\(undefined/);
 });
 
+test('production browser gates verify Nashville schedule time rather than UTC host defaults',()=>{
+  const askSmoke=read('scripts/ask-titans-browser-smoke.py');
+  const runtimeSmoke=read('scripts/runtime-365-browser-smoke.py');
+  assert.match(askSmoke,/stage='kickoff-timezone'/);
+  assert.match(askSmoke,/Nashville time/);
+  assert.match(askSmoke,/teamTimeVerified/);
+  assert.match(askSmoke,/CDT/);
+  assert.match(askSmoke,/CST/);
+  assert.match(runtimeSmoke,/teamTimeZone/);
+  assert.match(runtimeSmoke,/America\/Chicago/);
+  assert.match(runtimeSmoke,/Nashville time/);
+  assert.match(runtimeSmoke,/365 Mode kickoff is not rendered in Nashville time/);
+});
+
 test('shared team-time module is available to the offline PWA shell',()=>{
   const sw=read('sw.js');
   assert.match(sw,/\/team-time-v21\.js/);
