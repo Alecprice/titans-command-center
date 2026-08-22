@@ -62,7 +62,7 @@ test('account module has one canonical entry path and sync is registered first',
   assert.match(runtime,/import '\.\/mobile-navigation-v112\.js\?v=2';/);
   assert.match(account,/if\(window\.__TitansAccountV112\)return;/);
   assert.match(account,/window\.__TitansAccountV112=true;/);
-  assert.match(account,/account-v112\.css\?v=3/);
+  assert.match(account,/account-v112\.css\?v=4/);
   const syncIndex=html.indexOf('/account-sync-v112.js?v=2');
   const accountIndex=html.indexOf('/account-v112.js?v=3');
   assert.ok(syncIndex>=0&&accountIndex>syncIndex,'account sync must register before the account module announces session state');
