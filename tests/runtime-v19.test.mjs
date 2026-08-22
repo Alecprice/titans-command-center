@@ -62,8 +62,8 @@ test('365 and premium surfaces subscribe to shared refresh without migrating sta
   assert.doesNotMatch(change,/TitansRuntime/);
 });
 
-test('PWA v51 precaches the runtime and 365 assets',()=>{
+test('PWA precaches the runtime and 365 assets',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v51/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   for(const asset of ['runtime-v19.js','mode-365-v19.js','mode-365-v19.css'])assert.match(sw,new RegExp(asset.replace('.','\\.')));
 });

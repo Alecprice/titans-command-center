@@ -101,19 +101,51 @@ try:
         mobile=m.execute_script("""
           const panel=document.querySelector('.v19-365');
           const links=[...document.querySelectorAll('.v19-365-grid>a')];
+          const menu=document.querySelector('#menu-button'),dock=document.querySelector('.mobile-nav');
+          const mr=menu?.getBoundingClientRect(),dr=dock?.getBoundingClientRect();
+          const dockTargets=[...(dock?.querySelectorAll('a,button')||[])];
           return {
             viewport:innerWidth,
             overflow:document.documentElement.scrollWidth>innerWidth+1,
             panelWidth:panel?.getBoundingClientRect().width||0,
             panelHeight:panel?.getBoundingClientRect().height||0,
             targets:links.map(x=>({h:x.getBoundingClientRect().height,w:x.getBoundingClientRect().width,label:x.querySelector('small')?.textContent||''})),
-            reviewHeight:document.querySelector('.v19-365>header>a')?.getBoundingClientRect().height||0
+            reviewHeight:document.querySelector('.v19-365>header>a')?.getBoundingClientRect().height||0,
+            menu:mr?{x:mr.x,y:mr.y,w:mr.width,h:mr.height,display:getComputedStyle(menu).display}:null,
+            dock:dr?{x:dr.x,y:dr.y,w:dr.width,h:dr.height,display:getComputedStyle(dock).display}:null,
+            dockTargets:dockTargets.map(x=>({h:x.getBoundingClientRect().height,w:x.getBoundingClientRect().width,label:(x.textContent||'').trim()}))
           }
         """)
         if mobile['overflow']: raise RuntimeError(f'Mobile horizontal overflow: {mobile}')
         if mobile['reviewHeight']<44: raise RuntimeError(f'Mobile review target too small: {mobile}')
         if any(x['h']<44 for x in mobile['targets']): raise RuntimeError(f'Mobile 365 card target too small: {mobile}')
+        if not mobile['menu'] or mobile['menu']['display']=='none' or mobile['menu']['w']<44 or mobile['menu']['h']<44 or mobile['menu']['x']<0 or mobile['menu']['y']<0: raise RuntimeError(f'Mobile menu unreachable: {mobile}')
+        if not mobile['dock'] or mobile['dock']['display']=='none' or mobile['dock']['h']<60 or mobile['dock']['x']<0 or mobile['dock']['x']+mobile['dock']['w']>mobile['viewport']+1: raise RuntimeError(f'Mobile dock invalid: {mobile}')
+        if len(mobile['dockTargets'])!=6 or any(x['h']<44 or x['w']<44 for x in mobile['dockTargets']): raise RuntimeError(f'Mobile dock targets invalid: {mobile}')
+
+        m.find_element(By.ID,'mobile-more-button').click()
+        sheet=WebDriverWait(m,10,poll_frequency=.1).until(lambda driver:driver.execute_script("""
+          const s=document.querySelector('#sidebar'),more=document.querySelector('#mobile-more-button');
+          const r=s?.getBoundingClientRect();
+          if(!s?.classList.contains('open')||more?.getAttribute('aria-expanded')!=='true'||!r||r.width<=0||r.height<=0)return null;
+          return {top:r.top,bottom:r.bottom,height:r.height,links:[...s.querySelectorAll('.nav a')].length};
+        """))
+        if sheet['bottom']>mobile['dock']['y']+2: raise RuntimeError(f'Mobile sheet overlaps dock: sheet={sheet} mobile={mobile}')
+        m.execute_script("document.querySelector('#app').click()")
+        WebDriverWait(m,5).until(lambda driver:not driver.find_element(By.ID,'sidebar').get_attribute('class').split().__contains__('open'))
+
+        search=m.find_element(By.ID,'global-search')
+        search.click();search.send_keys('roster')
+        search_state=WebDriverWait(m,10,poll_frequency=.1).until(lambda driver:driver.execute_script("""
+          const p=document.querySelector('.v111-search-panel');if(!p||p.hidden)return null;
+          const r=p.getBoundingClientRect(),rows=[...p.querySelectorAll('[data-v111-index]')];
+          return rows.length?{left:r.left,right:r.right,width:r.width,height:r.height,rows:rows.length,targets:rows.map(x=>x.getBoundingClientRect().height)}:null;
+        """))
+        if search_state['left']<0 or search_state['right']>mobile['viewport']+1 or any(h<44 for h in search_state['targets']): raise RuntimeError(f'Mobile Smart Search invalid: {search_state}')
+
         mobile['panelState']=mobile_panel
+        mobile['sheet']=sheet
+        mobile['smartSearch']=search_state
         result['mobile']=mobile
         result['browserWarnings'].extend(severe_logs(m))
     finally:

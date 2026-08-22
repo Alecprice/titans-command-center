@@ -1,5 +1,6 @@
 import './runtime-v19.js';
 import './mode-365-v19.js';
+import './mobile-navigation-v112.js';
 
 const app=document.querySelector('#app');
 const sidebar=document.querySelector('#sidebar');
@@ -11,7 +12,7 @@ const globalSearch=document.querySelector('#global-search');
 const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
 const queryParams=()=>new URLSearchParams(location.hash.split('?')[1]||'');
 const expectedTitles={games:'Games & Schedule',roster:'Roster',transactions:'Transactions',stats:'Stats Lab',markets:'Odds & Props',feed:'Intel Feed',sources:'Sources',live:'Game Day Center',legacy:'Legacy',player:'Player profile',search:null};
-const mobilePrimary=new Set(['home','live','roster','transactions','stats']);
+const mobilePrimary=new Set(['home','live','roster']);
 const sectionTargets=[
   {hash:'#live',label:'Game Day',terms:'game live scoreboard kickoff score'},
   {hash:'#games',label:'Schedule',terms:'schedule games calendar opponent week'},
