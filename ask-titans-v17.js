@@ -1,3 +1,5 @@
+import {formatCalendarDate,formatTeamKickoff,TEAM_TIME_LABEL} from './team-time-v21.js';
+
 (() => {
   'use strict';
 
@@ -40,7 +42,6 @@
   const stats=()=>arr(state.fan?.playerStats);
   const nextGame=()=>games().find(g=>{const t=Date.parse(g?.date);return Number.isFinite(t)&&t>Date.now()&&!/final|bye/i.test(String(g?.status||''))})||null;
   const iso=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?null:d.toISOString()};
-  const fmt=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'Time TBD':new Intl.DateTimeFormat(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(d)};
   const age=value=>{const t=Date.parse(value);if(!Number.isFinite(t))return'Freshness not provided';const m=Math.max(0,Math.round((Date.now()-t)/60000));return m<2?'Updated just now':m<60?`Updated ${m} min ago`:m<1440?`Updated ${Math.round(m/60)} hr ago`:`Updated ${Math.round(m/1440)} day${Math.round(m/1440)===1?'':'s'} ago`};
   const sourceTime=(...values)=>values.map(iso).find(Boolean)||null;
   const clean=value=>String(value??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
@@ -69,12 +70,13 @@
   function nextGameAnswer(){
     const g=nextGame();
     if(!g)return response('The next Titans game is not available in the loaded schedule yet.','I will not guess a kickoff or opponent when the schedule row is missing.',[],[source('Titans schedule data','Internal verified schedule feed',state.data?.fetchedAt||state.data?.meta?.updatedAt)],{label:'Open Schedule',href:'#games'},'Data unavailable');
-    return response(`Tennessee is next scheduled ${g.homeAway==='home'?'to host':'to visit'} ${g.opponent||g.opponentAbbr} on ${fmt(g.date)}.`,`That is the next non-final, non-bye game in the loaded Titans schedule. ${g.network?`${g.network} is the listed network.`:'The network is not loaded yet.'}`,[fact('Opponent',g.opponent||g.opponentAbbr||'TBD'),fact('Kickoff',fmt(g.date)),fact('Network',g.network||'TBD'),fact('Venue',g.venue||'TBD')],[source('Schedule','Titans Command Center loaded schedule',g.updatedAt||state.data?.fetchedAt||state.data?.meta?.updatedAt)],{label:'Open Game Day',href:'#live'});
+    const kickoff=formatTeamKickoff(g.date);
+    return response(`Tennessee is next scheduled ${g.homeAway==='home'?'to host':'to visit'} ${g.opponent||g.opponentAbbr} on ${kickoff} (${TEAM_TIME_LABEL}).`,`That is the next non-final, non-bye game in the loaded Titans schedule. ${g.network?`${g.network} is the listed network.`:'The network is not loaded yet.'}`,[fact('Opponent',g.opponent||g.opponentAbbr||'TBD'),fact('Kickoff',`${kickoff} · ${TEAM_TIME_LABEL}`),fact('Network',g.network||'TBD'),fact('Venue',g.venue||'TBD')],[source('Schedule','Titans Command Center loaded schedule',g.updatedAt||state.data?.fetchedAt||state.data?.meta?.updatedAt)],{label:'Open Game Day',href:'#live'});
   }
 
   function watchAnswer(){
-    const g=nextGame();
-    return response(g?`The next game is ${fmt(g.date)} and the loaded TV listing is ${g.network||'TBD'}. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.`:'The next kickoff is not loaded, but Listen / Watch still has the official and licensed provider guides.','Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans.',g?[fact('Listed network',g.network||'TBD'),fact('Kickoff',fmt(g.date))]:[],[source('Broadcast guide','Titans Command Center media routing',g?.updatedAt||state.data?.fetchedAt)],{label:'Open Listen / Watch',href:'#media'});
+    const g=nextGame(),kickoff=g?formatTeamKickoff(g.date):null;
+    return response(g?`The next game is ${kickoff} (${TEAM_TIME_LABEL}) and the loaded TV listing is ${g.network||'TBD'}. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.`:'The next kickoff is not loaded, but Listen / Watch still has the official and licensed provider guides.','Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans.',g?[fact('Listed network',g.network||'TBD'),fact('Kickoff',`${kickoff} · ${TEAM_TIME_LABEL}`)]:[],[source('Broadcast guide','Titans Command Center media routing',g?.updatedAt||state.data?.fetchedAt)],{label:'Open Listen / Watch',href:'#media'});
   }
 
   function standingsAnswer(){
@@ -95,7 +97,7 @@
     const player=findPlayer(query),rows=player?moves().filter(x=>clean([x.description,x.title,x.summary,x.player,x.name].join(' ')).includes(clean(player.name))):moves();
     const x=rows[0];
     if(!x)return response(player?`No loaded transaction currently matches ${player.name}.`:'No roster transaction is loaded right now.','A missing transaction row is reported as missing rather than converted into a claim that nothing happened.',[],[source('Transactions','Loaded Titans transaction feed',state.data?.fetchedAt)],{label:'Open Transactions',href:'#transactions'},'Data unavailable');
-    return response(player?`Latest loaded ${player.name} roster movement: ${x.description||x.title||x.summary||'transaction recorded'}.`:`Latest loaded roster move: ${x.description||x.title||x.summary||'transaction recorded'}.`,'Roster movement can change depth, role, and available game-day personnel. The Change Engine tracks follow-on depth and availability updates separately.',[fact('Type',x.type||'Transaction'),fact('Date',x.date?fmt(x.date):'Date not loaded')],[source('Transactions','Loaded Titans transaction record',x.date||x.publishedAt||x.capturedAt||state.data?.fetchedAt)],{label:'Open Transactions',href:'#transactions'});
+    return response(player?`Latest loaded ${player.name} roster movement: ${x.description||x.title||x.summary||'transaction recorded'}.`:`Latest loaded roster move: ${x.description||x.title||x.summary||'transaction recorded'}.`,'Roster movement can change depth, role, and available game-day personnel. The Change Engine tracks follow-on depth and availability updates separately.',[fact('Type',x.type||'Transaction'),fact('Date',x.date?formatCalendarDate(x.date):'Date not loaded')],[source('Transactions','Loaded Titans transaction record',x.date||x.publishedAt||x.capturedAt||state.data?.fetchedAt)],{label:'Open Transactions',href:'#transactions'});
   }
 
   function depthAnswer(query){
@@ -119,7 +121,7 @@
     const g=scoreGame();
     if(!g)return response('No current Titans scoreboard event is loaded.','Without a current scoreboard event, Ask Titans will not invent a live score, clock, possession, or game state.',[],[source('Scoreboard','Internal scoreboard proxy',state.score?.fetchedAt)],{label:'Open Game Day',href:'#live'},'No live event');
     const isLive=/in progress|halftime|end of/i.test(`${g.status} ${g.detail}`);
-    if(!isLive)return response(`The scoreboard event is ${g.detail||g.status||'not marked live'}${g.date?` for ${fmt(g.date)}`:''}.`,'The live command surface only activates when the upstream status genuinely indicates a game in progress.',[fact('Status',g.detail||g.status||'Unknown'),fact('Opponent',g.opponent)],[source('Scoreboard','Internal ESPN scoreboard proxy',state.score?.fetchedAt||g.date)],{label:'Open Game Day',href:'#live'});
+    if(!isLive)return response(`The scoreboard event is ${g.detail||g.status||'not marked live'}${g.date?` for ${formatTeamKickoff(g.date)} (${TEAM_TIME_LABEL})`:''}.`,'The live command surface only activates when the upstream status genuinely indicates a game in progress.',[fact('Status',g.detail||g.status||'Unknown'),fact('Opponent',g.opponent)],[source('Scoreboard','Internal ESPN scoreboard proxy',state.score?.fetchedAt||g.date)],{label:'Open Game Day',href:'#live'});
     return response(`TEN ${g.tenScore??'—'} — ${g.opponentAbbr} ${g.oppScore??'—'}${g.clock?` · ${g.clock}`:''}${g.period?` · Q${g.period}`:''}.`,'This is the current loaded scoreboard state. Drive, play, EPA, and WPA context appears in Game Day only when trustworthy structured rows are available.',[fact('Game status',g.detail||g.status||'Live'),fact('Opponent',g.opponent)],[source('Scoreboard','Internal ESPN scoreboard proxy',state.score?.fetchedAt||new Date().toISOString())],{label:'Open Game Day',href:'#live'});
   }
 
