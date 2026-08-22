@@ -26,23 +26,33 @@ test('player intelligence uses loaded API data and refuses fake zero or film cla
   const js=read('player-intelligence-v16.js');
   assert.match(js,/fetch\(`\/api\/player\?id=/);
   assert.match(js,/fetch\('\/api\/fan-intel'/);
+  assert.match(js,/fetch\('\/api\/data'/);
   assert.match(js,/This is an ingest gap, not a zero-stat claim/);
   assert.match(js,/They do not infer film grades/);
   assert.match(js,/No salary\/cap values are inferred/);
   assert.match(js,/Cap savings\/dead-money outcomes are not estimated/);
 });
 
-test('player intelligence integrates My Titans favorite state',()=>{
+test('player intelligence integrates My Titans favorite state and supports repeat toggles',()=>{
   const js=read('player-intelligence-v16.js');
   assert.match(js,/titans:v15MyTitans/);
   assert.match(js,/data-v16-favorite/);
   assert.match(js,/Make favorite/);
+  assert.match(js,/favoriteButton\.getAttribute\('aria-pressed'\)==='true'/);
+  assert.match(js,/favoriteButton\.setAttribute\('aria-pressed',String\(!isFavorite\)\)/);
+});
+
+test('player timeline can include verified site transactions without a browser global',()=>{
+  const js=read('player-intelligence-v16.js');
+  assert.match(js,/siteData\(\)/);
+  assert.match(js,/arr\(site\?\.transactions\)/);
+  assert.doesNotMatch(js,/__titansBootstrap/);
 });
 
 test('player trends are generated from numeric warehouse fields only',()=>{
   const js=read('player-intelligence-v16.js');
   assert.match(js,/function flattenStats/);
-  assert.match(js,/Number\.isFinite\(Number\(v\)\)/);
+  assert.match(js,/Number\.isFinite\(Number\(value\)\)/);
   assert.match(js,/function spark/);
   assert.match(js,/player-game warehouse/);
 });
