@@ -33,6 +33,19 @@ test('remote v1.0 preferences refresh the live fan shell once only when changed'
   assert.match(sync,/const merged=\{\.\.\.local,\.\.\.remotePreferences\}/);
 });
 
+test('account production smoke retries the real mobile sheet entry instead of bypassing it',()=>{
+  const smoke=read('scripts/account-browser-smoke.py');
+  assert.match(smoke,/def open_account_from_sheet\(driver,attempts=3\):/);
+  assert.match(smoke,/if not opened:/);
+  assert.match(smoke,/wait_sheet_settled\(driver\)/);
+  assert.match(smoke,/scrollIntoView/);
+  assert.match(smoke,/button\.click\(\)/);
+  assert.match(smoke,/s\.inert/);
+  assert.match(smoke,/ElementNotInteractableException/);
+  assert.match(smoke,/StaleElementReferenceException/);
+  assert.doesNotMatch(smoke,/execute_script\([^\n]*data-account-open[^\n]*\.click\(\)/);
+});
+
 test('guest-first account behavior and local fallback remain unchanged',()=>{
   const sync=read('account-sync-v112.js');
   const account=read('account-v112.js');
