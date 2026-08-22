@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + runtime / 365 Mode browser regression failure**
-- Source commit: `d878533cdde08dceec8a625533a01c40a5f13636`
+- Status: **deployed + Account / Guest browser regression failure**
+- Source commit: `310419ceb9a50eb7b69f81d9c16500ec05eb0303`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -13,12 +13,12 @@
 - Player Intelligence / Game Day browser regression: success
 - Ask Titans browser regression: success
 - Change Intelligence browser regression: success
-- Runtime / 365 Mode browser regression: failure
-- Account / Guest browser regression: skipped
+- Runtime / 365 Mode browser regression: success
+- Account / Guest browser regression: failure
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T05:33:47Z
+- Recorded: 2026-08-22T05:40:04Z
 
 ## Production regression
 
@@ -70,19 +70,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "d878533cdde08dceec8a625533a01c40a5f13636",
-    "builtAt": "2026-08-22T05:32:13.218Z"
+    "commit": "310419ceb9a50eb7b69f81d9c16500ec05eb0303",
+    "builtAt": "2026-08-22T05:38:23.002Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 5,
   "responseMs": {
-    "root": 64,
-    "health": 429,
-    "data": 2750,
-    "stats": 326,
-    "market": 434,
-    "analytics": 586
+    "root": 58,
+    "health": 191,
+    "data": 287,
+    "stats": 173,
+    "market": 526,
+    "analytics": 361
   },
-  "testedAt": "2026-08-22T05:32:49.568Z",
+  "testedAt": "2026-08-22T05:38:55.986Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -112,8 +112,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 174,
-  "testedAt": "2026-08-22T05:32:50.427Z"
+  "durationMs": 441,
+  "testedAt": "2026-08-22T05:38:56.895Z"
 }```
 
 ## Browser navigation regression
@@ -158,11 +158,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 120,
+  "maxLongTaskMs": 201,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 25.17,
-  "testedAt": "2026-08-22T05:33:19Z"
+  "durationSeconds": 28.1,
+  "testedAt": "2026-08-22T05:39:34Z"
 }```
 
 ## Listen Watch browser regression
@@ -195,8 +195,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.17,
-  "testedAt": "2026-08-22T05:33:22Z"
+  "durationSeconds": 1.89,
+  "testedAt": "2026-08-22T05:39:37Z"
 }```
 
 ## Command Intelligence browser regression
@@ -254,8 +254,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.26,
-  "testedAt": "2026-08-22T05:33:24Z"
+  "durationSeconds": 2.3,
+  "testedAt": "2026-08-22T05:39:39Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -305,8 +305,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.23,
-  "testedAt": "2026-08-22T05:33:28Z"
+  "durationSeconds": 2.49,
+  "testedAt": "2026-08-22T05:39:42Z"
 }```
 
 ## Ask Titans browser regression
@@ -383,8 +383,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.73,
-  "testedAt": "2026-08-22T05:33:30Z"
+  "durationSeconds": 1.5,
+  "testedAt": "2026-08-22T05:39:44Z"
 }```
 
 ## Change Intelligence browser regression
@@ -421,15 +421,15 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.85,
-  "testedAt": "2026-08-22T05:33:33Z"
+  "durationSeconds": 3.06,
+  "testedAt": "2026-08-22T05:39:47Z"
 }```
 
 ## Runtime / 365 Mode browser regression
 
 ```json
 {
-  "ok": false,
+  "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "desktop": {
     "phase": "preseason",
@@ -454,23 +454,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787376845310,
+          "expiresAt": 1787377220080,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787376815310,
+          "updatedAt": 1787377190080,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787376845153,
+          "expiresAt": 1787377220044,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787376815153,
+          "updatedAt": 1787377190044,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-22T05:33:34.945Z",
+        "at": "2026-08-22T05:39:49.906Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -497,10 +497,118 @@
       "width": 969
     }
   },
-  "mobile": {},
+  "mobile": {
+    "layout": {
+      "dock": {
+        "display": "grid",
+        "h": 72,
+        "w": 465,
+        "x": 10,
+        "y": 621
+      },
+      "dockTargets": [
+        {
+          "h": 58,
+          "label": "Home",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Roster",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Game",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Search",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "More",
+          "w": 89.8125
+        }
+      ],
+      "menu": {
+        "display": "grid",
+        "h": 46,
+        "w": 46,
+        "x": 10,
+        "y": 8
+      },
+      "overflow": false,
+      "panelHeight": 765.171875,
+      "panelWidth": 461,
+      "reviewHeight": 48,
+      "targets": [
+        {
+          "h": 112,
+          "label": "NEXT GAME",
+          "w": 427
+        },
+        {
+          "h": 122.9375,
+          "label": "WHAT CHANGED?",
+          "w": 427
+        },
+        {
+          "h": 122.9375,
+          "label": "ROSTER",
+          "w": 427
+        },
+        {
+          "h": 112,
+          "label": "AVAILABILITY",
+          "w": 427
+        }
+      ],
+      "viewport": 500
+    },
+    "panelState": {
+      "cards": 4,
+      "display": "block",
+      "height": 765.171875,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksMon, Aug 24, 12:00 AM UTC \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 461
+    },
+    "sheet": {
+      "bottom": 611,
+      "dockTop": 621,
+      "height": 504.71875,
+      "links": 13,
+      "top": 106.28125
+    },
+    "smartSearch": {
+      "height": 110,
+      "left": 10,
+      "right": 475,
+      "rows": 1,
+      "targets": [
+        58
+      ],
+      "width": 465
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 4.7
+}```
+
+## Account / Guest browser regression
+
+```json
+{
+  "ok": false,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "browserWarnings": [],
   "error": "TimeoutException: Message: \n",
-  "durationSeconds": 14.22
+  "durationSeconds": 11.42
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
