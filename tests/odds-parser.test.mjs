@@ -134,3 +134,33 @@ test('free provider runtime cache caps event requests and reuses a successful re
   assert.equal(bypassed.ok,true);
   assert.equal(calls,6,'trusted bypass performs one fresh events request plus two odds requests');
 });
+
+test('configured provider overlaps the two bounded Titans event-detail requests',async t=>{
+  const originalFetch=globalThis.fetch;
+  let calls=0,activeOdds=0,maxActiveOdds=0;
+  const future=days=>new Date(Date.now()+days*24*60*60*1000).toISOString();
+  const events=[
+    {id:'evt-a',home_team:'Tennessee Titans',away_team:'Seattle Seahawks',commence_time:future(1)},
+    {id:'evt-b',home_team:'TEN Titans',away_team:'Chicago Bears',commence_time:future(2)}
+  ];
+  globalThis.fetch=async url=>{
+    calls++;
+    const value=String(url);
+    if(value.endsWith('/events'))return new Response(JSON.stringify(events),{status:200,headers:{'content-type':'application/json'}});
+    if(/\/events\/[^/]+\/odds/.test(value)){
+      activeOdds++;maxActiveOdds=Math.max(maxActiveOdds,activeOdds);
+      await new Promise(resolve=>setTimeout(resolve,30));
+      activeOdds--;
+      const id=value.match(/\/events\/([^/]+)\/odds/)?.[1]||'evt-a';
+      return new Response(JSON.stringify({id,bookmakers:[{key:'fanduel',title:'FanDuel',markets:[{key:'h2h',outcomes:[{name:'Tennessee Titans',price:-120},{name:'Opponent',price:110}]}]}]}),{status:200,headers:{'content-type':'application/json'}});
+    }
+    throw new Error(`Unexpected URL: ${value}`);
+  };
+  resetOddsRuntimeCache();
+  t.after(()=>{globalThis.fetch=originalFetch;resetOddsRuntimeCache()});
+  const result=await fetchFreeOdds({PROPLINE_API_KEY:'test-only-key'},{maxEvents:2,bypassCache:true});
+  assert.equal(result.ok,true);
+  assert.equal(calls,3,'one events request plus two bounded event-detail requests expected');
+  assert.equal(result.odds.length,4);
+  assert.equal(maxActiveOdds,2,'the two event-detail requests should overlap instead of running serially');
+});
