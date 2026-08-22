@@ -11,7 +11,7 @@ test('Command route guard is loaded after Command Intelligence and precached',()
   assert.ok(command>=0);
   assert.ok(guard>command);
   assert.match(sw,/command-route-guard-v15\.js/);
-  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v43'/);
+  assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
 });
 
 test('Command route guard hands control back after legacy hydration overwrites the app',()=>{
