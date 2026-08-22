@@ -6,7 +6,7 @@
   function wake(){
     if(route()!=='command'||document.querySelector('.v18-change-intel'))return;
     if(!document.querySelector('.v15-command-view'))return;
-    window.dispatchEvent(new Event('hashchange'));
+    window.TitansChangeIntelligence?.wake?.();
   }
 
   function schedule(){
