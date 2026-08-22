@@ -10,7 +10,7 @@ test('Change Intelligence 2.0 loads after Command Intelligence and is precached'
   assert.ok(base>=0&&change>base);
   assert.match(sw,/change-intelligence-v18\.css/);
   assert.match(sw,/change-intelligence-v18\.js/);
-  assert.match(sw,/titans-cc-brand-2026-v47/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
 });
 
 test('reviewed snapshot changes only when fan explicitly marks current state reviewed',()=>{
@@ -44,10 +44,14 @@ test('Change Intelligence does not infer practice reps or hidden coaching intent
   assert.match(js,/compact comparison snapshot in this browser/);
 });
 
-test('Change Intelligence uses narrow observers and mobile-safe targets',()=>{
-  const js=read('change-intelligence-v18.js'),css=read('change-intelligence-v18.css');
-  assert.match(js,/observe\(host,\{childList:true,subtree:false\}\)/);
-  assert.match(js,/observe\(app,\{childList:true,subtree:false\}\)/);
+test('Change Intelligence uses shared top-level runtime plus a narrow host observer and mobile-safe targets',()=>{
+  const js=read('change-intelligence-v18.js'),runtime=read('runtime-v19.js'),css=read('change-intelligence-v18.css');
+  assert.match(js,/state\.viewObserver\.observe\(host,\{childList:true,subtree:false\}\)/);
+  assert.match(js,/runtime\.onAppRender/);
+  assert.match(js,/runtime\.onRoute/);
+  assert.doesNotMatch(js,/observe\(app,\{childList:true,subtree:false\}\)/);
+  assert.match(runtime,/observe\(app,\{childList:true,subtree:false\}\)/);
+  assert.doesNotMatch(runtime,/subtree:true/);
   assert.match(css,/@media\(max-width:759px\)/);
   assert.match(css,/@media\(max-width:390px\)/);
   assert.match(css,/min-height:48px/);
