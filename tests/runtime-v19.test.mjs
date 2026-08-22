@@ -3,19 +3,23 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('v1.9 shared runtime boots before 365 Mode from the early usability module',()=>{
+test('shared runtime boots before 365 Mode from the early usability module',()=>{
   const js=read('usability-runtime.js');
   assert.match(js,/import '\.\/runtime-v19\.js';/);
   assert.match(js,/import '\.\/mode-365-v19\.js';/);
   assert.ok(js.indexOf("import './runtime-v19.js';")<js.indexOf("import './mode-365-v19.js';"));
 });
 
-test('shared runtime centralizes route and app-render subscriptions',()=>{
+test('shared runtime centralizes route, render, and refresh subscriptions',()=>{
   const js=read('runtime-v19.js');
   assert.match(js,/const routeListeners=new Set\(\)/);
   assert.match(js,/const renderListeners=new Set\(\)/);
+  assert.match(js,/const refreshListeners=new Set\(\)/);
   assert.match(js,/function onRoute/);
   assert.match(js,/function onAppRender/);
+  assert.match(js,/function onRefresh/);
+  assert.match(js,/function refresh\(/);
+  assert.match(js,/version:'1\.10\.0'/);
   assert.match(js,/observe\(app,\{childList:true,subtree:false\}\)/);
   assert.doesNotMatch(js,/subtree:true/);
 });
@@ -37,20 +41,29 @@ test('shared runtime provides storage-safe JSON helpers',()=>{
   assert.match(js,/catch\{return fallback\}/);
 });
 
-test('premium home layer consumes shared runtime without migrating stable Ask or Change modules',()=>{
+test('global scoreboard control invalidates the shared runtime cache',()=>{
+  const js=read('runtime-v19.js');
+  assert.match(js,/const refreshButton=document\.querySelector\('#refresh-button'\)/);
+  assert.match(js,/refreshButton\?\.addEventListener\('click',\(\)=>refresh\(\{reason:'scoreboard-control'\}\)\)/);
+  assert.match(js,/apiCache\.clear\(\)/);
+  assert.match(js,/refreshInfo/);
+});
+
+test('365 and premium surfaces subscribe to shared refresh without migrating stable Ask or Change modules',()=>{
+  const mode=read('mode-365-v19.js');
   const premium=read('premium-experience-v14.js');
   const ask=read('ask-titans-v17.js');
   const change=read('change-intelligence-v18.js');
-  assert.match(premium,/const runtime=window\.TitansRuntime/);
-  assert.match(premium,/runtime\.apiJson\('\/api\/fan-intel'/);
-  assert.match(premium,/runtime\.onRoute/);
-  assert.match(premium,/runtime\.onAppRender/);
+  assert.match(mode,/runtime\.onRefresh\(refreshMode\)/);
+  assert.match(mode,/document\.querySelector\('\.v19-365'\)\?\.remove\(\)/);
+  assert.match(premium,/runtime\.onRefresh\(refreshPremium\)/);
+  assert.match(premium,/document\.querySelectorAll\('\.v14-now,\.v14-gameday-quick,\.v14-stats-help,\.v14-player-help'\)/);
   assert.doesNotMatch(ask,/TitansRuntime/);
   assert.doesNotMatch(change,/TitansRuntime/);
 });
 
-test('PWA v50 precaches the runtime and 365 assets',()=>{
+test('PWA v51 precaches the runtime and 365 assets',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v50/);
+  assert.match(sw,/titans-cc-brand-2026-v51/);
   for(const asset of ['runtime-v19.js','mode-365-v19.js','mode-365-v19.css'])assert.match(sw,new RegExp(asset.replace('.','\\.')));
 });

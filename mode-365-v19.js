@@ -70,7 +70,7 @@
   function updateStatus(p){
     document.body.dataset.v19Phase=p.key;
     const pill=document.querySelector('.sidebar-foot .status-pill');
-    if(pill&&!pill.dataset.v19Mode){pill.dataset.v19Mode='1';pill.innerHTML=`<i></i> ${esc(p.accent)} mode`}
+    if(pill){pill.dataset.v19Mode='1';pill.innerHTML=`<i></i> ${esc(p.accent)} mode`}
   }
 
   async function render(){
@@ -83,7 +83,17 @@
     target.insertAdjacentElement('afterend',section);updateStatus(p);
   }
 
+  function refreshMode(){
+    state.serial++;
+    state.data=null;
+    state.fan=null;
+    state.loading=null;
+    document.querySelector('.v19-365')?.remove();
+    setTimeout(render,0);
+  }
+
   runtime.onRoute(()=>{state.serial++;setTimeout(render,30)});
   runtime.onAppRender(()=>queueMicrotask(render));
+  runtime.onRefresh(refreshMode);
   setTimeout(render,100);
 })();
