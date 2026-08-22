@@ -11,6 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 OUT=Path('/tmp/account-browser-smoke.json')
+IMPORT_FILE=Path('/tmp/titans-account-import-smoke.json')
 
 def driver_for(width=390,height=844):
     options=Options();options.add_argument('--headless=new');options.add_argument('--no-sandbox');options.add_argument('--disable-dev-shm-usage');options.add_argument(f'--window-size={width},{height}');options.set_capability('goog:loggingPrefs',{'browser':'ALL'});return webdriver.Chrome(options=options)
@@ -91,11 +92,11 @@ def wait_account_panel(driver,timeout=8):
 
 def wait_guest_tools(driver,timeout=8):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
-      const panel=document.querySelector('.account-panel'),exp=panel?.querySelector('[data-account-export]'),reset=panel?.querySelector('[data-account-reset]');
-      if(!panel||!exp||!reset)return null;
-      const er=exp.getBoundingClientRect(),rr=reset.getBoundingClientRect();
-      if(er.height<44||rr.height<44||er.width<44||rr.width<44)return null;
-      return {exportLabel:exp.textContent.trim(),resetLabel:reset.textContent.trim(),exportHeight:er.height,resetHeight:rr.height,guest:Boolean(window.TitansAccount?.guest)};
+      const panel=document.querySelector('.account-panel'),exp=panel?.querySelector('[data-account-export]'),reset=panel?.querySelector('[data-account-reset]'),imp=panel?.querySelector('[data-account-import]');
+      if(!panel||!exp||!reset||!imp)return null;
+      const er=exp.getBoundingClientRect(),rr=reset.getBoundingClientRect(),ir=imp.getBoundingClientRect();
+      if(er.height<44||rr.height<44||ir.height<44||er.width<44||rr.width<44||ir.width<44)return null;
+      return {exportLabel:exp.textContent.trim(),importLabel:imp.textContent.trim(),resetLabel:reset.textContent.trim(),exportHeight:er.height,importHeight:ir.height,resetHeight:rr.height,guest:Boolean(window.TitansAccount?.guest)};
     """))
 
 def state(driver):
@@ -111,10 +112,12 @@ def state(driver):
             runtimeVersion:window.TitansRuntime?.version||null,
             accountApi:Boolean(window.TitansAccount),
             accountGuest:window.TitansAccount?.guest??null,
+            accountImport:Boolean(window.TitansAccountImport),
             accountCard:card?.textContent?.trim()||'',
             accountCardAtSidebarTop:Boolean(document.querySelector('#sidebar > .account-sheet-card')),
             accountEntry:er?{top:er.top,bottom:er.bottom,width:er.width,height:er.height}:null,
-            accountPanel:ar?{top:ar.top,bottom:ar.bottom,width:ar.width,height:ar.height,text:(account?.textContent||'').slice(0,220)}:null,
+            accountPanel:ar?{top:ar.top,bottom:ar.bottom,width:ar.width,height:ar.height,text:(account?.textContent||'').slice(0,260)}:null,
+            importPreview:document.querySelector('.account-import-preview')?.textContent?.trim()||'',
             sidebar:{open:Boolean(sidebar?.classList.contains('open')),inert:Boolean(sidebar?.inert),ariaHidden:sidebar?.getAttribute('aria-hidden')||null,rect:sr?{top:sr.top,bottom:sr.bottom,width:sr.width,height:sr.height}:null},
             moreExpanded:document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded')||null,
             dock:dr?{top:dr.top,bottom:dr.bottom,width:dr.width,height:dr.height}:null,
@@ -128,6 +131,7 @@ def severe(driver):
 
 result={'ok':False,'base':BASE,'browserWarnings':[]};start=time.time();d=None;stage='starting'
 try:
+    IMPORT_FILE.write_text(json.dumps({'format':'titans-command-center-settings','version':1,'exportedAt':'2026-08-22T12:00:00Z','scope':'guest-device','account':None,'preferences':{'titans:v15MyTitans':{'favorite':'Browser Smoke'}}}),encoding='utf-8')
     stage='launch';d=driver_for()
     stage='load-home';d.get(f'{BASE}/#home')
     stage='prepare-returning-user';prepare_returning_user(d)
@@ -144,7 +148,14 @@ try:
     if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')
 
     stage='guest-portability-tools';tools=wait_guest_tools(d)
-    if tools['exportLabel']!='Export this device' or tools['resetLabel']!='Reset this device' or not tools['guest']: raise RuntimeError(f'guest portability tools invalid: {tools}')
+    if tools['exportLabel']!='Export this device' or tools['importLabel']!='Import backup' or tools['resetLabel']!='Reset this device' or not tools['guest']: raise RuntimeError(f'guest portability tools invalid: {tools}')
+
+    stage='import-preview';d.find_element(By.CSS_SELECTOR,'[data-account-import-file]').send_keys(str(IMPORT_FILE))
+    import_preview=wait(d,"""const p=document.querySelector('.account-import-preview'),a=p?.querySelector('[data-account-import-apply]');if(!p||p.hidden||!a)return null;const r=a.getBoundingClientRect();return {text:p.textContent.trim(),applyHeight:r.height,pending:window.TitansAccountImport?.pending||null,favorite:JSON.parse(localStorage.getItem('titans:v15MyTitans')||'null')?.favorite||null};""",8)
+    if 'READY TO RESTORE' not in import_preview['text'] or 'Nothing has changed yet' not in import_preview['text'] or import_preview['applyHeight']<44 or import_preview['favorite']=='Browser Smoke': raise RuntimeError(f'import did not remain preview-only: {import_preview}')
+    stage='cancel-import';d.find_element(By.CSS_SELECTOR,'[data-account-import-cancel]').click()
+    wait(d,"return document.querySelector('.account-import-preview')?.hidden===true && !window.TitansAccountImport?.pending",5)
+
     stage='arm-reset';d.find_element(By.CSS_SELECTOR,'.account-panel [data-account-reset]').click()
     armed=wait(d,"""const b=document.querySelector('.account-panel [data-account-reset]'),h=document.querySelector('.account-reset-hint');return b?.dataset.armed==='true'&&b.textContent.trim()==='Confirm reset'?{label:b.textContent.trim(),hint:h?.textContent.trim()||'',guest:Boolean(window.TitansAccount?.guest),hash:location.hash}:null;""",5)
     if 'within 6 seconds' not in armed['hint'] or not armed['guest'] or armed['hash']!='#home': raise RuntimeError(f'reset confirmation invalid: {armed}')
@@ -166,7 +177,7 @@ try:
     if roster['route']!='#roster': raise RuntimeError(f'guest navigation blocked: {roster}')
     stage='console';result['browserWarnings']=severe(d)
     if result['browserWarnings']: raise RuntimeError(f'Browser console errors: {result["browserWarnings"][:5]}')
-    result.update({'ok':True,'guest':guest,'mobileShell':shell,'sheet':sheet,'accountEntry':entry,'panel':panel,'portabilityTools':tools,'resetArmed':armed,'authOutage':outage,'roster':roster});stage='complete'
+    result.update({'ok':True,'guest':guest,'mobileShell':shell,'sheet':sheet,'accountEntry':entry,'panel':panel,'portabilityTools':tools,'importPreview':import_preview,'resetArmed':armed,'authOutage':outage,'roster':roster});stage='complete'
 except Exception as exc:
     result['stage']=stage;result['error']=f'{type(exc).__name__}: {exc}'
     if d is not None:result['state']=state(d)
@@ -174,5 +185,7 @@ finally:
     if d is not None:
         try:d.quit()
         except Exception:pass
+    try:IMPORT_FILE.unlink(missing_ok=True)
+    except Exception:pass
     result['durationSeconds']=round(time.time()-start,2);OUT.write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))
 if not result['ok']: raise SystemExit(1)
