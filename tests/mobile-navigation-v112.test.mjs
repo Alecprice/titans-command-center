@@ -9,7 +9,7 @@ test('mobile navigation polish is loaded and packaged offline',()=>{
   assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/mobile-navigation-v112\.css/);
   assert.match(sw,/mobile-navigation-v112\.js/);
-  assert.match(runtime,/import '\.\/mobile-navigation-v112\.js';/);
+  assert.match(runtime,/import '\.\/mobile-navigation-v112\.js\?v=2';/);
 });
 
 test('mobile top menu is safe-area aware and thumb reachable',()=>{
