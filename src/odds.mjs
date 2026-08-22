@@ -160,8 +160,10 @@ async function fetchPropLine(env,{maxEvents=2}={}) {
   const headers={'X-API-Key':env.PROPLINE_API_KEY};
   const {json,headers:rh}=await getJson(`${base}/events`,{headers});
   const events=selectTitansEvents(json,maxEvents);
-  const odds=[];
-  for(const event of events){const id=event.id??event.eventId??event.key;if(!id)continue;try{const out=await getJson(`${base}/events/${encodeURIComponent(id)}/odds?includeLinks=true`,{headers});odds.push(...normalizeOddsRows(out.json,'PropLine',event));}catch{}}
+  const odds=(await Promise.all(events.map(async event=>{
+    const id=event.id??event.eventId??event.key;if(!id)return [];
+    try{const out=await getJson(`${base}/events/${encodeURIComponent(id)}/odds?includeLinks=true`,{headers});return normalizeOddsRows(out.json,'PropLine',event)}catch{return []}
+  }))).flat();
   return {ok:true,configured:true,provider:'PropLine',events,odds,futures:[],quota:{remaining:rh.get('x-ratelimit-remaining')||rh.get('ratelimit-remaining')||null,limit:rh.get('x-ratelimit-limit')||rh.get('ratelimit-limit')||null},fetchedAt:new Date().toISOString()};
 }
 
@@ -169,8 +171,11 @@ async function fetchOddsApiIo(env,{maxEvents=2}={}) {
   if(!env.ODDS_API_IO_KEY) return {ok:false,configured:false,provider:'Odds-API.io',odds:[],events:[]};
   const key=encodeURIComponent(env.ODDS_API_IO_KEY);
   const {json}=await getJson(`https://api.odds-api.io/v3/events?apiKey=${key}&sport=nfl&limit=100`);
-  const events=selectTitansEvents(json,maxEvents); const odds=[];
-  for(const event of events){const id=event.id??event.eventId??event.key;if(!id)continue;try{const out=await getJson(`https://api.odds-api.io/v3/odds?apiKey=${key}&eventId=${encodeURIComponent(id)}`);odds.push(...normalizeOddsRows(out.json,'Odds-API.io',event));}catch{}}
+  const events=selectTitansEvents(json,maxEvents);
+  const odds=(await Promise.all(events.map(async event=>{
+    const id=event.id??event.eventId??event.key;if(!id)return [];
+    try{const out=await getJson(`https://api.odds-api.io/v3/odds?apiKey=${key}&eventId=${encodeURIComponent(id)}`);return normalizeOddsRows(out.json,'Odds-API.io',event)}catch{return []}
+  }))).flat();
   return {ok:true,configured:true,provider:'Odds-API.io',events,odds,futures:[],fetchedAt:new Date().toISOString()};
 }
 
