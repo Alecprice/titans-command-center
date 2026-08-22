@@ -11,8 +11,10 @@ test('app shell keeps core accessibility, mobile navigation and PWA semantics',(
   assert.match(html,/id="primary-nav" aria-label="Primary navigation"/);
   assert.match(html,/id="app"[^>]*aria-live="polite"[^>]*tabindex="-1"/);
   assert.match(html,/rel="preload" as="image" href="\/assets\/brand\/current-lockup\.webp"/);
-  assert.match(html,/class="mobile-nav"[\s\S]*href="#transactions"[^>]*data-route="transactions"[\s\S]*>Moves/);
+  assert.match(html,/class="mobile-nav"[\s\S]*href="#live"[^>]*data-route="live"[^>]*class="mobile-game-action"/);
+  assert.match(html,/id="mobile-search-button"[^>]*aria-label="Search Titans Command Center"/);
   assert.match(html,/id="mobile-more-button"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/);
+  assert.match(html,/id="primary-nav"[\s\S]*href="#transactions"[^>]*data-route="transactions"[\s\S]*Transactions/);
   assert.match(html,/href="\/usability-runtime\.css"/);
   assert.match(html,/src="\/usability-runtime\.js\?v=26"/);
   assert.match(html,/src="\/ux-polish\.js\?v=29"/);
