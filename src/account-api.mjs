@@ -95,13 +95,24 @@ function sanitizePreferences(input){
   return clean;
 }
 
+function preferenceStorageNotReady(error){
+  const code=String(error?.code||'').toUpperCase();
+  const message=String(error?.message||'').toLowerCase();
+  return code==='42P01'||(message.includes('fan_user_preferences')&&message.includes('does not exist'));
+}
+
+function preferenceFailure(error){
+  if(preferenceStorageNotReady(error))return json({ok:false,error:'Account preference storage is not provisioned yet.',code:'PREFERENCE_STORAGE_NOT_READY',localOnly:true},503);
+  return json({ok:false,error:'Preference sync unavailable',code:'PREFERENCE_SYNC_UNAVAILABLE',localOnly:true},503);
+}
+
 export async function accountPreferencesRoute(request,env){
   if(!['GET','PUT'].includes(request.method))return json({ok:false,error:'Method not allowed'},405,{Allow:'GET, PUT'});
   const session=await authSession(request);
   const user=session?.user||null;
   if(!user?.id)return json({ok:false,error:'Authentication required'},401);
   const sql=await getSql(env);
-  if(!sql)return json({ok:false,error:'Database unavailable'},503);
+  if(!sql)return json({ok:false,error:'Database unavailable',code:'DATABASE_UNAVAILABLE',localOnly:true},503);
   try{
     if(request.method==='GET'){
       const [row]=await sql`select preferences,schema_version,updated_at from fan_user_preferences where user_id=${String(user.id)} limit 1`;
@@ -120,6 +131,6 @@ export async function accountPreferencesRoute(request,env){
     return json({ok:true,preferences,updatedAt:row?.updated_at||null});
   }catch(error){
     console.error('[account-preferences]',error);
-    return json({ok:false,error:'Preference sync unavailable'},503);
+    return preferenceFailure(error);
   }
 }
