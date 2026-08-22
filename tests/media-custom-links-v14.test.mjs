@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('custom media links are user-managed and local-only',()=>{
+test('custom media links remain user-managed with guest-local and optional account sync behavior',()=>{
   const js=read('media-custom-links-v14.js');
   assert.match(js,/titans:v14CustomMediaLinks/);
   assert.match(js,/localStorage\.getItem/);
   assert.match(js,/localStorage\.setItem/);
-  assert.match(js,/stored only on this device/);
-  assert.match(js,/not verified, endorsed, or sent to the Command Center server/);
+  assert.match(js,/Guest links stay on this device/);
+  assert.match(js,/signed-in users can sync saved links/);
+  assert.match(js,/not verified or endorsed by the Command Center/);
   assert.doesNotMatch(js,/fetch\(/);
   assert.doesNotMatch(js,/XMLHttpRequest/);
 });
