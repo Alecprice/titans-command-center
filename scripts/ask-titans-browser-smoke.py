@@ -66,7 +66,8 @@ try:
         answer=row['answer']
         if 'not available' in answer.lower() or 'not loaded' in answer.lower():
             continue
-        if 'Nashville time' not in answer or ' UTC' in answer or not ('CDT' in answer or 'CST' in answer):
+        kickoff_clause=answer.split('Open Listen / Watch',1)[0]
+        if 'Nashville time' not in kickoff_clause or ' UTC' in kickoff_clause or not ('CDT' in kickoff_clause or 'CST' in kickoff_clause):
             raise RuntimeError(f'Ask Titans kickoff is not rendered in Nashville time: {row}')
         team_time_verified.append(row['question'])
 
