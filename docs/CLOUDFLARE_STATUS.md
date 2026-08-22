@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `c7a0dbfa0bf1462416d460760658cba34a348577`
+- Status: **deployed + data freshness browser regression failure**
+- Source commit: `0c699204156d19cb980590ae747f4d21274803cb`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -14,12 +14,12 @@
 - Ask Titans browser regression: success
 - Change Intelligence browser regression: success
 - Runtime / 365 Mode browser regression: success
-- Data freshness browser regression: success
-- Account / Guest browser regression: success
-- Advanced analytics browser regression: success
-- Player headshot browser regression: success
+- Data freshness browser regression: failure
+- Account / Guest browser regression: skipped
+- Advanced analytics browser regression: skipped
+- Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-22T21:20:16Z
+- Recorded: 2026-08-22T21:26:06Z
 
 ## Production regression
 
@@ -71,19 +71,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "c7a0dbfa0bf1462416d460760658cba34a348577",
-    "builtAt": "2026-08-22T21:18:50.296Z"
+    "commit": "0c699204156d19cb980590ae747f4d21274803cb",
+    "builtAt": "2026-08-22T21:24:58.939Z"
   },
-  "deploymentPropagationAttempts": 3,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 29,
-    "health": 956,
-    "data": 538,
-    "stats": 300,
-    "market": 2369,
-    "analytics": 577
+    "root": 26,
+    "health": 250,
+    "data": 245,
+    "stats": 237,
+    "market": 528,
+    "analytics": 435
   },
-  "testedAt": "2026-08-22T21:19:24.948Z",
+  "testedAt": "2026-08-22T21:25:26.908Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -113,8 +113,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 189,
-  "testedAt": "2026-08-22T21:19:25.797Z"
+  "durationMs": 152,
+  "testedAt": "2026-08-22T21:25:27.599Z"
 }```
 
 ## Browser navigation regression
@@ -159,11 +159,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 66,
+  "maxLongTaskMs": 0,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 19.18,
-  "testedAt": "2026-08-22T21:19:49Z"
+  "durationSeconds": 16.97,
+  "testedAt": "2026-08-22T21:25:48Z"
 }```
 
 ## Listen Watch browser regression
@@ -196,8 +196,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.96,
-  "testedAt": "2026-08-22T21:19:52Z"
+  "durationSeconds": 2.03,
+  "testedAt": "2026-08-22T21:25:50Z"
 }```
 
 ## Command Intelligence browser regression
@@ -255,8 +255,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.2,
-  "testedAt": "2026-08-22T21:19:54Z"
+  "durationSeconds": 2.1,
+  "testedAt": "2026-08-22T21:25:53Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -306,8 +306,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.67,
-  "testedAt": "2026-08-22T21:19:57Z"
+  "durationSeconds": 2.96,
+  "testedAt": "2026-08-22T21:25:56Z"
 }```
 
 ## Ask Titans browser regression
@@ -388,8 +388,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 1.65,
-  "testedAt": "2026-08-22T21:19:59Z"
+  "durationSeconds": 1.55,
+  "testedAt": "2026-08-22T21:25:58Z"
 }```
 
 ## Change Intelligence browser regression
@@ -426,8 +426,8 @@
     "width": 355
   },
   "browserWarnings": [],
-  "durationSeconds": 2.37,
-  "testedAt": "2026-08-22T21:20:02Z"
+  "durationSeconds": 2.33,
+  "testedAt": "2026-08-22T21:26:00Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -461,23 +461,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787433634052,
+          "expiresAt": 1787433992745,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787433604052,
+          "updatedAt": 1787433962745,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787433633952,
+          "expiresAt": 1787433992688,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787433603952,
+          "updatedAt": 1787433962688,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-22T21:20:03.772Z",
+        "at": "2026-08-22T21:26:02.525Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -604,231 +604,42 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.43
+  "durationSeconds": 3.62
 }```
 
 ## Data freshness browser regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktop": {
-    "detail": "Roster 3 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
-    "overflow": false,
-    "rect": {
-      "bottom": 948.28125,
-      "height": 132.03125,
-      "left": 922.65625,
-      "right": 1239,
-      "top": 816.25,
-      "width": 316.34375
-    },
-    "state": "stale",
-    "strong": "Roster snapshot needs review",
-    "text": "DATA FRESHNESSRoster snapshot needs reviewRoster 3 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
-    "title": "The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.",
-    "viewport": {
-      "height": 757,
-      "width": 1280
-    }
-  },
-  "mobile": {
-    "detail": "Roster 3 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
-    "overflow": false,
-    "rect": {
-      "bottom": 1625.84375,
-      "height": 113.53125,
-      "left": 10,
-      "right": 365,
-      "top": 1512.3125,
-      "width": 355
-    },
-    "state": "stale",
-    "strong": "Roster snapshot needs review",
-    "text": "DATA FRESHNESSRoster snapshot needs reviewRoster 3 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
-    "title": "The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.",
-    "viewport": {
-      "height": 701,
-      "width": 390
-    }
-  },
-  "browserWarnings": [],
-  "durationSeconds": 2.03,
-  "testedAt": "2026-08-22T21:20:08Z"
-}```
-
-## Account / Guest browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "browserWarnings": [],
-  "guest": {
-    "accountGuest": true,
-    "route": "#home",
-    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
-  },
-  "mobileShell": {
-    "dock": {
-      "h": 72,
-      "top": 621,
-      "w": 465
-    },
-    "more": {
-      "bottom": 686,
-      "h": 58,
-      "top": 628,
-      "w": 89.8125
-    },
-    "runtime": "1.10.0",
-    "sidebarHidden": "true",
-    "sidebarInert": true
-  },
-  "sheet": {
-    "bottom": 611,
-    "dockTop": 621,
-    "top": 106.28125
-  },
-  "accountEntry": {
-    "bottom": 290.53125,
-    "h": 44,
-    "parent": "sidebar",
-    "top": 246.53125,
-    "visibleBottom": 611,
-    "visibleTop": 106.28125,
-    "w": 390
-  },
-  "panel": {
-    "bottom": 701,
-    "h": 602.859375,
-    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordLog inContinue as guestGUEST DATAThese settings exist only on this device.Export this deviceImport backupReset this deviceReset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.",
-    "vh": 701,
-    "w": 485
-  },
-  "portabilityTools": {
-    "exportHeight": 50,
-    "exportLabel": "Export this device",
-    "guest": true,
-    "importHeight": 50,
-    "importLabel": "Import backup",
-    "resetHeight": 50,
-    "resetLabel": "Reset this device"
-  },
-  "importPreview": {
-    "applyHeight": 46,
-    "favorite": null,
-    "pending": {
-      "accountEmail": "",
-      "exportedAt": "2026-08-22T12:00:00Z",
-      "keys": [
-        "titans:v15MyTitans"
-      ],
-      "preferences": {
-        "titans:v15MyTitans": {
-          "favorite": "Browser Smoke"
-        }
-      },
-      "scope": "guest-device"
-    },
-    "text": "READY TO RESTORE1 setting groupAug 22, 2026, 12:00 PM \u00b7 guest-deviceNothing has changed yet. Applying restores only recognized Titans preferences from this file.Apply imported settingsCancel"
-  },
-  "resetArmed": {
-    "guest": true,
+  "stage": "desktop-freshness",
+  "error": "RuntimeError: desktop: freshness card introduced horizontal overflow: {'detail': 'Roster 3 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago', 'overflow': True, 'rect': {'bottom': 2472.1875, 'height': 132.03125, 'left': 922.65625, 'right': 1239, 'top': 2340.15625, 'width': 316.34375}, 'state': 'stale', 'strong': 'Roster snapshot needs review', 'text': 'DATA FRESHNESSRoster snapshot needs reviewRoster 3 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192', 'title': 'The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.', 'viewport': {'height': 757, 'width': 1280}}",
+  "state": {
     "hash": "#home",
-    "hint": "Tap Confirm reset again within 6 seconds.",
-    "label": "Confirm reset"
-  },
-  "authOutage": {
-    "guest": true,
-    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
-  },
-  "roster": {
-    "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 3 days agoRo"
-  },
-  "durationSeconds": 1.78
-}```
-
-## Advanced analytics browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "seasonContext": {
-    "bannerRole": "note",
-    "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
-    "bannerVisible": true,
-    "dataSeason": "2025",
-    "heading": "2025 advanced analytics baseline",
-    "requestedSeason": "2026",
-    "seasonFallback": "true"
-  },
-  "mobileSeasonContext": {
-    "fallback": "true",
-    "text": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
-    "visible": true
-  },
-  "metricCount": 4,
-  "metricValues": [
-    {
-      "detail": "#30 of 32",
-      "label": "Offensive EPA / play",
-      "value": "-0.148"
-    },
-    {
-      "detail": "#28 of 32",
-      "label": "Defensive EPA / play allowed",
-      "value": "+0.104"
-    },
-    {
-      "detail": "#11 of 32",
-      "label": "Pace",
-      "value": "28.9 sec/play"
-    },
-    {
-      "detail": "Latest loaded week: 18",
-      "label": "Rest days",
-      "value": "7 days"
+    "card": {
+      "detail": "Roster 3 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
+      "overflow": true,
+      "rect": {
+        "bottom": 2472.1875,
+        "height": 132.03125,
+        "left": 922.65625,
+        "right": 1239,
+        "top": 2340.15625,
+        "width": 316.34375
+      },
+      "state": "stale",
+      "strong": "Roster snapshot needs review",
+      "text": "DATA FRESHNESSRoster snapshot needs reviewRoster 3 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
+      "title": "The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.",
+      "viewport": {
+        "height": 757,
+        "width": 1280
+      }
     }
-  ],
-  "situationFields": [
-    "Down & distance",
-    "Field position",
-    "Formation",
-    "Personnel",
-    "Score diff",
-    "TEN EPA",
-    "Time remaining"
-  ],
-  "initialPlayCards": 60,
-  "offenseFilteredPlayCards": 39,
-  "mobileMetricCount": 4,
-  "browserWarnings": [],
-  "durationSeconds": 2.05,
-  "testedAt": "2026-08-22T21:20:12Z"
-}```
-
-## Player headshot browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "rosterCards": 95,
-  "rosterDecoratedHeadshots": 82,
-  "rosterLoadedHeadshots": 46,
-  "statsPlayerRows": 95,
-  "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 82,
-  "mobileLoadedHeadshots": 82,
-  "richPlayer": "Austin Schlottmann",
-  "richPlayerHeadshotLoaded": true,
-  "browserWarnings": [],
-  "durationSeconds": 3.23,
-  "testedAt": "2026-08-22T21:20:16Z"
+  },
+  "durationSeconds": 1.48,
+  "testedAt": "2026-08-22T21:26:06Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
