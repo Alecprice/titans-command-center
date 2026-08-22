@@ -158,15 +158,18 @@ try:
     mobile_targets = driver.execute_script("""
       return [...document.querySelectorAll('.mobile-nav a,.mobile-nav button')].map(el=>({label:el.textContent.trim(),height:el.getBoundingClientRect().height,width:el.getBoundingClientRect().width}));
     """)
-    if len(mobile_targets) != 6 or any(item['height'] < 44 for item in mobile_targets):
+    expected_labels={'Home','Roster','Game','Search','More'}
+    if len(mobile_targets) != 5 or {item['label'] for item in mobile_targets} != expected_labels or any(item['height'] < 44 or item['width'] < 44 for item in mobile_targets):
         raise RuntimeError(f'Mobile nav touch targets invalid: {mobile_targets}')
 
-    stage = 'mobile:moves-click'
-    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#transactions\"]')?.click()")
+    stage = 'mobile:transactions-from-more'
+    driver.execute_script("document.querySelector('#mobile-more-button')?.click()")
+    wait_for(driver, "document.querySelector('#sidebar')?.classList.contains('open')")
+    driver.execute_script("document.querySelector('#primary-nav a[href=\"#transactions\"]')?.click()")
     wait_for(driver, "location.hash === '#transactions'")
     wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Transactions'")
     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
-    wait_for(driver, "document.querySelector('.mobile-nav a[href=\"#transactions\"]')?.getAttribute('aria-current') === 'page'")
+    wait_for(driver, "document.querySelector('#mobile-more-button')?.classList.contains('active')")
     assert_no_horizontal_overflow(driver, 'mobile Transactions')
 
     stage = 'mobile:more-open'
@@ -188,26 +191,30 @@ try:
     driver.find_element('tag name', 'body').send_keys(Keys.ESCAPE)
     wait_for(driver, "!document.querySelector('#sidebar')?.classList.contains('open') && document.querySelector('#sidebar')?.inert === true")
 
-    stage = 'mobile:stats-then-moves'
-    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#stats\"]')?.click()")
+    stage = 'mobile:stats-then-transactions'
+    driver.execute_script("document.querySelector('#mobile-more-button')?.click()")
+    wait_for(driver, "document.querySelector('#sidebar')?.classList.contains('open')")
+    driver.execute_script("document.querySelector('#primary-nav a[href=\"#stats\"]')?.click()")
     wait_for(driver, "location.hash === '#stats'")
     time.sleep(0.12)
-    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#transactions\"]')?.click()")
+    driver.execute_script("document.querySelector('#mobile-more-button')?.click()")
+    wait_for(driver, "document.querySelector('#sidebar')?.classList.contains('open')")
+    driver.execute_script("document.querySelector('#primary-nav a[href=\"#transactions\"]')?.click()")
     wait_for(driver, "document.querySelector('.page-head h1')?.textContent.trim() === 'Transactions'")
     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
     assert_no_horizontal_overflow(driver, 'mobile Transactions after Stats')
 
     stage = 'mobile:search-quick-jump'
+    driver.find_element('id', 'mobile-search-button').click()
     search = driver.find_element('id', 'global-search')
     search.clear()
     search.send_keys('transactions')
+    wait_for(driver, "document.querySelector('.v111-search-panel') && !document.querySelector('.v111-search-panel').hidden")
+    search.send_keys(Keys.ARROW_DOWN)
     search.send_keys(Keys.ENTER)
-    wait_for(driver, "location.hash.startsWith('#search?q=transactions')")
-    wait_for(driver, "document.querySelector('.search-route-shortcuts a[href=\"#transactions\"]')")
-    assert_no_horizontal_overflow(driver, 'mobile Search')
-    driver.execute_script("document.querySelector('.search-route-shortcuts a[href=\"#transactions\"]')?.click()")
     wait_for(driver, "location.hash === '#transactions'")
     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
+    assert_no_horizontal_overflow(driver, 'mobile Smart Search')
 
     stage = 'mobile:roster-route'
     driver.execute_script("document.querySelector('.mobile-nav a[href=\"#roster\"]')?.click()")
@@ -268,7 +275,9 @@ try:
     driver.get(f'{BASE}/#home')
     wait_for(driver, "document.readyState === 'complete' && document.querySelector('.fan-hero')")
     assert_no_horizontal_overflow(driver, '320px Home')
-    driver.execute_script("document.querySelector('.mobile-nav a[href=\"#transactions\"]')?.click()")
+    driver.execute_script("document.querySelector('#mobile-more-button')?.click()")
+    wait_for(driver, "document.querySelector('#sidebar')?.classList.contains('open')")
+    driver.execute_script("document.querySelector('#primary-nav a[href=\"#transactions\"]')?.click()")
     wait_for(driver, "document.querySelectorAll('.transaction-row').length > 0", timeout=10)
     assert_no_horizontal_overflow(driver, '320px Transactions')
 
@@ -296,8 +305,9 @@ try:
         'transactionChecks': transaction_checks,
         'mobileChecks': 14,
         'smallPhoneChecks': 2,
-        'searchQuickJump': True,
+        'smartSearchQuickJump': True,
         'mobileDrawerInert': True,
+        'fiveActionDock': True,
         'teamRoomChecks': 4,
         'rosterFilterReset': True,
         'mobileTargets': mobile_targets,
