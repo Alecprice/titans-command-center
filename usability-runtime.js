@@ -1,5 +1,6 @@
 import './runtime-v19.js';
 import './mode-365-v19.js';
+import './mobile-navigation-v112.js';
 
 const app=document.querySelector('#app');
 const sidebar=document.querySelector('#sidebar');
