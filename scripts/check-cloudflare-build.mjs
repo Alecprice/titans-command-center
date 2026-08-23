@@ -32,6 +32,7 @@ const shellBlock=sw.match(/const SHELL\s*=\s*\[([\s\S]*?)\];/);
 if(!shellBlock)throw new Error('Service worker SHELL precache list could not be parsed');
 const shellPaths=[...shellBlock[1].matchAll(/['"]([^'"]+)['"]/g)].map(match=>match[1]);
 if(!shellPaths.length)throw new Error('Service worker SHELL precache list is empty');
+const shellPathSet=new Set(shellPaths);
 for(const publicPath of shellPaths){
   if(publicPath==='/')continue;
   if(!publicPath.startsWith('/'))throw new Error(`Service worker precache path must be root-relative: ${publicPath}`);
@@ -60,6 +61,9 @@ for(const relative of browserCode){
     const resolved=path.normalize(path.join(path.dirname(relative),specifier));
     if(resolved.startsWith('..'))throw new Error(`Browser module escapes static root: ${relative} -> ${specifier}`);
     try{await access(path.join(dist,resolved))}catch{throw new Error(`Browser module import is missing from Cloudflare build: ${relative} -> ${specifier}`)}
+    const importerPublic=`/${relative.split(path.sep).join('/')}`;
+    const importedPublic=`/${resolved.split(path.sep).join('/')}`;
+    if(shellPathSet.has(importerPublic)&&!shellPathSet.has(importedPublic))throw new Error(`Offline PWA dependency is not precached: ${importerPublic} -> ${importedPublic}`);
   }
 }
 
@@ -69,4 +73,4 @@ try{
 }catch(error){if(error?.code!=='ENOENT')throw error}
 const rootEntries=await readdir(dist);
 if(rootEntries.some(name=>name.endsWith('.mjs')))throw new Error('Server/root .mjs files must not be copied to static output');
-console.log(`Cloudflare static build verification passed (${shellPaths.length} PWA shell paths, ${browserCode.length} browser modules verified, commit ${meta.commit}).`);
+console.log(`Cloudflare static build verification passed (${shellPaths.length} PWA shell paths, ${browserCode.length} browser modules verified, offline dependency closure checked, commit ${meta.commit}).`);
