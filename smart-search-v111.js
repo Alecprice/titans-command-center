@@ -1,4 +1,5 @@
 import('./fantasy-sleeper-intelligence-v2.js').catch(()=>{});
+import('./fantasy-decision-center-v3.js').catch(()=>{});
 (() => {
   'use strict';
   const runtime=window.TitansRuntime;
@@ -13,7 +14,7 @@ import('./fantasy-sleeper-intelligence-v2.js').catch(()=>{});
     ['#roster','Roster','players depth personnel numbers positions'],
     ['#transactions','Transactions','moves signings waivers releases cuts'],
     ['#stats','Stats Lab','stats analytics epa cpoe success rate'],
-    ['#fantasy','Fantasy Command','fantasy football lineup sleeper draft start sit ppr points'],
+    ['#fantasy','Fantasy Command','fantasy football lineup sleeper draft start sit ppr points decision compare waiver'],
     ['#feed','Intel Feed','news updates reports stories'],
     ['#fan','Fan Hub','injuries standings opponent ask titans'],
     ['#media','Listen / Watch','watch tv radio stream broadcast channel'],
@@ -25,12 +26,13 @@ import('./fantasy-sleeper-intelligence-v2.js').catch(()=>{});
     ['#fan','Ask: What changed?','what changed since last visit'],
     ['#fan','Ask: Who is next?','next game opponent kickoff'],
     ['#fan','Ask: Injuries','injuries availability practice status'],
+    ['#fantasy','Compare Start / Sit','fantasy start sit decision compare sleeper lineup'],
     ['#fantasy','Open Fantasy Command','fantasy start sit sleeper draft lineup scoring'],
     ['#media','How do I watch?','watch listen tv radio network'],
     ['#stats','Explain EPA','epa expected points added'],
   ];
   const state={data:null,open:false,index:-1,items:[],query:'',loading:null};
-  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const norm=value=>String(value??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 
   const panel=document.createElement('div');
