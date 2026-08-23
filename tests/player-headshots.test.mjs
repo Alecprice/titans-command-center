@@ -13,6 +13,10 @@ test('nflreadpy headshot manifest has useful current Titans coverage',()=>{
   assert.ok(Number(headshots.rosterRows)>=80,`only ${headshots.rosterRows} roster rows`);
   assert.ok(Number(headshots.headshotCount)>=70,`only ${headshots.headshotCount} headshots`);
   assert.equal(headshots.players.length,headshots.headshotCount);
+  assert.ok(Number(headshots.coveragePct)>=0&&Number(headshots.coveragePct)<=100,`invalid coverage ${headshots.coveragePct}`);
+  assert.equal(headshots.players.length+(headshots.omittedPlayers||[]).length,headshots.rosterRows);
+  assert.equal(Number(headshots.omittedCount),(headshots.omittedPlayers||[]).length);
+  assert.equal(Object.values(headshots.omissionReasons||{}).reduce((sum,value)=>sum+Number(value||0),0),Number(headshots.omittedCount));
   const names=new Set();
   for(const player of headshots.players){
     assert.ok(player.name);
@@ -42,6 +46,17 @@ test('headshot generator reports upstream coverage gaps instead of fabricating i
   assert.match(workflow,/sum\(int\(value\) for value in reasons\.values\(\)\)==omitted_count/);
   assert.match(workflow,/no-approved-headshot-url/);
   assert.match(workflow,/missing-player-name/);
+});
+
+test('headshot production regression surfaces and reconciles upstream coverage context',()=>{
+  const production=read('scripts/headshot-production-regression.mjs');
+  assert.match(production,/headshotCount\+omittedCount===rosterRows/);
+  assert.match(production,/omittedPlayers\.length===omittedCount/);
+  assert.match(production,/Object\.values\(omissionReasons\)/);
+  assert.match(production,/coveragePct,/);
+  assert.match(production,/omissionReasons,/);
+  assert.match(production,/omittedPlayers:omittedPlayers\.map/);
+  assert.match(production,/allowedOmissionReasons/);
 });
 
 test('headshot decorator covers roster, Stats Lab and rich player views without broad recursive observation',()=>{
