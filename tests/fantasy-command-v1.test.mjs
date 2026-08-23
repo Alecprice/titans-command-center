@@ -35,12 +35,14 @@ test('Fantasy scoring supports standard half-PPR and PPR without invented projec
   assert.doesNotMatch(js,/projectedPoints\s*[:=]\s*\d/i);
 });
 
-test('My Fantasy is local-first and bounded',()=>{
+test('My Fantasy is local-first bounded and normalizes invalid stored shapes',()=>{
   assert.match(js,/STORE='titans-fantasy-v1'/);
   assert.match(js,/raw\.manual\.slice\(0,40\)/);
   assert.match(js,/state\.manual\.length>=40/);
   assert.match(js,/crypto\.randomUUID\(\)/);
   assert.match(js,/localStorage\.setItem\(STORE/);
+  assert.match(js,/parsed&&typeof parsed==='object'&&!Array\.isArray\(parsed\)\?parsed:\{\}/);
+  assert.doesNotMatch(js,/const raw=safeJson\(localStorage\.getItem\(STORE\),\{\}\);return \{scoring/);
 });
 
 test('Sleeper integration is read-only bounded and season-scoped',()=>{
