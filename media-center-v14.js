@@ -7,12 +7,13 @@
   const OFFICIAL={
     titansLiveAudio:'https://www.tennesseetitans.com/broadcast/titans-radio/live-game-day-audio',
     titansRadio:'https://www.tennesseetitans.com/audio/live-game-broadcast-titans-radio-2026',
+    titansAffiliates:'https://www.tennesseetitans.com/broadcast/titans-radio/titans-radio-affiliates',
     zonePlayer:'https://www.1045thezone.com/player/?playerID=3234',
     zoneListen:'https://www.1045thezone.com/listen/',
     titansWatch:'https://www.tennesseetitans.com/watch-live-games/ways-to-watch',
     nflPlus:'https://www.nfl.com/plus/learn-more',
     nflInternational:'https://www.nfl.com/international/ways-to-watch/by-country',
-    tuneIn:'https://tunein.com/radio/Tennessee-Titans-s252150/',
+    tuneIn:'https://tunein.com/radio/Stream-Tennessee-Titans-a37485/',
     sirius:'https://www.siriusxm.com/sports/nfl',
     sundayTicket:'https://tv.youtube.com/learn/nflsundayticket/',
     paramount:'https://www.paramountplus.com/shows/nfl-on-cbs/',
@@ -82,7 +83,7 @@
     const local=state.area==='nashville',international=state.area==='international';
     const intro=local?'Nashville flagship: WGFX 104.5 The Zone. Use the official station or Titans game-audio player below; NFL geographic/device restrictions can still apply.':international?'International audio and streaming rights vary by country. Use the official country guide first.':'For Titans games outside the Nashville market in the U.S., use an NFL-licensed all-game audio provider.';
     const localDeck=local?`<div class="media-radio-player"><div class="media-onair"><i></i><span>${g?'NEXT TITANS BROADCAST':'NASHVILLE SPORTS RADIO'}</span><strong>${esc(g?gameLabel(g):'104.5 The Zone')}</strong><small>${g?fmt(g.date):'Official listening options'}</small></div><div class="media-radio-launch" role="group" aria-label="Official Titans Radio listening options"><a class="media-radio-launch-main" href="${OFFICIAL.titansLiveAudio}" target="_blank" rel="noopener noreferrer"><small>GAME AUDIO</small><strong>Listen on Titans Radio</strong><span>The official live-audio button appears when the broadcast is available. Mobile home-market rules apply.</span><b>Open official game audio ↗</b></a><a class="media-radio-launch-alt" href="${OFFICIAL.zonePlayer}" target="_blank" rel="noopener noreferrer"><small>104.5 THE ZONE</small><strong>Open the official station player</strong><span>Current 104.5 web player · player ID 3234.</span><b>Open 104.5 ↗</b></a></div><p class="media-rights-note">The Command Center does not hotlink or rebroadcast the station’s raw audio stream. That avoids broken-player errors and keeps playback on the current rights-holder player. You can keep this page open for kickoff times, affiliates and watch guidance.</p><div class="media-action-row"><a class="button" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.zoneListen}">104.5 listening options ↗</a><a class="button" target="_blank" rel="noopener noreferrer" href="${OFFICIAL.titansRadio}">Titans Radio broadcast page ↗</a></div></div>`:'';
-    return `<section class="media-radio-deck"><div class="media-radio-top"><div><small>LISTEN</small><h2>Titans Radio</h2><p>${intro}</p></div><div class="media-radio-dial"><span>104.5</span><small>THE ZONE</small></div></div>${localDeck}${radioProviderGrid()}<details class="media-affiliates"><summary>Terrestrial Titans Radio affiliates</summary><div>${stationAffiliates().map(x=>`<div><strong>${x[0]}</strong><span>${x[1]}</span><small>${x[2]}</small></div>`).join('')}</div><p>Use your actual radio for AM/FM reception. iPhones do not expose an AM/FM tuner to websites, so web playback uses authorized digital sources instead.</p></details></section>`
+    return `<section class="media-radio-deck"><div class="media-radio-top"><div><small>LISTEN</small><h2>Titans Radio</h2><p>${intro}</p></div><div class="media-radio-dial"><span>104.5</span><small>THE ZONE</small></div></div>${localDeck}${radioProviderGrid()}<details class="media-affiliates"><summary>Selected terrestrial Titans Radio affiliates</summary><div>${stationAffiliates().map(x=>`<div><strong>${x[0]}</strong><span>${x[1]}</span><small>${x[2]}</small></div>`).join('')}</div><p>This is a selected local subset. <a href="${OFFICIAL.titansAffiliates}" target="_blank" rel="noopener noreferrer">View the complete official 2026 affiliate list ↗</a></p><p>Use your actual radio for AM/FM reception. iPhones do not expose an AM/FM tuner to websites, so web playback uses authorized digital sources instead.</p></details></section>`
   }
 
   function watchSection(g){
