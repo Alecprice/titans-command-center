@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `86d2ae6cfda36b09f79f7786b28f39cace96e731`
+- Source commit: `160ae86647cdd4e2a97e8a254fed783ec0711119`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -19,7 +19,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-23T02:15:49Z
+- Recorded: 2026-08-23T02:21:39Z
 
 ## Production regression
 
@@ -71,19 +71,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "86d2ae6cfda36b09f79f7786b28f39cace96e731",
-    "builtAt": "2026-08-23T02:14:35.262Z"
+    "commit": "160ae86647cdd4e2a97e8a254fed783ec0711119",
+    "builtAt": "2026-08-23T02:20:20.992Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 49,
-    "health": 756,
-    "data": 328,
-    "stats": 176,
-    "market": 566,
-    "analytics": 511
+    "root": 16,
+    "health": 179,
+    "data": 419,
+    "stats": 385,
+    "market": 1057,
+    "analytics": 632
   },
-  "testedAt": "2026-08-23T02:15:03.404Z",
+  "testedAt": "2026-08-23T02:20:46.189Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -113,8 +113,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 137,
-  "testedAt": "2026-08-23T02:15:04.158Z"
+  "durationMs": 130,
+  "testedAt": "2026-08-23T02:20:47.101Z"
 }```
 
 ## Browser navigation regression
@@ -159,11 +159,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 103,
-  "longTasksOver250ms": 0,
+  "maxLongTaskMs": 335,
+  "longTasksOver250ms": 1,
   "browserWarnings": [],
-  "durationSeconds": 15.11,
-  "testedAt": "2026-08-23T02:15:23Z"
+  "durationSeconds": 17.58,
+  "testedAt": "2026-08-23T02:21:08Z"
 }```
 
 ## Listen Watch browser regression
@@ -196,8 +196,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.88,
-  "testedAt": "2026-08-23T02:15:25Z"
+  "durationSeconds": 2.27,
+  "testedAt": "2026-08-23T02:21:11Z"
 }```
 
 ## Command Intelligence browser regression
@@ -255,8 +255,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 1.78,
-  "testedAt": "2026-08-23T02:15:27Z"
+  "durationSeconds": 2.79,
+  "testedAt": "2026-08-23T02:21:14Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -306,8 +306,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.84,
-  "testedAt": "2026-08-23T02:15:30Z"
+  "durationSeconds": 3.44,
+  "testedAt": "2026-08-23T02:21:18Z"
 }```
 
 ## Ask Titans browser regression
@@ -388,8 +388,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.16,
-  "testedAt": "2026-08-23T02:15:33Z"
+  "durationSeconds": 1.72,
+  "testedAt": "2026-08-23T02:21:20Z"
 }```
 
 ## Change Intelligence browser regression
@@ -426,8 +426,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.27,
-  "testedAt": "2026-08-23T02:15:35Z"
+  "durationSeconds": 3.08,
+  "testedAt": "2026-08-23T02:21:23Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -461,23 +461,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787451367609,
+          "expiresAt": 1787451715950,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787451337609,
+          "updatedAt": 1787451685950,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787451367562,
+          "expiresAt": 1787451715769,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787451337562,
+          "updatedAt": 1787451685769,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-23T02:15:37.437Z",
+        "at": "2026-08-23T02:21:25.529Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -604,7 +604,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 4.05
+  "durationSeconds": 4.33
 }```
 
 ## Data freshness browser regression
@@ -614,19 +614,19 @@
   "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "desktop": {
-    "detail": "Roster 48 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
+    "detail": "Roster 54 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
     "overflow": false,
     "rect": {
-      "bottom": 1202.265625,
+      "bottom": 3234.140625,
       "height": 132.03125,
       "left": 915.328125,
       "right": 1216.984375,
-      "top": 1070.234375,
+      "top": 3102.109375,
       "width": 301.65625
     },
     "state": "recent",
     "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 48 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 54 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
     "title": "The loaded roster snapshot was captured within the last 48 hours.",
     "viewport": {
       "height": 757,
@@ -634,19 +634,19 @@
     }
   },
   "mobile": {
-    "detail": "Roster 48 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
+    "detail": "Roster 54 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
     "overflow": false,
     "rect": {
-      "bottom": 2182.203125,
+      "bottom": 6545.078125,
       "height": 113.53125,
       "left": 9,
       "right": 366,
-      "top": 2068.671875,
+      "top": 6431.546875,
       "width": 357
     },
     "state": "recent",
     "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 48 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 54 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
     "title": "The loaded roster snapshot was captured within the last 48 hours.",
     "viewport": {
       "height": 701,
@@ -654,8 +654,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 1.85,
-  "testedAt": "2026-08-23T02:15:42Z"
+  "durationSeconds": 2.07,
+  "testedAt": "2026-08-23T02:21:30Z"
 }```
 
 ## Account / Guest browser regression
@@ -746,9 +746,9 @@
   },
   "roster": {
     "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 48 minutes a"
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 54 minutes a"
   },
-  "durationSeconds": 1.84
+  "durationSeconds": 1.9
 }```
 
 ## Advanced analytics browser regression
@@ -807,8 +807,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.44,
-  "testedAt": "2026-08-23T02:15:46Z"
+  "durationSeconds": 2.21,
+  "testedAt": "2026-08-23T02:21:35Z"
 }```
 
 ## Player headshot browser regression
@@ -819,16 +819,16 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "rosterCards": 95,
   "rosterDecoratedHeadshots": 81,
-  "rosterLoadedHeadshots": 46,
+  "rosterLoadedHeadshots": 41,
   "statsPlayerRows": 96,
   "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 81,
-  "mobileLoadedHeadshots": 81,
+  "statsLoadedHeadshots": 13,
+  "mobileLoadedHeadshots": 27,
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.21,
-  "testedAt": "2026-08-23T02:15:49Z"
+  "durationSeconds": 3.69,
+  "testedAt": "2026-08-23T02:21:39Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
