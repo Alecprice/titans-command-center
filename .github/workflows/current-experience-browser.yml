@@ -101,6 +101,12 @@ jobs:
         continue-on-error: true
         run: python scripts/fantasy-browser-smoke.py
 
+      - name: Audit Fantasy Decision Center
+        id: fantasy_decision
+        if: steps.deployed_sha.outcome == 'success'
+        continue-on-error: true
+        run: python scripts/fantasy-decision-browser-smoke.py
+
       - name: Audit Account and Guest flow
         id: account_guest
         if: steps.deployed_sha.outcome == 'success'
@@ -123,6 +129,7 @@ jobs:
             /tmp/smart-search-browser-smoke.json
             /tmp/mobile-navigation-browser-smoke.json
             /tmp/fantasy-browser-smoke.json
+            /tmp/fantasy-decision-browser-smoke.json
             /tmp/account-browser-smoke.json
             /tmp/market-browser-smoke.json
           if-no-files-found: ignore
@@ -137,6 +144,7 @@ jobs:
           SEARCH_OUTCOME: ${{ steps.smart_search.outcome }}
           MOBILE_OUTCOME: ${{ steps.mobile_nav.outcome }}
           FANTASY_OUTCOME: ${{ steps.fantasy_command.outcome }}
+          FANTASY_DECISION_OUTCOME: ${{ steps.fantasy_decision.outcome }}
           ACCOUNT_OUTCOME: ${{ steps.account_guest.outcome }}
           MARKET_OUTCOME: ${{ steps.live_markets.outcome }}
         with:
@@ -147,6 +155,7 @@ jobs:
               search: process.env.SEARCH_OUTCOME,
               mobile: process.env.MOBILE_OUTCOME,
               fantasy: process.env.FANTASY_OUTCOME,
+              decisions: process.env.FANTASY_DECISION_OUTCOME,
               account: process.env.ACCOUNT_OUTCOME,
               markets: process.env.MARKET_OUTCOME,
             };
@@ -154,7 +163,7 @@ jobs:
             const state = failed.length ? 'failure' : 'success';
             const description = failed.length
               ? `Failed: ${failed.map(([name]) => name).join(', ')}`.slice(0, 140)
-              : 'Runtime, search, mobile, fantasy, account and markets passed';
+              : 'Runtime, search, mobile, fantasy, decisions, account and markets passed';
             const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
             await github.rest.repos.createCommitStatus({
               owner,
@@ -174,9 +183,10 @@ jobs:
           SEARCH_OUTCOME: ${{ steps.smart_search.outcome }}
           MOBILE_OUTCOME: ${{ steps.mobile_nav.outcome }}
           FANTASY_OUTCOME: ${{ steps.fantasy_command.outcome }}
+          FANTASY_DECISION_OUTCOME: ${{ steps.fantasy_decision.outcome }}
           ACCOUNT_OUTCOME: ${{ steps.account_guest.outcome }}
           MARKET_OUTCOME: ${{ steps.live_markets.outcome }}
         run: |
-          for outcome in "$DEPLOYED_SHA_OUTCOME" "$RUNTIME_OUTCOME" "$SEARCH_OUTCOME" "$MOBILE_OUTCOME" "$FANTASY_OUTCOME" "$ACCOUNT_OUTCOME" "$MARKET_OUTCOME"; do
+          for outcome in "$DEPLOYED_SHA_OUTCOME" "$RUNTIME_OUTCOME" "$SEARCH_OUTCOME" "$MOBILE_OUTCOME" "$FANTASY_OUTCOME" "$FANTASY_DECISION_OUTCOME" "$ACCOUNT_OUTCOME" "$MARKET_OUTCOME"; do
             [[ "$outcome" == "success" ]] || exit 1
           done
