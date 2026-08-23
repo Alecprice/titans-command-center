@@ -52,6 +52,18 @@ test('market smoke validates truthful live reference unavailable modes and real 
   assert.match(source,/find_element\(By\.ID,'mh-refresh'\)\.click\(\)/);
 });
 
+test('market filter regression reacquires controls after DOM replacement',()=>{
+  const source=read('scripts/market-browser-smoke.py');
+  assert.match(source,/def stable_select_element\(driver,selector,timeout=8\):/);
+  assert.match(source,/NoSuchElementException, StaleElementReferenceException/);
+  assert.match(source,/element_id=element\.id/);
+  assert.match(source,/state\['stablePolls'\]>=3/);
+  assert.match(source,/element=stable_select_element\(driver,selector\)/);
+  assert.match(source,/reset_element=stable_select_element\(driver,selector\)/);
+  assert.match(source,/wait_settled\(driver\);stable_select_element\(driver,selector\)/);
+  assert.doesNotMatch(source,/if driver\.find_elements\(By\.CSS_SELECTOR,selector\):filters\[key\]=exercise_select/);
+});
+
 test('market smoke keeps production diagnostics compact without weakening row assertions',()=>{
   const source=read('scripts/market-browser-smoke.py');
   assert.match(source,/const rowCount=rowNodes\.length/);
