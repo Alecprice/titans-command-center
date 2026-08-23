@@ -7,7 +7,7 @@ const root=path.resolve(here,'..');
 const dist=path.join(root,'dist');
 const required=[
   'index.html','app.js','usability-runtime.js','usability-runtime.css','transactions-hub.js','stats-hub.js','market-hub.js','sw.js','manifest.webmanifest','build-meta.json','_headers',
-  'src/core.mjs','src/data.mjs','src/odds.mjs','src/visual-audit.mjs','src/roster-audit-20260819.mjs',
+  'src/core.mjs','src/data.mjs','src/odds.mjs','src/visual-audit.mjs','src/roster-audit-20260819.mjs','src/roster-audit-20260822.mjs',
   'assets/archive/current-shield-primary.webp','assets/brand/current-lockup.webp','assets/icon-192.png','assets/icon-512.png'
 ];
 for(const relative of required)await access(path.join(dist,relative));
@@ -37,10 +37,36 @@ for(const publicPath of shellPaths){
   if(!publicPath.startsWith('/'))throw new Error(`Service worker precache path must be root-relative: ${publicPath}`);
   try{await access(path.join(dist,publicPath.slice(1)))}catch{throw new Error(`Service worker precache asset is missing from Cloudflare build: ${publicPath}`)}
 }
+
+// Validate the local browser module graph. A missing relative module otherwise falls
+// through the Worker asset handler to index.html and browsers reject it as text/html.
+const browserCode=[];
+async function collectBrowserCode(dir,prefix=''){
+  for(const entry of await readdir(dir,{withFileTypes:true})){
+    const rel=path.join(prefix,entry.name);
+    if(entry.isDirectory()){
+      if(rel==='assets')continue;
+      await collectBrowserCode(path.join(dir,entry.name),rel);
+    }else if(/\.(?:js|mjs)$/.test(entry.name))browserCode.push(rel);
+  }
+}
+await collectBrowserCode(dist);
+const importPattern=/(?:\bfrom\s*|\bimport\s*\(\s*)['"]([^'"]+)['"]/g;
+for(const relative of browserCode){
+  const code=await readFile(path.join(dist,relative),'utf8');
+  for(const match of code.matchAll(importPattern)){
+    const specifier=match[1];
+    if(!specifier.startsWith('.'))continue;
+    const resolved=path.normalize(path.join(path.dirname(relative),specifier));
+    if(resolved.startsWith('..'))throw new Error(`Browser module escapes static root: ${relative} -> ${specifier}`);
+    try{await access(path.join(dist,resolved))}catch{throw new Error(`Browser module import is missing from Cloudflare build: ${relative} -> ${specifier}`)}
+  }
+}
+
 try{
   const legacyEntries=await readdir(path.join(dist,'assets','legacy'));
   if(legacyEntries.length)throw new Error(`Retired duplicate legacy assets leaked into build: ${legacyEntries.join(', ')}`);
 }catch(error){if(error?.code!=='ENOENT')throw error}
 const rootEntries=await readdir(dist);
 if(rootEntries.some(name=>name.endsWith('.mjs')))throw new Error('Server/root .mjs files must not be copied to static output');
-console.log(`Cloudflare static build verification passed (${shellPaths.length} PWA shell paths verified, commit ${meta.commit}).`);
+console.log(`Cloudflare static build verification passed (${shellPaths.length} PWA shell paths, ${browserCode.length} browser modules verified, commit ${meta.commit}).`);
