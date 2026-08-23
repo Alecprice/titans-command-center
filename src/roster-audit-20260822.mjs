@@ -1,5 +1,5 @@
 export const ROSTER_AUDIT_DATE='2026-08-22';
-export const ROSTER_SOURCE_CONFLICT="TennesseeTitans.com roster currently omits TE Matt Lauter, while the Titans' Aug. 16 transaction story says he was signed and NFL.com lists him Active. The audited fallback retains Lauter and surfaces the discrepancy.";
+export const ROSTER_SOURCE_CONFLICT='';
 const raw=`61|Andre James|C|Offense|Active|8
 51|Austin Schlottmann|C|Offense|Active|8
 79|Pat Coogan|C|Offense|Active|R
@@ -33,7 +33,6 @@ const raw=`61|Andre James|C|Offense|Active|8
 81|Jaren Kanak|TE|Offense|Reserve/Injured|R
 83|Joel Wilson|TE|Offense|Active|1
 86|Kylen Granson|TE|Offense|Active|6
-|Matt Lauter|TE|Offense|Active|R
 80|Bryce Oliver|WR|Offense|Active|3
 0|Calvin Ridley|WR|Offense|Active|8
 14|Carnell Tate|WR|Offense|Active|R
@@ -66,6 +65,7 @@ const raw=`61|Andre James|C|Offense|Active|8
 15|Keldric Faulk|DE|Defense|Active|R
 93|Malik Herring|DE|Defense|Active|6
 7|Oluwafemi Oladejo|DE|Defense|Active|2
+58|Tanoh Kpassagnon|DE|Defense|Active|8
 56|Truman Jones|DE|Defense|Active|2
 97|Jalyn Holmes|DL|Defense|Active|7
 91|John Franklin-Myers|DL|Defense|Active|9
@@ -82,7 +82,7 @@ const raw=`61|Andre James|C|Offense|Active|8
 40|Dominique Hampton|LB|Defense|Active|2
 54|Dorian Mausi|LB|Defense|Active|2
 52|James Williams Sr.|LB|Defense|Active|3
-|Milo Eifler|LB|Defense|Active|3
+45|Milo Eifler|LB|Defense|Active|3
 49|Mani Powell|LB|Defense|Active|R
 44|Mohamoud Diabate|LB|Defense|Active|4
 37|Amani Hooker|S|Defense|Active|8
