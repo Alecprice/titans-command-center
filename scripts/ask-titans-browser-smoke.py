@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
@@ -71,7 +72,51 @@ try:
             raise RuntimeError(f'Ask Titans kickoff is not rendered in Nashville time: {row}')
         team_time_verified.append(row['question'])
 
+    stage='fantasy-handoff:prepare'
+    driver.execute_script("""
+      localStorage.setItem('titans-fantasy-v1',JSON.stringify({
+        scoring:'ppr',
+        manual:[
+          {name:'Decision Smoke A',position:'WR',team:'TEN',slot:'starter'},
+          {name:'Decision Smoke B',position:'RB',team:'IND',slot:'bench'}
+        ]
+      }));
+    """)
+    wait_for(driver,"performance.getEntriesByType('resource').some(x=>x.name.includes('/ask-fantasy-bridge-v1.js'))")
+    stage='fantasy-handoff:ask'
+    driver.execute_script("const i=document.querySelector('#v17-ask-input');i.value='Should I start Decision Smoke A or Decision Smoke B?';document.querySelector('[data-v17-ask]').click()")
+    wait_for(driver,"document.querySelector('[data-fantasy-ask-bridge=\"ready\"]')")
+    handoff=driver.execute_script("""
+      const root=document.querySelector('[data-fantasy-ask-bridge="ready"]'),action=root?.querySelector('.v17-answer-action');
+      return {
+        title:root?.querySelector('h4')?.textContent?.trim()||'',
+        text:root?.textContent?.trim()||'',
+        href:action?.getAttribute('href')||'',
+        actionHeight:action?.getBoundingClientRect().height||0
+      };
+    """)
+    if handoff['href']!='#fantasy' or 'No projection generated' not in handoff['text'] or 'PPR' not in handoff['text']:
+        raise RuntimeError(f'Fantasy handoff content invalid: {handoff}')
+    stage='fantasy-handoff:navigate'
+    driver.find_element(By.CSS_SELECTOR,'[data-fantasy-ask-bridge="ready"] .v17-answer-action').click()
+    wait_for(driver,"location.hash==='#fantasy' && document.querySelector('[data-fantasy-decision=\"ready\"]')")
+    carried=driver.execute_script("""
+      const root=document.querySelector('[data-fantasy-decision="ready"]'),sels=[...root.querySelectorAll('select')];
+      return {
+        hash:location.hash,
+        selected:sels.map(s=>s.selectedOptions[0]?.textContent?.trim()||''),
+        values:sels.map(s=>s.value),
+        verdict:root.querySelector('.fdc-verdict')?.textContent?.trim()||''
+      };
+    """)
+    if len(carried['selected'])!=2 or 'Decision Smoke A' not in carried['selected'][0] or 'Decision Smoke B' not in carried['selected'][1]:
+        raise RuntimeError(f'Fantasy question did not carry player selections: {carried}')
+    if 'Evidence leans' not in carried['verdict'] and 'Too close to call' not in carried['verdict']:
+        raise RuntimeError(f'Fantasy Decision Center verdict missing after handoff: {carried}')
+
     stage='unsupported'
+    driver.get(f'{BASE}/#fan')
+    wait_for(driver,"document.querySelector('.v17-ask')")
     driver.execute_script("const i=document.querySelector('#v17-ask-input');i.value='Tell me the secret play call for Sunday';document.querySelector('[data-v17-ask]').click()")
     wait_for(driver,"document.querySelector('.v17-ask-answer h4')?.textContent?.includes('could not map')")
 
@@ -90,6 +135,16 @@ try:
     if any(x['h']<44 for x in mobile['quick']) or mobile['askButton']<44 or mobile['input']<44:
         raise RuntimeError(f'Ask Titans mobile targets invalid: {mobile}')
 
+    stage='fantasy-handoff:mobile'
+    driver.execute_script("const i=document.querySelector('#v17-ask-input');i.value='Fantasy lineup help';document.querySelector('[data-v17-ask]').click()")
+    wait_for(driver,"document.querySelector('[data-fantasy-ask-bridge=\"ready\"]')")
+    mobile_handoff=driver.execute_script("""
+      const root=document.querySelector('[data-fantasy-ask-bridge="ready"]'),a=root?.querySelector('.v17-answer-action'),r=root?.getBoundingClientRect();
+      return {left:r?.left||0,right:r?.right||0,viewport:document.documentElement.clientWidth,actionHeight:a?.getBoundingClientRect().height||0,overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+3};
+    """)
+    if mobile_handoff['overflow'] or mobile_handoff['left']<-1 or mobile_handoff['right']>mobile_handoff['viewport']+1 or mobile_handoff['actionHeight']<44:
+        raise RuntimeError(f'Fantasy Ask handoff mobile geometry invalid: {mobile_handoff}')
+
     stage='console'
     warnings=[]
     try: warnings=[x for x in driver.get_log('browser') if x.get('level') in ('SEVERE','WARNING')]
@@ -97,7 +152,7 @@ try:
     severe=[x for x in warnings if x.get('level')=='SEVERE']
     if severe: raise RuntimeError(f'Ask Titans console has severe errors: {severe[:4]}')
 
-    result={'ok':True,'base':BASE,'answers':answers,'teamTimeVerified':team_time_verified,'unsupportedRefused':True,'mobileTargets':mobile,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    result={'ok':True,'base':BASE,'answers':answers,'teamTimeVerified':team_time_verified,'fantasyHandoff':handoff,'fantasyCarried':carried,'unsupportedRefused':True,'mobileTargets':mobile,'mobileFantasyHandoff':mobile_handoff,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     write(result);print(json.dumps(result,indent=2))
 except Exception as exc:
     result={'ok':False,'base':BASE,'stage':stage,'error':f'{type(exc).__name__}: {exc}','durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
