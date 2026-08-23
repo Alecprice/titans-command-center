@@ -21,6 +21,14 @@ def no_overflow(driver,label):
 def write(payload):
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
 
+def prepare_returning_user(driver):
+    driver.execute_script("""
+      localStorage.setItem('titans:v10Onboarded','1');
+      document.querySelector('#v10-onboarding [data-v10-close]')?.click();
+      document.querySelector('.v10-modal-backdrop[data-v10-close]')?.click();
+    """)
+    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding,.v10-modal-backdrop'))
+
 options=webdriver.ChromeOptions()
 options.add_argument('--headless=new')
 options.add_argument('--no-sandbox')
@@ -39,6 +47,7 @@ try:
 
     stage='fan:load'
     driver.get(f'{BASE}/#fan')
+    prepare_returning_user(driver)
     wait_for(driver,"document.querySelector('.v17-ask') && document.querySelectorAll('[data-v17-q]').length >= 5")
     no_overflow(driver,'Ask Titans desktop')
 
