@@ -32,7 +32,8 @@ test('mobile and account smokes suppress test-only sheet motion and verify settl
 test('account smoke reports explicit stage and browser state on failure',()=>{
   const source=read('scripts/account-browser-smoke.py');
   assert.match(source,/stage='starting'/);
-  assert.match(source,/stage='wait-more'/);
+  assert.match(source,/stage='open-more'/);
+  assert.doesNotMatch(source,/stage='wait-more'/);
   assert.match(source,/stage='wait-account-panel'/);
   assert.match(source,/result\['state'\]=state\(d\)/);
 });

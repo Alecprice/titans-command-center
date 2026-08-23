@@ -54,6 +54,20 @@ def wait_sheet_settled(driver,timeout=8):
       return r.top<innerHeight&&r.bottom<=dr.top+2?{top:r.top,bottom:r.bottom,dockTop:dr.top}:null;
     """))
 
+def open_more_sheet(driver,attempts=3):
+    last_error=None
+    for _ in range(attempts):
+        try:
+            opened=driver.execute_script("return document.querySelector('#sidebar')?.classList.contains('open')&&!document.querySelector('#sidebar')?.inert")
+            if not opened:
+                driver.find_element(By.ID,'mobile-more-button').click()
+            return wait_sheet_settled(driver,timeout=2)
+        except (ElementClickInterceptedException,ElementNotInteractableException,StaleElementReferenceException,TimeoutException) as exc:
+            last_error=exc
+            time.sleep(.12)
+    if last_error:raise last_error
+    raise RuntimeError('More button did not open settled sidebar')
+
 def wait_account_entry(driver,timeout=5):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
       const b=document.querySelector('#sidebar > .account-sheet-card [data-account-open]'),s=document.querySelector('#sidebar'),dock=document.querySelector('.mobile-nav');
@@ -69,8 +83,7 @@ def open_account_from_sheet(driver,attempts=3):
     for _ in range(attempts):
         opened=driver.execute_script("return document.querySelector('#sidebar')?.classList.contains('open')&&!document.querySelector('#sidebar')?.inert")
         if not opened:
-            driver.find_element(By.ID,'mobile-more-button').click()
-            wait_sheet_settled(driver)
+            open_more_sheet(driver)
         try:
             geometry=wait_account_entry(driver)
             button=driver.find_element(By.CSS_SELECTOR,'#sidebar > .account-sheet-card [data-account-open]')
@@ -142,8 +155,7 @@ try:
     if 'GUEST' not in guest['text'].upper() or not guest['accountGuest']: raise RuntimeError(f'guest state missing: {guest}')
     stage='wait-mobile-shell';shell=wait_mobile_shell_ready(d)
 
-    stage='open-more';d.find_element(By.ID,'mobile-more-button').click()
-    stage='wait-more';sheet=wait_sheet_settled(d)
+    stage='open-more';sheet=open_more_sheet(d)
     stage='open-account';entry=open_account_from_sheet(d)
     stage='wait-account-panel';panel=wait_account_panel(d)
     if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')

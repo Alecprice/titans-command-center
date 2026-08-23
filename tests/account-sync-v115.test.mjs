@@ -85,7 +85,10 @@ test('account production smoke waits for shell readiness then requires real mobi
   assert.match(smoke,/window\.TitansRuntime/);
   assert.match(smoke,/sidebar\.getAttribute\('aria-hidden'\)!=='true'/);
   assert.match(smoke,/mr\.width<44\|\|mr\.height<44/);
-  assert.match(smoke,/d\.find_element\(By\.ID,'mobile-more-button'\)\.click\(\)/);
+  assert.match(smoke,/def open_more_sheet\(driver,attempts=3\):/);
+  assert.match(smoke,/driver\.find_element\(By\.ID,'mobile-more-button'\)\.click\(\)/);
+  assert.match(smoke,/return wait_sheet_settled\(driver,timeout=2\)/);
+  assert.match(smoke,/stage='open-more';sheet=open_more_sheet\(d\)/);
   assert.match(smoke,/def wait_account_entry\(driver,timeout=5\):/);
   assert.match(smoke,/#sidebar > \.account-sheet-card \[data-account-open\]/);
   assert.match(smoke,/r\.bottom>visibleBottom\+1/);
