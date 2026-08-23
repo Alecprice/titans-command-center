@@ -28,11 +28,27 @@ function vercelResponse(){
   return {api,result:()=>response||new Response(null,{status:statusCode,headers})};
 }
 function jsonResponse(payload,status=200,headers={}){return new Response(JSON.stringify(payload),{status,headers:{'Content-Type':'application/json; charset=utf-8',...headers}});}
+function withEdgeCacheStatus(response,status){const headers=new Headers(response.headers);headers.set('X-Titans-Edge-Cache',status);return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
+function marketCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:'2026-08-19',time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
 async function nativeData(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});const headers={'Cache-Control':'public, s-maxage=30, stale-while-revalidate=120'};const data=await getBootstrapData(env);if(!data.configured)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);if(!data.ok)return jsonResponse(data,503,headers);const sql=await getSql(env);const teamContext=await getAuditedTeamContext(sql);return jsonResponse({...data,teamContext},200,headers);}
 async function nativeScoreboard(request){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const headers={'Cache-Control':'public, s-maxage=15, stale-while-revalidate=30'};try{const upstream=await fetch(SCOREBOARD_URL,{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`},signal:AbortSignal.timeout(4500)});if(!upstream.ok)throw new Error(`ESPN ${upstream.status}`);return jsonResponse({ok:true,provider:'ESPN',unofficial:true,available:true,fetchedAt:new Date().toISOString(),payload:await upstream.json()},200,headers);}catch(error){console.error('[cloudflare-scoreboard]',error);return jsonResponse({ok:false,provider:'ESPN',unofficial:true,available:false,error:'Live scoreboard provider unavailable',fetchedAt:new Date().toISOString(),payload:{events:[]}},200,headers);}}
 async function adapterRoute(request,route,handler,env){const req=vercelRequest(request,route);const res=vercelResponse();await handler(req,res.api,env);return res.result();}
-async function runApi(request,env){
+async function cachedMarketData(request,env,ctx){
+  const url=new URL(request.url);
+  if(request.method!=='GET'||url.searchParams.size)return withEdgeCacheStatus(await adapterRoute(request,'market-data',marketDataRoute,env),'BYPASS');
+  const cache=globalThis.caches?.default;
+  if(!cache)return withEdgeCacheStatus(await adapterRoute(request,'market-data',marketDataRoute,env),'UNAVAILABLE');
+  const key=marketCacheKey(request),hit=await cache.match(key);
+  if(hit)return withEdgeCacheStatus(hit,'HIT');
+  const fresh=await adapterRoute(request,'market-data',marketDataRoute,env);
+  if(fresh.ok){
+    const write=cache.put(key,fresh.clone()).catch(error=>console.warn('[market-edge-cache]',error));
+    if(ctx?.waitUntil)ctx.waitUntil(write);else await write;
+  }
+  return withEdgeCacheStatus(fresh,'MISS');
+}
+async function runApi(request,env,ctx){
   const url=new URL(request.url);const route=url.pathname.slice(API_PREFIX.length).replace(/^\/+|\/+$/g,'');if(!route)return jsonResponse({ok:false,error:'API route required'},404);
   try{
     if(route==='health')return await nativeHealth(request,env);
@@ -41,7 +57,7 @@ async function runApi(request,env){
     if(route.startsWith('account/auth/'))return await accountAuthProxy(request,route.slice('account/auth/'.length));
     if(route==='account/preferences')return await accountPreferencesRoute(request,env);
     if(route==='preseason-stats')return await adapterRoute(request,route,preseasonStatsRoute,env);
-    if(route==='market-data')return await adapterRoute(request,route,marketDataRoute,env);
+    if(route==='market-data')return await cachedMarketData(request,env,ctx);
     if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
     if(route==='fan-intel')return await adapterRoute(request,route,fanIntelRoute,env);
 
@@ -52,4 +68,4 @@ async function runApi(request,env){
 }
 async function executeScheduledJob(env,job,run){const started=new Date();let result;try{result={job,...(await run())};}catch(error){console.error('[cloudflare-cron]',job,error);result={job,ok:false,error:'Sync job failed'};}const stored=await recordSyncRun(env,job,result,started);return {...result,auditStored:Boolean(stored.stored)};}
 async function runScheduled(env){const jobs=[['official-audit',()=>syncTitansOfficialAudit(env)],['espn',()=>syncEspn(env)],['nflverse-roster',()=>syncNflverseRoster(env,2026)],['nflverse-stats',()=>syncNflverseStats(env,2026)],['nws-weather',()=>syncNwsNextHomeGame(env)],['bluesky',()=>syncBluesky(env,'Tennessee Titans',30)],['odds',()=>env.PROPLINE_API_KEY||env.ODDS_API_IO_KEY?syncFreeOdds(env):Promise.resolve({ok:true,skipped:true,source:'titans-cc',error:'No free odds API key configured'})]];const results=await Promise.all(jobs.map(([job,run])=>executeScheduledJob(env,job,run)));const succeeded=results.filter(r=>r?.ok&&!r?.skipped).length;const failed=results.filter(r=>!r?.ok&&!r?.skipped).length;console.log('[cloudflare-cron]',{succeeded,failed,results:results.map(r=>({job:r.job,ok:r.ok,skipped:Boolean(r.skipped),auditStored:Boolean(r.auditStored)}))});}
-export default {async fetch(request,env){const pathname=new URL(request.url).pathname;if(pathname.startsWith(API_PREFIX))return runApi(request,env);return env.ASSETS.fetch(request);},async scheduled(_controller,env,ctx){ctx.waitUntil(runScheduled(env));}};
+export default {async fetch(request,env,ctx){const pathname=new URL(request.url).pathname;if(pathname.startsWith(API_PREFIX))return runApi(request,env,ctx);return env.ASSETS.fetch(request);},async scheduled(_controller,env,ctx){ctx.waitUntil(runScheduled(env));}};
