@@ -80,3 +80,12 @@ test('Ask Titans production smoke gates the real fantasy handoff and carried sel
   assert.match(smoke,/fantasy-handoff:mobile/);
   assert.match(smoke,/actionHeight/);
 });
+
+test('Ask Titans browser smoke closes first-run onboarding before real click interactions',()=>{
+  const smoke=read('scripts/ask-titans-browser-smoke.py');
+  assert.match(smoke,/def prepare_returning_user\(driver\):/);
+  assert.match(smoke,/titans:v10Onboarded/);
+  assert.match(smoke,/v10-modal-backdrop/);
+  assert.match(smoke,/not d\.find_elements\(By\.CSS_SELECTOR,'#v10-onboarding,\.v10-modal-backdrop'\)/);
+  assert.match(smoke,/driver\.get\(f'\{BASE\}\/\#fan'\)\n    prepare_returning_user\(driver\)/);
+});
