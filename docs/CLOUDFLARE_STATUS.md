@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `8a0eeea48c55a199b1fbba4817586c0a5d433daa`
+- Source commit: `2e5385dd6391c204875277cad8be393172838227`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-23T20:25:47Z
+- Recorded: 2026-08-23T23:11:25Z
 
 ## Production regression
 
@@ -40,7 +40,7 @@
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
   "serviceWorkerCache": "titans-cc-brand-2026-v59",
-  "precachePaths": 103,
+  "precachePaths": 104,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -67,31 +67,31 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 264,
+  "marketRows": 268,
   "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "8a0eeea48c55a199b1fbba4817586c0a5d433daa",
-    "builtAt": "2026-08-23T20:24:32.552Z"
+    "commit": "2e5385dd6391c204875277cad8be393172838227",
+    "builtAt": "2026-08-23T23:10:04.995Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 23,
-    "health": 203,
-    "data": 166,
-    "stats": 138,
-    "market": 43,
-    "analytics": 307
+    "root": 29,
+    "health": 1300,
+    "data": 393,
+    "stats": 145,
+    "market": 396,
+    "analytics": 778
   },
-  "testedAt": "2026-08-23T20:24:52.337Z",
+  "testedAt": "2026-08-23T23:10:27.962Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-22",
     "databaseContentAudit": "2026-08-22",
-    "responseMs": 212,
-    "testedAt": "2026-08-23T20:24:52.589Z"
+    "responseMs": 284,
+    "testedAt": "2026-08-23T23:10:28.285Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -99,17 +99,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 152,
-    "warmHitMs": 152,
-    "rows": 264,
+    "coldOrInitialMs": 145,
+    "warmHitMs": 145,
+    "rows": 268,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 152,
-        "rows": 264
+        "durationMs": 145,
+        "rows": 268
       }
     ],
-    "testedAt": "2026-08-23T20:24:52.808Z"
+    "testedAt": "2026-08-23T23:10:28.496Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -170,7 +170,7 @@
     "a1.espncdn.com"
   ],
   "durationMs": 110,
-  "testedAt": "2026-08-23T20:24:53.363Z"
+  "testedAt": "2026-08-23T23:10:29.525Z"
 }```
 
 ## Browser navigation regression
@@ -215,11 +215,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 65,
+  "maxLongTaskMs": 78,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 14.74,
-  "testedAt": "2026-08-23T20:25:13Z"
+  "durationSeconds": 15.0,
+  "testedAt": "2026-08-23T23:10:49Z"
 }```
 
 ## Listen Watch browser regression
@@ -252,8 +252,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.02,
-  "testedAt": "2026-08-23T20:25:15Z"
+  "durationSeconds": 2.21,
+  "testedAt": "2026-08-23T23:10:52Z"
 }```
 
 ## Market Pulse browser regression
@@ -267,9 +267,9 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 82,
-        "total": 264,
-        "renderedRows": 82
+        "shown": 84,
+        "total": 268,
+        "renderedRows": 84
       },
       "summary": {
         "controls": [
@@ -317,18 +317,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 82 of 264 rows",
-        "resultTotal": 264,
-        "rowCount": 82,
+        "result": "Showing 84 of 268 rows",
+        "resultTotal": 268,
+        "rowCount": 84,
         "rowSample": [
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3.5Price-108Implied51.9%",
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine4Price-110Implied52.4%",
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine4Price-110Implied52.4%"
+          "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3Price-112Implied52.8%",
+          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine3Price-115Implied53.5%",
+          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine3Price-115Implied53.5%"
         ],
         "scrollWidth": 1265,
-        "shown": 82,
+        "shown": 84,
         "title": "Live Titans market board",
-        "total": 264,
+        "total": 268,
         "viewport": 1265
       }
     },
@@ -337,36 +337,36 @@
         "available": true,
         "options": 3,
         "selectedValue": "148033",
-        "before": "Showing 82 of 264 rows",
-        "after": "Showing 80 of 264 rows"
+        "before": "Showing 84 of 268 rows",
+        "after": "Showing 82 of 268 rows"
       },
       "book": {
         "available": true,
         "options": 14,
         "selectedValue": "onexbet",
-        "before": "Showing 82 of 264 rows",
-        "after": "Showing 6 of 264 rows"
+        "before": "Showing 84 of 268 rows",
+        "after": "Showing 6 of 268 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Showing 82 of 264 rows",
-        "after": "Showing 82 of 264 rows"
+        "before": "Showing 84 of 268 rows",
+        "after": "Showing 84 of 268 rows"
       }
     },
     "alternateLines": {
       "available": true,
-      "beforeRows": 82,
-      "afterRows": 264
+      "beforeRows": 84,
+      "afterRows": 268
     },
     "refresh": {
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 264,
-        "total": 264,
-        "renderedRows": 264
+        "shown": 268,
+        "total": 268,
+        "renderedRows": 268
       },
       "summary": {
         "controls": [
@@ -414,18 +414,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 264 of 264 rows",
-        "resultTotal": 264,
-        "rowCount": 264,
+        "result": "Showing 268 of 268 rows",
+        "resultTotal": 268,
+        "rowCount": 268,
         "rowSample": [
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3.5Price-108Implied51.9%",
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine4Price-110Implied52.4%",
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine4Price-110Implied52.4%"
+          "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3Price-112Implied52.8%",
+          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine3Price-115Implied53.5%",
+          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine3Price-115Implied53.5%"
         ],
         "scrollWidth": 1265,
-        "shown": 264,
+        "shown": 268,
         "title": "Live Titans market board",
-        "total": 264,
+        "total": 268,
         "viewport": 1265
       }
     }
@@ -434,9 +434,9 @@
     "state": {
       "quality": "Live",
       "provider": "PropLine",
-      "shown": 264,
-      "total": 264,
-      "renderedRows": 264
+      "shown": 268,
+      "total": 268,
+      "renderedRows": 268
     },
     "summary": {
       "controls": [
@@ -484,18 +484,18 @@
       "quality": "Live",
       "referenceNotice": "",
       "refreshHeight": 44,
-      "result": "Showing 264 of 264 rows",
-      "resultTotal": 264,
-      "rowCount": 264,
+      "result": "Showing 268 of 268 rows",
+      "resultTotal": 268,
+      "rowCount": 268,
       "rowSample": [
-        "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3.5Price-108Implied51.9%",
-        "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine4Price-110Implied52.4%",
-        "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine4Price-110Implied52.4%"
+        "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3Price-112Implied52.8%",
+        "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine3Price-115Implied53.5%",
+        "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine3Price-115Implied53.5%"
       ],
       "scrollWidth": 375,
-      "shown": 264,
+      "shown": 268,
       "title": "Live Titans market board",
-      "total": 264,
+      "total": 268,
       "viewport": 375
     },
     "rowGeometry": [
@@ -526,8 +526,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 5.74,
-  "testedAt": "2026-08-23T20:25:21Z"
+  "durationSeconds": 6.01,
+  "testedAt": "2026-08-23T23:10:58Z"
 }```
 
 ## Command Intelligence browser regression
@@ -585,8 +585,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.21,
-  "testedAt": "2026-08-23T20:25:24Z"
+  "durationSeconds": 2.26,
+  "testedAt": "2026-08-23T23:11:01Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -636,8 +636,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 4.33,
-  "testedAt": "2026-08-23T20:25:28Z"
+  "durationSeconds": 4.62,
+  "testedAt": "2026-08-23T23:11:06Z"
 }```
 
 ## Ask Titans browser regression
@@ -718,8 +718,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 1.52,
-  "testedAt": "2026-08-23T20:25:30Z"
+  "durationSeconds": 1.63,
+  "testedAt": "2026-08-23T23:11:08Z"
 }```
 
 ## Change Intelligence browser regression
@@ -756,8 +756,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.28,
-  "testedAt": "2026-08-23T20:25:33Z"
+  "durationSeconds": 2.3,
+  "testedAt": "2026-08-23T23:11:10Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -791,23 +791,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787516765150,
+          "expiresAt": 1787526702584,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787516735150,
+          "updatedAt": 1787526672584,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787516765115,
+          "expiresAt": 1787526702533,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787516735115,
+          "updatedAt": 1787526672533,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-23T20:25:35.004Z",
+        "at": "2026-08-23T23:11:12.438Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -934,7 +934,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.55
+  "durationSeconds": 3.81
 }```
 
 ## Data freshness browser regression
@@ -944,7 +944,7 @@
   "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "desktop": {
-    "detail": "Roster 9 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days ago",
+    "detail": "Roster 12 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days ago",
     "overflow": false,
     "rect": {
       "bottom": 3251.171875,
@@ -956,7 +956,7 @@
     },
     "state": "recent",
     "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 9 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 12 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days agoSee sources \u2192",
     "title": "The loaded roster snapshot was captured within the last 48 hours.",
     "viewport": {
       "height": 757,
@@ -964,7 +964,7 @@
     }
   },
   "mobile": {
-    "detail": "Roster 9 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days ago",
+    "detail": "Roster 12 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days ago",
     "overflow": false,
     "rect": {
       "bottom": 6545.078125,
@@ -976,7 +976,7 @@
     },
     "state": "recent",
     "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 9 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 12 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days agoSee sources \u2192",
     "title": "The loaded roster snapshot was captured within the last 48 hours.",
     "viewport": {
       "height": 701,
@@ -984,8 +984,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 1.62,
-  "testedAt": "2026-08-23T20:25:39Z"
+  "durationSeconds": 1.61,
+  "testedAt": "2026-08-23T23:11:16Z"
 }```
 
 ## Account / Guest browser regression
@@ -1076,9 +1076,9 @@
   },
   "roster": {
     "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 9 hours agoR"
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 12 hours ago"
   },
-  "durationSeconds": 1.81
+  "durationSeconds": 1.9
 }```
 
 ## Advanced analytics browser regression
@@ -1137,8 +1137,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.92,
-  "testedAt": "2026-08-23T20:25:43Z"
+  "durationSeconds": 2.1,
+  "testedAt": "2026-08-23T23:11:21Z"
 }```
 
 ## Player headshot browser regression
@@ -1149,16 +1149,16 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "rosterCards": 95,
   "rosterDecoratedHeadshots": 81,
-  "rosterLoadedHeadshots": 39,
+  "rosterLoadedHeadshots": 17,
   "statsPlayerRows": 96,
   "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 8,
-  "mobileLoadedHeadshots": 22,
+  "statsLoadedHeadshots": 7,
+  "mobileLoadedHeadshots": 21,
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.17,
-  "testedAt": "2026-08-23T20:25:46Z"
+  "durationSeconds": 3.02,
+  "testedAt": "2026-08-23T23:11:24Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
