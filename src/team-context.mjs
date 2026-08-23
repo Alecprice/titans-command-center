@@ -13,7 +13,6 @@ export const auditedTeamContext = {
     ]
   },
   knownConflicts:[
-    {topic:'Matt Lauter current roster status · Aug. 22 audit',officialValue:'Titans Aug. 16 transaction story says signed; NFL.com lists Lauter active',secondaryValue:'TennesseeTitans.com current roster page omits Lauter',resolution:'Retain Matt Lauter in the dated audited roster and surface the omission. Two independent current official signals support the signing while the roster page is internally inconsistent.'},
     {topic:'Sean Brown current roster status · Aug. 22 audit',officialValue:'Tennessee Titans Aug. 17 transaction: waived/injured',secondaryValue:'NFL.com roster still lists Sean Brown as reserve',resolution:'Exclude Sean Brown from the current audited roster. The dated Titans transaction controls over a stale secondary roster listing.'},
     {topic:'2026 preseason opener date',officialValue:'Aug. 13, 2026',secondaryValue:'Pro Football Reference currently lists Aug. 15',resolution:'Use Tennessee Titans/NFL schedule: Aug. 13.'},
     {topic:'Franchise origin date',officialValue:'Franchise granted Aug. 14, 1959; first season 1960',secondaryValue:'Some team/league summaries simply say established 1960',resolution:'Display both grant date and first season instead of collapsing them.'},
