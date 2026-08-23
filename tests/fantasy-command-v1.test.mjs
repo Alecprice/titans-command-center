@@ -49,7 +49,7 @@ test('Sleeper integration is read-only bounded and season-scoped',()=>{
   assert.match(js,/\/user\/\$\{encodeURIComponent\(user\.user_id\)\}\/leagues\/nfl\/\$\{SEASON\}/);
   assert.match(js,/\/league\/\$\{leagueId\}\/matchups\/\$\{state\.week\}/);
   assert.match(js,/\/draft\/\$\{encodeURIComponent\(draft\.draft_id\)\}\/picks/);
-  assert.match(js,/^\\d\{6,32\}\$/m);
+  assert.ok(js.includes("if(!/^\\d{6,32}$/.test(leagueId))"));
   assert.doesNotMatch(js,/fetch\([^\n]*(?:POST|PUT|PATCH|DELETE)/i);
   assert.match(js,/Sleeper integration is read-only/i);
 });
