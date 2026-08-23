@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { fetchFreeOdds } from './odds.mjs';
 import { getSql } from './db.mjs';
 
-const APP_VERSION='0.8.0';
+const APP_VERSION='1.0.0';
 const safeEqual=(a,b)=>{a=String(a||'');b=String(b||'');if(!a||!b)return false;const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&crypto.timingSafeEqual(x,y)};
 const bearer=req=>String(req.headers?.authorization||'').replace(/^Bearer\s+/i,'').trim();
 export function requireIngestAuth(req,env=process.env){const ingest=env.INGEST_SECRET,cron=env.CRON_SECRET;if(!ingest&&!cron)return {ok:false,status:503,error:'Ingestion auth is not configured'};const h=String(req.headers?.['x-ingest-secret']||'').trim(),b=bearer(req),ok=[ingest,cron].filter(Boolean).some(expected=>safeEqual(h,expected)||safeEqual(b,expected));return ok?{ok:true,status:200}:{ok:false,status:401,error:'Unauthorized'};}
