@@ -1,6 +1,7 @@
+import('./ask-fantasy-bridge-v1.js').catch(()=>{});
 (() => {
   'use strict';
-  const ROUTE='fantasy',STATE_KEY='titans-fantasy-v1',PLAYER_KEY='titans-fantasy-sleeper-player-index-v1';
+  const ROUTE='fantasy',STATE_KEY='titans-fantasy-v1',PLAYER_KEY='titans-fantasy-sleeper-player-index-v1',PENDING_KEY='titans-fantasy-pending-question-v1';
   const app=()=>document.querySelector('#app');
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -15,6 +16,13 @@
   function manualCandidates(){return Array.isArray(state().manual)?state().manual.slice(0,40).map((p,i)=>({id:`manual:${i}`,name:String(p.name||'Player'),position:String(p.position||''),team:String(p.team||''),slot:String(p.slot||'watch'),source:'manual'})):[]}
   function meta(id){const p=playerIndex()[String(id)]||{};return {id:String(id),name:p.full_name||[p.first_name,p.last_name].filter(Boolean).join(' ')||`Player ${id}`,position:p.position||'',team:p.team||'',injury:p.injury_status||'',status:p.status||'',source:'sleeper'}}
   function trendMap(rows=[]){const map=new Map();for(const r of rows||[])map.set(String(r.player_id),Number(r.count)||0);return map}
+  function pendingMatches(candidates){
+    let query='';try{query=String(localStorage.getItem(PENDING_KEY)||'').slice(0,160)}catch{}
+    if(!query)return [];
+    try{localStorage.removeItem(PENDING_KEY)}catch{}
+    const q=norm(query);if(!q)return [];
+    return candidates.filter(p=>{const name=norm(p.name);return name.length>3&&q.includes(name)}).slice(0,2);
+  }
   function evidence(player,ctx){
     let score=0;const reasons=[];
     if(player.slot==='starter'){score+=2;reasons.push('currently in a starter slot')}
@@ -60,6 +68,7 @@
     section.innerHTML=`<div class="fdc-head"><div><small>DECISION CENTER</small><h2>Start / Sit Compare</h2><p>Compare transparent evidence—not invented projections.</p></div></div><div class="fdc-controls"><label>Player A<select data-fdc-a>${candidates.map(option).join('')}</select></label><label>Player B<select data-fdc-b>${candidates.map(option).join('')}</select></label></div><div data-fdc-result></div><p class="fdc-note">Signals can include starter/bench status, current availability flags, Titans roster status and Sleeper 24-hour add/drop trends. Always confirm late news and your league scoring.</p>`;
     const style=document.createElement('style');style.textContent='.fdc{margin-top:18px;padding:18px;border:1px solid rgba(120,180,255,.22);border-radius:18px;background:rgba(7,20,38,.72)}.fdc h2{margin:.2rem 0}.fdc p{margin:.3rem 0 .8rem}.fdc-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fdc-controls label{display:grid;gap:6px}.fdc select{min-height:44px;border-radius:10px;padding:8px}.fdc-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.fdc-player{padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:12px}.fdc-player span,.fdc-player b{display:block;margin-top:4px}.fdc-player ul{padding-left:18px}.fdc-verdict{grid-column:1/-1;padding:12px;border-radius:12px;background:rgba(80,160,220,.12);font-weight:700}.fdc-note{font-size:.9rem;opacity:.78}@media(max-width:560px){.fdc-controls,.fdc-compare{grid-template-columns:1fr}.fdc-verdict{grid-column:auto}}';section.appendChild(style);host.appendChild(section);
     const a=section.querySelector('[data-fdc-a]'),b=section.querySelector('[data-fdc-b]'),out=section.querySelector('[data-fdc-result]');if(candidates[1])b.selectedIndex=1;
+    const pending=pendingMatches(candidates);if(pending[0])a.value=pending[0].id;if(pending[1])b.value=pending[1].id;
     const draw=()=>{const pa=candidates.find(p=>p.id===a.value),pb=candidates.find(p=>p.id===b.value);if(!pa||!pb)return;const ea=evidence(pa,ctx),eb=evidence(pb,ctx);out.innerHTML=`<div class="fdc-compare">${card(pa,ea)}${card(pb,eb)}<div class="fdc-verdict">${esc(verdict(pa,pb,ea,eb))}</div></div>`};a.addEventListener('change',draw);b.addEventListener('change',draw);draw();
   }
   const observer=new MutationObserver(()=>{if(route()===ROUTE)queueMicrotask(mount)});if(app())observer.observe(app(),{childList:true,subtree:true});addEventListener('hashchange',()=>{contextKey='';context=null;if(route()===ROUTE)queueMicrotask(mount)});queueMicrotask(mount);
