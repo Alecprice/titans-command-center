@@ -57,3 +57,24 @@ test('Decision Center remains mobile and touch safe',()=>{
   assert.match(js,/@media\(max-width:560px\)/);
   assert.match(js,/grid-template-columns:1fr/);
 });
+
+test('Ask Titans routes only explicit fantasy decision intents into the evidence workspace',()=>{
+  assert.match(js,/const fantasyIntent=value=>/);
+  for(const term of ['fantasy','start sit','should i start','should i sit','lineup','waiver','flex'])assert.ok(js.includes(term),`${term} missing from fantasy intent bridge`);
+  assert.doesNotMatch(js,/\bstarter\b.*fantasyIntent/);
+  assert.match(js,/data-fdc-ask-fantasy/);
+  assert.match(js,/Who should I start in fantasy\?/);
+  assert.match(js,/Open Fantasy Decision Center/);
+  assert.match(js,/will not invent a point projection/);
+  assert.match(js,/Transparent evidence comparison/);
+  assert.match(js,/PROJECTION/);
+  assert.match(js,/Not invented/);
+});
+
+test('Ask Titans fantasy bridge owns only matched click or Enter events in capture phase',()=>{
+  assert.match(js,/document\.addEventListener\('click',event=>/);
+  assert.match(js,/document\.addEventListener\('keydown',event=>/);
+  assert.match(js,/if\(!fantasyIntent\(query\)\)return;event\.preventDefault\(\);event\.stopImmediatePropagation\(\)/);
+  assert.match(js,/event\.key!=='Enter'.*!fantasyIntent\(event\.target\.value\)\)return/);
+  assert.match(js,/\},true\);/);
+});
