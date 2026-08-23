@@ -4,7 +4,7 @@ import('./ask-fantasy-bridge-v1.js').catch(()=>{});
   const ROUTE='fantasy',STATE_KEY='titans-fantasy-v1',PLAYER_KEY='titans-fantasy-sleeper-player-index-v1',PENDING_KEY='titans-fantasy-pending-question-v1';
   const app=()=>document.querySelector('#app');
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const plain=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:{};
   const read=(key,fallback={})=>{try{return plain(JSON.parse(localStorage.getItem(key)||'null'))}catch{return fallback}};
   const state=()=>read(STATE_KEY,{});
