@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `15fa886db2ef2c1f4d7c092345610fc4a9835d8c`
+- Source commit: `9bca0af0b6dac2133d2cc17ee1353a2383fdfb96`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-23T19:58:32Z
+- Recorded: 2026-08-23T20:08:27Z
 
 ## Production regression
 
@@ -59,7 +59,7 @@
   "databaseOk": true,
   "dataStatus": 200,
   "dataRosterCount": 95,
-  "transactionCount": 26,
+  "transactionCount": 27,
   "invalidTransactionDates": 0,
   "statsStatus": 200,
   "statsRosterCount": 95,
@@ -72,19 +72,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "15fa886db2ef2c1f4d7c092345610fc4a9835d8c",
-    "builtAt": "2026-08-23T19:57:15.921Z"
+    "commit": "9bca0af0b6dac2133d2cc17ee1353a2383fdfb96",
+    "builtAt": "2026-08-23T20:07:15.297Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 23,
-    "health": 162,
-    "data": 363,
-    "stats": 287,
-    "market": 380,
-    "analytics": 458
+    "root": 34,
+    "health": 152,
+    "data": 408,
+    "stats": 163,
+    "market": 3614,
+    "analytics": 583
   },
-  "testedAt": "2026-08-23T19:57:35.108Z",
+  "testedAt": "2026-08-23T20:07:39.597Z",
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
   "analyticsSeasonFallback": true,
@@ -143,8 +143,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 98,
-  "testedAt": "2026-08-23T19:57:35.733Z"
+  "durationMs": 115,
+  "testedAt": "2026-08-23T20:07:40.378Z"
 }```
 
 ## Browser navigation regression
@@ -189,11 +189,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 104,
+  "maxLongTaskMs": 0,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 14.61,
-  "testedAt": "2026-08-23T19:57:55Z"
+  "durationSeconds": 12.88,
+  "testedAt": "2026-08-23T20:07:56Z"
 }```
 
 ## Listen Watch browser regression
@@ -226,8 +226,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.55,
-  "testedAt": "2026-08-23T19:57:57Z"
+  "durationSeconds": 1.95,
+  "testedAt": "2026-08-23T20:07:58Z"
 }```
 
 ## Market Pulse browser regression
@@ -500,8 +500,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 6.27,
-  "testedAt": "2026-08-23T19:58:04Z"
+  "durationSeconds": 5.43,
+  "testedAt": "2026-08-23T20:08:04Z"
 }```
 
 ## Command Intelligence browser regression
@@ -559,8 +559,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.75,
-  "testedAt": "2026-08-23T19:58:07Z"
+  "durationSeconds": 2.16,
+  "testedAt": "2026-08-23T20:08:06Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -610,8 +610,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 5.66,
-  "testedAt": "2026-08-23T19:58:13Z"
+  "durationSeconds": 4.16,
+  "testedAt": "2026-08-23T20:08:10Z"
 }```
 
 ## Ask Titans browser regression
@@ -692,8 +692,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 1.53,
-  "testedAt": "2026-08-23T19:58:15Z"
+  "durationSeconds": 1.33,
+  "testedAt": "2026-08-23T20:08:12Z"
 }```
 
 ## Change Intelligence browser regression
@@ -702,7 +702,7 @@
 {
   "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "detectedBeforeReview": 121,
+  "detectedBeforeReview": 122,
   "categories": [
     "Roster",
     "Transaction"
@@ -722,7 +722,7 @@
       },
       {
         "h": 48,
-        "label": "Transaction \u00b7 26"
+        "label": "Transaction \u00b7 27"
       }
     ],
     "review": 48,
@@ -730,8 +730,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.38,
-  "testedAt": "2026-08-23T19:58:18Z"
+  "durationSeconds": 2.28,
+  "testedAt": "2026-08-23T20:08:15Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -755,9 +755,9 @@
     "panel": {
       "cards": 4,
       "display": "block",
-      "height": 344.390625,
+      "height": 386.140625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -765,23 +765,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787515130325,
+          "expiresAt": 1787515726393,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787515100325,
+          "updatedAt": 1787515696393,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787515130125,
+          "expiresAt": 1787515726380,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787515100125,
+          "updatedAt": 1787515696380,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-23T19:58:19.875Z",
+        "at": "2026-08-23T20:08:16.247Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -790,9 +790,9 @@
     "refreshedPanel": {
       "cards": 4,
       "display": "block",
-      "height": 344.390625,
+      "height": 386.140625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -800,9 +800,9 @@
     "returnPanel": {
       "cards": 4,
       "display": "block",
-      "height": 344.390625,
+      "height": 386.140625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -852,7 +852,7 @@
         "y": 8
       },
       "overflow": false,
-      "panelHeight": 765.171875,
+      "panelHeight": 806.921875,
       "panelWidth": 461,
       "reviewHeight": 48,
       "targets": [
@@ -862,12 +862,12 @@
           "w": 427
         },
         {
-          "h": 122.9375,
+          "h": 143.8125,
           "label": "WHAT CHANGED?",
           "w": 427
         },
         {
-          "h": 122.9375,
+          "h": 143.8125,
           "label": "ROSTER",
           "w": 427
         },
@@ -882,9 +882,9 @@
     "panelState": {
       "cards": 4,
       "display": "block",
-      "height": 765.171875,
+      "height": 806.921875,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 461
@@ -908,7 +908,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 4.21
+  "durationSeconds": 3.08
 }```
 
 ## Data freshness browser regression
@@ -918,19 +918,19 @@
   "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "desktop": {
-    "detail": "Roster 19 hours ago \u00b7 Moves 5 days ago \u00b7 Intel 5 days ago",
+    "detail": "Roster 9 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days ago",
     "overflow": false,
     "rect": {
-      "bottom": 948.28125,
+      "bottom": 965.3125,
       "height": 132.03125,
       "left": 915.328125,
       "right": 1216.984375,
-      "top": 816.25,
+      "top": 833.28125,
       "width": 301.65625
     },
     "state": "recent",
     "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 19 hours ago \u00b7 Moves 5 days ago \u00b7 Intel 5 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 9 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days agoSee sources \u2192",
     "title": "The loaded roster snapshot was captured within the last 48 hours.",
     "viewport": {
       "height": 757,
@@ -938,7 +938,7 @@
     }
   },
   "mobile": {
-    "detail": "Roster 19 hours ago \u00b7 Moves 5 days ago \u00b7 Intel 5 days ago",
+    "detail": "Roster 9 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days ago",
     "overflow": false,
     "rect": {
       "bottom": 1642.84375,
@@ -950,7 +950,7 @@
     },
     "state": "recent",
     "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 19 hours ago \u00b7 Moves 5 days ago \u00b7 Intel 5 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 9 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days agoSee sources \u2192",
     "title": "The loaded roster snapshot was captured within the last 48 hours.",
     "viewport": {
       "height": 701,
@@ -958,8 +958,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 2.13,
-  "testedAt": "2026-08-23T19:58:24Z"
+  "durationSeconds": 1.42,
+  "testedAt": "2026-08-23T20:08:19Z"
 }```
 
 ## Account / Guest browser regression
@@ -1050,9 +1050,9 @@
   },
   "roster": {
     "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 19 hours ago"
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 9 hours agoR"
   },
-  "durationSeconds": 1.71
+  "durationSeconds": 1.39
 }```
 
 ## Advanced analytics browser regression
@@ -1111,8 +1111,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.01,
-  "testedAt": "2026-08-23T19:58:29Z"
+  "durationSeconds": 1.77,
+  "testedAt": "2026-08-23T20:08:23Z"
 }```
 
 ## Player headshot browser regression
@@ -1123,16 +1123,16 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "rosterCards": 95,
   "rosterDecoratedHeadshots": 81,
-  "rosterLoadedHeadshots": 42,
+  "rosterLoadedHeadshots": 47,
   "statsPlayerRows": 96,
   "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 12,
-  "mobileLoadedHeadshots": 26,
+  "statsLoadedHeadshots": 81,
+  "mobileLoadedHeadshots": 81,
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.0,
-  "testedAt": "2026-08-23T19:58:32Z"
+  "durationSeconds": 2.68,
+  "testedAt": "2026-08-23T20:08:26Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
