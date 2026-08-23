@@ -13,11 +13,11 @@ test('admin and ingest secret checks hash to fixed length before constant-time c
   assert.match(ingest,/createHash\('sha256'\)/);
   assert.match(ingest,/timingSafeEqual\(secretDigest\(aText\),secretDigest\(bText\)\)/);
   assert.doesNotMatch(ingest,/\.length===.*timingSafeEqual/);
-  const adminEnv={INGEST_SECRET:'correct-secret-value'};
-  assert.equal(requireAdminAuth({headers:{'x-ingest-secret':'correct-secret-value'}},adminEnv).ok,true);
+  const adminEnv={INGEST_SECRET:'test-key'};
+  assert.equal(requireAdminAuth({headers:{'x-ingest-secret':'test-key'}},adminEnv).ok,true);
   assert.equal(requireAdminAuth({headers:{'x-ingest-secret':'x'}},adminEnv).ok,false);
   assert.equal(requireAdminAuth({headers:{}},adminEnv).ok,false);
-  const ingestEnv={INGEST_SECRET:'ingest-secret',CRON_SECRET:'cron-secret'};
-  assert.equal(requireIngestAuth({headers:{authorization:'Bearer cron-secret'}},ingestEnv).ok,true);
+  const ingestEnv={INGEST_SECRET:'ingest',CRON_SECRET:'cron'};
+  assert.equal(requireIngestAuth({headers:{authorization:'Bearer cron'}},ingestEnv).ok,true);
   assert.equal(requireIngestAuth({headers:{authorization:'Bearer nope'}},ingestEnv).ok,false);
 });
