@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { team, games, roster, feed, sources } from '../src/data.mjs';
+import { auditedTeamContext } from '../src/team-context.mjs';
 import { legacyTimeline, visualArchive, knownVisualsNotPictured, visualSources } from '../src/visual-audit.mjs';
 
 const errors=[];
@@ -9,7 +10,8 @@ check('current team identity metadata',()=>{assert.equal(team.name,'Tennessee Ti
 check('franchise milestone dates preserve 1959 vs 1960 distinction',()=>{assert.equal(team.franchiseGranted,'1959-08-14');assert.equal(team.firstSeason,1960);assert.equal(team.firstSeasonInTennessee,1997);assert.equal(team.firstSeasonAsTitans,1999);});
 check('2026 schedule contains Week 9 bye',()=>{assert.ok(games.find(g=>g.week===9&&g.status==='bye'),'Week 9 bye is missing');});
 check('Week 18 stays genuinely TBD at current Reliant Stadium name',()=>{const week18=games.find(g=>g.week===18&&g.opponentAbbr==='HOU');assert.ok(week18,'Week 18 at Houston is missing');assert.equal(week18.date,null);assert.equal(week18.dateTbd,true);assert.equal(week18.network,'TBD');assert.equal(week18.venue,'Reliant Stadium');});
-check('fallback roster is the full dated cross-source audited snapshot',()=>{assert.equal(team.rosterCoverage.fallbackType,'cross-source-audited-snapshot');assert.equal(team.rosterCoverage.fallbackPlayers,roster.length);assert.equal(team.rosterCoverage.asOf,'2026-08-22');assert.match(team.rosterCoverage.sourceConflict||'',/Matt Lauter/i);assert.equal(roster.length,95);assert.equal(roster.filter(p=>p.status==='Active').length,91);assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,4);assert.ok(roster.some(p=>p.name==='Milo Eifler'&&p.status==='Active'));assert.ok(roster.some(p=>p.name==='Nazeeh Johnson'&&p.status==='Reserve/Injured'));assert.equal(roster.some(p=>p.name==='Sean Brown'),false);assert.equal(roster.some(p=>p.name==='Dominic Richardson'),false);});
+check('fallback roster is the full dated cross-source audited snapshot',()=>{assert.equal(team.rosterCoverage.fallbackType,'cross-source-audited-snapshot');assert.equal(team.rosterCoverage.fallbackPlayers,roster.length);assert.equal(team.rosterCoverage.asOf,'2026-08-22');assert.match(team.rosterCoverage.sourceConflict||'',/Matt Lauter/i);assert.equal(roster.length,95);assert.equal(roster.filter(p=>p.status==='Active').length,91);assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,4);assert.ok(roster.some(p=>p.name==='Milo Eifler'&&p.status==='Active'));assert.ok(roster.some(p=>p.name==='Matt Lauter'&&p.status==='Active'));assert.ok(roster.some(p=>p.name==='Nazeeh Johnson'&&p.status==='Reserve/Injured'));assert.equal(roster.some(p=>p.name==='Sean Brown'),false);assert.equal(roster.some(p=>p.name==='Dominic Richardson'),false);});
+check('cross-source roster conflicts are explicit and fact-specific',()=>{assert.equal(auditedTeamContext.auditedOn,'2026-08-22');const laut=auditedTeamContext.knownConflicts.find(x=>/Matt Lauter/i.test(x.topic));const brown=auditedTeamContext.knownConflicts.find(x=>/Sean Brown/i.test(x.topic));assert.ok(laut,'Matt Lauter source conflict is missing');assert.match(laut.resolution,/retain Matt Lauter/i);assert.ok(brown,'Sean Brown source conflict is missing');assert.match(brown.resolution,/exclude Sean Brown/i);assert.match(auditedTeamContext.sourcePolicy.rule,/fact-specific/i);});
 check('fallback player metadata avoids unsupported editorial tags',()=>{for(const player of roster)assert.equal('tag' in player,false,`${player.name} has an unsupported editorial tag`);});
 check('Peter Skoronski fallback position matches official roster',()=>{assert.equal(roster.find(p=>p.name==='Peter Skoronski')?.position,'G');});
 check('fallback feed carries the current Aug. 19 transaction',()=>{const item=feed.find(x=>/D'Ernest Johnson/i.test(x.title));assert.ok(item);assert.match(item.url,/tennesseetitans\.com\/team\/transactions/);});
@@ -34,5 +36,6 @@ check('base app no longer requests retired duplicate legacy assets',()=>{
   assert.doesNotMatch(app,/\/assets\/legacy\//);
   assert.doesNotMatch(app,/legacy-(?:banner|derrick|fireball|lightblue-wordmark|logo-evolution|sword|vintage-roundel|wordmark-fireball)\.webp/);
 });
+check('ingest runtime identifies the current production release',()=>{const ingest=readFileSync(new URL('../src/ingest.mjs',import.meta.url),'utf8');assert.match(ingest,/APP_VERSION='1\.0\.0'/);});
 if(errors.length){console.error(`\nContent audit failed (${errors.length}):\n- ${errors.join('\n- ')}`);process.exit(1)}
 console.log(`\nContent audit passed: ${games.length} schedule rows, ${roster.length} audited fallback players, ${feed.length} sourced fallback feed items, ${visualArchive.length} audited visual assets.`);
