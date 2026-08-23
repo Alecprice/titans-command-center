@@ -62,5 +62,28 @@
     const a=section.querySelector('[data-fdc-a]'),b=section.querySelector('[data-fdc-b]'),out=section.querySelector('[data-fdc-result]');if(candidates[1])b.selectedIndex=1;
     const draw=()=>{const pa=candidates.find(p=>p.id===a.value),pb=candidates.find(p=>p.id===b.value);if(!pa||!pb)return;const ea=evidence(pa,ctx),eb=evidence(pb,ctx);out.innerHTML=`<div class="fdc-compare">${card(pa,ea)}${card(pb,eb)}<div class="fdc-verdict">${esc(verdict(pa,pb,ea,eb))}</div></div>`};a.addEventListener('change',draw);b.addEventListener('change',draw);draw();
   }
-  const observer=new MutationObserver(()=>{if(route()===ROUTE)queueMicrotask(mount)});if(app())observer.observe(app(),{childList:true,subtree:true});addEventListener('hashchange',()=>{contextKey='';context=null;if(route()===ROUTE)queueMicrotask(mount)});queueMicrotask(mount);
+
+  const fantasyIntent=value=>{const q=norm(value);return /\bfantasy\b|\bstart sit\b|\bshould i start\b|\bshould i sit\b|\blineup\b|\bwaiver\b|\bflex\b/.test(q)};
+  function fantasyAskMarkup(){
+    return `<article class="v17-ask-answer fdc-ask-bridge" data-fdc-ask-answer><div class="v17-answer-top"><span>FANTASY DECISION</span><b>Evidence workspace</b></div><h4>Use Fantasy Decision Center for that call.</h4><div class="v17-why"><small>WHY IT MATTERS</small><p>Ask Titans will not invent a point projection or pretend a start/sit choice is certain. Decision Center compares the evidence the app actually has, including your saved lineup slot, current availability flags, Titans roster context when relevant, and bounded Sleeper add/drop trends.</p></div><div class="v17-ask-facts"><div><small>METHOD</small><strong>Transparent evidence comparison</strong></div><div><small>PROJECTION</small><strong>Not invented</strong></div></div><a class="button primary v17-answer-action" href="#fantasy">Open Fantasy Decision Center →</a></article>`;
+  }
+  function renderFantasyAsk(root,query){
+    const input=root?.querySelector('#v17-ask-input'),out=root?.querySelector('[data-v17-result]');if(!out)return false;
+    if(input)input.value=query;out.innerHTML=fantasyAskMarkup();return true;
+  }
+  function enhanceAsk(){
+    if(route()!=='fan')return;const quick=document.querySelector('.v17-ask .v17-quick');if(!quick||quick.querySelector('[data-fdc-ask-fantasy]'))return;
+    const button=document.createElement('button');button.type='button';button.dataset.fdcAskFantasy='1';button.textContent='Start / Sit';quick.appendChild(button);
+  }
+  document.addEventListener('click',event=>{
+    if(route()!=='fan')return;const target=event.target.closest?.('[data-v17-ask],[data-fdc-ask-fantasy]');if(!target)return;
+    const root=target.closest('.v17-ask');if(!root)return;const query=target.hasAttribute('data-fdc-ask-fantasy')?'Who should I start in fantasy?':root.querySelector('#v17-ask-input')?.value||'';
+    if(!fantasyIntent(query))return;event.preventDefault();event.stopImmediatePropagation();renderFantasyAsk(root,query);
+  },true);
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Enter'||route()!=='fan'||event.target?.id!=='v17-ask-input'||!fantasyIntent(event.target.value))return;
+    event.preventDefault();event.stopImmediatePropagation();renderFantasyAsk(event.target.closest('.v17-ask'),event.target.value);
+  },true);
+
+  const observer=new MutationObserver(()=>{if(route()===ROUTE)queueMicrotask(mount);if(route()==='fan')queueMicrotask(enhanceAsk)});if(app())observer.observe(app(),{childList:true,subtree:true});addEventListener('hashchange',()=>{contextKey='';context=null;if(route()===ROUTE)queueMicrotask(mount);if(route()==='fan')queueMicrotask(enhanceAsk)});queueMicrotask(mount);queueMicrotask(enhanceAsk);
 })();
