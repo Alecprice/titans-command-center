@@ -32,7 +32,7 @@ import('./fantasy-decision-center-v3.js').catch(()=>{});
     ['#stats','Explain EPA','epa expected points added'],
   ];
   const state={data:null,open:false,index:-1,items:[],query:'',loading:null};
-  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const norm=value=>String(value??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 
   const panel=document.createElement('div');
