@@ -90,9 +90,16 @@ jobs:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: python scripts/media-browser-smoke.py
 
+      - name: Run Market Pulse browser regression
+        id: market_browser
+        if: steps.media_browser.outcome == 'success'
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: python scripts/market-browser-smoke.py
+
       - name: Run Command Intelligence browser regression
         id: command_browser
-        if: steps.media_browser.outcome == 'success'
+        if: steps.market_browser.outcome == 'success'
         env:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: python scripts/command-intelligence-browser-smoke.py
@@ -164,6 +171,7 @@ jobs:
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
           BROWSER_OUTCOME: ${{ steps.browser.outcome }}
           MEDIA_BROWSER_OUTCOME: ${{ steps.media_browser.outcome }}
+          MARKET_BROWSER_OUTCOME: ${{ steps.market_browser.outcome }}
           COMMAND_BROWSER_OUTCOME: ${{ steps.command_browser.outcome }}
           PLAYER_GAMEDAY_BROWSER_OUTCOME: ${{ steps.player_gameday_browser.outcome }}
           ASK_BROWSER_OUTCOME: ${{ steps.ask_browser.outcome }}
@@ -182,6 +190,7 @@ jobs:
           elif [[ "$SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}";
           elif [[ "$BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + browser navigation regression ${BROWSER_OUTCOME:-not-run}";
           elif [[ "$MEDIA_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Listen Watch browser regression ${MEDIA_BROWSER_OUTCOME:-not-run}";
+          elif [[ "$MARKET_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Market Pulse browser regression ${MARKET_BROWSER_OUTCOME:-not-run}";
           elif [[ "$COMMAND_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Command Intelligence browser regression ${COMMAND_BROWSER_OUTCOME:-not-run}";
           elif [[ "$PLAYER_GAMEDAY_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Player Intelligence / Game Day browser regression ${PLAYER_GAMEDAY_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ASK_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Ask Titans browser regression ${ASK_BROWSER_OUTCOME:-not-run}";
@@ -190,7 +199,7 @@ jobs:
           elif [[ "$FRESHNESS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + data freshness browser regression ${FRESHNESS_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ACCOUNT_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Account / Guest browser regression ${ACCOUNT_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ANALYTICS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + advanced analytics browser regression ${ANALYTICS_BROWSER_OUTCOME:-not-run}";
-          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
+          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
           else STATUS="deployed + player headshot browser regression ${HEADSHOT_BROWSER_OUTCOME:-not-run}"; fi
           {
             echo '# Cloudflare deployment status'
@@ -204,6 +213,7 @@ jobs:
             echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"
             echo "- Browser navigation regression: ${BROWSER_OUTCOME:-not-run}"
             echo "- Listen Watch browser regression: ${MEDIA_BROWSER_OUTCOME:-not-run}"
+            echo "- Market Pulse browser regression: ${MARKET_BROWSER_OUTCOME:-not-run}"
             echo "- Command Intelligence browser regression: ${COMMAND_BROWSER_OUTCOME:-not-run}"
             echo "- Player Intelligence / Game Day browser regression: ${PLAYER_GAMEDAY_BROWSER_OUTCOME:-not-run}"
             echo "- Ask Titans browser regression: ${ASK_BROWSER_OUTCOME:-not-run}"
@@ -225,6 +235,7 @@ jobs:
             if [[ -f /tmp/headshot-production-smoke.json ]]; then echo; echo '## Player headshot production regression'; echo; echo '```json'; cat /tmp/headshot-production-smoke.json; echo '```'; fi
             if [[ -f /tmp/browser-nav-smoke.json ]]; then echo; echo '## Browser navigation regression'; echo; echo '```json'; cat /tmp/browser-nav-smoke.json; echo '```'; fi
             if [[ -f /tmp/media-browser-smoke.json ]]; then echo; echo '## Listen Watch browser regression'; echo; echo '```json'; cat /tmp/media-browser-smoke.json; echo '```'; fi
+            if [[ -f /tmp/market-browser-smoke.json ]]; then echo; echo '## Market Pulse browser regression'; echo; echo '```json'; cat /tmp/market-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/command-intelligence-browser-smoke.json ]]; then echo; echo '## Command Intelligence browser regression'; echo; echo '```json'; cat /tmp/command-intelligence-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/player-gameday-browser-smoke.json ]]; then echo; echo '## Player Intelligence / Game Day browser regression'; echo; echo '```json'; cat /tmp/player-gameday-browser-smoke.json; echo '```'; fi
             if [[ -f /tmp/ask-titans-browser-smoke.json ]]; then echo; echo '## Ask Titans browser regression'; echo; echo '```json'; cat /tmp/ask-titans-browser-smoke.json; echo '```'; fi
