@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('desktop Smart Search reserves separate grid columns for input and command shortcut',()=>{
+test('desktop Smart Search reserves usable width and separate grid columns for input and command shortcut',()=>{
   const css=read('smart-search-v111.css');
-  assert.match(css,/\.search-wrap\{position:relative;min-width:0;display:grid;grid-template-columns:auto minmax\(0,1fr\) auto;align-items:stretch\}/);
+  assert.match(css,/\.search-wrap\{position:relative;min-width:240px;flex:1 1 320px;display:grid;grid-template-columns:auto minmax\(0,1fr\) auto;align-items:stretch\}/);
   assert.match(css,/\.search-wrap input\{grid-column:2;min-width:0;width:100%;max-width:100%;align-self:stretch\}/);
   assert.match(css,/\.search-wrap kbd\{grid-column:3;position:relative!important;inset:auto!important;transform:none!important;/);
   assert.match(css,/min-width:44px/);
+  assert.match(css,/@media\(max-width:760px\)\{\.topbar \.search-wrap\{flex:1;min-width:0\}/);
 });
 
 test('Smart Search browser regression waits for enhanced settled geometry and verifies click ownership',()=>{
@@ -18,6 +19,7 @@ test('Smart Search browser regression waits for enhanced settled geometry and ve
   assert.match(smoke,/shortcut\.dataset\.fanCommand==='1'/);
   assert.match(smoke,/document\.elementFromPoint\(x,y\)/);
   assert.match(smoke,/inputCenterOwner/);
+  assert.match(smoke,/hit\['input'\]\['width'\]<120/);
   assert.match(smoke,/Desktop search center click is owned by another element/);
   assert.match(smoke,/Desktop quick-jump click target intercepted after route return/);
   assert.match(smoke,/search\.click\(\);search\.send_keys\('Cam Ward'\)/);
