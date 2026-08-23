@@ -10,7 +10,8 @@
   const arr=value=>Array.isArray(value)?value:[];
   const getJson=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback}};
   const setJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
-  const fmt=value=>{try{const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric'}).format(d)}catch{return'TBD'}};
+  const calendarDate=value=>{try{const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(d)}catch{return'TBD'}};
+  const teamDate=value=>{try{const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'America/Chicago'}).format(d)}catch{return'TBD'}};
   const slug=value=>String(value??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const human=value=>String(value??'').replace(/[_-]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
   const number=value=>Number.isFinite(Number(value))?Number(value):null;
@@ -69,7 +70,7 @@
   function latestStatus(data,fan){
     const player=data.player||{},name=player.name||'Player',injuries=arr(data.injuries),currentInjury=injuries[0];
     const depth=arr(fan?.depthChart?.changes).find(x=>String(x.playerId||'')===String(player.id||'')||slug(x.name)===slug(name));
-    if(currentInjury)return {label:'Availability',value:currentInjury.reportStatus||currentInjury.practiceStatus||currentInjury.primaryInjury||'Reported',copy:`Latest injury-report row: ${currentInjury.primaryInjury||'designation'} · ${currentInjury.reportDate||fmt(currentInjury.capturedAt)}`};
+    if(currentInjury)return {label:'Availability',value:currentInjury.reportStatus||currentInjury.practiceStatus||currentInjury.primaryInjury||'Reported',copy:`Latest injury-report row: ${currentInjury.primaryInjury||'designation'} · ${currentInjury.reportDate?calendarDate(currentInjury.reportDate):teamDate(currentInjury.capturedAt)}`};
     if(depth)return {label:'Depth chart',value:depth.type||'Changed',copy:`Listed depth role moved ${depth.from??'—'} → ${depth.to??'—'}.`};
     return {label:'Roster status',value:player.rosterStatus||'Active roster',copy:'No newer injury or depth-change row is loaded for this player.'};
   }
@@ -84,8 +85,8 @@
 
   function whatChanged(data,fan){
     const player=data.player||{},name=player.name||'',rows=[];
-    const injury=arr(data.injuries)[0];if(injury)rows.push(['Injury report',injury.reportStatus||injury.practiceStatus||injury.primaryInjury||'Updated',injury.reportDate||fmt(injury.capturedAt)]);
-    const depth=arr(fan?.depthChart?.changes).find(x=>String(x.playerId||'')===String(player.id||'')||slug(x.name)===slug(name));if(depth)rows.push(['Depth chart',`${depth.type||'changed'} · ${depth.from??'—'} → ${depth.to??'—'}`,fan?.depthChart?.capturedAt?fmt(fan.depthChart.capturedAt):'Current snapshot']);
+    const injury=arr(data.injuries)[0];if(injury)rows.push(['Injury report',injury.reportStatus||injury.practiceStatus||injury.primaryInjury||'Updated',injury.reportDate?calendarDate(injury.reportDate):teamDate(injury.capturedAt)]);
+    const depth=arr(fan?.depthChart?.changes).find(x=>String(x.playerId||'')===String(player.id||'')||slug(x.name)===slug(name));if(depth)rows.push(['Depth chart',`${depth.type||'changed'} · ${depth.from??'—'} → ${depth.to??'—'}`,fan?.depthChart?.capturedAt?teamDate(fan.depthChart.capturedAt):'Current snapshot']);
     const mentions=arr(fan?.playerStats).filter(x=>String(x.playerId||'')===String(player.id||'')).slice(0,2);if(mentions.length)rows.push(['Production',`${mentions.length} recent player-stat row${mentions.length===1?'':'s'} loaded`,'Game data']);
     if(!rows.length)rows.push(['No detected change','Roster profile is stable in the currently loaded datasets.','Current load']);
     return rows;
@@ -93,7 +94,7 @@
 
   function gameLog(rows){
     if(!rows.length)return'<div class="v16-empty"><strong>No player-game rows loaded.</strong><span>This is an ingest gap, not a zero-stat claim.</span></div>';
-    return `<div class="v16-game-log">${rows.slice(0,12).map(row=>{const metrics=metricSummary(row);return `<article><div class="v16-game-id"><small>${esc(row.season?`${row.season} · `:'')}Week ${esc(row.week??'—')}</small><strong>${esc(row.homeAbbr||'')} vs ${esc(row.awayAbbr||'')}</strong><span>${esc(fmt(row.kickoff))}</span></div><div class="v16-log-stats">${metrics.length?metrics.map(metric=>`<div><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong></div>`).join(''):'<span>No numeric fields in this stat row.</span>'}</div></article>`}).join('')}</div>`;
+    return `<div class="v16-game-log">${rows.slice(0,12).map(row=>{const metrics=metricSummary(row);return `<article><div class="v16-game-id"><small>${esc(row.season?`${row.season} · `:'')}Week ${esc(row.week??'—')}</small><strong>${esc(row.homeAbbr||'')} vs ${esc(row.awayAbbr||'')}</strong><span>${esc(teamDate(row.kickoff))}</span></div><div class="v16-log-stats">${metrics.length?metrics.map(metric=>`<div><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong></div>`).join(''):'<span>No numeric fields in this stat row.</span>'}</div></article>`}).join('')}</div>`;
   }
 
   function trends(rows){
@@ -104,9 +105,9 @@
 
   function newsAndMoves(data,fan,site){
     const player=data.player||{},name=slug(player.name),rows=[];
-    for(const item of arr(fan?.playerStats).filter(x=>String(x.playerId||'')===String(player.id||'')).slice(0,4))rows.push({kind:'Game data',title:`${item.statGroup||'Stats'} · Week ${item.week??'—'}`,meta:fmt(item.kickoff)});
-    for(const item of arr(data.injuries).slice(0,4))rows.push({kind:'Injury report',title:item.primaryInjury||item.reportStatus||'Availability update',meta:item.reportDate||fmt(item.capturedAt)});
-    for(const transaction of arr(site?.transactions).filter(x=>slug([x.description,x.title,x.summary,x.player,x.name].filter(Boolean).join(' ')).includes(name)).slice(0,4))rows.push({kind:'Transaction',title:transaction.description||transaction.title||transaction.summary||'Roster transaction',meta:fmt(transaction.date||transaction.publishedAt)});
+    for(const item of arr(fan?.playerStats).filter(x=>String(x.playerId||'')===String(player.id||'')).slice(0,4))rows.push({kind:'Game data',title:`${item.statGroup||'Stats'} · Week ${item.week??'—'}`,meta:teamDate(item.kickoff)});
+    for(const item of arr(data.injuries).slice(0,4))rows.push({kind:'Injury report',title:item.primaryInjury||item.reportStatus||'Availability update',meta:item.reportDate?calendarDate(item.reportDate):teamDate(item.capturedAt)});
+    for(const transaction of arr(site?.transactions).filter(x=>slug([x.description,x.title,x.summary,x.player,x.name].filter(Boolean).join(' ')).includes(name)).slice(0,4))rows.push({kind:'Transaction',title:transaction.description||transaction.title||transaction.summary||'Roster transaction',meta:transaction.date?calendarDate(transaction.date):teamDate(transaction.publishedAt)});
     return rows.length?`<div class="v16-move-list">${rows.slice(0,8).map(item=>`<article><small>${esc(item.kind)}</small><strong>${esc(item.title)}</strong><span>${esc(item.meta)}</span></article>`).join('')}</div>`:'<div class="v16-empty"><strong>No additional timeline rows loaded.</strong><span>The page will expand automatically as transactions, injuries and game stats accumulate.</span></div>';
   }
 
@@ -123,7 +124,7 @@
     const layer=document.createElement('section');layer.className='v16-player-intel';layer.innerHTML=`
       <section class="v16-player-command">
         <header><div><small>PLAYER COMMAND CENTER</small><h2>${esc(player.name||'Titans player')}</h2><p>Quick answer first. Game logs, trends and deeper football context stay one tap away.</p></div><button type="button" data-v16-favorite aria-pressed="${favorite}">${favorite?'★ Favorite':'☆ Make favorite'}</button></header>
-        <div class="v16-quick-grid"><article><small>${esc(status.label)}</small><strong>${esc(status.value)}</strong><span>${esc(status.copy)}</span></article><article><small>Last loaded game</small><strong>${esc(last?`Week ${last.week??'—'}`:'Awaiting stats')}</strong><span>${esc(last?fmt(last.kickoff):'No game-stat row loaded')}</span></article>${quick.slice(0,2).map(metric=>`<article><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong><span>Latest loaded game</span></article>`).join('')}</div>
+        <div class="v16-quick-grid"><article><small>${esc(status.label)}</small><strong>${esc(status.value)}</strong><span>${esc(status.copy)}</span></article><article><small>Last loaded game</small><strong>${esc(last?`Week ${last.week??'—'}`:'Awaiting stats')}</strong><span>${esc(last?teamDate(last.kickoff):'No game-stat row loaded')}</span></article>${quick.slice(0,2).map(metric=>`<article><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong><span>Latest loaded game</span></article>`).join('')}</div>
       </section>
       <section class="v16-player-changed"><header><div><small>WHAT CHANGED?</small><h3>Latest player movement</h3></div><span>Verified loaded data only</span></header>${changes.map(change=>`<article><small>${esc(change[0])}</small><strong>${esc(change[1])}</strong><span>${esc(change[2])}</span></article>`).join('')}</section>
       <div class="v16-player-tabs" role="tablist" aria-label="Player intelligence sections"><button class="active" type="button" data-v16-player-tab="overview" aria-selected="true">Overview</button><button type="button" data-v16-player-tab="games" aria-selected="false">Game Log</button><button type="button" data-v16-player-tab="trends" aria-selected="false">Trends</button><button type="button" data-v16-player-tab="career" aria-selected="false">Career + Contract</button><button type="button" data-v16-player-tab="timeline" aria-selected="false">Timeline</button></div>
