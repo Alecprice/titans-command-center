@@ -14,6 +14,7 @@ test('Account smoke retries the real More control until the sidebar is actually 
 
 test('All Account smoke entry paths use the verified More helper',()=>{
   assert.match(source,/if not opened:\n\s+open_more_sheet\(driver\)/);
-  assert.match(source,/stage='open-more';stage='wait-more';sheet=open_more_sheet\(d\)/);
+  assert.match(source,/stage='open-more';sheet=open_more_sheet\(d\)/);
+  assert.doesNotMatch(source,/stage='wait-more'/);
   assert.doesNotMatch(source,/stage='open-more';d\.find_element\(By\.ID,'mobile-more-button'\)\.click\(\)/);
 });
