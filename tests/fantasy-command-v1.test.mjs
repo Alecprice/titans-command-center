@@ -7,6 +7,7 @@ const js=read('fantasy-command-v1.js');
 const css=read('fantasy-command-v1.css');
 const html=read('index.html');
 const sw=read('sw.js');
+const headers=read('_headers');
 const manifest=JSON.parse(read('manifest.webmanifest'));
 const search=read('smart-search-v111.js');
 
@@ -52,6 +53,12 @@ test('Sleeper integration is read-only bounded and season-scoped',()=>{
   assert.ok(js.includes("if(!/^\\d{6,32}$/.test(leagueId))"));
   assert.doesNotMatch(js,/fetch\([^\n]*(?:POST|PUT|PATCH|DELETE)/i);
   assert.match(js,/Sleeper integration is read-only/i);
+});
+
+test('Fantasy only opens the CSP connection boundary to the official Sleeper API',()=>{
+  assert.match(headers,/connect-src 'self' https:\/\/api\.sleeper\.app;/);
+  assert.doesNotMatch(headers,/connect-src[^\n]*\*/);
+  assert.doesNotMatch(headers,/connect-src[^\n]*sleeper\.com/);
 });
 
 test('Fantasy UI is mobile-first and touch safe',()=>{
