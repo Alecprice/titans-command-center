@@ -20,6 +20,26 @@ def no_overflow(driver,label):
     state=driver.execute_script("return {w:document.documentElement.clientWidth,s:document.documentElement.scrollWidth}")
     if state['s']>state['w']+3: raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
+def activate_player_tab(driver,tab,timeout=8):
+    deadline=time.time()+timeout
+    stable=0
+    last=None
+    while time.time()<deadline:
+        last=driver.execute_script("""
+          const tab=document.querySelector(`[data-v16-player-tab="${arguments[0]}"]`),pane=document.querySelector(`[data-v16-pane="${arguments[0]}"]`);
+          if(!tab||!pane)return {exists:false,selected:false,visible:false};
+          const selected=tab.getAttribute('aria-selected')==='true',visible=!pane.hidden;
+          if(!selected||!visible)tab.click();
+          return {exists:true,selected,visible,tabConnected:tab.isConnected,paneConnected:pane.isConnected};
+        """,tab)
+        if last.get('exists') and last.get('selected') and last.get('visible') and last.get('tabConnected') and last.get('paneConnected'):
+            stable+=1
+            if stable>=3:return last
+        else:
+            stable=0
+        time.sleep(.1)
+    raise TimeoutError(f'Player tab did not settle after DOM refresh: {tab} {last}')
+
 options=webdriver.ChromeOptions()
 options.add_argument('--headless=new')
 options.add_argument('--no-sandbox')
@@ -59,9 +79,7 @@ try:
     tabs=[]
     for tab in ['overview','games','trends','career','timeline']:
         stage=f'player:tab:{tab}'
-        driver.execute_script("document.querySelector(`[data-v16-player-tab=\"${arguments[0]}\"]`)?.click()",tab)
-        wait_for(driver,f"document.querySelector('[data-v16-player-tab=\"{tab}\"]')?.getAttribute('aria-selected') === 'true'")
-        wait_for(driver,f"!document.querySelector('[data-v16-pane=\"{tab}\"]')?.hidden")
+        activate_player_tab(driver,tab)
         tabs.append(tab)
 
     stage='player:favorite'
