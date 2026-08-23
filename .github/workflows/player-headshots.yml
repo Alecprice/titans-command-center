@@ -47,10 +47,21 @@ jobs:
           from pathlib import Path
           data=json.loads(Path('assets/data/player-headshots.json').read_text())
           rows=data.get('players') or []
+          omitted=data.get('omittedPlayers') or []
+          reasons=data.get('omissionReasons') or {}
+          roster_rows=int(data.get('rosterRows') or 0)
+          headshots=int(data.get('headshotCount') or 0)
+          omitted_count=int(data.get('omittedCount') or 0)
           assert data.get('team')=='TEN'
           assert len(rows)>=60, f'headshot coverage too low: {len(rows)}'
+          assert len(rows)==headshots
+          assert len(omitted)==omitted_count
+          assert headshots+omitted_count==roster_rows, (headshots, omitted_count, roster_rows)
+          assert sum(int(value) for value in reasons.values())==omitted_count
+          assert 0<=float(data.get('coveragePct',-1))<=100
+          assert all(row.get('reason') in {'no-approved-headshot-url','missing-player-name'} for row in omitted)
           assert all(str(row.get('headshotUrl','')).startswith('https://') for row in rows)
-          print({'season':data.get('season'),'headshots':len(rows),'rosterRows':data.get('rosterRows')})
+          print({'season':data.get('season'),'headshots':headshots,'rosterRows':roster_rows,'coveragePct':data.get('coveragePct'),'omittedCount':omitted_count,'omissionReasons':reasons})
           PY
 
       - name: Commit refreshed manifest
