@@ -1,0 +1,88 @@
+import json
+import os
+import time
+from pathlib import Path
+
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+
+BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
+REPORT=Path('/tmp/responsive-matrix-smoke.json')
+VIEWPORTS=[
+    ('small-phone',360,780,'mobile'),
+    ('phone',390,844,'mobile'),
+    ('large-phone',430,932,'mobile'),
+    ('tablet-portrait',768,1024,'desktop-shell'),
+    ('small-laptop',1024,768,'desktop-shell'),
+    ('desktop',1440,1000,'desktop-shell'),
+    ('wide-desktop',1920,1080,'desktop-shell'),
+]
+ROUTES=['home','live','games','roster','stats','markets','feed','legacy','sources']
+
+def wait(driver,expression,timeout=10):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(f'return Boolean({expression})'))
+
+def dimensions(driver):
+    return driver.execute_script("""
+      const de=document.documentElement;
+      const nav=document.querySelector('.mobile-nav');
+      const side=document.querySelector('#sidebar');
+      return {
+        innerWidth:innerWidth, innerHeight:innerHeight,
+        clientWidth:de.clientWidth, scrollWidth:de.scrollWidth,
+        bodyScrollWidth:document.body?.scrollWidth||0,
+        mobileNav:nav?getComputedStyle(nav).display:null,
+        sidebar:side?getComputedStyle(side).display:null,
+        sidebarPosition:side?getComputedStyle(side).position:null,
+        appWidth:document.querySelector('#app')?.getBoundingClientRect().width||0,
+        topbarWidth:document.querySelector('.topbar')?.getBoundingClientRect().width||0,
+        touchTargets:[...document.querySelectorAll('.mobile-nav a,.mobile-nav button')].map(el=>({label:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})),
+      };
+    """)
+
+def assert_layout(state,label,mode):
+    if state['scrollWidth']>state['clientWidth']+3 or state['bodyScrollWidth']>state['clientWidth']+3:
+        raise RuntimeError(f'{label}: horizontal overflow {state}')
+    if state['appWidth']<=0 or state['topbarWidth']<=0:
+        raise RuntimeError(f'{label}: primary shell has zero width {state}')
+    if mode=='mobile':
+        if state['mobileNav']=='none': raise RuntimeError(f'{label}: mobile dock hidden')
+        if len(state['touchTargets'])!=5: raise RuntimeError(f'{label}: expected five mobile actions {state["touchTargets"]}')
+        if any(x['w']<44 or x['h']<44 for x in state['touchTargets']): raise RuntimeError(f'{label}: undersized touch target {state["touchTargets"]}')
+    else:
+        if state['mobileNav']!='none': raise RuntimeError(f'{label}: mobile dock visible on desktop/tablet shell')
+
+options=webdriver.ChromeOptions()
+options.add_argument('--headless=new')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+options.add_argument('--disable-gpu')
+options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+driver=None
+started=time.time()
+rows=[]
+try:
+    driver=webdriver.Chrome(options=options)
+    driver.set_page_load_timeout(25)
+    for name,width,height,mode in VIEWPORTS:
+        driver.set_window_size(width,height)
+        for route in ROUTES:
+            driver.get(f'{BASE}/#{route}')
+            wait(driver,"document.readyState === 'complete' && document.querySelector('#app')")
+            wait(driver,"document.querySelector('.page-head h1') || document.querySelector('.fan-hero')",12)
+            time.sleep(.08)
+            state=dimensions(driver)
+            assert_layout(state,f'{name}:{route}',mode)
+            rows.append({'viewport':name,'width':width,'height':height,'route':route,'scrollWidth':state['scrollWidth'],'clientWidth':state['clientWidth'],'mobileNav':state['mobileNav']})
+    warnings=[x for x in driver.get_log('browser') if x.get('level')=='SEVERE']
+    if warnings: raise RuntimeError(f'Browser severe warnings: {warnings[:8]}')
+    payload={'ok':True,'base':BASE,'viewports':len(VIEWPORTS),'routes':len(ROUTES),'checks':len(rows),'rows':rows,'durationSeconds':round(time.time()-started,2)}
+    REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
+    print(json.dumps({k:v for k,v in payload.items() if k!='rows'},indent=2))
+except Exception as exc:
+    payload={'ok':False,'base':BASE,'error':f'{type(exc).__name__}: {exc}','rows':rows,'durationSeconds':round(time.time()-started,2)}
+    REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
+    print(json.dumps(payload,indent=2))
+    raise
+finally:
+    if driver: driver.quit()
