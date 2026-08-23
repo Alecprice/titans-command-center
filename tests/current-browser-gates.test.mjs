@@ -52,6 +52,17 @@ test('market smoke validates truthful live reference unavailable modes and real 
   assert.match(source,/find_element\(By\.ID,'mh-refresh'\)\.click\(\)/);
 });
 
+test('market smoke keeps production diagnostics compact without weakening row assertions',()=>{
+  const source=read('scripts/market-browser-smoke.py');
+  assert.match(source,/const rowCount=rowNodes\.length/);
+  assert.match(source,/const rowSample=rowNodes\.slice\(0,3\)/);
+  assert.match(source,/result,rowCount,rowSample,controls/);
+  assert.match(source,/row_count=summary\['rowCount'\]/);
+  assert.match(source,/before_rows=before\['rowCount'\]/);
+  assert.match(source,/after_rows=after\['rowCount'\]/);
+  assert.doesNotMatch(source,/result,rows,controls/);
+});
+
 test('market controls meet the 44px touch target floor',()=>{
   const css=read('market-hub.css');
   assert.match(css,/\.mh-head \.button\{min-height:44px\}/);
