@@ -11,14 +11,7 @@ import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflv
 const API_PREFIX='/api/';
 const APP_VERSION='1.0.0';
 const SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
-const SERVER_BINDINGS=['DATABASE_URL','INGEST_SECRET','CRON_SECRET','PROPLINE_API_KEY','ODDS_API_IO_KEY','PROPLINE_BOOKS','PROPLINE_EXTRA_MARKETS','ODDS_API_IO_BOOKS','ODDS_CACHE_SECONDS','TITANS_HISTORY_START','TITANS_HISTORY_END','CONTINUE_ON_IMPORT_ERROR'];
 
-function applyRuntimeEnv(env){
-  for(const key of SERVER_BINDINGS){
-    const value=env?.[key];
-    if(value!==undefined&&value!==null)process.env[key]=String(value);
-  }
-}
 function requestHeaders(headers){const out={};for(const [key,value] of headers.entries())out[key.toLowerCase()]=value;return out;}
 function requestQuery(url,route){const query={route};for(const [key,value] of url.searchParams.entries()){if(key==='route')continue;const current=query[key];if(current===undefined)query[key]=value;else if(Array.isArray(current))current.push(value);else query[key]=[current,value];}return query;}
 function vercelRequest(request,route){const url=new URL(request.url);return {method:request.method,headers:requestHeaders(request.headers),query:requestQuery(url,route),url:`${url.pathname}${url.search}`};}
@@ -61,9 +54,7 @@ async function runApi(request,env,ctx){
     if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
     if(route==='fan-intel')return await adapterRoute(request,route,fanIntelRoute,env);
 
-    // Legacy routes still share the Vercel-compatible gateway. Mirror bindings for
-    // those routes until the remaining handlers are migrated to explicit env args.
-    applyRuntimeEnv(env);const req=vercelRequest(request,route);const res=vercelResponse();await apiHandler(req,res.api);return res.result();
+    const req=vercelRequest(request,route);const res=vercelResponse();await apiHandler(req,res.api,env);return res.result();
   }catch(error){console.error('[cloudflare-api-adapter]',route,error);return jsonResponse({ok:false,error:'API request failed'},500);}
 }
 async function executeScheduledJob(env,job,run){const started=new Date();let result;try{result={job,...(await run())};}catch(error){console.error('[cloudflare-cron]',job,error);result={job,ok:false,error:'Sync job failed'};}const stored=await recordSyncRun(env,job,result,started);return {...result,auditStored:Boolean(stored.stored)};}
