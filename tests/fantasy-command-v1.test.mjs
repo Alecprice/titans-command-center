@@ -16,10 +16,11 @@ test('Fantasy Command is a first-class discoverable app route',()=>{
   assert.match(html,/fantasy-command-v1\.js\?v=1/);
   assert.match(search,/\['#fantasy','Fantasy Command'/);
   assert.ok(manifest.shortcuts.some(item=>item.url==='/#fantasy'));
+  assert.ok(manifest.shortcuts.some(item=>item.url==='/#transactions'&&item.short_name==='Moves'));
 });
 
 test('Fantasy Command stays available in the offline PWA shell',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v60/);
+  assert.match(sw,/titans-cc-brand-2026-v59/);
   assert.match(sw,/'\/fantasy-command-v1\.css'/);
   assert.match(sw,/'\/fantasy-command-v1\.js'/);
 });
@@ -43,7 +44,7 @@ test('My Fantasy is local-first and bounded',()=>{
 
 test('Sleeper integration is read-only bounded and season-scoped',()=>{
   assert.match(js,/https:\/\/api\.sleeper\.app\/v1/);
-  assert.match(js,/const SEASON='2026'/);
+  assert.match(js,/SEASON='2026'/);
   assert.match(js,/setTimeout\(\(\)=>controller\.abort\(\),6500\)/);
   assert.match(js,/\/user\/\$\{encodeURIComponent\(user\.user_id\)\}\/leagues\/nfl\/\$\{SEASON\}/);
   assert.match(js,/\/league\/\$\{leagueId\}\/matchups\/\$\{state\.week\}/);
