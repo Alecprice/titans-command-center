@@ -45,6 +45,29 @@ test('security-sensitive workflows retain least-privilege repository permissions
   for(const name of ['cloudflare-deploy.yml','player-headshots.yml'])assert.match(read(name),/permissions:\s*\n\s*contents: write/);
 });
 
+test('read-only workflow checkouts do not persist repository credentials',()=>{
+  for(const name of ['quality.yml','nflreadpy-ingest.yml','responsive-matrix.yml','current-experience-browser.yml']){
+    const source=read(name);
+    assert.match(source,/persist-credentials: false/,`${name}: read-only checkout should not persist GitHub credentials`);
+  }
+  for(const name of ['cloudflare-deploy.yml','player-headshots.yml']){
+    const source=read(name);
+    assert.doesNotMatch(source,/persist-credentials: false/,`${name}: write workflow still needs checkout credentials for its generated-file push`);
+  }
+});
+
+test('Cloudflare status writer syncs to current main before committing its generated report',()=>{
+  const deploy=read('cloudflare-deploy.yml');
+  const fetchIndex=deploy.indexOf('git fetch origin main');
+  const checkoutIndex=deploy.indexOf('git checkout -B main origin/main');
+  const reportIndex=deploy.indexOf("echo '# Cloudflare deployment status'");
+  const pushIndex=deploy.indexOf('git push origin main');
+  assert.ok(fetchIndex>=0,'deployment status writer must fetch the latest main');
+  assert.ok(checkoutIndex>fetchIndex,'deployment status writer must move to current main after fetching');
+  assert.ok(reportIndex>checkoutIndex,'deployment report must be generated after syncing current main');
+  assert.ok(pushIndex>reportIndex,'deployment report must push only after the synced report commit is created');
+});
+
 test('critical workflow dependencies stay on the reviewed pinned releases',()=>{
   const all=workflows.map(read).join('\n');
   for(const ref of [
