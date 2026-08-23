@@ -63,7 +63,7 @@ async function loadMarket(force=false){
   const existing=app.querySelector('.market-hub'),button=existing?.querySelector('#mh-refresh');if(button){button.disabled=true;button.textContent='Refreshing…'}
   app.querySelector('.mh-error')?.remove();
   try{
-    const url=force?`/api/market-data?refresh=${Date.now()}`:'/api/market-data',r=await fetch(url,{cache:force?'no-store':'default',headers:{Accept:'application/json'}}),d=await r.json();
+    const r=await fetch('/api/market-data',{cache:force?'no-store':'default',headers:{Accept:'application/json'}}),d=await r.json();
     if(requestId!==marketRequestSerial||mhRoute()!=='markets')return;
     if(!r.ok||!d.ok)throw new Error(d.error||'Market source unavailable');
     renderMarket(app,d);
