@@ -2,9 +2,46 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-08-22T11:58:12.731432+00:00",
+  "generatedAt": "2026-08-23T11:33:06.446157+00:00",
   "rosterRows": 91,
   "headshotCount": 88,
+  "coveragePct": 96.7,
+  "omittedCount": 3,
+  "omissionReasons": {
+    "no-approved-headshot-url": 3
+  },
+  "omittedPlayers": [
+    {
+      "name": "Keydrain Calligan",
+      "normalizedName": "keydraincalligan",
+      "number": "29",
+      "position": "DB",
+      "status": "ACT",
+      "gsisId": "00-0040674",
+      "espnId": "4606181",
+      "reason": "no-approved-headshot-url"
+    },
+    {
+      "name": "Latrell McCutchin",
+      "normalizedName": "latrellmccutchin",
+      "number": "36",
+      "position": "DB",
+      "status": "ACT",
+      "gsisId": "00-0040916",
+      "espnId": null,
+      "reason": "no-approved-headshot-url"
+    },
+    {
+      "name": "Shad Banks",
+      "normalizedName": "shadbanks",
+      "number": "40",
+      "position": "LB",
+      "status": "ACT",
+      "gsisId": "00-0040911",
+      "espnId": null,
+      "reason": "no-approved-headshot-url"
+    }
+  ],
   "source": "nflreadpy.load_rosters + nflreadpy.load_players",
   "sourceDocs": "https://nflreadpy.nflverse.com/api/load_functions/",
   "players": [
