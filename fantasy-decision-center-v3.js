@@ -16,6 +16,9 @@ import('./ask-fantasy-bridge-v1.js').catch(()=>{});
   function manualCandidates(){return Array.isArray(state().manual)?state().manual.slice(0,40).map((p,i)=>({id:`manual:${i}`,name:String(p.name||'Player'),position:String(p.position||''),team:String(p.team||''),slot:String(p.slot||'watch'),source:'manual'})):[]}
   function meta(id){const p=playerIndex()[String(id)]||{};return {id:String(id),name:p.full_name||[p.first_name,p.last_name].filter(Boolean).join(' ')||`Player ${id}`,position:p.position||'',team:p.team||'',injury:p.injury_status||'',status:p.status||'',source:'sleeper'}}
   function trendMap(rows=[]){const map=new Map();for(const r of rows||[])map.set(String(r.player_id),Number(r.count)||0);return map}
+  function waiverCandidates(rows,rostered,limit=12){
+    const out=[];for(const row of rows||[]){const id=String(row?.player_id||'');if(!id||rostered.has(id))continue;const p=meta(id);if(!/^(QB|RB|WR|TE|K)$/.test(String(p.position||''))||/^Player \d+/.test(p.name))continue;p.slot='waiver';out.push(p);if(out.length>=limit)break}return out;
+  }
   function pendingMatches(candidates){
     let query='';try{query=String(localStorage.getItem(PENDING_KEY)||'').slice(0,160)}catch{}
     if(!query)return [];
@@ -27,6 +30,7 @@ import('./ask-fantasy-bridge-v1.js').catch(()=>{});
     let score=0;const reasons=[];
     if(player.slot==='starter'){score+=2;reasons.push('currently in a starter slot')}
     if(player.slot==='bench'){reasons.push('currently on the bench')}
+    if(player.slot==='waiver')reasons.push('unrostered in the connected Sleeper league');
     const injury=String(player.injury||player.status||'').toLowerCase();
     if(/out|ir|injured reserve|pup|inactive/.test(injury)){score-=4;reasons.push(`availability flag: ${player.injury||player.status}`)}
     else if(/questionable|doubtful/.test(injury)){score-=2;reasons.push(`availability flag: ${player.injury||player.status}`)}
@@ -47,6 +51,7 @@ import('./ask-fantasy-bridge-v1.js').catch(()=>{});
       const [adds,drops]=await Promise.all([sleeper('/players/nfl/trending/add?lookback_hours=24&limit=25'),sleeper('/players/nfl/trending/drop?lookback_hours=24&limit=15')]);
       base.adds=trendMap(adds);base.drops=trendMap(drops);
       if(owner){const starters=new Set((owner.starters||[]).map(String));for(const id of owner.players||[]){const p=meta(id);p.slot=starters.has(String(id))?'starter':'bench';base.candidates.push(p)}}
+      const rostered=new Set((rosters||[]).flatMap(r=>Array.isArray(r.players)?r.players:[]).map(String));base.candidates.push(...waiverCandidates(adds,rostered,12));
       const seen=new Set();base.candidates=base.candidates.filter(p=>{const k=`${norm(p.name)}|${p.team}|${p.position}`;if(seen.has(k))return false;seen.add(k);return true}).slice(0,80);
       return base;
     })().catch(()=>({candidates:manualCandidates(),adds:new Map(),drops:new Map(),titans:[]})).then(value=>{if(key===`${state().sleeperUser||''}|${state().leagueId||''}`){context=value;contextKey=key}return value});
@@ -57,15 +62,15 @@ import('./ask-fantasy-bridge-v1.js').catch(()=>{});
     if(contextPromise&&promiseKey===key)return contextPromise;
     promiseKey=key;contextPromise=buildContext(key).finally(()=>{if(promiseKey===key){contextPromise=null;promiseKey=''}});return contextPromise;
   }
-  function option(p){return `<option value="${esc(p.id)}">${esc(p.name)}${p.position?` · ${esc(p.position)}`:''}${p.team?` · ${esc(p.team)}`:''}</option>`}
+  function option(p){return `<option value="${esc(p.id)}">${esc(p.name)}${p.position?` · ${esc(p.position)}`:''}${p.team?` · ${esc(p.team)}`:''}${p.slot==='waiver'?' · WAIVER':''}</option>`}
   function card(player,ev){return `<div class="fdc-player"><strong>${esc(player.name)}</strong><span>${esc([player.position,player.team,player.slot].filter(Boolean).join(' · '))}</span><b>${ev.score>0?'+':''}${ev.score} evidence</b><ul>${ev.reasons.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`}
   function verdict(a,b,ea,eb){const diff=ea.score-eb.score;if(Math.abs(diff)<2)return 'Too close to call from the loaded evidence. Check late availability and your league rules.';const lead=diff>0?a:b;return `Evidence leans ${lead.name}, but this is not a point projection or guarantee.`}
   async function mount(){
     if(route()!==ROUTE)return;const host=app()?.querySelector('.fantasy-content');if(!host||host.querySelector('[data-fantasy-decision]'))return;
     const ctx=await loadContext();if(route()!==ROUTE||!host.isConnected||host.querySelector('[data-fantasy-decision]'))return;
-    const candidates=ctx.candidates;if(candidates.length<2)return;
+    const candidates=ctx.candidates;if(candidates.length<2)return;const waiverCount=candidates.filter(p=>p.slot==='waiver').length;
     const section=document.createElement('section');section.dataset.fantasyDecision='ready';section.className='fdc';
-    section.innerHTML=`<div class="fdc-head"><div><small>DECISION CENTER</small><h2>Start / Sit Compare</h2><p>Compare transparent evidence—not invented projections.</p></div></div><div class="fdc-controls"><label>Player A<select data-fdc-a>${candidates.map(option).join('')}</select></label><label>Player B<select data-fdc-b>${candidates.map(option).join('')}</select></label></div><div data-fdc-result></div><p class="fdc-note">Signals can include starter/bench status, current availability flags, Titans roster status and Sleeper 24-hour add/drop trends. Always confirm late news and your league scoring.</p>`;
+    section.innerHTML=`<div class="fdc-head"><div><small>DECISION CENTER</small><h2>Start / Sit Compare</h2><p>Compare transparent evidence—not invented projections.${waiverCount?` ${waiverCount} trending unrostered player${waiverCount===1?'':'s'} available to compare.`:''}</p></div></div><div class="fdc-controls"><label>Player A<select data-fdc-a>${candidates.map(option).join('')}</select></label><label>Player B<select data-fdc-b>${candidates.map(option).join('')}</select></label></div><div data-fdc-result></div><p class="fdc-note">Signals can include starter/bench status, league availability, current availability flags, Titans roster status and Sleeper 24-hour add/drop trends. Always confirm late news and your league scoring.</p>`;
     const style=document.createElement('style');style.textContent='.fdc{margin-top:18px;padding:18px;border:1px solid rgba(120,180,255,.22);border-radius:18px;background:rgba(7,20,38,.72)}.fdc h2{margin:.2rem 0}.fdc p{margin:.3rem 0 .8rem}.fdc-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fdc-controls label{display:grid;gap:6px}.fdc select{min-height:44px;border-radius:10px;padding:8px}.fdc-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.fdc-player{padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:12px}.fdc-player span,.fdc-player b{display:block;margin-top:4px}.fdc-player ul{padding-left:18px}.fdc-verdict{grid-column:1/-1;padding:12px;border-radius:12px;background:rgba(80,160,220,.12);font-weight:700}.fdc-note{font-size:.9rem;opacity:.78}@media(max-width:560px){.fdc-controls,.fdc-compare{grid-template-columns:1fr}.fdc-verdict{grid-column:auto}}';section.appendChild(style);host.appendChild(section);
     const a=section.querySelector('[data-fdc-a]'),b=section.querySelector('[data-fdc-b]'),out=section.querySelector('[data-fdc-result]');if(candidates[1])b.selectedIndex=1;
     const pending=pendingMatches(candidates);if(pending[0])a.value=pending[0].id;if(pending[1])b.value=pending[1].id;
