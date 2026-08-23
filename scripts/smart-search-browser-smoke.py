@@ -48,7 +48,7 @@ try:
         search=WebDriverWait(d,15).until(lambda x:x.find_element(By.ID,'global-search'))
         hit=desktop_hit_areas(d)
         if not hit or hit['input']['width']<120 or hit['input']['height']<32: raise RuntimeError(f'Desktop search input geometry invalid: {hit}')
-        if hit['shortcut']['width']<24 or hit['shortcut']['height']<20: raise RuntimeError(f'Desktop command shortcut geometry invalid: {hit}')
+        if hit['shortcut']['width']<32 or hit['shortcut']['height']<32: raise RuntimeError(f'Desktop command shortcut geometry invalid: {hit}')
         if hit['overlap']>0.5: raise RuntimeError(f'Desktop search input overlaps command shortcut: {hit}')
         search.click();search.send_keys('Cam Ward')
         rows=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].map(x=>({kind:x.querySelector('small')?.textContent||'',label:x.querySelector('strong')?.textContent||'',href:x.getAttribute('href')}))")
