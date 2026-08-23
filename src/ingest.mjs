@@ -3,7 +3,8 @@ import { fetchFreeOdds } from './odds.mjs';
 import { getSql } from './db.mjs';
 
 const APP_VERSION='1.0.0';
-const safeEqual=(a,b)=>{a=String(a||'');b=String(b||'');if(!a||!b)return false;const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&crypto.timingSafeEqual(x,y)};
+const secretDigest=value=>crypto.createHash('sha256').update(String(value??''),'utf8').digest();
+const safeEqual=(a,b)=>{const aText=String(a??''),bText=String(b??''),match=crypto.timingSafeEqual(secretDigest(aText),secretDigest(bText));return match&&Boolean(aText)&&Boolean(bText)};
 const bearer=req=>String(req.headers?.authorization||'').replace(/^Bearer\s+/i,'').trim();
 export function requireIngestAuth(req,env=process.env){const ingest=env.INGEST_SECRET,cron=env.CRON_SECRET;if(!ingest&&!cron)return {ok:false,status:503,error:'Ingestion auth is not configured'};const h=String(req.headers?.['x-ingest-secret']||'').trim(),b=bearer(req),ok=[ingest,cron].filter(Boolean).some(expected=>safeEqual(h,expected)||safeEqual(b,expected));return ok?{ok:true,status:200}:{ok:false,status:401,error:'Unauthorized'};}
 export function requireAdminAuth(req,env=process.env){const expected=env.INGEST_SECRET||env.CRON_SECRET;if(!expected)return {ok:false,status:503,error:'Admin auth is not configured'};const ok=safeEqual(String(req.headers?.['x-ingest-secret']||''),expected)||safeEqual(bearer(req),expected);return ok?{ok:true,status:200}:{ok:false,status:401,error:'Unauthorized'};}
