@@ -66,3 +66,17 @@ test('Ask Titans remains mobile first and reduced-motion friendly',()=>{
   assert.match(css,/min-height:48px/);
   assert.match(css,/prefers-reduced-motion:reduce/);
 });
+
+test('Ask Titans production smoke gates the real fantasy handoff and carried selections',()=>{
+  const smoke=read('scripts/ask-titans-browser-smoke.py');
+  assert.match(smoke,/Should I start Decision Smoke A or Decision Smoke B\?/);
+  assert.match(smoke,/data-fantasy-ask-bridge/);
+  assert.match(smoke,/No projection generated/);
+  assert.match(smoke,/find_element\(By\.CSS_SELECTOR/);
+  assert.match(smoke,/location\.hash==='#fantasy'/);
+  assert.match(smoke,/selectedOptions\[0\]/);
+  assert.match(smoke,/Decision Smoke A/);
+  assert.match(smoke,/Decision Smoke B/);
+  assert.match(smoke,/fantasy-handoff:mobile/);
+  assert.match(smoke,/actionHeight/);
+});
