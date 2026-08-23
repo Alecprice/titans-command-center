@@ -8,6 +8,8 @@ const HOME_KEY_SET=new Set(HOME_KEYS);
 const V10_THEMES=new Set(['system','dark','light']);
 const V10_DENSITIES=new Set(['comfortable','compact']);
 const V10_NOTIFICATION_KEYS=['kickoff','final','transactions','news'];
+const MAX_AUTH_BODY_BYTES=32*1024;
+const MAX_PREFERENCE_BODY_BYTES=32*1024;
 
 function json(payload,status=200,headers={}){
   return new Response(JSON.stringify(payload),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers}});
@@ -18,6 +20,27 @@ function authHeaders(request){
   for(const key of ['cookie','content-type','accept']){const value=request.headers.get(key);if(value)headers.set(key,value);}
   headers.set('origin',new URL(AUTH_ORIGIN).origin);
   return headers;
+}
+
+function mutationIsCrossSite(request){
+  if(String(request.headers.get('sec-fetch-site')||'').toLowerCase()==='cross-site')return true;
+  const origin=request.headers.get('origin');
+  if(!origin)return false;
+  try{return new URL(origin).origin!==new URL(request.url).origin;}catch{return true;}
+}
+
+function declaredBodyTooLarge(request,maxBytes){
+  const raw=request.headers.get('content-length');
+  if(raw===null)return false;
+  const length=Number(raw);
+  return Number.isFinite(length)&&length>maxBytes;
+}
+
+async function limitedBody(request,maxBytes){
+  if(declaredBodyTooLarge(request,maxBytes))return {ok:false,status:413,error:'Request body too large'};
+  const body=await request.arrayBuffer();
+  if(body.byteLength>maxBytes)return {ok:false,status:413,error:'Request body too large'};
+  return {ok:true,body};
 }
 
 async function authSession(request){
@@ -34,7 +57,13 @@ export async function accountAuthProxy(request,subpath){
   if(!['get-session','sign-in/email','sign-up/email','sign-out'].includes(safe))return json({ok:false,error:'Unknown account route'},404);
   const allowedMethod=safe==='get-session'?'GET':'POST';
   if(request.method!==allowedMethod)return json({ok:false,error:'Method not allowed'},405,{Allow:allowedMethod});
-  const body=request.method==='GET'?undefined:await request.arrayBuffer();
+  if(request.method==='POST'&&mutationIsCrossSite(request))return json({ok:false,error:'Cross-site account request rejected'},403);
+  let body;
+  if(request.method!=='GET'){
+    const limited=await limitedBody(request,MAX_AUTH_BODY_BYTES);
+    if(!limited.ok)return json({ok:false,error:limited.error},limited.status);
+    body=limited.body;
+  }
   try{
     const upstream=await fetch(`${AUTH_ORIGIN}/${safe}`,{method:request.method,headers:authHeaders(request),body,redirect:'manual'});
     const outHeaders=new Headers(upstream.headers);
@@ -108,6 +137,7 @@ function preferenceFailure(error){
 
 export async function accountPreferencesRoute(request,env){
   if(!['GET','PUT'].includes(request.method))return json({ok:false,error:'Method not allowed'},405,{Allow:'GET, PUT'});
+  if(request.method==='PUT'&&mutationIsCrossSite(request))return json({ok:false,error:'Cross-site account request rejected'},403);
   const session=await authSession(request);
   const user=session?.user||null;
   if(!user?.id)return json({ok:false,error:'Authentication required'},401);
@@ -118,7 +148,10 @@ export async function accountPreferencesRoute(request,env){
       const [row]=await sql`select preferences,schema_version,updated_at from fan_user_preferences where user_id=${String(user.id)} limit 1`;
       return json({ok:true,preferences:sanitizePreferences(row?.preferences||{}),schemaVersion:Number(row?.schema_version||1),updatedAt:row?.updated_at||null});
     }
-    const body=await request.json().catch(()=>({}));
+    const limited=await limitedBody(request,MAX_PREFERENCE_BODY_BYTES);
+    if(!limited.ok)return json({ok:false,error:limited.error},limited.status);
+    let body={};
+    try{body=JSON.parse(new TextDecoder().decode(limited.body)||'{}');}catch{return json({ok:false,error:'Invalid JSON body'},400);}
     const preferences=sanitizePreferences(body?.preferences);
     const encoded=JSON.stringify(preferences);
     if(encoded.length>24000)return json({ok:false,error:'Preferences too large'},413);
