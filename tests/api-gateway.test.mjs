@@ -13,9 +13,9 @@ function response(){
   return {state,res};
 }
 
-async function run(method,query={},headers={}){
+async function run(method,query={},headers={},env){
   const {state,res}=response();
-  await api({method,query,headers},res);
+  await api({method,query,headers},res,env);
   return state;
 }
 
@@ -57,4 +57,22 @@ test('Vercel rewrites preserve the public API contract',()=>{
 test('health endpoint treats optional warehouse loss as degraded, not app-down',async()=>{
   const previous=process.env.DATABASE_URL;delete process.env.DATABASE_URL;
   try{const result=await run('GET',{route:'health'});assert.equal(result.status,200);assert.equal(result.body?.ok,true);assert.equal(result.body?.status,'degraded');assert.equal(result.body?.fallbacks?.auditedRoster,true);}finally{if(previous)process.env.DATABASE_URL=previous;}
+});
+
+test('explicit runtime env overrides process.env for Cloudflare compatibility',async()=>{
+  const previous=process.env.DATABASE_URL;process.env.DATABASE_URL='postgres://must-not-be-read.invalid/db';
+  try{
+    const result=await run('GET',{route:'health'},{},{});
+    assert.equal(result.status,200);
+    assert.equal(result.body?.status,'degraded');
+    assert.equal(result.body?.database?.configured,false);
+  }finally{if(previous===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=previous;}
+});
+
+test('Bluesky limit parsing is finite integer bounded with a safe fallback',()=>{
+  const source=fs.readFileSync(new URL('../api/index.js',import.meta.url),'utf8');
+  assert.match(source,/rawLimit=Number\(query\.limit\|\|20\)/);
+  assert.match(source,/Number\.isFinite\(rawLimit\)/);
+  assert.match(source,/Math\.min\(50,Math\.max\(1,Math\.trunc\(rawLimit\)\)\):20/);
+  assert.doesNotMatch(source,/Math\.min\(50,Math\.max\(1,Number\(query\.limit\|\|20\)\)\)/);
 });

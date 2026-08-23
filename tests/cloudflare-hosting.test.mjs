@@ -32,13 +32,17 @@ test('Cloudflare adapter uses native Worker env and execution context for core A
   assert.doesNotMatch(worker,/CRON_SECRET\|\|env\.INGEST_SECRET/);
 });
 
-test('Cloudflare adapter retains a temporary process.env bridge only for legacy gateway routes',()=>{
+test('Cloudflare passes bindings explicitly through legacy gateway routes without mutating process.env',()=>{
   const worker=read('cloudflare/worker.mjs');
-  assert.match(worker,/SERVER_BINDINGS/);
-  assert.match(worker,/DATABASE_URL/);
-  assert.match(worker,/applyRuntimeEnv\(env\)/);
-  assert.match(worker,/process\.env\[key\]=String\(value\)/);
-  assert.match(worker,/Legacy routes still share the Vercel-compatible gateway/);
+  const gateway=read('api/index.js');
+  assert.match(worker,/apiHandler\(req,res\.api,env\)/);
+  assert.doesNotMatch(worker,/SERVER_BINDINGS/);
+  assert.doesNotMatch(worker,/applyRuntimeEnv/);
+  assert.doesNotMatch(worker,/process\.env\[/);
+  assert.match(gateway,/export default async function handler\(req,res,env=process\.env\)/);
+  assert.match(gateway,/return await run\(req,res,env\)/);
+  assert.match(gateway,/requireAdminAuth\(req,env\)/);
+  assert.match(gateway,/requireIngestAuth\(req,env\)/);
 });
 
 test('browser-facing responses enforce a restrictive security header baseline',()=>{
