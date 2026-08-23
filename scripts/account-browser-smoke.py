@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.common.exceptions import ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException
+from selenium.common.exceptions import ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -75,12 +75,13 @@ def open_account_from_sheet(driver,attempts=3):
             geometry=wait_account_entry(driver)
             button=driver.find_element(By.CSS_SELECTOR,'#sidebar > .account-sheet-card [data-account-open]')
             button.click()
+            WebDriverWait(driver,2,poll_frequency=.1).until(lambda d:d.find_elements(By.CSS_SELECTOR,'.account-panel'))
             return geometry
-        except (ElementClickInterceptedException,ElementNotInteractableException,StaleElementReferenceException) as exc:
+        except (ElementClickInterceptedException,ElementNotInteractableException,StaleElementReferenceException,TimeoutException) as exc:
             last_error=exc
             time.sleep(.12)
     if last_error:raise last_error
-    raise RuntimeError('account entry did not become interactable')
+    raise RuntimeError('account entry did not open account panel')
 
 def wait_account_panel(driver,timeout=8):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
