@@ -41,6 +41,21 @@ test('Cloudflare adapter retains a temporary process.env bridge only for legacy 
   assert.match(worker,/Legacy routes still share the Vercel-compatible gateway/);
 });
 
+test('browser-facing responses enforce a restrictive security header baseline',()=>{
+  const headers=read('_headers');
+  assert.match(headers,/Strict-Transport-Security: max-age=31536000; includeSubDomains/);
+  assert.match(headers,/X-Content-Type-Options: nosniff/);
+  assert.match(headers,/X-Frame-Options: DENY/);
+  assert.match(headers,/Referrer-Policy: strict-origin-when-cross-origin/);
+  assert.match(headers,/Cross-Origin-Resource-Policy: same-origin/);
+  assert.match(headers,/Permissions-Policy: camera=\(\), microphone=\(\), geolocation=\(\), payment=\(\), usb=\(\)/);
+  assert.match(headers,/Content-Security-Policy: default-src 'self'/);
+  assert.match(headers,/object-src 'none'/);
+  assert.match(headers,/frame-ancestors 'none'/);
+  assert.match(headers,/form-action 'self'/);
+  assert.doesNotMatch(headers,/script-src[^\n;]*'unsafe-inline'/);
+});
+
 test('Cloudflare build publishes only browser-facing assets',()=>{
   const build=read('scripts/build-cloudflare.mjs');
   for(const module of ['src/core.mjs','src/data.mjs','src/odds.mjs','src/visual-audit.mjs','src/roster-audit-20260819.mjs'])assert.match(build,new RegExp(module.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
