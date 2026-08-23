@@ -27,14 +27,16 @@ test('Week 9 is a bye and Week 18 is TBD',()=>{
   assert.equal(gameStatus(week18),'TBD');
 });
 
-test('fallback roster is the full dated audited snapshot',()=>{
-  assert.equal(team.rosterCoverage.fallbackType,'full-audited-snapshot');
+test('fallback roster is the full dated cross-source audited snapshot',()=>{
+  assert.equal(team.rosterCoverage.fallbackType,'cross-source-audited-snapshot');
   assert.equal(team.rosterCoverage.fallbackPlayers,roster.length);
   assert.equal(roster.length,95);
   assert.equal(team.rosterCoverage.officialActivePlayersAtAudit,91);
   assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,4);
   assert.equal(roster.filter(p=>p.status==='Active').length,91);
   assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,4);
+  assert.equal(team.rosterCoverage.asOf,'2026-08-22');
+  assert.match(team.rosterCoverage.sourceConflict||'',/Matt Lauter/i);
 });
 
 test('fallback roster does not use unsourced opinion tags',()=>{
