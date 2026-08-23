@@ -46,20 +46,22 @@ def wait_settled(driver,timeout=18):
 
 
 def read_summary(driver):
-    return driver.execute_script("""
+    return driver.execute_script(r"""
       const hub=document.querySelector('.market-hub');if(!hub)return null;
       const status=[...hub.querySelectorAll('.mh-status span')].map(x=>({text:(x.textContent||'').replace(/\s+/g,' ').trim(),value:x.querySelector('b')?.textContent?.trim()||'',className:x.className||''}));
       const marketStatus=status.find(x=>x.text.toLowerCase().includes('market rows'));
       const freshness=status.find(x=>x.text.toLowerCase().includes('freshness'));
       const result=(hub.querySelector('.mh-results')?.textContent||'').replace(/\s+/g,' ').trim();
       const resultNumbers=[...hub.querySelectorAll('.mh-results b')].map(x=>Number(x.textContent));
-      const rows=[...hub.querySelectorAll('.mh-row')].map(x=>(x.textContent||'').replace(/\s+/g,' ').trim());
+      const rowNodes=[...hub.querySelectorAll('.mh-row')];
+      const rowCount=rowNodes.length;
+      const rowSample=rowNodes.slice(0,3).map(x=>(x.textContent||'').replace(/\s+/g,' ').trim());
       const controls=[...hub.querySelectorAll('.mh-controls select,.mh-controls button')].filter(x=>x.offsetParent!==null).map(x=>({id:x.id,tag:x.tagName,disabled:Boolean(x.disabled),height:x.getBoundingClientRect().height,width:x.getBoundingClientRect().width,value:x.value||'',pressed:x.getAttribute('aria-pressed')}));
       return {
         title:hub.querySelector('.mh-head h2')?.textContent?.trim()||'',
         provider:status[0]?.value||'',quality:freshness?.value||'',total:Number(marketStatus?.value),
         shown:Number.isFinite(resultNumbers[0])?resultNumbers[0]:null,resultTotal:Number.isFinite(resultNumbers[1])?resultNumbers[1]:null,
-        result,rows,controls,
+        result,rowCount,rowSample,controls,
         referenceNotice:(hub.querySelector('.mh-reference-notice')?.textContent||'').replace(/\s+/g,' ').trim(),
         empty:(hub.querySelector('.mh-empty')?.textContent||'').replace(/\s+/g,' ').trim(),
         refreshHeight:hub.querySelector('#mh-refresh')?.getBoundingClientRect().height||0,
@@ -75,22 +77,22 @@ def assert_truthful_state(summary,label):
     if summary['overflow']:raise RuntimeError(f'{label}: horizontal overflow: {summary}')
     if summary['refreshHeight']<44:raise RuntimeError(f'{label}: refresh target below 44px: {summary}')
     if summary['errorVisible']:raise RuntimeError(f'{label}: market error panel is visible: {summary}')
-    total=summary['total'];quality=summary['quality']
+    total=summary['total'];quality=summary['quality'];row_count=summary['rowCount']
     if total is None or total<0:raise RuntimeError(f'{label}: market row total missing: {summary}')
     if summary['shown'] is not None and summary['resultTotal'] is not None:
         if summary['shown']>summary['resultTotal'] or summary['resultTotal']!=total:
             raise RuntimeError(f'{label}: rendered result counts disagree with status total: {summary}')
     if quality=='Live':
-        if total<1 or not summary['rows']:raise RuntimeError(f'{label}: live market mode has no rendered rows: {summary}')
+        if total<1 or row_count<1:raise RuntimeError(f'{label}: live market mode has no rendered rows: {summary}')
         if summary['referenceNotice']:raise RuntimeError(f'{label}: live mode shows a published-reference warning: {summary}')
     elif quality=='Published reference':
-        if total<1 or not summary['rows'] or 'not live odds' not in summary['referenceNotice'].lower():
+        if total<1 or row_count<1 or 'not live odds' not in summary['referenceNotice'].lower():
             raise RuntimeError(f'{label}: published reference is not clearly labeled: {summary}')
     elif quality=='Unavailable':
-        if total!=0 or summary['rows'] or summary['title']!='Titans market status' or not summary['empty'] or summary['referenceNotice']:
+        if total!=0 or row_count!=0 or summary['title']!='Titans market status' or not summary['empty'] or summary['referenceNotice']:
             raise RuntimeError(f'{label}: unavailable market state is ambiguous: {summary}')
     else:raise RuntimeError(f'{label}: unknown market freshness label {quality!r}: {summary}')
-    return {'quality':quality,'provider':summary['provider'],'shown':summary['shown'],'total':total}
+    return {'quality':quality,'provider':summary['provider'],'shown':summary['shown'],'total':total,'renderedRows':row_count}
 
 
 def exercise_select(driver,selector):
@@ -101,7 +103,7 @@ def exercise_select(driver,selector):
     WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value===arguments[1]",selector,chosen))
     wait_settled(driver);after=read_summary(driver)
     if after['shown'] is not None and after['shown']<0:raise RuntimeError(f'{selector}: invalid filtered count: {after}')
-    if not after['rows'] and not after['empty']:raise RuntimeError(f'{selector}: filter rendered neither rows nor a clear empty state: {after}')
+    if after['rowCount']<1 and not after['empty']:raise RuntimeError(f'{selector}: filter rendered neither rows nor a clear empty state: {after}')
     reset=Select(driver.find_element(By.CSS_SELECTOR,selector));reset.select_by_value('all')
     WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value==='all'",selector));wait_settled(driver)
     return {'available':True,'options':option_count,'selectedValue':chosen,'before':before['result'],'after':after['result']}
@@ -127,9 +129,9 @@ try:
 
         stage='desktop:alternates';toggle=driver.find_elements(By.ID,'mh-alt-toggle')
         if toggle and toggle[0].is_enabled():
-            before=read_summary(driver);before_rows=len(before['rows']);toggle[0].click()
+            before=read_summary(driver);before_rows=before['rowCount'];toggle[0].click()
             WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.find_element(By.ID,'mh-alt-toggle').get_attribute('aria-pressed')=='true');wait_settled(driver)
-            after=read_summary(driver);after_rows=len(after['rows'])
+            after=read_summary(driver);after_rows=after['rowCount']
             if after_rows<before_rows:raise RuntimeError(f'Alternate-line toggle reduced visible rows: before={before_rows} after={after_rows}')
             result['desktop']['alternateLines']={'available':True,'beforeRows':before_rows,'afterRows':after_rows}
         else:result['desktop']['alternateLines']={'available':False}
