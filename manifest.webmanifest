@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Titans Command Center",
   "short_name": "Titans CC",
-  "description": "A fan-built Tennessee Titans game-day, roster, intel, analytics, markets, and franchise legacy PWA.",
+  "description": "A fan-built Tennessee Titans game-day, fantasy football, roster, intel, analytics, markets, and franchise legacy PWA.",
   "start_url": "/#home",
   "scope": "/",
   "display": "standalone",
@@ -17,8 +17,8 @@
   ],
   "shortcuts": [
     {"name":"Game Day","short_name":"Game Day","url":"/#live","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]},
+    {"name":"Fantasy Command","short_name":"Fantasy","url":"/#fantasy","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]},
     {"name":"Roster","short_name":"Roster","url":"/#roster","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]},
-    {"name":"Transactions","short_name":"Moves","url":"/#transactions","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]},
     {"name":"Stats Lab","short_name":"Stats","url":"/#stats","icons":[{"src":"/assets/icon-192.png","sizes":"192x192","type":"image/png"}]}
   ]
 }
