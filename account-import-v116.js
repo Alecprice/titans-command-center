@@ -1,3 +1,5 @@
+import './account-interaction-v117.js?v=1';
+
 (() => {
   'use strict';
   if(window.__TitansAccountImportV116)return;
