@@ -1,10 +1,12 @@
+import './account-interaction-v117.js?v=1';
+
 (() => {
   'use strict';
   if(window.__TitansAccountImportV116)return;
   window.__TitansAccountImportV116=true;
   const MAX_FILE_BYTES=64000;
   let pending=null;
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
   function ensureCss(){if(document.querySelector('link[data-account-import-v116]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='/account-import-v116.css?v=1';link.dataset.accountImportV116='';document.head.appendChild(link);}
   function previewHost(){return document.querySelector('.account-import-preview');}
   function renderPreview(preview,error=''){
