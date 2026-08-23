@@ -15,14 +15,16 @@ test('Cloudflare Worker serves static assets and runs only API paths through com
   assert.match(config,/"required"\s*:\s*\["DATABASE_URL"\]/);
 });
 
-test('Cloudflare adapter uses native Worker env for core API routes and trusted scheduler',()=>{
+test('Cloudflare adapter uses native Worker env and execution context for core API routes and trusted scheduler',()=>{
   const worker=read('cloudflare/worker.mjs');
   assert.match(worker,/import apiHandler from '\.\.\/api\/index\.js'/);
   assert.match(worker,/databaseHealth\(env\)/);
   assert.match(worker,/getBootstrapData\(env\)/);
   assert.match(worker,/preseasonStatsRoute,env/);
   assert.match(worker,/marketDataRoute,env/);
-  assert.match(worker,/runApi\(request,env\)/);
+  assert.match(worker,/cachedMarketData\(request,env,ctx\)/);
+  assert.match(worker,/runApi\(request,env,ctx\)/);
+  assert.match(worker,/async fetch\(request,env,ctx\)/);
   assert.match(worker,/env\.ASSETS\.fetch\(request\)/);
   assert.match(worker,/executeScheduledJob/);
   assert.match(worker,/syncTitansOfficialAudit/);
