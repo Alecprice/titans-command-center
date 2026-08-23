@@ -104,7 +104,7 @@ test('post-deploy audit targets the exact deployed SHA and runs current experien
   assert.ok(audit.includes('github.event.workflow_run.head_sha'));
   assert.ok(audit.includes('/build-meta.json'));
   for(const command of ['python scripts/runtime-365-diagnostic.py','python scripts/smart-search-browser-smoke.py','python scripts/mobile-navigation-browser-smoke.py','python scripts/account-browser-smoke.py','python scripts/market-browser-smoke.py'])assert.ok(audit.includes(command),`${command} missing from audit workflow`);
-  assert.ok(audit.includes('actions/upload-artifact@v4'));
+  assert.ok(audit.includes('actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'));
 });
 
 test('post-deploy SHA probe uses the Node fetch path accepted by production',()=>{
