@@ -45,9 +45,10 @@ test('runtime diagnostic records a named stage and failure state',()=>{
 
 test('market smoke validates truthful live reference unavailable modes and real controls',()=>{
   const source=read('scripts/market-browser-smoke.py');
-  for(const token of ["quality=='Live'","quality=='Published reference'","quality=='Unavailable'",'#mh-event-filter','#mh-book-filter','#mh-category-filter','#mh-alt-toggle','desktop:refresh','EC.staleness_of','Mobile market controls below 44px','horizontal overflow','SEVERE'])assert.ok(source.includes(token),`${token} missing from market smoke`);
+  for(const token of ["quality=='Live'","quality=='Published reference'","quality=='Unavailable'",'#mh-event-filter','#mh-book-filter','#mh-category-filter','mh-alt-toggle','desktop:refresh','EC.staleness_of','Mobile market controls below 44px','horizontal overflow','SEVERE'])assert.ok(source.includes(token),`${token} missing from market smoke`);
   assert.match(source,/Select\(element\)/);
   assert.match(source,/select\.select_by_index\(1\)/);
+  assert.match(source,/find_element\(By\.ID,'mh-alt-toggle'\)/);
   assert.match(source,/find_element\(By\.ID,'mh-refresh'\)\.click\(\)/);
 });
 
