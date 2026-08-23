@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {marketDataRoute} from '../src/market-api.mjs';
 
 function response(){
@@ -27,4 +28,11 @@ test('Market Pulse still accepts the gateway route marker',async()=>{
   await marketDataRoute({method:'POST',query:{route:'market-data'}},res,{});
   assert.equal(state.status,405);
   assert.equal(state.headers.Allow,'GET');
+});
+
+test('Market refresh uses the canonical endpoint without unique query URLs',()=>{
+  const source=fs.readFileSync(new URL('../market-hub.js',import.meta.url),'utf8');
+  assert.match(source,/fetch\('\/api\/market-data',\{cache:force\?'no-store':'default'/);
+  assert.doesNotMatch(source,/\/api\/market-data\?refresh=/);
+  assert.doesNotMatch(source,/Date\.now\(\).*market-data|market-data.*Date\.now\(\)/);
 });

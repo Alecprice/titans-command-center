@@ -22,8 +22,10 @@ test('market cache writes are non-blocking and failure-tolerant',()=>{
   assert.match(worker,/async fetch\(request,env,ctx\)/);
 });
 
-test('market UI explicit refresh continues using a cache-busting no-store request',()=>{
+test('market UI explicit refresh stays canonical while bypassing the browser cache',()=>{
   const hub=read('market-hub.js');
-  assert.match(hub,/force\?`\/api\/market-data\?refresh=\$\{Date\.now\(\)\}`:'\/api\/market-data'/);
+  assert.match(hub,/fetch\('\/api\/market-data',\{cache:force\?'no-store':'default'/);
   assert.match(hub,/cache:force\?'no-store':'default'/);
+  assert.doesNotMatch(hub,/\/api\/market-data\?refresh=/);
+  assert.doesNotMatch(hub,/market-data[^\n]*Date\.now\(\)|Date\.now\(\)[^\n]*market-data/);
 });
