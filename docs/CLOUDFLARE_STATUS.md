@@ -1,834 +1,251 @@
 # Cloudflare deployment status
 
-- Status: **deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `160ae86647cdd4e2a97e8a254fed783ec0711119`
-- Quality gate: success
+- Status: **quality gate failed before Cloudflare deploy**
+- Source commit: `319f03e19af5dab9d4920388c09a1bf9fbe0a2da`
+- Quality gate: failure
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
-- Deploy outcome: success
-- Production regression: success
-- Browser navigation regression: success
-- Listen Watch browser regression: success
-- Command Intelligence browser regression: success
-- Player Intelligence / Game Day browser regression: success
-- Ask Titans browser regression: success
-- Change Intelligence browser regression: success
-- Runtime / 365 Mode browser regression: success
-- Data freshness browser regression: success
-- Account / Guest browser regression: success
-- Advanced analytics browser regression: success
-- Player headshot browser regression: success
-- Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-23T02:21:39Z
+- Deploy outcome: skipped
+- Production regression: skipped
+- Browser navigation regression: skipped
+- Listen Watch browser regression: skipped
+- Command Intelligence browser regression: skipped
+- Player Intelligence / Game Day browser regression: skipped
+- Ask Titans browser regression: skipped
+- Change Intelligence browser regression: skipped
+- Runtime / 365 Mode browser regression: skipped
+- Data freshness browser regression: skipped
+- Account / Guest browser regression: skipped
+- Advanced analytics browser regression: skipped
+- Player headshot browser regression: skipped
+- Worker URL: existing deployment remains unchanged
+- Recorded: 2026-08-23T02:25:29Z
 
-## Production regression
+## Quality gate failure context
 
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "rootStatus": 200,
-  "securityHeaders": {
-    "contentTypeOptions": "nosniff",
-    "frameOptions": "DENY",
-    "referrerPolicy": "strict-origin-when-cross-origin",
-    "contentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com; connect-src 'self'; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
-    "robots": "noindex, nofollow",
-    "csp": true
-  },
-  "manifestStatus": 200,
-  "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v59",
-  "precachePaths": 97,
-  "pwaIcons": {
-    "icon192": {
-      "width": 192,
-      "height": 192,
-      "bytes": 2854
-    },
-    "icon512": {
-      "width": 512,
-      "height": 512,
-      "bytes": 5724
-    }
-  },
-  "healthStatus": 200,
-  "appStatus": "healthy",
-  "databaseConfigured": true,
-  "databaseOk": true,
-  "dataStatus": 200,
-  "dataRosterCount": 95,
-  "transactionCount": 26,
-  "invalidTransactionDates": 0,
-  "statsStatus": 200,
-  "statsRosterCount": 95,
-  "statsRosterMode": "live-database",
-  "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
-  "completedPreseasonGames": 1,
-  "marketStatus": 200,
-  "marketRows": 262,
-  "marketMode": "configured-provider",
-  "buildMeta": {
-    "app": "titans-command-center",
-    "version": "1.0.0",
-    "commit": "160ae86647cdd4e2a97e8a254fed783ec0711119",
-    "builtAt": "2026-08-23T02:20:20.992Z"
-  },
-  "deploymentPropagationAttempts": 1,
-  "responseMs": {
-    "root": 16,
-    "health": 179,
-    "data": 419,
-    "stats": 385,
-    "market": 1057,
-    "analytics": 632
-  },
-  "testedAt": "2026-08-23T02:20:46.189Z",
-  "analyticsStatus": 200,
-  "analyticsDataSeason": 2025,
-  "analyticsSeasonFallback": true,
-  "analyticsWarehousePlays": 48771,
-  "analyticsPersonnelPlays": 45184,
-  "analyticsRecentPlays": 80,
-  "analyticsPersonnelRows": 20,
-  "analyticsOffensiveEpaPerPlay": -0.14842680811935147,
-  "analyticsDefensiveEpaPerPlayAllowed": 0.10385631037224918,
-  "analyticsPaceSecondsPerPlay": 28.914001158972834,
-  "analyticsLatestRestDays": 7
-}```
+```text
+not ok 1 - v1.16 backup restore is loaded through the stable account module and packaged offline
+  ---
+  duration_ms: 4.948714
+  location: '/home/runner/work/titans-command-center/titans-command-center/tests/account-import-v116.test.mjs:6:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /titans-cc-brand-2026-v59/. Input:
+    
+    "const CACHE = 'titans-cc-brand-2026-v60';\n" +
+      'const SHELL = [\n' +
+      "  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/mode-365-v19.css',\n" +
+      "  '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/team-time-v21.js', '/mode-365-v19.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/accessibility-runtime.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/player-intelligence-v16.js', '/gameday-v16.js',\n" +
+      "  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',\n" +
+      "  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'\n" +
+      '];\n' +
+      'const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));\n' +
+      'const NETWORK_FIRST=/\\.(?:js|mjs|css|webmanifest)$/i;\n' +
+      "self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});\n" +
+      "self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});\n" +
+      "self.addEventListener('fetch',event=>{\n" +
+      "  if(event.request.method!=='GET')return;\n" +
+      '  const url=new URL(event.request.url);\n' +
+      '  if(url.origin!==self.location.origin)return;\n' +
+      "  if(url.pathname.startsWith('/api/'))return;\n" +
+      "  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}\n" +
+      '  if(!SHELL_PATHS.has(url.pathname))return;\n' +
+      '  if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}\n' +
+      '  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));\n' +
+      '});\n' +
+      "self.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:String(payload.url||'/#home')},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});\n" +
+      "self.addEventListener('notificationclick',event=>{event.notification.close();const target=new URL(event.notification.data?.url||'/#home',self.location.origin).href;event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});\n"
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    const CACHE = 'titans-cc-brand-2026-v60';
+    const SHELL = [
+      '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/mode-365-v19.css',
+      '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/team-time-v21.js', '/mode-365-v19.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/accessibility-runtime.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/player-intelligence-v16.js', '/gameday-v16.js',
+      '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',
+      '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'
+    ];
+    const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));
+    const NETWORK_FIRST=/\.(?:js|mjs|css|webmanifest)$/i;
+    self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
+    self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
+    self.addEventListener('fetch',event=>{
+      if(event.request.method!=='GET')return;
+      const url=new URL(event.request.url);
+      if(url.origin!==self.location.origin)return;
+      if(url.pathname.startsWith('/api/'))return;
+      if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}
+      if(!SHELL_PATHS.has(url.pathname))return;
+      if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}
+      event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));
+    });
+    self.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:String(payload.url||'/#home')},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});
+    self.addEventListener('notificationclick',event=>{event.notification.close();const target=new URL(event.notification.data?.url||'/#home',self.location.origin).href;event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});
+    
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/account-import-v116.test.mjs:9:97)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:796:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:526:18)
+    node:internal/test_runner/harness:255:12
+    node:internal/process/task_queues:140:7
+    AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+    AsyncResource.runMicrotask (node:internal/process/task_queues:137:8)
+not ok 19 - account layer is explicitly loaded and packaged offline
+  ---
+  duration_ms: 4.696655
+  location: '/home/runner/work/titans-command-center/titans-command-center/tests/account-v112.test.mjs:6:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /titans-cc-brand-2026-v59/. Input:
+    
+    "const CACHE = 'titans-cc-brand-2026-v60';\n" +
+      'const SHELL = [\n' +
+      "  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/mode-365-v19.css',\n" +
+      "  '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/team-time-v21.js', '/mode-365-v19.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/accessibility-runtime.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/player-intelligence-v16.js', '/gameday-v16.js',\n" +
+      "  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',\n" +
+      "  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'\n" +
+      '];\n' +
+      'const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));\n' +
+      'const NETWORK_FIRST=/\\.(?:js|mjs|css|webmanifest)$/i;\n' +
+      "self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});\n" +
+      "self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});\n" +
+      "self.addEventListener('fetch',event=>{\n" +
+      "  if(event.request.method!=='GET')return;\n" +
+      '  const url=new URL(event.request.url);\n' +
+      '  if(url.origin!==self.location.origin)return;\n' +
+      "  if(url.pathname.startsWith('/api/'))return;\n" +
+      "  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}\n" +
+      '  if(!SHELL_PATHS.has(url.pathname))return;\n' +
+      '  if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}\n' +
+      '  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));\n' +
+      '});\n' +
+      "self.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:String(payload.url||'/#home')},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});\n" +
+      "self.addEventListener('notificationclick',event=>{event.notification.close();const target=new URL(event.notification.data?.url||'/#home',self.location.origin).href;event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});\n"
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    const CACHE = 'titans-cc-brand-2026-v60';
+    const SHELL = [
+      '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/mode-365-v19.css',
+      '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/team-time-v21.js', '/mode-365-v19.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/accessibility-runtime.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/player-intelligence-v16.js', '/gameday-v16.js',
+      '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',
+      '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'
+    ];
+    const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));
+    const NETWORK_FIRST=/\.(?:js|mjs|css|webmanifest)$/i;
+    self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
+    self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
+    self.addEventListener('fetch',event=>{
+      if(event.request.method!=='GET')return;
+      const url=new URL(event.request.url);
+      if(url.origin!==self.location.origin)return;
+      if(url.pathname.startsWith('/api/'))return;
+      if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}
+      if(!SHELL_PATHS.has(url.pathname))return;
+      if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}
+      event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));
+    });
+    self.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:String(payload.url||'/#home')},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});
+    self.addEventListener('notificationclick',event=>{event.notification.close();const target=new URL(event.notification.data?.url||'/#home',self.location.origin).href;event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});
+    
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/account-v112.test.mjs:8:257)
+    Test.runInAsyncScope (node:async_hooks:206:9)
+    Test.run (node:internal/test_runner/test:796:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:526:18)
+    node:internal/test_runner/harness:255:12
+    node:internal/process/task_queues:140:7
+    AsyncResource.runInAsyncScope (node:async_hooks:206:9)
+    AsyncResource.runMicrotask (node:internal/process/task_queues:137:8)
 
-## Player headshot production regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "season": 2026,
-  "rosterRows": 91,
-  "headshotCount": 88,
-  "allowedHosts": [
-    "static.clubs.nfl.com",
-    "static.www.nfl.com",
-    "static.nfl.com",
-    "a.espncdn.com",
-    "a1.espncdn.com"
-  ],
-  "durationMs": 130,
-  "testedAt": "2026-08-23T02:20:47.101Z"
-}```
-
-## Browser navigation regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktopRounds": 3,
-  "transactionChecks": 12,
-  "mobileChecks": 14,
-  "smallPhoneChecks": 2,
-  "smartSearchQuickJump": true,
-  "mobileDrawerInert": true,
-  "fiveActionDock": true,
-  "teamRoomChecks": 4,
-  "rosterFilterReset": true,
-  "mobileTargets": [
-    {
-      "height": 58,
-      "label": "Home",
-      "width": 69.796875
-    },
-    {
-      "height": 58,
-      "label": "Roster",
-      "width": 69.796875
-    },
-    {
-      "height": 58,
-      "label": "Game",
-      "width": 69.796875
-    },
-    {
-      "height": 58,
-      "label": "Search",
-      "width": 69.796875
-    },
-    {
-      "height": 58,
-      "label": "More",
-      "width": 69.8125
-    }
-  ],
-  "maxLongTaskMs": 335,
-  "longTasksOver250ms": 1,
-  "browserWarnings": [],
-  "durationSeconds": 17.58,
-  "testedAt": "2026-08-23T02:21:08Z"
-}```
-
-## Listen Watch browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "territoryChecks": [
-    "Elsewhere in U.S.",
-    "International",
-    "Nashville / Middle Tennessee"
-  ],
-  "officialTitansAudio": true,
-  "official1045Player": true,
-  "rawEmbeddedAudio": false,
-  "mobileAreaTargets": [
-    {
-      "h": 44,
-      "label": "Nashville / Middle Tennessee"
-    },
-    {
-      "h": 44,
-      "label": "Elsewhere in U.S."
-    },
-    {
-      "h": 44,
-      "label": "International"
-    }
-  ],
-  "mobileTimeRows": 4,
-  "browserWarnings": [],
-  "durationSeconds": 2.27,
-  "testedAt": "2026-08-23T02:21:11Z"
-}```
-
-## Command Intelligence browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "tabsVisited": [
-    "changes",
-    "press",
-    "scheme",
-    "global",
-    "stadium",
-    "gm",
-    "history"
-  ],
-  "addonsVerified": [
-    "changes",
-    "scheme",
-    "global",
-    "gm"
-  ],
-  "spoilerToggle": true,
-  "mediaTuneGuideAfterPushState": true,
-  "mobileTabTargets": [
-    {
-      "h": 48,
-      "label": "Changes"
-    },
-    {
-      "h": 48,
-      "label": "Press Room"
-    },
-    {
-      "h": 48,
-      "label": "Scheme Lab"
-    },
-    {
-      "h": 48,
-      "label": "Global Fans"
-    },
-    {
-      "h": 48,
-      "label": "Stadium"
-    },
-    {
-      "h": 48,
-      "label": "Fan GM"
-    },
-    {
-      "h": 48,
-      "label": "Time Machine"
-    }
-  ],
-  "mobileViewport": 375,
-  "browserWarnings": [],
-  "durationSeconds": 2.79,
-  "testedAt": "2026-08-23T02:21:14Z"
-}```
-
-## Player Intelligence / Game Day browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "playerRoute": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
-  "playerRouteHydrated": true,
-  "playerTabs": [
-    "overview",
-    "games",
-    "trends",
-    "career",
-    "timeline"
-  ],
-  "favoriteToggle": [
-    "false",
-    "true",
-    "false"
-  ],
-  "playerMobileTargets": [
-    {
-      "h": 48,
-      "label": "Overview"
-    },
-    {
-      "h": 48,
-      "label": "Game Log"
-    },
-    {
-      "h": 48,
-      "label": "Trends"
-    },
-    {
-      "h": 48,
-      "label": "Career + Contract"
-    },
-    {
-      "h": 48,
-      "label": "Timeline"
-    }
-  ],
-  "playerHeadshotLoaded": true,
-  "gameDayPhase": "pregame",
-  "gameDayTuneLink": true,
-  "gameDayMobileViewport": 375,
-  "browserWarnings": [],
-  "durationSeconds": 3.44,
-  "testedAt": "2026-08-23T02:21:18Z"
-}```
-
-## Ask Titans browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "answers": [
-    {
-      "question": "Who is next?",
-      "action": "#live",
-      "answer": "Tennessee is next scheduled to host Seattle Seahawks on Sun, Aug 23, 7:00 PM CDT (Nashville time).",
-      "facts": 4,
-      "sources": 1,
-      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. FOX is the listed network."
-    },
-    {
-      "question": "Cam Ward",
-      "action": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
-      "answer": "Cam Ward is listed as QB #1 with roster status Active.",
-      "facts": 2,
-      "sources": 2,
-      "why": "No recent structured player-game rows are loaded, so I am not treating missing stats as zero production."
-    },
-    {
-      "question": "What is EPA?",
-      "action": "#stats",
-      "answer": "EPA: Expected Points Added estimates how much a play helped or hurt scoring expectation.",
-      "facts": 2,
-      "sources": 1,
-      "why": "Advanced metrics are context tools, not standalone player grades. Command Center labels model-derived metrics and keeps them behind plain-English explanations."
-    },
-    {
-      "question": "How do I watch?",
-      "action": "#media",
-      "answer": "The next game is Sun, Aug 23, 7:00 PM CDT (Nashville time) and the loaded TV listing is FOX. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
-      "facts": 2,
-      "sources": 1,
-      "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
-    }
-  ],
-  "teamTimeVerified": [
-    "Who is next?",
-    "How do I watch?"
-  ],
-  "unsupportedRefused": true,
-  "mobileTargets": {
-    "askButton": 50,
-    "input": 50,
-    "quick": [
-      {
-        "h": 48,
-        "label": "What changed?"
-      },
-      {
-        "h": 48,
-        "label": "Who is next?"
-      },
-      {
-        "h": 48,
-        "label": "Injuries"
-      },
-      {
-        "h": 48,
-        "label": "Watch"
-      },
-      {
-        "h": 48,
-        "label": "Cam Ward"
-      },
-      {
-        "h": 48,
-        "label": "Explain EPA"
-      }
-    ],
-    "viewport": 375,
-    "width": 357
-  },
-  "browserWarnings": [],
-  "durationSeconds": 1.72,
-  "testedAt": "2026-08-23T02:21:20Z"
-}```
-
-## Change Intelligence browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "detectedBeforeReview": 121,
-  "categories": [
-    "Roster",
-    "Transaction"
-  ],
-  "favoritePriority": "Added to loaded roster",
-  "rosterFilterVisible": 95,
-  "clearedAfterReview": true,
-  "mobileTargets": {
-    "filters": [
-      {
-        "h": 48,
-        "label": "All"
-      },
-      {
-        "h": 48,
-        "label": "Roster \u00b7 95"
-      },
-      {
-        "h": 48,
-        "label": "Transaction \u00b7 26"
-      }
-    ],
-    "review": 48,
-    "viewport": 375,
-    "width": 357
-  },
-  "browserWarnings": [],
-  "durationSeconds": 3.08,
-  "testedAt": "2026-08-23T02:21:23Z"
-}```
-
-## Runtime / 365 Mode browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktop": {
-    "phase": "preseason",
-    "cards": 4,
-    "runtimeVersion": "1.10.0",
-    "teamTimeZone": "America/Chicago",
-    "teamTimeLabel": "Nashville time",
-    "routeCycle": true,
-    "singlePanel": true,
-    "cacheUrls": [
-      "/api/data",
-      "/api/fan-intel"
-    ],
-    "panel": {
-      "cards": 4,
-      "display": "block",
-      "height": 344.390625,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 925
-    },
-    "refresh": {
-      "cache": [
-        {
-          "expiresAt": 1787451715950,
-          "hasValue": true,
-          "inflight": false,
-          "updatedAt": 1787451685950,
-          "url": "/api/data"
-        },
-        {
-          "expiresAt": 1787451715769,
-          "hasValue": true,
-          "inflight": false,
-          "updatedAt": 1787451685769,
-          "url": "/api/fan-intel"
-        }
-      ],
-      "epoch": 1,
-      "last": {
-        "at": "2026-08-23T02:21:25.529Z",
-        "epoch": 1,
-        "reason": "scoreboard-control",
-        "urls": null
-      }
-    },
-    "refreshedPanel": {
-      "cards": 4,
-      "display": "block",
-      "height": 344.390625,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 925
-    },
-    "returnPanel": {
-      "cards": 4,
-      "display": "block",
-      "height": 344.390625,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 925
-    }
-  },
-  "mobile": {
-    "layout": {
-      "dock": {
-        "display": "grid",
-        "h": 72,
-        "w": 465,
-        "x": 10,
-        "y": 621
-      },
-      "dockTargets": [
-        {
-          "h": 58,
-          "label": "Home",
-          "w": 89.796875
-        },
-        {
-          "h": 58,
-          "label": "Roster",
-          "w": 89.796875
-        },
-        {
-          "h": 58,
-          "label": "Game",
-          "w": 89.796875
-        },
-        {
-          "h": 58,
-          "label": "Search",
-          "w": 89.796875
-        },
-        {
-          "h": 58,
-          "label": "More",
-          "w": 89.8125
-        }
-      ],
-      "menu": {
-        "display": "grid",
-        "h": 46,
-        "w": 46,
-        "x": 10,
-        "y": 8
-      },
-      "overflow": false,
-      "panelHeight": 765.171875,
-      "panelWidth": 461,
-      "reviewHeight": 48,
-      "targets": [
-        {
-          "h": 112,
-          "label": "NEXT GAME",
-          "w": 427
-        },
-        {
-          "h": 122.9375,
-          "label": "WHAT CHANGED?",
-          "w": 427
-        },
-        {
-          "h": 122.9375,
-          "label": "ROSTER",
-          "w": 427
-        },
-        {
-          "h": 112,
-          "label": "AVAILABILITY",
-          "w": 427
-        }
-      ],
-      "viewport": 500
-    },
-    "panelState": {
-      "cards": 4,
-      "display": "block",
-      "height": 765.171875,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 461
-    },
-    "sheet": {
-      "bottom": 611,
-      "dockTop": 621,
-      "height": 504.71875,
-      "links": 13,
-      "top": 106.28125
-    },
-    "smartSearch": {
-      "height": 110,
-      "left": 10,
-      "right": 475,
-      "rows": 1,
-      "targets": [
-        58
-      ],
-      "width": 465
-    }
-  },
-  "browserWarnings": [],
-  "durationSeconds": 4.33
-}```
-
-## Data freshness browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktop": {
-    "detail": "Roster 54 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
-    "overflow": false,
-    "rect": {
-      "bottom": 3234.140625,
-      "height": 132.03125,
-      "left": 915.328125,
-      "right": 1216.984375,
-      "top": 3102.109375,
-      "width": 301.65625
-    },
-    "state": "recent",
-    "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 54 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
-    "title": "The loaded roster snapshot was captured within the last 48 hours.",
-    "viewport": {
-      "height": 757,
-      "width": 1280
-    }
-  },
-  "mobile": {
-    "detail": "Roster 54 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
-    "overflow": false,
-    "rect": {
-      "bottom": 6545.078125,
-      "height": 113.53125,
-      "left": 9,
-      "right": 366,
-      "top": 6431.546875,
-      "width": 357
-    },
-    "state": "recent",
-    "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 54 minutes ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
-    "title": "The loaded roster snapshot was captured within the last 48 hours.",
-    "viewport": {
-      "height": 701,
-      "width": 390
-    }
-  },
-  "browserWarnings": [],
-  "durationSeconds": 2.07,
-  "testedAt": "2026-08-23T02:21:30Z"
-}```
-
-## Account / Guest browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "browserWarnings": [],
-  "guest": {
-    "accountGuest": true,
-    "route": "#home",
-    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
-  },
-  "mobileShell": {
-    "dock": {
-      "h": 72,
-      "top": 621,
-      "w": 465
-    },
-    "more": {
-      "bottom": 686,
-      "h": 58,
-      "top": 628,
-      "w": 89.8125
-    },
-    "runtime": "1.10.0",
-    "sidebarHidden": "true",
-    "sidebarInert": true
-  },
-  "sheet": {
-    "bottom": 611,
-    "dockTop": 621,
-    "top": 106.28125
-  },
-  "accountEntry": {
-    "bottom": 290.53125,
-    "h": 44,
-    "parent": "sidebar",
-    "top": 246.53125,
-    "visibleBottom": 611,
-    "visibleTop": 106.28125,
-    "w": 390
-  },
-  "panel": {
-    "bottom": 701,
-    "h": 602.859375,
-    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordLog inContinue as guestGUEST DATAThese settings exist only on this device.Export this deviceImport backupReset this deviceReset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.",
-    "vh": 701,
-    "w": 485
-  },
-  "portabilityTools": {
-    "exportHeight": 50,
-    "exportLabel": "Export this device",
-    "guest": true,
-    "importHeight": 50,
-    "importLabel": "Import backup",
-    "resetHeight": 50,
-    "resetLabel": "Reset this device"
-  },
-  "importPreview": {
-    "applyHeight": 46,
-    "favorite": null,
-    "pending": {
-      "accountEmail": "",
-      "exportedAt": "2026-08-22T12:00:00Z",
-      "keys": [
-        "titans:v15MyTitans"
-      ],
-      "preferences": {
-        "titans:v15MyTitans": {
-          "favorite": "Browser Smoke"
-        }
-      },
-      "scope": "guest-device"
-    },
-    "text": "READY TO RESTORE1 setting groupAug 22, 2026, 12:00 PM \u00b7 guest-deviceNothing has changed yet. Applying restores only recognized Titans preferences from this file.Apply imported settingsCancel"
-  },
-  "resetArmed": {
-    "guest": true,
-    "hash": "#home",
-    "hint": "Tap Confirm reset again within 6 seconds.",
-    "label": "Confirm reset"
-  },
-  "authOutage": {
-    "guest": true,
-    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
-  },
-  "roster": {
-    "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 54 minutes a"
-  },
-  "durationSeconds": 1.9
-}```
-
-## Advanced analytics browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "seasonContext": {
-    "bannerRole": "note",
-    "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
-    "bannerVisible": true,
-    "dataSeason": "2025",
-    "heading": "2025 advanced analytics baseline",
-    "requestedSeason": "2026",
-    "seasonFallback": "true"
-  },
-  "mobileSeasonContext": {
-    "fallback": "true",
-    "text": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
-    "visible": true
-  },
-  "metricCount": 4,
-  "metricValues": [
-    {
-      "detail": "#30 of 32",
-      "label": "Offensive EPA / play",
-      "value": "-0.148"
-    },
-    {
-      "detail": "#28 of 32",
-      "label": "Defensive EPA / play allowed",
-      "value": "+0.104"
-    },
-    {
-      "detail": "#11 of 32",
-      "label": "Pace",
-      "value": "28.9 sec/play"
-    },
-    {
-      "detail": "Latest loaded week: 18",
-      "label": "Rest days",
-      "value": "7 days"
-    }
-  ],
-  "situationFields": [
-    "Down & distance",
-    "Field position",
-    "Formation",
-    "Personnel",
-    "Score diff",
-    "TEN EPA",
-    "Time remaining"
-  ],
-  "initialPlayCards": 60,
-  "offenseFilteredPlayCards": 39,
-  "mobileMetricCount": 4,
-  "browserWarnings": [],
-  "durationSeconds": 2.21,
-  "testedAt": "2026-08-23T02:21:35Z"
-}```
-
-## Player headshot browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "rosterCards": 95,
-  "rosterDecoratedHeadshots": 81,
-  "rosterLoadedHeadshots": 41,
-  "statsPlayerRows": 96,
-  "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 13,
-  "mobileLoadedHeadshots": 27,
-  "richPlayer": "Austin Schlottmann",
-  "richPlayerHeadshotLoaded": true,
-  "browserWarnings": [],
-  "durationSeconds": 3.69,
-  "testedAt": "2026-08-23T02:21:39Z"
-}```
+--- tail ---
+  ...
+# Subtest: fan-facing base pages prefer live/backup language over storage implementation jargon
+ok 291 - fan-facing base pages prefer live/backup language over storage implementation jargon
+  ---
+  duration_ms: 0.255913
+  ...
+# Subtest: roster team-room switcher has plain button semantics, keyboard cycling and safe source links
+ok 292 - roster team-room switcher has plain button semantics, keyboard cycling and safe source links
+  ---
+  duration_ms: 0.402351
+  ...
+# Subtest: rich player pages use the server player endpoint
+ok 293 - rich player pages use the server player endpoint
+  ---
+  duration_ms: 0.296042
+  ...
+# Subtest: fan status UI uses reader-friendly coverage language instead of implementation jargon
+ok 294 - fan status UI uses reader-friendly coverage language instead of implementation jargon
+  ---
+  duration_ms: 0.245567
+  ...
+# Subtest: source activity distinguishes checked rows from new rows in fan-readable language
+ok 295 - source activity distinguishes checked rows from new rows in fan-readable language
+  ---
+  duration_ms: 0.296593
+  ...
+# Subtest: v0.6 database adapter uses current live schema columns
+ok 296 - v0.6 database adapter uses current live schema columns
+  ---
+  duration_ms: 0.372747
+  ...
+# Subtest: visual archive uses audited metadata instead of ambiguous legacy aliases
+ok 297 - visual archive uses audited metadata instead of ambiguous legacy aliases
+  ---
+  duration_ms: 0.296493
+  ...
+# Subtest: responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint
+ok 298 - responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint
+  ---
+  duration_ms: 0.264185
+  ...
+# Subtest: visual source registry includes official, specialist and Wikipedia cross-checks
+ok 299 - visual source registry includes official, specialist and Wikipedia cross-checks
+  ---
+  duration_ms: 1.226221
+  ...
+# Subtest: active visual catalog never uses quarantined legacy aliases
+ok 300 - active visual catalog never uses quarantined legacy aliases
+  ---
+  duration_ms: 0.324204
+  ...
+# Subtest: representative and composite art cannot masquerade as exact official logos
+ok 301 - representative and composite art cannot masquerade as exact official logos
+  ---
+  duration_ms: 0.677542
+  ...
+# Subtest: 2018 is treated as a uniform and wordmark change, not a new primary logo
+ok 302 - 2018 is treated as a uniform and wordmark change, not a new primary logo
+  ---
+  duration_ms: 1.013824
+  ...
+# Subtest: Tennessee Oilers transition preserves alternate-logo nuance
+ok 303 - Tennessee Oilers transition preserves alternate-logo nuance
+  ---
+  duration_ms: 0.288732
+  ...
+# Subtest: current Shield receives exact current-brand treatment
+ok 304 - current Shield receives exact current-brand treatment
+  ---
+  duration_ms: 0.203204
+  ...
+1..304
+# tests 304
+# suites 0
+# pass 302
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1438.642032
+```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
