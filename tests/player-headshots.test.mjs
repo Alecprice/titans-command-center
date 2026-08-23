@@ -27,6 +27,23 @@ test('nflreadpy headshot manifest has useful current Titans coverage',()=>{
   assert.ok(names.has('jefferysimmons'));
 });
 
+test('headshot generator reports upstream coverage gaps instead of fabricating image URLs',()=>{
+  const generator=read('scripts/build_player_headshots.py');
+  const workflow=read('.github/workflows/player-headshots.yml');
+  assert.match(generator,/omitted = \[\]/);
+  assert.match(generator,/"reason": "missing-player-name"/);
+  assert.match(generator,/"reason": "no-approved-headshot-url"/);
+  assert.match(generator,/"coveragePct": coverage_pct/);
+  assert.match(generator,/"omittedCount": len\(omitted\)/);
+  assert.match(generator,/"omissionReasons": omission_reasons/);
+  assert.match(generator,/"omittedPlayers": omitted/);
+  assert.match(generator,/if headshot_count < 60/);
+  assert.match(workflow,/headshots\+omitted_count==roster_rows/);
+  assert.match(workflow,/sum\(int\(value\) for value in reasons\.values\(\)\)==omitted_count/);
+  assert.match(workflow,/no-approved-headshot-url/);
+  assert.match(workflow,/missing-player-name/);
+});
+
 test('headshot decorator covers roster, Stats Lab and rich player views without broad recursive observation',()=>{
   const js=read('headshot-polish.js');
   assert.match(js,/\.player-card/);
