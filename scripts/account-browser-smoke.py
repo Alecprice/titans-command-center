@@ -155,7 +155,7 @@ try:
     if 'GUEST' not in guest['text'].upper() or not guest['accountGuest']: raise RuntimeError(f'guest state missing: {guest}')
     stage='wait-mobile-shell';shell=wait_mobile_shell_ready(d)
 
-    stage='open-more';stage='wait-more';sheet=open_more_sheet(d)
+    stage='open-more';sheet=open_more_sheet(d)
     stage='open-account';entry=open_account_from_sheet(d)
     stage='wait-account-panel';panel=wait_account_panel(d)
     if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')
