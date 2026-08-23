@@ -27,7 +27,11 @@ def overflow(driver):
 
 def prepare_returning_user(driver):
     driver.get(f'{BASE}/')
-    driver.execute_script("localStorage.setItem('titans:v10Onboarded','1')")
+    driver.execute_script("""
+      localStorage.setItem('titans:v10Onboarded','1');
+      document.querySelector('#v10-onboarding [data-v10-close]')?.click();
+    """)
+    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:not d.find_elements(By.CSS_SELECTOR,'#v10-onboarding'))
 
 options=webdriver.ChromeOptions()
 options.add_argument('--headless=new')
