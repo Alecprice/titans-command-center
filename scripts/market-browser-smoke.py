@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -42,6 +43,24 @@ def wait_settled(driver,timeout=18):
           if(status.length<5||!hub.querySelector('#mh-refresh')||!hub.querySelector('.mh-head h2'))return null;
           return true;
         """)
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(ready)
+
+
+def stable_select_element(driver,selector,timeout=8):
+    state={'id':None,'stablePolls':0}
+    def ready(d):
+        try:
+            element=d.find_element(By.CSS_SELECTOR,selector)
+            if not element.is_displayed() or not element.is_enabled():return False
+            Select(element).options
+            element_id=element.id
+            if element_id==state['id']:state['stablePolls']+=1
+            else:
+                state['id']=element_id
+                state['stablePolls']=1
+            return element if state['stablePolls']>=3 else False
+        except (NoSuchElementException,StaleElementReferenceException):
+            state['id']=None;state['stablePolls']=0;return False
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(ready)
 
 
@@ -96,16 +115,18 @@ def assert_truthful_state(summary,label):
 
 
 def exercise_select(driver,selector):
-    element=driver.find_element(By.CSS_SELECTOR,selector);select=Select(element);option_count=len(select.options)
+    wait_settled(driver)
+    element=stable_select_element(driver,selector);select=Select(element);option_count=len(select.options)
     if option_count<2:return {'available':False,'options':option_count}
     chosen=select.options[1].get_attribute('value');before=read_summary(driver)
     select.select_by_index(1)
     WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value===arguments[1]",selector,chosen))
-    wait_settled(driver);after=read_summary(driver)
+    wait_settled(driver);stable_select_element(driver,selector);after=read_summary(driver)
     if after['shown'] is not None and after['shown']<0:raise RuntimeError(f'{selector}: invalid filtered count: {after}')
     if after['rowCount']<1 and not after['empty']:raise RuntimeError(f'{selector}: filter rendered neither rows nor a clear empty state: {after}')
-    reset=Select(driver.find_element(By.CSS_SELECTOR,selector));reset.select_by_value('all')
-    WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value==='all'",selector));wait_settled(driver)
+    reset_element=stable_select_element(driver,selector);reset=Select(reset_element);reset.select_by_value('all')
+    WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value==='all'",selector))
+    wait_settled(driver);stable_select_element(driver,selector)
     return {'available':True,'options':option_count,'selectedValue':chosen,'before':before['result'],'after':after['result']}
 
 
@@ -124,7 +145,7 @@ try:
     if state['total']>0:
         stage='desktop:filters';filters={}
         for key,selector in [('event','#mh-event-filter'),('book','#mh-book-filter'),('category','#mh-category-filter')]:
-            if driver.find_elements(By.CSS_SELECTOR,selector):filters[key]=exercise_select(driver,selector)
+            filters[key]=exercise_select(driver,selector)
         result['desktop']['filters']=filters
 
         stage='desktop:alternates';toggle=driver.find_elements(By.ID,'mh-alt-toggle')
