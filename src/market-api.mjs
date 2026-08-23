@@ -23,6 +23,8 @@ export function validateConfiguredMarketData(data={}){
 
 export async function marketDataRoute(req,res,env=process.env){
   if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({ok:false,error:'Method not allowed'})}
+  const unsupported=Object.keys(req?.query||{}).filter(key=>key!=='route');
+  if(unsupported.length){res.setHeader('Cache-Control','no-store');return res.status(400).json({ok:false,error:'Market data endpoint does not accept query parameters'})}
   res.setHeader('Cache-Control','public, s-maxage=180, stale-while-revalidate=600');const diagnostics=[];
   try{
     const configured=await fetchFreeOdds(env,{maxEvents:2}),validated=validateConfiguredMarketData(configured);
