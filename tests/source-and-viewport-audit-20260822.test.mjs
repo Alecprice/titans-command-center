@@ -6,9 +6,9 @@ import { ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-2
 
 test('Aug 22 roster audit reflects the official Aug 21 roster moves',()=>{
   assert.equal(ROSTER_AUDIT_DATE,'2026-08-22');
-  assert.equal(roster.length,96);
+  assert.equal(roster.length,95);
   assert.equal(roster.filter(p=>p.status==='Active').length,91);
-  assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,5);
+  assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,4);
   assert.ok(roster.some(p=>p.name==='Milo Eifler'&&p.number==='45'&&p.status==='Active'));
   assert.ok(roster.some(p=>p.name==='Tanoh Kpassagnon'&&p.number==='58'&&p.status==='Active'));
   assert.ok(roster.some(p=>p.name==='Nazeeh Johnson'&&p.status==='Reserve/Injured'));
@@ -17,9 +17,9 @@ test('Aug 22 roster audit reflects the official Aug 21 roster moves',()=>{
   assert.equal(roster.some(p=>p.name==='Matt Lauter'),false);
   assert.equal(ROSTER_SOURCE_CONFLICT,'');
   assert.equal(team.rosterCoverage.asOf,'2026-08-22');
-  assert.equal(team.rosterCoverage.fallbackPlayers,96);
+  assert.equal(team.rosterCoverage.fallbackPlayers,95);
   assert.equal(team.rosterCoverage.officialActivePlayersAtAudit,91);
-  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,5);
+  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,4);
 });
 
 test('official schedule outranks secondary references for TBD and current broadcast fields',()=>{
