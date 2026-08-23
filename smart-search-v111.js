@@ -1,3 +1,4 @@
+import('./fantasy-sleeper-intelligence-v2.js').catch(()=>{});
 (() => {
   'use strict';
   const runtime=window.TitansRuntime;
