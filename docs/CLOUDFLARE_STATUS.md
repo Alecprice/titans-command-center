@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `4d0d357c993a4bf81678c322ce6aaf38b6210f1d`
+- Source commit: `7805147407c26252773afb25f9b4ad4d57e8fa9b`
 - Quality gate: failure
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -19,163 +19,93 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: existing deployment remains unchanged
-- Recorded: 2026-08-23T02:26:41Z
+- Recorded: 2026-08-23T02:27:01Z
 
 ## Quality gate failure context
 
 ```text
-not ok 184 - global kickoff guide includes countdown and responsive mobile layout
-  ---
-  duration_ms: 2.335633
-  location: '/home/runner/work/titans-command-center/titans-command-center/tests/media-timecodes-v14.test.mjs:60:1'
-  failureType: 'testCodeFailure'
-  error: |-
-    The input did not match the regular expression /media-timecodes-v14\.js/. Input:
-    
-    "const CACHE = 'titans-cc-brand-2026-v59';\n" +
-      'const SHELL = [\n' +
-      "  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/mode-365-v19.css',\n" +
-      "  '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/team-time-v21.js', '/mode-365-v19.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/accessibility-runtime.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecode.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/player-intelligence-v16.js', '/gameday-v16.js',\n" +
-      "  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',\n" +
-      "  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'\n" +
-      '];\n' +
-      'const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));\n' +
-      'const NETWORK_FIRST=/\\.(?:js|mjs|css|webmanifest)$/i;\n' +
-      "self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});\n" +
-      "self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});\n" +
-      "self.addEventListener('fetch',event=>{\n" +
-      "  if(event.request.method!=='GET')return;\n" +
-      '  const url=new URL(event.request.url);\n' +
-      '  if(url.origin!==self.location.origin)return;\n' +
-      "  if(url.pathname.startsWith('/api/'))return;\n" +
-      "  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}\n" +
-      '  if(!SHELL_PATHS.has(url.pathname))return;\n' +
-      '  if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}\n' +
-      '  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));\n' +
-      '});\n' +
-      "self.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:String(payload.url||'/#home')},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});\n" +
-      "self.addEventListener('notificationclick',event=>{event.notification.close();const target=new URL(event.notification.data?.url||'/#home',self.location.origin).href;event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});\n"
-    
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected:
-  actual: |-
-    const CACHE = 'titans-cc-brand-2026-v59';
-    const SHELL = [
-      '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/mode-365-v19.css',
-      '/app.js', '/legacy-polish.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/team-time-v21.js', '/mode-365-v19.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/accessibility-runtime.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecode.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/player-intelligence-v16.js', '/gameday-v16.js',
-      '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',
-      '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'
-    ];
-    const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));
-    const NETWORK_FIRST=/\.(?:js|mjs|css|webmanifest)$/i;
-    self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
-    self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
-    self.addEventListener('fetch',event=>{
-      if(event.request.method!=='GET')return;
-      const url=new URL(event.request.url);
-      if(url.origin!==self.location.origin)return;
-      if(url.pathname.startsWith('/api/'))return;
-      if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}
-      if(!SHELL_PATHS.has(url.pathname))return;
-      if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}
-      event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));
-    });
-    self.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:String(payload.url||'/#home')},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});
-    self.addEventListener('notificationclick',event=>{event.notification.close();const target=new URL(event.notification.data?.url||'/#home',self.location.origin).href;event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});
-    
-  operator: 'match'
-  stack: |-
-    TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/media-timecodes-v14.test.mjs:70:10)
-    Test.runInAsyncScope (node:async_hooks:206:9)
-    Test.run (node:internal/test_runner/test:796:25)
-    Test.processPendingSubtests (node:internal/test_runner/test:526:18)
-    Test.postRun (node:internal/test_runner/test:889:19)
-    Test.run (node:internal/test_runner/test:835:12)
-    async Test.processPendingSubtests (node:internal/test_runner/test:526:7)
-  ...
 
 --- tail ---
-  ...
-# Subtest: fan-facing base pages prefer live/backup language over storage implementation jargon
-ok 291 - fan-facing base pages prefer live/backup language over storage implementation jargon
-  ---
-  duration_ms: 0.251082
-  ...
-# Subtest: roster team-room switcher has plain button semantics, keyboard cycling and safe source links
-ok 292 - roster team-room switcher has plain button semantics, keyboard cycling and safe source links
-  ---
-  duration_ms: 0.494663
-  ...
-# Subtest: rich player pages use the server player endpoint
-ok 293 - rich player pages use the server player endpoint
-  ---
-  duration_ms: 0.296039
-  ...
-# Subtest: fan status UI uses reader-friendly coverage language instead of implementation jargon
-ok 294 - fan status UI uses reader-friendly coverage language instead of implementation jargon
-  ---
-  duration_ms: 0.238233
-  ...
-# Subtest: source activity distinguishes checked rows from new rows in fan-readable language
-ok 295 - source activity distinguishes checked rows from new rows in fan-readable language
-  ---
-  duration_ms: 0.304992
-  ...
-# Subtest: v0.6 database adapter uses current live schema columns
-ok 296 - v0.6 database adapter uses current live schema columns
-  ---
-  duration_ms: 0.352382
-  ...
-# Subtest: visual archive uses audited metadata instead of ambiguous legacy aliases
-ok 297 - visual archive uses audited metadata instead of ambiguous legacy aliases
-  ---
-  duration_ms: 0.327756
-  ...
-# Subtest: responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint
-ok 298 - responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint
-  ---
-  duration_ms: 0.257812
-  ...
-# Subtest: visual source registry includes official, specialist and Wikipedia cross-checks
-ok 299 - visual source registry includes official, specialist and Wikipedia cross-checks
-  ---
-  duration_ms: 1.230274
-  ...
-# Subtest: active visual catalog never uses quarantined legacy aliases
 ok 300 - active visual catalog never uses quarantined legacy aliases
   ---
-  duration_ms: 0.308518
+  duration_ms: 0.214078
   ...
 # Subtest: representative and composite art cannot masquerade as exact official logos
 ok 301 - representative and composite art cannot masquerade as exact official logos
   ---
-  duration_ms: 0.638347
+  duration_ms: 0.417943
   ...
 # Subtest: 2018 is treated as a uniform and wordmark change, not a new primary logo
 ok 302 - 2018 is treated as a uniform and wordmark change, not a new primary logo
   ---
-  duration_ms: 1.048214
+  duration_ms: 0.799253
   ...
 # Subtest: Tennessee Oilers transition preserves alternate-logo nuance
 ok 303 - Tennessee Oilers transition preserves alternate-logo nuance
   ---
-  duration_ms: 0.290841
+  duration_ms: 0.249875
   ...
 # Subtest: current Shield receives exact current-brand treatment
 ok 304 - current Shield receives exact current-brand treatment
   ---
-  duration_ms: 0.185616
+  duration_ms: 0.095935
   ...
 1..304
 # tests 304
 # suites 0
-# pass 303
-# fail 1
+# pass 304
+# fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 1444.81316
+# duration_ms 974.325031
+
+> titans-command-center@1.0.0 audit:content
+> node scripts/content-audit.mjs
+
+✓ current team identity metadata
+✓ franchise milestone dates preserve 1959 vs 1960 distinction
+✓ 2026 schedule contains Week 9 bye
+✓ Week 18 stays genuinely TBD at current Reliant Stadium name
+✓ fallback roster is the full dated cross-source audited snapshot
+✓ cross-source roster conflicts are explicit and fact-specific
+✓ fallback player metadata avoids unsupported editorial tags
+✓ Peter Skoronski fallback position matches official roster
+✓ fallback feed carries the current Aug. 19 transaction
+✓ fallback feed contains sourceable links instead of placeholder social claims
+✓ fallback source labels distinguish primary authorities from active persistence
+✓ visual labels are source-audited and active art avoids legacy aliases
+✓ base app no longer requests retired duplicate legacy assets
+✓ ingest runtime identifies the current production release
+
+Content audit passed: 21 schedule rows, 95 audited fallback players, 7 sourced fallback feed items, 6 audited visual assets.
+
+> titans-command-center@1.0.0 secret-scan
+> node scripts/check-secrets.mjs
+
+Secret scan passed: no embedded deployment credentials detected.
+
+> titans-command-center@1.0.0 syntax-check
+> node scripts/check-syntax.mjs
+
+Syntax check passed: 128 JavaScript modules.
+
+> titans-command-center@1.0.0 build:cloudflare
+> node scripts/build-cloudflare.mjs
+
+Cloudflare static build: 105 files, 850.5 KiB
+
+> titans-command-center@1.0.0 verify:cloudflare
+> node scripts/check-cloudflare-build.mjs
+
+file:///home/runner/work/titans-command-center/titans-command-center/scripts/check-cloudflare-build.mjs:66
+    if(shellPathSet.has(importerPublic)&&!shellPathSet.has(importedPublic))throw new Error(`Offline PWA dependency is not precached: ${importerPublic} -> ${importedPublic}`);
+                                                                                 ^
+
+Error: Offline PWA dependency is not precached: /usability-runtime.js -> /freshness-truth-v20.js
+    at file:///home/runner/work/titans-command-center/titans-command-center/scripts/check-cloudflare-build.mjs:66:82
+
+Node.js v20.20.2
 ```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
