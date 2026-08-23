@@ -19,6 +19,21 @@ for(const asset of ['/app.js','/usability-runtime.js','/usability-runtime.css','
   if(!html.includes(asset))throw new Error(`index.html missing expected production asset ${asset}`);
 }
 if(!html.includes('href="#transactions" data-route="transactions"')||!html.includes('id="mobile-more-button"'))throw new Error('Mobile navigation is missing Transactions or More');
+
+// Every local resource referenced by the HTML shell must exist in the static build.
+// Query strings are cache-busters and do not change the on-disk path.
+const shellRefs=[];
+for(const match of html.matchAll(/<(?:script|img|source)\b[^>]*?\bsrc=['"]([^'"]+)['"][^>]*>/gi))shellRefs.push(match[1]);
+for(const match of html.matchAll(/<link\b[^>]*?\bhref=['"]([^'"]+)['"][^>]*>/gi))shellRefs.push(match[1]);
+for(const raw of new Set(shellRefs)){
+  if(!raw.startsWith('/')||raw.startsWith('//'))continue;
+  const pathname=raw.split(/[?#]/,1)[0];
+  if(!pathname||pathname==='/')continue;
+  const relative=pathname.slice(1);
+  if(relative.includes('..'))throw new Error(`index.html local asset escapes static root: ${raw}`);
+  try{await access(path.join(dist,relative))}catch{throw new Error(`index.html references a missing local asset: ${raw}`)}
+}
+
 const meta=JSON.parse(await readFile(path.join(dist,'build-meta.json'),'utf8'));
 if(meta.app!=='titans-command-center'||!meta.version||!meta.commit||!meta.builtAt)throw new Error('Cloudflare build metadata is incomplete');
 const headers=await readFile(path.join(dist,'_headers'),'utf8');
@@ -39,8 +54,6 @@ for(const publicPath of shellPaths){
   try{await access(path.join(dist,publicPath.slice(1)))}catch{throw new Error(`Service worker precache asset is missing from Cloudflare build: ${publicPath}`)}
 }
 
-// Validate the local browser module graph. A missing relative module otherwise falls
-// through the Worker asset handler to index.html and browsers reject it as text/html.
 const browserCode=[];
 async function collectBrowserCode(dir,prefix=''){
   for(const entry of await readdir(dir,{withFileTypes:true})){
@@ -58,7 +71,8 @@ for(const relative of browserCode){
   for(const match of code.matchAll(importPattern)){
     const specifier=match[1];
     if(!specifier.startsWith('.'))continue;
-    const resolved=path.normalize(path.join(path.dirname(relative),specifier));
+    const clean=specifier.split(/[?#]/,1)[0];
+    const resolved=path.normalize(path.join(path.dirname(relative),clean));
     if(resolved.startsWith('..'))throw new Error(`Browser module escapes static root: ${relative} -> ${specifier}`);
     try{await access(path.join(dist,resolved))}catch{throw new Error(`Browser module import is missing from Cloudflare build: ${relative} -> ${specifier}`)}
     const importerPublic=`/${relative.split(path.sep).join('/')}`;
@@ -73,4 +87,4 @@ try{
 }catch(error){if(error?.code!=='ENOENT')throw error}
 const rootEntries=await readdir(dist);
 if(rootEntries.some(name=>name.endsWith('.mjs')))throw new Error('Server/root .mjs files must not be copied to static output');
-console.log(`Cloudflare static build verification passed (${shellPaths.length} PWA shell paths, ${browserCode.length} browser modules verified, offline dependency closure checked, commit ${meta.commit}).`);
+console.log(`Cloudflare static build verification passed (${new Set(shellRefs).size} HTML shell refs, ${shellPaths.length} PWA shell paths, ${browserCode.length} browser modules verified, offline dependency closure checked, commit ${meta.commit}).`);
