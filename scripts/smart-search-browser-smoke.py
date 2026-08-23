@@ -33,12 +33,25 @@ def desktop_hit_areas(driver):
       const input=document.querySelector('#global-search'),shortcut=document.querySelector('.search-wrap kbd');
       if(!input||!shortcut)return null;
       const i=input.getBoundingClientRect(),k=shortcut.getBoundingClientRect();
+      const x=i.left+i.width/2,y=i.top+i.height/2,owner=document.elementFromPoint(x,y);
       return {
         input:{left:i.left,right:i.right,top:i.top,bottom:i.bottom,width:i.width,height:i.height},
-        shortcut:{left:k.left,right:k.right,top:k.top,bottom:k.bottom,width:k.width,height:k.height},
-        overlap:Math.max(0,Math.min(i.right,k.right)-Math.max(i.left,k.left))*Math.max(0,Math.min(i.bottom,k.bottom)-Math.max(i.top,k.top))
+        shortcut:{left:k.left,right:k.right,top:k.top,bottom:k.bottom,width:k.width,height:k.height,enhanced:shortcut.dataset.fanCommand==='1'},
+        overlap:Math.max(0,Math.min(i.right,k.right)-Math.max(i.left,k.left))*Math.max(0,Math.min(i.bottom,k.bottom)-Math.max(i.top,k.top)),
+        inputCenterOwner:owner?.id||owner?.getAttribute?.('data-fan-command')||owner?.tagName||''
       };
     """)
+
+def settled_hit_areas(driver):
+    previous=None;stable=0
+    def ready(d):
+        nonlocal previous,stable
+        hit=desktop_hit_areas(d)
+        if not hit or not hit['shortcut']['enhanced']:return False
+        sig=(round(hit['input']['left'],1),round(hit['input']['right'],1),round(hit['shortcut']['left'],1),round(hit['shortcut']['right'],1),hit['inputCenterOwner'])
+        stable=stable+1 if sig==previous else 0;previous=sig
+        return hit if stable>=2 else False
+    return WebDriverWait(driver,10,poll_frequency=.1).until(ready)
 
 result={'ok':False,'base':BASE,'desktop':{},'mobile':{},'browserWarnings':[]};start=time.time()
 try:
@@ -46,10 +59,11 @@ try:
     try:
         d.get(f'{BASE}/#home');prepare_returning_user(d)
         search=WebDriverWait(d,15).until(lambda x:x.find_element(By.ID,'global-search'))
-        hit=desktop_hit_areas(d)
+        hit=settled_hit_areas(d)
         if not hit or hit['input']['width']<120 or hit['input']['height']<32: raise RuntimeError(f'Desktop search input geometry invalid: {hit}')
         if hit['shortcut']['width']<32 or hit['shortcut']['height']<32: raise RuntimeError(f'Desktop command shortcut geometry invalid: {hit}')
         if hit['overlap']>0.5: raise RuntimeError(f'Desktop search input overlaps command shortcut: {hit}')
+        if hit['inputCenterOwner']!='global-search': raise RuntimeError(f'Desktop search center click is owned by another element: {hit}')
         search.click();search.send_keys('Cam Ward')
         rows=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].map(x=>({kind:x.querySelector('small')?.textContent||'',label:x.querySelector('strong')?.textContent||'',href:x.getAttribute('href')}))")
         players=[r for r in rows if r['kind']=='PLAYER']
@@ -58,9 +72,11 @@ try:
         wait_for(d,"return location.hash.startsWith('#player?id=')")
         player_route=d.execute_script('return location.hash')
         d.execute_script("location.hash='#home'");wait_for(d,"return location.hash==='#home'")
-        d.find_element(By.ID,'global-search').click()
+        search=d.find_element(By.ID,'global-search');hit_after=settled_hit_areas(d)
+        if hit_after['inputCenterOwner']!='global-search':raise RuntimeError(f'Desktop quick-jump click target intercepted after route return: {hit_after}')
+        search.click()
         quick=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].slice(0,6).map(x=>x.querySelector('strong')?.textContent||'')")
-        result['desktop']={'playerResult':players[0]['label'],'playerRoute':player_route,'quickJump':quick,'hitAreas':hit};result['browserWarnings']+=severe_logs(d)
+        result['desktop']={'playerResult':players[0]['label'],'playerRoute':player_route,'quickJump':quick,'hitAreas':hit,'hitAreasAfterRoute':hit_after};result['browserWarnings']+=severe_logs(d)
     finally:d.quit()
     m=driver_for(390,844)
     try:
