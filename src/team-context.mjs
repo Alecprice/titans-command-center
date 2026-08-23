@@ -1,10 +1,10 @@
 export const auditedTeamContext = {
-  auditedOn:'2026-08-19',
+  auditedOn:'2026-08-22',
   sourcePolicy:{
     currentTeamData:['Tennessee Titans','NFL.com'],franchiseHistory:['Tennessee Titans','Pro Football Hall of Fame'],statisticalCrossCheck:['Tennessee Titans team stats','NFL.com','Pro Football Reference','nflverse'],visualCrossCheck:['Tennessee Titans brand/history','SportsLogos.net'],secondaryContext:['Wikipedia'],
-    rule:'Use a domain-specific source hierarchy. Current official Titans/NFL information overrides secondary sources when they conflict; conflicting source values are retained as audit notes instead of silently blended.',
+    rule:'Use a domain-specific and fact-specific source hierarchy. Current official Titans/NFL information overrides secondary sources when they conflict, but a dated official transaction can outrank a stale current-roster listing. Conflicting source values are retained as audit notes instead of silently blended.',
     domains:[
-      {key:'roster-schedule-transactions',label:'Roster · Schedule · Transactions',primary:'Tennessee Titans official',crossCheck:'NFL.com',secondary:'nflverse',note:'Never infer missing kickoff times, roster moves, or statuses from secondary templates.'},
+      {key:'roster-schedule-transactions',label:'Roster · Schedule · Transactions',primary:'Tennessee Titans official',crossCheck:'NFL.com',secondary:'nflverse',note:'Transactions control dated roster moves; never infer missing kickoff times, roster moves, or statuses from secondary templates.'},
       {key:'coaching-leadership',label:'Coaching · Leadership',primary:'Tennessee Titans official',crossCheck:'NFL.com when available',secondary:'Reference sources only',note:'Official current titles control.'},
       {key:'statistics',label:'Statistics',primary:'Tennessee Titans structured team stats',crossCheck:'NFL.com · Pro Football Reference',secondary:'nflverse',note:'Structured stat tables control over editorial recap copy when official pages disagree.'},
       {key:'injuries',label:'Injuries',primary:'Tennessee Titans official injury report',crossCheck:'NFL.com',secondary:'Roster Reserve/Injured is a separate status',note:'No published report is not the same thing as zero injuries.'},
@@ -13,6 +13,8 @@ export const auditedTeamContext = {
     ]
   },
   knownConflicts:[
+    {topic:'Matt Lauter current roster status · Aug. 22 audit',officialValue:'Titans Aug. 16 transaction story says signed; NFL.com lists Lauter active',secondaryValue:'TennesseeTitans.com current roster page omits Lauter',resolution:'Retain Matt Lauter in the dated audited roster and surface the omission. Two independent current official signals support the signing while the roster page is internally inconsistent.'},
+    {topic:'Sean Brown current roster status · Aug. 22 audit',officialValue:'Tennessee Titans Aug. 17 transaction: waived/injured',secondaryValue:'NFL.com roster still lists Sean Brown as reserve',resolution:'Exclude Sean Brown from the current audited roster. The dated Titans transaction controls over a stale secondary roster listing.'},
     {topic:'2026 preseason opener date',officialValue:'Aug. 13, 2026',secondaryValue:'Pro Football Reference currently lists Aug. 15',resolution:'Use Tennessee Titans/NFL schedule: Aug. 13.'},
     {topic:'Franchise origin date',officialValue:'Franchise granted Aug. 14, 1959; first season 1960',secondaryValue:'Some team/league summaries simply say established 1960',resolution:'Display both grant date and first season instead of collapsing them.'},
     {topic:'Jeffery Simmons 2025 total tackles',officialValue:'67 total tackles (Tennessee Titans structured team stats)',secondaryValue:'NFL.com individual career page currently shows 65',resolution:'Use 67: Tennessee Titans official team stats, an official Titans contract article, and Pro Football Reference agree; retain the NFL.com discrepancy as an audit note.'},
