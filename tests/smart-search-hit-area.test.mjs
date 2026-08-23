@@ -5,6 +5,7 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('desktop Smart Search reserves separate input and command shortcut hit areas',()=>{
   const css=read('smart-search-v111.css');
+  assert.match(css,/\.search-wrap\{position:relative;min-width:0\}/);
   assert.match(css,/\.search-wrap input\{flex:1 1 auto;min-width:0;width:auto\}/);
   assert.match(css,/\.search-wrap kbd\{flex:0 0 auto\}/);
 });
