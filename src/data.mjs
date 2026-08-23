@@ -5,7 +5,7 @@ export const team = {
   owner:'Amy Adams Strunk',generalManager:'Mike Borgonzi',president:'Burke Nihill',coach:'Robert Saleh',coachOfficialHireDate:'2026-01-22',
   season:2026,phase:'Preseason',stadium:'Nissan Stadium',franchiseGranted:'1959-08-14',firstSeason:1960,firstSeasonInTennessee:1997,firstSeasonAsTitans:1999,byeWeek:9,
   colors:['Titans blue','red','white','navy blue'],primaryLogo:'The Shield',
-  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:96,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:5,asOf:'2026-08-22',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-22T20:00:00Z'
+  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:95,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:4,asOf:'2026-08-22',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-22T20:00:00Z'
 };
 
 export const games = [
@@ -60,4 +60,4 @@ export const sources = [
   {name:'Odds-API.io',category:'Market',tier:'media',status:'Server key optional',method:'Odds-API.io v3',cost:'Free · no card',cadence:'Live / pregame',purpose:'Second free NFL odds source for cross-checks and fallback'}
 ];
 
-export const metrics=[{label:'Preseason',value:'1–0',delta:'W 19–13 at SF',tone:'good'},{label:'Next game',value:'SEA',delta:'Aug 23 · 7 PM CDT · FOX',tone:'neutral'},{label:'Audited roster',value:'96',delta:'91 active · 5 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
+export const metrics=[{label:'Preseason',value:'1–0',delta:'W 19–13 at SF',tone:'good'},{label:'Next game',value:'SEA',delta:'Aug 23 · 7 PM CDT · FOX',tone:'neutral'},{label:'Audited roster',value:'95',delta:'91 active · 4 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
