@@ -1,111 +1,834 @@
 # Cloudflare deployment status
 
-- Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `7805147407c26252773afb25f9b4ad4d57e8fa9b`
-- Quality gate: failure
+- Status: **deployed + full production + browser + media + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
+- Source commit: `730294d9b8d63ffd91ad0ee979a1e88f72206f30`
+- Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
-- Deploy outcome: skipped
-- Production regression: skipped
-- Browser navigation regression: skipped
-- Listen Watch browser regression: skipped
-- Command Intelligence browser regression: skipped
-- Player Intelligence / Game Day browser regression: skipped
-- Ask Titans browser regression: skipped
-- Change Intelligence browser regression: skipped
-- Runtime / 365 Mode browser regression: skipped
-- Data freshness browser regression: skipped
-- Account / Guest browser regression: skipped
-- Advanced analytics browser regression: skipped
-- Player headshot browser regression: skipped
-- Worker URL: existing deployment remains unchanged
-- Recorded: 2026-08-23T02:27:01Z
+- Deploy outcome: success
+- Production regression: success
+- Browser navigation regression: success
+- Listen Watch browser regression: success
+- Command Intelligence browser regression: success
+- Player Intelligence / Game Day browser regression: success
+- Ask Titans browser regression: success
+- Change Intelligence browser regression: success
+- Runtime / 365 Mode browser regression: success
+- Data freshness browser regression: success
+- Account / Guest browser regression: success
+- Advanced analytics browser regression: success
+- Player headshot browser regression: success
+- Worker URL: https://titans-command-center.alecjordanprice.workers.dev
+- Recorded: 2026-08-23T02:30:33Z
 
-## Quality gate failure context
+## Production regression
 
-```text
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "rootStatus": 200,
+  "securityHeaders": {
+    "contentTypeOptions": "nosniff",
+    "frameOptions": "DENY",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com; connect-src 'self'; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "robots": "noindex, nofollow",
+    "csp": true
+  },
+  "manifestStatus": 200,
+  "serviceWorkerStatus": 200,
+  "serviceWorkerCache": "titans-cc-brand-2026-v59",
+  "precachePaths": 99,
+  "pwaIcons": {
+    "icon192": {
+      "width": 192,
+      "height": 192,
+      "bytes": 2854
+    },
+    "icon512": {
+      "width": 512,
+      "height": 512,
+      "bytes": 5724
+    }
+  },
+  "healthStatus": 200,
+  "appStatus": "healthy",
+  "databaseConfigured": true,
+  "databaseOk": true,
+  "dataStatus": 200,
+  "dataRosterCount": 95,
+  "transactionCount": 26,
+  "invalidTransactionDates": 0,
+  "statsStatus": 200,
+  "statsRosterCount": 95,
+  "statsRosterMode": "live-database",
+  "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
+  "completedPreseasonGames": 1,
+  "marketStatus": 200,
+  "marketRows": 262,
+  "marketMode": "configured-provider",
+  "buildMeta": {
+    "app": "titans-command-center",
+    "version": "1.0.0",
+    "commit": "730294d9b8d63ffd91ad0ee979a1e88f72206f30",
+    "builtAt": "2026-08-23T02:29:04.176Z"
+  },
+  "deploymentPropagationAttempts": 1,
+  "responseMs": {
+    "root": 33,
+    "health": 216,
+    "data": 245,
+    "stats": 218,
+    "market": 1398,
+    "analytics": 422
+  },
+  "testedAt": "2026-08-23T02:29:34.721Z",
+  "analyticsStatus": 200,
+  "analyticsDataSeason": 2025,
+  "analyticsSeasonFallback": true,
+  "analyticsWarehousePlays": 48771,
+  "analyticsPersonnelPlays": 45184,
+  "analyticsRecentPlays": 80,
+  "analyticsPersonnelRows": 20,
+  "analyticsOffensiveEpaPerPlay": -0.14842680811935147,
+  "analyticsDefensiveEpaPerPlayAllowed": 0.10385631037224918,
+  "analyticsPaceSecondsPerPlay": 28.914001158972834,
+  "analyticsLatestRestDays": 7
+}```
 
---- tail ---
-ok 300 - active visual catalog never uses quarantined legacy aliases
-  ---
-  duration_ms: 0.214078
-  ...
-# Subtest: representative and composite art cannot masquerade as exact official logos
-ok 301 - representative and composite art cannot masquerade as exact official logos
-  ---
-  duration_ms: 0.417943
-  ...
-# Subtest: 2018 is treated as a uniform and wordmark change, not a new primary logo
-ok 302 - 2018 is treated as a uniform and wordmark change, not a new primary logo
-  ---
-  duration_ms: 0.799253
-  ...
-# Subtest: Tennessee Oilers transition preserves alternate-logo nuance
-ok 303 - Tennessee Oilers transition preserves alternate-logo nuance
-  ---
-  duration_ms: 0.249875
-  ...
-# Subtest: current Shield receives exact current-brand treatment
-ok 304 - current Shield receives exact current-brand treatment
-  ---
-  duration_ms: 0.095935
-  ...
-1..304
-# tests 304
-# suites 0
-# pass 304
-# fail 0
-# cancelled 0
-# skipped 0
-# todo 0
-# duration_ms 974.325031
+## Player headshot production regression
 
-> titans-command-center@1.0.0 audit:content
-> node scripts/content-audit.mjs
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "season": 2026,
+  "rosterRows": 91,
+  "headshotCount": 88,
+  "allowedHosts": [
+    "static.clubs.nfl.com",
+    "static.www.nfl.com",
+    "static.nfl.com",
+    "a.espncdn.com",
+    "a1.espncdn.com"
+  ],
+  "durationMs": 133,
+  "testedAt": "2026-08-23T02:29:35.347Z"
+}```
 
-✓ current team identity metadata
-✓ franchise milestone dates preserve 1959 vs 1960 distinction
-✓ 2026 schedule contains Week 9 bye
-✓ Week 18 stays genuinely TBD at current Reliant Stadium name
-✓ fallback roster is the full dated cross-source audited snapshot
-✓ cross-source roster conflicts are explicit and fact-specific
-✓ fallback player metadata avoids unsupported editorial tags
-✓ Peter Skoronski fallback position matches official roster
-✓ fallback feed carries the current Aug. 19 transaction
-✓ fallback feed contains sourceable links instead of placeholder social claims
-✓ fallback source labels distinguish primary authorities from active persistence
-✓ visual labels are source-audited and active art avoids legacy aliases
-✓ base app no longer requests retired duplicate legacy assets
-✓ ingest runtime identifies the current production release
+## Browser navigation regression
 
-Content audit passed: 21 schedule rows, 95 audited fallback players, 7 sourced fallback feed items, 6 audited visual assets.
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "desktopRounds": 3,
+  "transactionChecks": 12,
+  "mobileChecks": 14,
+  "smallPhoneChecks": 2,
+  "smartSearchQuickJump": true,
+  "mobileDrawerInert": true,
+  "fiveActionDock": true,
+  "teamRoomChecks": 4,
+  "rosterFilterReset": true,
+  "mobileTargets": [
+    {
+      "height": 58,
+      "label": "Home",
+      "width": 69.796875
+    },
+    {
+      "height": 58,
+      "label": "Roster",
+      "width": 69.796875
+    },
+    {
+      "height": 58,
+      "label": "Game",
+      "width": 69.796875
+    },
+    {
+      "height": 58,
+      "label": "Search",
+      "width": 69.796875
+    },
+    {
+      "height": 58,
+      "label": "More",
+      "width": 69.8125
+    }
+  ],
+  "maxLongTaskMs": 109,
+  "longTasksOver250ms": 0,
+  "browserWarnings": [],
+  "durationSeconds": 24.51,
+  "testedAt": "2026-08-23T02:30:06Z"
+}```
 
-> titans-command-center@1.0.0 secret-scan
-> node scripts/check-secrets.mjs
+## Listen Watch browser regression
 
-Secret scan passed: no embedded deployment credentials detected.
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "territoryChecks": [
+    "Elsewhere in U.S.",
+    "International",
+    "Nashville / Middle Tennessee"
+  ],
+  "officialTitansAudio": true,
+  "official1045Player": true,
+  "rawEmbeddedAudio": false,
+  "mobileAreaTargets": [
+    {
+      "h": 44,
+      "label": "Nashville / Middle Tennessee"
+    },
+    {
+      "h": 44,
+      "label": "Elsewhere in U.S."
+    },
+    {
+      "h": 44,
+      "label": "International"
+    }
+  ],
+  "mobileTimeRows": 4,
+  "browserWarnings": [],
+  "durationSeconds": 2.46,
+  "testedAt": "2026-08-23T02:30:09Z"
+}```
 
-> titans-command-center@1.0.0 syntax-check
-> node scripts/check-syntax.mjs
+## Command Intelligence browser regression
 
-Syntax check passed: 128 JavaScript modules.
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "tabsVisited": [
+    "changes",
+    "press",
+    "scheme",
+    "global",
+    "stadium",
+    "gm",
+    "history"
+  ],
+  "addonsVerified": [
+    "changes",
+    "scheme",
+    "global",
+    "gm"
+  ],
+  "spoilerToggle": true,
+  "mediaTuneGuideAfterPushState": true,
+  "mobileTabTargets": [
+    {
+      "h": 48,
+      "label": "Changes"
+    },
+    {
+      "h": 48,
+      "label": "Press Room"
+    },
+    {
+      "h": 48,
+      "label": "Scheme Lab"
+    },
+    {
+      "h": 48,
+      "label": "Global Fans"
+    },
+    {
+      "h": 48,
+      "label": "Stadium"
+    },
+    {
+      "h": 48,
+      "label": "Fan GM"
+    },
+    {
+      "h": 48,
+      "label": "Time Machine"
+    }
+  ],
+  "mobileViewport": 375,
+  "browserWarnings": [],
+  "durationSeconds": 2.12,
+  "testedAt": "2026-08-23T02:30:11Z"
+}```
 
-> titans-command-center@1.0.0 build:cloudflare
-> node scripts/build-cloudflare.mjs
+## Player Intelligence / Game Day browser regression
 
-Cloudflare static build: 105 files, 850.5 KiB
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "playerRoute": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
+  "playerRouteHydrated": true,
+  "playerTabs": [
+    "overview",
+    "games",
+    "trends",
+    "career",
+    "timeline"
+  ],
+  "favoriteToggle": [
+    "false",
+    "true",
+    "false"
+  ],
+  "playerMobileTargets": [
+    {
+      "h": 48,
+      "label": "Overview"
+    },
+    {
+      "h": 48,
+      "label": "Game Log"
+    },
+    {
+      "h": 48,
+      "label": "Trends"
+    },
+    {
+      "h": 48,
+      "label": "Career + Contract"
+    },
+    {
+      "h": 48,
+      "label": "Timeline"
+    }
+  ],
+  "playerHeadshotLoaded": true,
+  "gameDayPhase": "pregame",
+  "gameDayTuneLink": true,
+  "gameDayMobileViewport": 375,
+  "browserWarnings": [],
+  "durationSeconds": 3.25,
+  "testedAt": "2026-08-23T02:30:14Z"
+}```
 
-> titans-command-center@1.0.0 verify:cloudflare
-> node scripts/check-cloudflare-build.mjs
+## Ask Titans browser regression
 
-file:///home/runner/work/titans-command-center/titans-command-center/scripts/check-cloudflare-build.mjs:66
-    if(shellPathSet.has(importerPublic)&&!shellPathSet.has(importedPublic))throw new Error(`Offline PWA dependency is not precached: ${importerPublic} -> ${importedPublic}`);
-                                                                                 ^
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "answers": [
+    {
+      "question": "Who is next?",
+      "action": "#live",
+      "answer": "Tennessee is next scheduled to host Seattle Seahawks on Sun, Aug 23, 7:00 PM CDT (Nashville time).",
+      "facts": 4,
+      "sources": 1,
+      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. FOX is the listed network."
+    },
+    {
+      "question": "Cam Ward",
+      "action": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
+      "answer": "Cam Ward is listed as QB #1 with roster status Active.",
+      "facts": 2,
+      "sources": 2,
+      "why": "No recent structured player-game rows are loaded, so I am not treating missing stats as zero production."
+    },
+    {
+      "question": "What is EPA?",
+      "action": "#stats",
+      "answer": "EPA: Expected Points Added estimates how much a play helped or hurt scoring expectation.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Advanced metrics are context tools, not standalone player grades. Command Center labels model-derived metrics and keeps them behind plain-English explanations."
+    },
+    {
+      "question": "How do I watch?",
+      "action": "#media",
+      "answer": "The next game is Sun, Aug 23, 7:00 PM CDT (Nashville time) and the loaded TV listing is FOX. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
+    }
+  ],
+  "teamTimeVerified": [
+    "Who is next?",
+    "How do I watch?"
+  ],
+  "unsupportedRefused": true,
+  "mobileTargets": {
+    "askButton": 50,
+    "input": 50,
+    "quick": [
+      {
+        "h": 48,
+        "label": "What changed?"
+      },
+      {
+        "h": 48,
+        "label": "Who is next?"
+      },
+      {
+        "h": 48,
+        "label": "Injuries"
+      },
+      {
+        "h": 48,
+        "label": "Watch"
+      },
+      {
+        "h": 48,
+        "label": "Cam Ward"
+      },
+      {
+        "h": 48,
+        "label": "Explain EPA"
+      }
+    ],
+    "viewport": 375,
+    "width": 357
+  },
+  "browserWarnings": [],
+  "durationSeconds": 1.57,
+  "testedAt": "2026-08-23T02:30:16Z"
+}```
 
-Error: Offline PWA dependency is not precached: /usability-runtime.js -> /freshness-truth-v20.js
-    at file:///home/runner/work/titans-command-center/titans-command-center/scripts/check-cloudflare-build.mjs:66:82
+## Change Intelligence browser regression
 
-Node.js v20.20.2
-```
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "detectedBeforeReview": 121,
+  "categories": [
+    "Roster",
+    "Transaction"
+  ],
+  "favoritePriority": "Added to loaded roster",
+  "rosterFilterVisible": 95,
+  "clearedAfterReview": true,
+  "mobileTargets": {
+    "filters": [
+      {
+        "h": 48,
+        "label": "All"
+      },
+      {
+        "h": 48,
+        "label": "Roster \u00b7 95"
+      },
+      {
+        "h": 48,
+        "label": "Transaction \u00b7 26"
+      }
+    ],
+    "review": 48,
+    "viewport": 375,
+    "width": 357
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.33,
+  "testedAt": "2026-08-23T02:30:19Z"
+}```
+
+## Runtime / 365 Mode browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "desktop": {
+    "phase": "preseason",
+    "cards": 4,
+    "runtimeVersion": "1.10.0",
+    "teamTimeZone": "America/Chicago",
+    "teamTimeLabel": "Nashville time",
+    "routeCycle": true,
+    "singlePanel": true,
+    "cacheUrls": [
+      "/api/data",
+      "/api/fan-intel"
+    ],
+    "panel": {
+      "cards": 4,
+      "display": "block",
+      "height": 344.390625,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "refresh": {
+      "cache": [
+        {
+          "expiresAt": 1787452251154,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1787452221154,
+          "url": "/api/data"
+        },
+        {
+          "expiresAt": 1787452251089,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1787452221089,
+          "url": "/api/fan-intel"
+        }
+      ],
+      "epoch": 1,
+      "last": {
+        "at": "2026-08-23T02:30:20.852Z",
+        "epoch": 1,
+        "reason": "scoreboard-control",
+        "urls": null
+      }
+    },
+    "refreshedPanel": {
+      "cards": 4,
+      "display": "block",
+      "height": 344.390625,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "returnPanel": {
+      "cards": 4,
+      "display": "block",
+      "height": 344.390625,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    }
+  },
+  "mobile": {
+    "layout": {
+      "dock": {
+        "display": "grid",
+        "h": 72,
+        "w": 465,
+        "x": 10,
+        "y": 621
+      },
+      "dockTargets": [
+        {
+          "h": 58,
+          "label": "Home",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Roster",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Game",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Search",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "More",
+          "w": 89.8125
+        }
+      ],
+      "menu": {
+        "display": "grid",
+        "h": 46,
+        "w": 46,
+        "x": 10,
+        "y": 8
+      },
+      "overflow": false,
+      "panelHeight": 765.171875,
+      "panelWidth": 461,
+      "reviewHeight": 48,
+      "targets": [
+        {
+          "h": 112,
+          "label": "NEXT GAME",
+          "w": 427
+        },
+        {
+          "h": 122.9375,
+          "label": "WHAT CHANGED?",
+          "w": 427
+        },
+        {
+          "h": 122.9375,
+          "label": "ROSTER",
+          "w": 427
+        },
+        {
+          "h": 112,
+          "label": "AVAILABILITY",
+          "w": 427
+        }
+      ],
+      "viewport": 500
+    },
+    "panelState": {
+      "cards": 4,
+      "display": "block",
+      "height": 765.171875,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.ROSTERroster-moveWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 461
+    },
+    "sheet": {
+      "bottom": 611,
+      "dockTop": 621,
+      "height": 504.71875,
+      "links": 13,
+      "top": 106.28125
+    },
+    "smartSearch": {
+      "height": 110,
+      "left": 10,
+      "right": 475,
+      "rows": 1,
+      "targets": [
+        58
+      ],
+      "width": 465
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 3.58
+}```
+
+## Data freshness browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "desktop": {
+    "detail": "Roster 1 hour ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
+    "overflow": false,
+    "rect": {
+      "bottom": 948.28125,
+      "height": 132.03125,
+      "left": 915.328125,
+      "right": 1216.984375,
+      "top": 816.25,
+      "width": 301.65625
+    },
+    "state": "recent",
+    "strong": "Recent server snapshot",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 1 hour ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
+    "title": "The loaded roster snapshot was captured within the last 48 hours.",
+    "viewport": {
+      "height": 757,
+      "width": 1280
+    }
+  },
+  "mobile": {
+    "detail": "Roster 1 hour ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
+    "overflow": false,
+    "rect": {
+      "bottom": 1642.84375,
+      "height": 113.53125,
+      "left": 9,
+      "right": 366,
+      "top": 1529.3125,
+      "width": 357
+    },
+    "state": "recent",
+    "strong": "Recent server snapshot",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 1 hour ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
+    "title": "The loaded roster snapshot was captured within the last 48 hours.",
+    "viewport": {
+      "height": 701,
+      "width": 390
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 1.59,
+  "testedAt": "2026-08-23T02:30:25Z"
+}```
+
+## Account / Guest browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "browserWarnings": [],
+  "guest": {
+    "accountGuest": true,
+    "route": "#home",
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "mobileShell": {
+    "dock": {
+      "h": 72,
+      "top": 621,
+      "w": 465
+    },
+    "more": {
+      "bottom": 686,
+      "h": 58,
+      "top": 628,
+      "w": 89.8125
+    },
+    "runtime": "1.10.0",
+    "sidebarHidden": "true",
+    "sidebarInert": true
+  },
+  "sheet": {
+    "bottom": 611,
+    "dockTop": 621,
+    "top": 106.28125
+  },
+  "accountEntry": {
+    "bottom": 290.53125,
+    "h": 44,
+    "parent": "sidebar",
+    "top": 246.53125,
+    "visibleBottom": 611,
+    "visibleTop": 106.28125,
+    "w": 390
+  },
+  "panel": {
+    "bottom": 701,
+    "h": 602.859375,
+    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordLog inContinue as guestGUEST DATAThese settings exist only on this device.Export this deviceImport backupReset this deviceReset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.",
+    "vh": 701,
+    "w": 485
+  },
+  "portabilityTools": {
+    "exportHeight": 50,
+    "exportLabel": "Export this device",
+    "guest": true,
+    "importHeight": 50,
+    "importLabel": "Import backup",
+    "resetHeight": 50,
+    "resetLabel": "Reset this device"
+  },
+  "importPreview": {
+    "applyHeight": 46,
+    "favorite": null,
+    "pending": {
+      "accountEmail": "",
+      "exportedAt": "2026-08-22T12:00:00Z",
+      "keys": [
+        "titans:v15MyTitans"
+      ],
+      "preferences": {
+        "titans:v15MyTitans": {
+          "favorite": "Browser Smoke"
+        }
+      },
+      "scope": "guest-device"
+    },
+    "text": "READY TO RESTORE1 setting groupAug 22, 2026, 12:00 PM \u00b7 guest-deviceNothing has changed yet. Applying restores only recognized Titans preferences from this file.Apply imported settingsCancel"
+  },
+  "resetArmed": {
+    "guest": true,
+    "hash": "#home",
+    "hint": "Tap Confirm reset again within 6 seconds.",
+    "label": "Confirm reset"
+  },
+  "authOutage": {
+    "guest": true,
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "roster": {
+    "route": "#roster",
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 1 hour agoRo"
+  },
+  "durationSeconds": 2.7
+}```
+
+## Advanced analytics browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "seasonContext": {
+    "bannerRole": "note",
+    "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "bannerVisible": true,
+    "dataSeason": "2025",
+    "heading": "2025 advanced analytics baseline",
+    "requestedSeason": "2026",
+    "seasonFallback": "true"
+  },
+  "mobileSeasonContext": {
+    "fallback": "true",
+    "text": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "visible": true
+  },
+  "metricCount": 4,
+  "metricValues": [
+    {
+      "detail": "#30 of 32",
+      "label": "Offensive EPA / play",
+      "value": "-0.148"
+    },
+    {
+      "detail": "#28 of 32",
+      "label": "Defensive EPA / play allowed",
+      "value": "+0.104"
+    },
+    {
+      "detail": "#11 of 32",
+      "label": "Pace",
+      "value": "28.9 sec/play"
+    },
+    {
+      "detail": "Latest loaded week: 18",
+      "label": "Rest days",
+      "value": "7 days"
+    }
+  ],
+  "situationFields": [
+    "Down & distance",
+    "Field position",
+    "Formation",
+    "Personnel",
+    "Score diff",
+    "TEN EPA",
+    "Time remaining"
+  ],
+  "initialPlayCards": 60,
+  "offenseFilteredPlayCards": 39,
+  "mobileMetricCount": 4,
+  "browserWarnings": [],
+  "durationSeconds": 1.61,
+  "testedAt": "2026-08-23T02:30:29Z"
+}```
+
+## Player headshot browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "rosterCards": 95,
+  "rosterDecoratedHeadshots": 81,
+  "rosterLoadedHeadshots": 41,
+  "statsPlayerRows": 96,
+  "statsDecoratedHeadshots": 82,
+  "statsLoadedHeadshots": 8,
+  "mobileLoadedHeadshots": 22,
+  "richPlayer": "Austin Schlottmann",
+  "richPlayerHeadshotLoaded": true,
+  "browserWarnings": [],
+  "durationSeconds": 3.77,
+  "testedAt": "2026-08-23T02:30:33Z"
+}```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
