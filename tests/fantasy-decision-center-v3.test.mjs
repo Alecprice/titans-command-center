@@ -11,7 +11,7 @@ test('Decision Center loads additively through search bootstrap and PWA shell',(
   assert.match(search,/import\('\.\/fantasy-decision-center-v3\.js'\)\.catch/);
   assert.match(search,/Compare Start \/ Sit/);
   assert.match(sw,/'\/fantasy-decision-center-v3\.js'/);
-  assert.match(sw,/titans-cc-brand-2026-v60/);
+  assert.match(sw,/titans-cc-brand-2026-v59/);
 });
 
 test('Decision Center compares transparent evidence rather than projected points',()=>{
