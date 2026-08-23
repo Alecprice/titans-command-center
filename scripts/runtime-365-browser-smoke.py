@@ -49,7 +49,7 @@ def disable_sidebar_motion(driver):
 
 def wait_365_panel(driver,timeout=15):
     def read_state(d):
-        return d.execute_script("""
+        return d.execute_script(r"""
           const panel=document.querySelector('.v19-365');
           if(!panel||!panel.isConnected)return null;
           const style=getComputedStyle(panel),rect=panel.getBoundingClientRect();

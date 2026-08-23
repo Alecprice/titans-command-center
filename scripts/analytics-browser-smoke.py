@@ -55,7 +55,7 @@ try:
     assert_no_horizontal_overflow(driver, 'desktop advanced Stats Lab')
 
     stage = 'desktop:season-context'
-    season_context = driver.execute_script("""
+    season_context = driver.execute_script(r"""
       const root=document.querySelector('.advanced-analytics-hub');
       const banner=root?.querySelector('.ah-season-context');
       return {
@@ -129,7 +129,7 @@ try:
     mobile_metric_count = driver.execute_script("return document.querySelectorAll('.advanced-analytics-hub .ah-metric').length")
     if mobile_metric_count != 4:
         raise RuntimeError(f'Mobile advanced metric count was {mobile_metric_count}')
-    mobile_season_banner = driver.execute_script("""
+    mobile_season_banner = driver.execute_script(r"""
       const root=document.querySelector('.advanced-analytics-hub'),banner=root?.querySelector('.ah-season-context');
       return {fallback:root?.dataset?.seasonFallback||'',visible:Boolean(banner&&banner.getBoundingClientRect().width>0&&banner.getBoundingClientRect().height>0),text:(banner?.textContent||'').replace(/\s+/g,' ').trim()};
     """)
