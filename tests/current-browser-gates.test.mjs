@@ -7,7 +7,7 @@ const quality=read('.github/workflows/quality.yml');
 const audit=read('.github/workflows/current-experience-browser.yml');
 const deploy=read('.github/workflows/cloudflare-deploy.yml');
 
-for(const path of ['scripts/smart-search-browser-smoke.py','scripts/mobile-navigation-browser-smoke.py','scripts/account-browser-smoke.py','scripts/market-browser-smoke.py']){
+for(const path of ['scripts/smart-search-browser-smoke.py','scripts/mobile-navigation-browser-smoke.py','scripts/account-browser-smoke.py','scripts/market-browser-smoke.py','scripts/fantasy-decision-browser-smoke.py']){
   test(`${path} isolates unrelated first-run onboarding`,()=>{
     const source=read(path);
     assert.match(source,/def prepare_returning_user\(driver\):/);
@@ -82,9 +82,26 @@ test('market controls meet the 44px touch target floor',()=>{
   assert.match(css,/\.mh-controls \.button\{min-height:44px/);
 });
 
-test('quality gate syntax-checks new diagnostic and market smoke',()=>{
+test('Fantasy Decision Center production gate uses deterministic local candidates and validates desktop plus mobile truth',()=>{
+  const source=read('scripts/fantasy-decision-browser-smoke.py');
+  assert.match(source,/titans-fantasy-v1/);
+  assert.match(source,/Decision Smoke A/);
+  assert.match(source,/Decision Smoke B/);
+  assert.match(source,/data-fantasy-decision/);
+  assert.match(source,/Start \/ Sit Compare/);
+  assert.match(source,/Evidence leans/);
+  assert.match(source,/Too close to call/);
+  assert.match(source,/Decision controls below 44px/);
+  assert.match(source,/Decision Center overflow/);
+  assert.match(source,/result\['mobile'\]=run\(390,844\)/);
+  assert.match(source,/Browser console errors/);
+  assert.doesNotMatch(source,/sleeperUser|leagueId/);
+});
+
+test('quality gate syntax-checks current diagnostic and browser smokes',()=>{
   assert.ok(quality.includes('scripts/runtime-365-diagnostic.py'));
   assert.ok(quality.includes('scripts/market-browser-smoke.py'));
+  assert.ok(quality.includes('scripts/fantasy-decision-browser-smoke.py'));
 });
 
 test('Cloudflare release chain blocks on Market Pulse browser regression',()=>{
@@ -103,7 +120,9 @@ test('post-deploy audit targets the exact deployed SHA and runs current experien
   assert.ok(audit.includes("workflows: ['Titans Cloudflare Deploy']"));
   assert.ok(audit.includes('github.event.workflow_run.head_sha'));
   assert.ok(audit.includes('/build-meta.json'));
-  for(const command of ['python scripts/runtime-365-diagnostic.py','python scripts/smart-search-browser-smoke.py','python scripts/mobile-navigation-browser-smoke.py','python scripts/account-browser-smoke.py','python scripts/market-browser-smoke.py'])assert.ok(audit.includes(command),`${command} missing from audit workflow`);
+  for(const command of ['python scripts/runtime-365-diagnostic.py','python scripts/smart-search-browser-smoke.py','python scripts/mobile-navigation-browser-smoke.py','python scripts/fantasy-browser-smoke.py','python scripts/fantasy-decision-browser-smoke.py','python scripts/account-browser-smoke.py','python scripts/market-browser-smoke.py'])assert.ok(audit.includes(command),`${command} missing from audit workflow`);
+  assert.ok(audit.includes('/tmp/fantasy-decision-browser-smoke.json'));
+  assert.ok(audit.includes('FANTASY_DECISION_OUTCOME'));
   assert.ok(audit.includes('actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'));
 });
 
@@ -119,6 +138,7 @@ test('post-deploy audit publishes an inspectable commit status and still fails o
   assert.match(audit,/continue-on-error: true/);
   assert.match(audit,/createCommitStatus/);
   assert.match(audit,/context: 'Titans Current Experience'/);
+  assert.match(audit,/decisions: process\.env\.FANTASY_DECISION_OUTCOME/);
   assert.match(audit,/target_url:/);
   assert.match(audit,/Fail audit when any current-experience check failed/);
 });
