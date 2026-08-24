@@ -195,7 +195,9 @@ test('production regression audit is wired as a package command',()=>{
   const pkg=JSON.parse(read('package.json'));
   assert.equal(pkg.scripts['audit:production'],'node scripts/production-regression.mjs');
   const script=read('scripts/production-regression.mjs');
-  assert.match(script,/Expected 95 Neon roster players/);
+  assert.match(script,/Live Neon roster is unexpectedly small/);
+  assert.match(script,/Stats Lab roster count .* does not match live Data API roster count/);
+  assert.doesNotMatch(script,/Expected 95 Neon roster players/);
   assert.match(script,/PWA precache paths failed/);
   assert.match(script,/database connection string leaked/i);
   assert.match(script,/workers\.dev staging hostname is not marked noindex/);
