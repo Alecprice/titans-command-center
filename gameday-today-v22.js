@@ -5,22 +5,9 @@
   const app=document.querySelector('#app');
   if(!runtime||!app)return;
 
-  const BRIEFS={
-    pre2:{
-      teamDate:'2026-08-23',
-      opponentAbbr:'SEA',
-      eyebrow:'TONIGHT IN NASHVILLE',
-      title:'Seahawks at Titans',
-      facts:[
-        'Kickoff is 7:00 PM CT on FOX. Titans radio is WGFX 104.5 FM The Zone.',
-        'Parking lots open at 3 PM CT and Nissan Stadium gates open at 5 PM CT.',
-        'Robert Saleh said he anticipates the starters playing roughly 20–25 plays, potentially until halftime.'
-      ],
-      guideUrl:'https://www.tennesseetitans.com/stadium/gameday/',
-      previewUrl:'https://www.tennesseetitans.com/news/six-things-to-watch-for-the-titans-in-sunday-s-preseason-game-vs-the-seahawks',
-      tuneUrl:'https://www.tennesseetitans.com/news/seattle-seahawks-vs-tennessee-titans-how-to-watch-listen-and-live-stream-x1296'
-    }
-  };
+  const OFFICIAL_SCHEDULE='https://www.tennesseetitans.com/schedule/';
+  const HOME_GAMEDAY='https://www.tennesseetitans.com/stadium/gameday/';
+  const TITANS_RADIO='WGFX 104.5 FM The Zone';
 
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const teamDate=value=>{
@@ -30,7 +17,21 @@
     const valueOf=type=>parts.find(part=>part.type===type)?.value||'';
     return `${valueOf('year')}-${valueOf('month')}-${valueOf('day')}`;
   };
-  const today=()=>teamDate(Date.now());
+  const countdown=value=>{
+    const kickoff=Date.parse(value),diff=kickoff-Date.now();
+    if(!Number.isFinite(kickoff))return'Time TBD';
+    if(diff<=0)return'Kickoff';
+    const minutes=Math.floor(diff/60000),days=Math.floor(minutes/1440),hours=Math.floor((minutes%1440)/60);
+    return days?`${days}d ${hours}h`:hours?`${hours}h ${minutes%60}m`:`${Math.max(1,minutes)}m`;
+  };
+  const weekLabel=game=>String(game?.week||'').startsWith('P')?`Preseason ${String(game.week).slice(1)}`:`Week ${game?.week||'TBD'}`;
+  const matchup=game=>game?.homeAway==='home'?`${game.opponent||'Opponent'} at Titans`:`Titans at ${game?.opponent||'Opponent'}`;
+  const upcoming=games=>games
+    .filter(game=>{
+      const kickoff=Date.parse(game?.date);
+      return Number.isFinite(kickoff)&&kickoff>Date.now()&&!/final|bye/i.test(String(game?.status||''));
+    })
+    .sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))[0]||null;
 
   function ensureStyle(){
     if(document.querySelector('#gameday-today-v22-style'))return;
@@ -41,7 +42,8 @@
       .v22-today-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
       .v22-today-head small,.v22-today-fact small{font-size:.7rem;letter-spacing:.11em;text-transform:uppercase;color:#8fc8ff;font-weight:900}
       .v22-today-head h3{margin:4px 0 0;font-size:clamp(1.25rem,3vw,1.7rem)}
-      .v22-today-live{padding:7px 10px;border-radius:999px;background:rgba(237,23,76,.13);border:1px solid rgba(237,23,76,.38);font-size:.76rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+      .v22-today-live{padding:7px 10px;border-radius:999px;background:rgba(75,146,219,.14);border:1px solid rgba(75,146,219,.38);font-size:.76rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+      .v22-today-live.game-day{background:rgba(237,23,76,.13);border-color:rgba(237,23,76,.38)}
       .v22-today-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
       .v22-today-fact{padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(0,0,0,.12);display:grid;gap:6px;line-height:1.45}
       .v22-today-fact span{color:var(--muted,#a8b8c8)}
@@ -55,29 +57,31 @@
     document.head.append(style);
   }
 
-  function briefMarkup(brief){
-    return `<section class="v22-today-brief" aria-label="Official same-day game brief"><div class="v22-today-head"><div><small>${esc(brief.eyebrow)}</small><h3>${esc(brief.title)}</h3></div><span class="v22-today-live">Game day</span></div><div class="v22-today-facts">${brief.facts.map((fact,index)=>`<div class="v22-today-fact"><small>${index===0?'WATCH / LISTEN':index===1?'AT THE STADIUM':'ON THE FIELD'}</small><span>${esc(fact)}</span></div>`).join('')}</div><div class="v22-today-actions"><a href="#media">Open Listen / Watch</a><a href="${esc(brief.guideUrl)}" target="_blank" rel="noopener noreferrer">Official game guide ↗</a><a href="${esc(brief.previewUrl)}" target="_blank" rel="noopener noreferrer">Official preview ↗</a><span class="v22-today-source">Verified from TennesseeTitans.com · Aug. 22–23</span></div></section>`;
+  function briefMarkup(game){
+    const gameDay=teamDate(Date.now())===teamDate(game.date);
+    const kickoff=runtime.formatTeamKickoff?runtime.formatTeamKickoff(game.date):new Date(game.date).toLocaleString();
+    const where=game.homeAway==='home'?`Home · ${game.venue||'Nissan Stadium'}`:`Road · ${game.venue||'Venue TBD'}`;
+    return `<section class="v22-today-brief" aria-label="Next Titans game fast pass" data-game-id="${esc(game.id||'')}"><div class="v22-today-head"><div><small>${gameDay?'GAME DAY IN NASHVILLE':'NEXT GAME FAST PASS'}</small><h3>${esc(matchup(game))}</h3></div><span class="v22-today-live${gameDay?' game-day':''}">${esc(weekLabel(game))}</span></div><div class="v22-today-facts"><div class="v22-today-fact"><small>WHEN</small><span>${esc(kickoff)} · ${esc(countdown(game.date))}</span></div><div class="v22-today-fact"><small>WATCH / LISTEN</small><span>${esc(game.network||'Network TBD')} · ${esc(TITANS_RADIO)}</span></div><div class="v22-today-fact"><small>WHERE</small><span>${esc(where)}</span></div></div><div class="v22-today-actions"><a href="#media">Open Listen / Watch</a><a href="${OFFICIAL_SCHEDULE}" target="_blank" rel="noopener noreferrer">Official schedule ↗</a>${game.homeAway==='home'?`<a href="${HOME_GAMEDAY}" target="_blank" rel="noopener noreferrer">Stadium guide ↗</a>`:''}<span class="v22-today-source">Schedule facts: TennesseeTitans.com</span></div></section>`;
   }
 
   async function mount(){
     if(runtime.route()!=='live')return;
     const phase=app.querySelector('.v16-gd-phase:not(.live):not(.post)');
-    if(!phase||phase.querySelector('.v22-today-brief'))return;
+    if(!phase)return;
+    const existing=phase.querySelector('.v22-today-brief');
     const data=await runtime.apiJson('/api/data',{ttl:30000});
     if(runtime.route()!=='live'||!phase.isConnected)return;
-    const games=Array.isArray(data?.games)?data.games:[];
-    const game=games.find(item=>BRIEFS[item.id]);
-    const brief=game?BRIEFS[game.id]:null;
-    if(!brief||game.opponentAbbr!==brief.opponentAbbr)return;
-    const kickoff=Date.parse(game.date);
-    if(!Number.isFinite(kickoff)||Date.now()>=kickoff)return;
-    if(teamDate(game.date)!==brief.teamDate||today()!==brief.teamDate)return;
+    const game=upcoming(Array.isArray(data?.games)?data.games:[]);
+    if(!game){existing?.remove();return;}
+    if(existing?.dataset.gameId===String(game.id||''))return;
+    existing?.remove();
     ensureStyle();
     const tune=phase.querySelector('.v16-gd-tune');
-    if(tune)tune.insertAdjacentHTML('afterend',briefMarkup(brief));
-    else phase.querySelector(':scope > header')?.insertAdjacentHTML('afterend',briefMarkup(brief));
+    if(tune)tune.insertAdjacentHTML('afterend',briefMarkup(game));
+    else phase.querySelector(':scope > header')?.insertAdjacentHTML('afterend',briefMarkup(game));
   }
 
   runtime.onAppRender(()=>queueMicrotask(mount),{immediate:true});
   runtime.onRoute(current=>{if(current==='live')queueMicrotask(mount)});
+  runtime.onRefresh(()=>{if(runtime.route()==='live')queueMicrotask(mount)});
 })();
