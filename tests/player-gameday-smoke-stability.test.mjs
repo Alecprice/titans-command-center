@@ -21,6 +21,10 @@ test('Player Intelligence smoke still validates every tab and the full Game Day 
   assert.match(source,/Favorite did not toggle/);
   assert.match(source,/Player mobile tab targets invalid/);
   assert.match(source,/Game Day source\/tune contract failed/);
+  assert.match(source,/\.v22-today-brief\[data-game-id\]/);
+  assert.match(source,/Next-game fast pass missing or incomplete during pregame/);
+  assert.match(source,/gameDayFastPassGameId/);
+  assert.match(source,/Next-game fast pass mobile targets invalid/);
   assert.match(source,/Game Day mobile media target too small/);
   assert.match(source,/v1\.6 browser console has severe errors/);
 });
