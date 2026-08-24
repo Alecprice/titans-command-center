@@ -20,6 +20,29 @@ def no_overflow(driver,label):
     state=driver.execute_script("return {w:document.documentElement.clientWidth,s:document.documentElement.scrollWidth}")
     if state['s']>state['w']+3: raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
+def activate_cutdown_view(driver,timeout=8):
+    deadline=time.time()+timeout
+    stable=0
+    last=None
+    while time.time()<deadline:
+        last=driver.execute_script("""
+          const button=document.querySelector('[data-team-room-view="cutdown"]');
+          const panel=document.querySelector('[data-panel="cutdown"]');
+          const root=panel?.querySelector('[data-cutdown-command]');
+          if(!button||!panel||!root)return {exists:false,selected:false,visible:false,buttonConnected:Boolean(button?.isConnected),panelConnected:Boolean(panel?.isConnected)};
+          const selected=button.getAttribute('aria-pressed')==='true';
+          const visible=!panel.hidden;
+          if(!selected||!visible)button.click();
+          return {exists:true,selected,visible,buttonConnected:button.isConnected,panelConnected:panel.isConnected};
+        """)
+        if last.get('exists') and last.get('selected') and last.get('visible') and last.get('buttonConnected') and last.get('panelConnected'):
+            stable+=1
+            if stable>=3:return last
+        else:
+            stable=0
+        time.sleep(.1)
+    raise TimeoutError(f'Cutdown view did not settle after roster refresh: {last}')
+
 def activate_player_tab(driver,tab,timeout=8):
     deadline=time.time()+timeout
     stable=0
@@ -73,8 +96,7 @@ try:
 
     stage='cutdown:desktop'
     wait_for(driver,"document.querySelector('[data-team-room-view=\"cutdown\"]') && document.querySelector('[data-panel=\"cutdown\"]')",timeout=10)
-    driver.execute_script("document.querySelector('[data-team-room-view=\"cutdown\"]')?.click()")
-    wait_for(driver,"document.querySelector('[data-panel=\"cutdown\"]:not([hidden]) [data-cutdown-command]')",timeout=8)
+    cutdown_settle=activate_cutdown_view(driver)
     no_overflow(driver,'cutdown desktop')
     cutdown=driver.execute_script("""
       const root=document.querySelector('[data-cutdown-command]');
@@ -82,13 +104,14 @@ try:
       return {
         text:(root?.innerText||'').slice(0,2200),
         activePressed:document.querySelector('[data-team-room-view="cutdown"]')?.getAttribute('aria-pressed')||'',
+        settled:Boolean(arguments[0]?.selected&&arguments[0]?.visible),
         nflSource:links.some(x=>x.href.includes('operations.nfl.com/calendar-events/nfl-important-dates')),
         titansMoves:links.some(x=>x.href.includes('tennesseetitans.com/team/transactions')),
         limitText:(root?.innerText||'').includes('Final active limit') && (root?.innerText||'').includes('53'),
         disclaimer:(root?.innerText||'').includes('not the same thing as “cuts required.”')
       };
-    """)
-    if cutdown['activePressed']!='true' or not cutdown['nflSource'] or not cutdown['titansMoves'] or not cutdown['limitText'] or not cutdown['disclaimer']:
+    """,cutdown_settle)
+    if not cutdown['settled'] or cutdown['activePressed']!='true' or not cutdown['nflSource'] or not cutdown['titansMoves'] or not cutdown['limitText'] or not cutdown['disclaimer']:
         raise RuntimeError(f'Cutdown Command contract failed: {cutdown}')
 
     stage='cutdown:mobile'
