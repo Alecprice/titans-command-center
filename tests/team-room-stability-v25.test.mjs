@@ -7,9 +7,17 @@ const js=fs.readFileSync(new URL('../team-room.js',import.meta.url),'utf8');
 test('Team Room preserves the selected roster subview across app rerenders',()=>{
   assert.match(js,/TR_VIEWS=new Set\(\['roster','depth','staff','cutdown'\]\)/);
   assert.match(js,/trPreferredRosterView='roster'/);
-  assert.match(js,/if\(persist\)trPreferredRosterView=next/);
-  assert.match(js,/setRosterView\(requestedRosterView\(\)\|\|trPreferredRosterView,\{persist:false\}\)/);
+  assert.match(js,/if\(persist\)\{trPreferredRosterView=next;syncRosterViewUrl\(next\);\}/);
+  assert.match(js,/setRosterView\(requestedRosterView\(\)\|\|app\.dataset\.teamRoomView\|\|trPreferredRosterView,\{persist:false\}\)/);
   assert.doesNotMatch(js,/wireTeamRoomSwitcher\(switcher\);setRosterView\('roster'\)/);
+});
+
+test('Team Room persists subview selection in a shareable roster URL without history spam',()=>{
+  assert.match(js,/const syncRosterViewUrl=view=>/);
+  assert.match(js,/if\(view==='roster'\)params\.delete\('view'\);else params\.set\('view',view\)/);
+  assert.match(js,/history\.replaceState\(history\.state,'',next\)/);
+  assert.doesNotMatch(js,/history\.pushState/);
+  assert.match(js,/const next=`#roster\$\{query\?`\?\$\{query\}`:''\}`/);
 });
 
 test('Team Room honors deep-linked subviews without losing keyboard behavior',()=>{
