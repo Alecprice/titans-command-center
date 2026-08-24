@@ -27,3 +27,12 @@ test('Cutdown browser results are persisted in the existing production report',(
   assert.match(smoke,/'cutdownCommandText':cutdown\['text'\]/);
   assert.match(smoke,/'cutdownMobileTargets':cutdown_mobile\['links'\]/);
 });
+test('Cutdown browser smoke reacquires the view until roster rerenders settle',()=>{
+  assert.match(smoke,/def activate_cutdown_view\(driver,timeout=8\):/);
+  assert.match(smoke,/buttonConnected:Boolean\(button\?\.isConnected\)/);
+  assert.match(smoke,/panelConnected:Boolean\(panel\?\.isConnected\)/);
+  assert.match(smoke,/if\(!selected\|\|!visible\)button\.click\(\)/);
+  assert.match(smoke,/if stable>=3:return last/);
+  assert.match(smoke,/cutdown_settle=activate_cutdown_view\(driver\)/);
+  assert.match(smoke,/settled:Boolean\(arguments\[0\]\?\.selected&&arguments\[0\]\?\.visible\)/);
+});
