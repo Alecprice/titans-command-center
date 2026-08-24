@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Player Intelligence / Game Day browser regression failure**
-- Source commit: `af2c34939da65a06411bf95a2c71c3346137e59f`
+- Source commit: `497216065075f255dd72a34cbf139116f9497f89`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-24T16:12:14Z
+- Recorded: 2026-08-24T16:16:56Z
 
 ## Production regression
 
@@ -67,31 +67,31 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 368,
+  "marketRows": 392,
   "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "af2c34939da65a06411bf95a2c71c3346137e59f",
-    "builtAt": "2026-08-24T16:11:15.582Z"
+    "commit": "497216065075f255dd72a34cbf139116f9497f89",
+    "builtAt": "2026-08-24T16:15:36.408Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 5,
   "responseMs": {
-    "root": 79,
-    "health": 167,
-    "data": 148,
-    "stats": 133,
-    "market": 47,
-    "analytics": 455
+    "root": 32,
+    "health": 178,
+    "data": 449,
+    "stats": 322,
+    "market": 250,
+    "analytics": 503
   },
-  "testedAt": "2026-08-24T16:11:38.873Z",
+  "testedAt": "2026-08-24T16:16:15.191Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-22",
     "databaseContentAudit": "2026-08-22",
-    "responseMs": 269,
-    "testedAt": "2026-08-24T16:11:39.179Z"
+    "responseMs": 179,
+    "testedAt": "2026-08-24T16:16:15.404Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -99,17 +99,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 190,
-    "warmHitMs": 190,
-    "rows": 368,
+    "coldOrInitialMs": 112,
+    "warmHitMs": 112,
+    "rows": 392,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 190,
-        "rows": 368
+        "durationMs": 112,
+        "rows": 392
       }
     ],
-    "testedAt": "2026-08-24T16:11:39.432Z"
+    "testedAt": "2026-08-24T16:16:15.579Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -169,8 +169,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 180,
-  "testedAt": "2026-08-24T16:11:40.192Z"
+  "durationMs": 111,
+  "testedAt": "2026-08-24T16:16:16.295Z"
 }```
 
 ## Browser navigation regression
@@ -215,11 +215,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 83,
-  "longTasksOver250ms": 0,
+  "maxLongTaskMs": 348,
+  "longTasksOver250ms": 2,
   "browserWarnings": [],
-  "durationSeconds": 15.07,
-  "testedAt": "2026-08-24T16:11:59Z"
+  "durationSeconds": 19.88,
+  "testedAt": "2026-08-24T16:16:42Z"
 }```
 
 ## Listen Watch browser regression
@@ -252,8 +252,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.11,
-  "testedAt": "2026-08-24T16:12:02Z"
+  "durationSeconds": 2.04,
+  "testedAt": "2026-08-24T16:16:44Z"
 }```
 
 ## Market Pulse browser regression
@@ -267,9 +267,9 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 110,
-        "total": 368,
-        "renderedRows": 110
+        "shown": 122,
+        "total": 392,
+        "renderedRows": 122
       },
       "summary": {
         "controls": [
@@ -317,18 +317,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 110 of 368 rows",
-        "resultTotal": 368,
-        "rowCount": 110,
+        "result": "Showing 122 of 392 rows",
+        "resultTotal": 392,
+        "rowCount": 122,
         "rowSample": [
           "CHI Bears at TEN Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine1.5Price-115Implied53.5%",
           "CHI Bears at TEN Titans Spread \u00b7 MyBookie.ag \u2197SideChicago BearsLine0.5Price-110Implied52.4%",
-          "CHI Bears at TEN Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine1Price-113Implied53.1%"
+          "CHI Bears at TEN Titans Spread \u00b7 BetOnline.ag \u2197SideChicago BearsLine1Price-110Implied52.4%"
         ],
         "scrollWidth": 1265,
-        "shown": 110,
+        "shown": 122,
         "title": "Live Titans market board",
-        "total": 368,
+        "total": 392,
         "viewport": 1265
       }
     },
@@ -337,36 +337,36 @@
         "available": true,
         "options": 3,
         "selectedValue": "159453",
-        "before": "Showing 110 of 368 rows",
-        "after": "Showing 34 of 368 rows"
+        "before": "Showing 122 of 392 rows",
+        "after": "Showing 46 of 392 rows"
       },
       "book": {
         "available": true,
         "options": 14,
         "selectedValue": "betonlineag",
-        "before": "Showing 110 of 368 rows",
-        "after": "Showing 6 of 368 rows"
+        "before": "Showing 122 of 392 rows",
+        "after": "Showing 10 of 392 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Showing 110 of 368 rows",
-        "after": "Showing 110 of 368 rows"
+        "before": "Showing 122 of 392 rows",
+        "after": "Showing 122 of 392 rows"
       }
     },
     "alternateLines": {
       "available": true,
-      "beforeRows": 110,
-      "afterRows": 368
+      "beforeRows": 122,
+      "afterRows": 392
     },
     "refresh": {
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 368,
-        "total": 368,
-        "renderedRows": 368
+        "shown": 392,
+        "total": 392,
+        "renderedRows": 392
       },
       "summary": {
         "controls": [
@@ -414,18 +414,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 368 of 368 rows",
-        "resultTotal": 368,
-        "rowCount": 368,
+        "result": "Showing 392 of 392 rows",
+        "resultTotal": 392,
+        "rowCount": 392,
         "rowSample": [
           "CHI Bears at TEN Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine1.5Price-115Implied53.5%",
           "CHI Bears at TEN Titans Spread \u00b7 MyBookie.ag \u2197SideChicago BearsLine0.5Price-110Implied52.4%",
-          "CHI Bears at TEN Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine1Price-113Implied53.1%"
+          "CHI Bears at TEN Titans Spread \u00b7 BetOnline.ag \u2197SideChicago BearsLine1Price-110Implied52.4%"
         ],
         "scrollWidth": 1265,
-        "shown": 368,
+        "shown": 392,
         "title": "Live Titans market board",
-        "total": 368,
+        "total": 392,
         "viewport": 1265
       }
     }
@@ -434,9 +434,9 @@
     "state": {
       "quality": "Live",
       "provider": "PropLine",
-      "shown": 368,
-      "total": 368,
-      "renderedRows": 368
+      "shown": 392,
+      "total": 392,
+      "renderedRows": 392
     },
     "summary": {
       "controls": [
@@ -484,18 +484,18 @@
       "quality": "Live",
       "referenceNotice": "",
       "refreshHeight": 44,
-      "result": "Showing 368 of 368 rows",
-      "resultTotal": 368,
-      "rowCount": 368,
+      "result": "Showing 392 of 392 rows",
+      "resultTotal": 392,
+      "rowCount": 392,
       "rowSample": [
         "CHI Bears at TEN Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine1.5Price-115Implied53.5%",
         "CHI Bears at TEN Titans Spread \u00b7 MyBookie.ag \u2197SideChicago BearsLine0.5Price-110Implied52.4%",
-        "CHI Bears at TEN Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine1Price-113Implied53.1%"
+        "CHI Bears at TEN Titans Spread \u00b7 BetOnline.ag \u2197SideChicago BearsLine1Price-110Implied52.4%"
       ],
       "scrollWidth": 375,
-      "shown": 368,
+      "shown": 392,
       "title": "Live Titans market board",
-      "total": 368,
+      "total": 392,
       "viewport": 375
     },
     "rowGeometry": [
@@ -526,8 +526,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 5.89,
-  "testedAt": "2026-08-24T16:12:08Z"
+  "durationSeconds": 6.67,
+  "testedAt": "2026-08-24T16:16:51Z"
 }```
 
 ## Command Intelligence browser regression
@@ -585,8 +585,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.16,
-  "testedAt": "2026-08-24T16:12:11Z"
+  "durationSeconds": 2.47,
+  "testedAt": "2026-08-24T16:16:53Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -596,11 +596,11 @@
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "stage": "cutdown:desktop",
-  "error": "RuntimeError: Cutdown Command contract failed: {'activePressed': '', 'disclaimer': True, 'limitText': True, 'nflSource': True, 'text': \"53-MAN CUTDOWN COMMAND\\nFinal roster clock\\n\\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\\n\\nTIME REMAINING\\n6d 5h\\nSun, Aug 30, 6:00 PM EDT\\nLoaded roster\\n95\\nAll current rows\\nActive rows\\n91\\nLoaded status = Active\\nReserve / other\\n4\\nNot counted as active rows here\\nFinal active limit\\n53\\n38 loaded active rows above 53\\nPOSITION SHAPE\\nActive rows by position\\nFull roster \u2192\\n13\\nWR\\n9\\nCB\\n9\\nLB\\n8\\nDE\\n7\\nRB\\n7\\nT\\n6\\nDT\\n6\\nG\\n6\\nS\\n5\\nTE\\n4\\nQB\\n3\\nC\\n3\\nDL\\n2\\nDB\\n1\\nK\\n1\\nLS\\n1\\nP\\nMOVEMENT WIRE\\nLatest loaded transactions\\nAll moves \u2192\\n2026-08-21\\n\\nSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.\\n\\n2026-08-19\\n\\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\\n\\n2026-08-17\\n\\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\\n\\n2026-08-16\\n\\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\\n\\n2026-08-10\\n\\nWaived LB Shad Banks Jr. from injured reserve with an injury settlement.\\n\\n2026-08-06\\n\\nWaived injured LB Shad Banks Jr. and signed free-agent LB Dominique Hampton.\\n\\nThe NFL limit applies to the Active/Inactive List. Reserve, exempt, waiver and other roster mechanics can change how a club reaches 53, so \u201crows above 53\u201d is not the same thing as \u201ccuts required.\u201d\\n\\nNFL roster deadline \u2197\\nOfficial Titans transactions \u2197\", 'titansMoves': True}",
-  "durationSeconds": 2.37,
-  "testedAt": "2026-08-24T16:12:13Z",
+  "error": "RuntimeError: Cutdown Command contract failed: {'activePressed': '', 'disclaimer': True, 'limitText': True, 'nflSource': True, 'text': \"53-MAN CUTDOWN COMMAND\\nFinal roster clock\\n\\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\\n\\nTIME REMAINING\\n6d 5h\\nSun, Aug 30, 6:00 PM EDT\\nLoaded roster\\n95\\nAll current rows\\nActive rows\\n91\\nLoaded status = Active\\nReserve / other\\n4\\nNot counted as active rows here\\nFinal active limit\\n53\\n38 loaded active rows above 53\\nPOSITION SHAPE\\nActive rows by position\\nFull roster \u2192\\n13\\nWR\\n9\\nCB\\n9\\nLB\\n8\\nDE\\n7\\nRB\\n7\\nT\\n6\\nDT\\n6\\nG\\n6\\nS\\n5\\nTE\\n4\\nQB\\n3\\nC\\n3\\nDL\\n2\\nDB\\n1\\nK\\n1\\nLS\\n1\\nP\\nMOVEMENT WIRE\\nLatest loaded transactions\\nAll moves \u2192\\n2026-08-21\\n\\nSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.\\n\\n2026-08-19\\n\\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\\n\\n2026-08-17\\n\\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\\n\\n2026-08-16\\n\\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\\n\\n2026-08-10\\n\\nWaived LB Shad Banks Jr. from injured reserve with an injury settlement.\\n\\n2026-08-06\\n\\nWaived injured LB Shad Banks Jr. and signed free-agent LB Dominique Hampton.\\n\\nMY 53 \u00b7 FAN BOARD\\nBuild your own Titans 53\\n\\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\\n\\n0 / 53\\nClear picks\\nNo fan picks yet.\\n#61\\nAndre James\\nC \u00b7 Offense\\n+\\n#51\\nAustin Schlottmann\\nC \u00b7 Offense\\n+\\n#79\\nPat Coogan\\nC \u00b7 Offense\\n+\\n#73\\nCordell Volson\\nG \u00b7 Offense\\n+\\n#67\\nDrew Moss\\nG \u00b7 Offense\\n+\\n#66\\nFernando Carmona Jr.\\nG \u00b7 Offense\\n+\\n#71\\nGarrett Dellinger\\nG \u00b7 Offense\\n+\\n#64\\nJackson Slater\\nG \u00b7 Offense\\n+\\n#77\\nPeter Skoronski\\nG \u00b7 Offense\\n+\\n#1\\nCam Ward\\nQB \u00b7 Offense\\n+\\n#16\\nHendon Hooker\\nQB \u00b7 Offense\\n+\\n#10\\nMitchell Trubisky\\nQB \u00b7 Offense\\n+\\n#8\\nWill Levis\\nQB \u00b7 Offense\\n+\\n#21\\nD'Ernest Johnson\\nRB \u00b7 Offense\\n+\\n#36\\nJulius Chestnut\\nRB \u00b7 Offense\\n+\\n#31\\nKalel Mullings\\nRB \u00b7 Offense\\n+\\n#35\\nMichael Carter\\nRB \u00b7 Offense\\n+\\n#32\\nNicholas Singleton\\nRB \u00b7 Offense\\n+\\n#20\\nTony Pollard\\nRB \u00b7 Offense\\n+\\n#2\\nTyjae Spears\\nRB \u00b7 Offense\\n+\\n#69\\nAamil Wagner\\nT \u00b7 Offense\\n+\\n#76\\nAustin Deculus\\nT \u00b7 Offense\\n+\\n#78\\nBrandon Crenshaw-Dickson\\nT \u00b7 Offense\\n+\\n#75\\nDan Moore Jr.\\nT \u00b7 Offense\\n+\\n#55\\nJC Latham\\nT \u00b7 Offense\\n\", 'titansMoves': True}",
+  "durationSeconds": 1.7,
+  "testedAt": "2026-08-24T16:16:55Z",
   "hash": "#roster",
-  "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated yesterday\nRoster \u00b7 updated yesterday\nRoster \u00b7 updated yesterday\nRoster \u00b7 updated yesterday\nRoster \u00b7 updated yesterday\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\n53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n6d 5h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-21\n\nSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.\n\n20",
+  "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated yesterday\nRoster \u00b7 updated yesterday\nRoster \u00b7 updated yesterday\nRoster \u00b7 updated yesterday\nRoster \u00b7 updated yesterday\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\n53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n6d 5h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-21\n\nSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.\n\n2026-08-19\n\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\n\n2026-08-17\n\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\n\n2026-08-16\n\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\n\n2026-08-10\n\nWaived LB Shad Banks Jr. from injured reserve with an injury settlement.\n\n2026-08-06\n\nWaived injured LB Shad Banks Jr. and signed free-agent LB Dominique Hampton.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device.",
   "browserWarnings": []
 }```
 
