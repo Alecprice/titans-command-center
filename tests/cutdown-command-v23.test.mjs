@@ -18,7 +18,7 @@ test('Cutdown Command uses the official 2026 final roster deadline and limit',()
 });
 
 test('Cutdown Command reports loaded roster facts without predicting cuts',()=>{
-  assert.match(js,/status\|\|'\)\.toLowerCase\(\)==='active'/);
+  assert.match(js,/String\(p\.status\|\|'\'\)\.toLowerCase\(\)==='active'/);
   assert.match(js,/active\.length-FINAL_LIMIT/);
   assert.match(js,/does <strong>not<\/strong> rank bubble players or predict cuts/);
   assert.match(js,/rows above 53.*not the same thing as.*cuts required/);
