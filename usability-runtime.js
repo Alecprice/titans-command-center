@@ -2,6 +2,7 @@ import './runtime-v19.js';
 import './mode-365-v19.js';
 import './mobile-navigation-v112.js?v=2';
 import('./freshness-truth-v20.js').catch(()=>{});
+import('./home-stability-v27.js').catch(()=>{});
 
 const app=document.querySelector('#app');
 const sidebar=document.querySelector('#sidebar');
