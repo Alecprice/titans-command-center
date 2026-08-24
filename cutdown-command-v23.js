@@ -19,7 +19,7 @@
     if(diff<=0)return 'Deadline reached';
     const mins=Math.max(1,Math.floor(diff/60000));
     const days=Math.floor(mins/1440),hours=Math.floor((mins%1440)/60),m=mins%60;
-    return days?${days}d ${hours}h:hours?${hours}h ${m}m:${m}m;
+    return days?`${days}d ${hours}h`:hours?`${hours}h ${m}m`:`${m}m`;
   };
   const deadlineLabel=()=>new Intl.DateTimeFormat('en-US',{
     weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',
