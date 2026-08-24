@@ -1,11 +1,11 @@
-import { auditedRoster20260822, ROSTER_SOURCE_CONFLICT } from './roster-audit-20260822.mjs';
+import { auditedRoster20260824, ROSTER_SOURCE_CONFLICT } from './roster-audit-20260824.mjs';
 
 export const team = {
   name:'Tennessee Titans',shortName:'Titans',abbreviation:'TEN',city:'Nashville',conference:'AFC',division:'AFC South',
   owner:'Amy Adams Strunk',generalManager:'Mike Borgonzi',president:'Burke Nihill',coach:'Robert Saleh',coachOfficialHireDate:'2026-01-22',
   season:2026,phase:'Preseason',stadium:'Nissan Stadium',franchiseGranted:'1959-08-14',firstSeason:1960,firstSeasonInTennessee:1997,firstSeasonAsTitans:1999,byeWeek:9,
   colors:['Titans blue','red','white','navy blue'],primaryLogo:'The Shield',
-  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:95,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:4,asOf:'2026-08-22',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-22T20:00:00Z'
+  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:96,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:5,asOf:'2026-08-24',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-24T19:19:00Z'
 };
 
 export const games = [
@@ -32,9 +32,10 @@ export const games = [
   {id:'wk18',week:18,date:null,opponent:'Houston Texans',opponentAbbr:'HOU',homeAway:'away',status:'scheduled',venue:'Reliant Stadium',network:'TBD',source:'Tennessee Titans / NFL',dateTbd:true}
 ];
 
-export const roster = auditedRoster20260822.map(player=>({...player}));
+export const roster = auditedRoster20260824.map(player=>({...player}));
 
 export const feed = [
+  {id:'n8',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign Reid Carrico, place Milo Eifler on Injured Reserve',summary:'On Aug. 24, Tennessee signed LB Reid Carrico and placed LB Milo Eifler on Injured Reserve.',publishedAt:'2026-08-24T19:19:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-lb-reid-carrico-place-lb-milo-eifler-on-injured-reserve'},
   {id:'n7',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign Tanoh Kpassagnon and Milo Eifler',summary:'On Aug. 21, Tennessee signed DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.',publishedAt:'2026-08-21T15:38:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-de-tanoh-kpassagnon-and-lb-milo-eifler-while-releasing-te-matt-lauter-and-placing-db-nazeeh-johnson-on-reserve-injured'},
   {id:'n6',type:'game',tier:'official',source:'Tennessee Titans',title:'Game preview: Titans host Seahawks on FOX',summary:'Tennessee enters preseason Week 2 at 1-0 and hosts Seattle at Nissan Stadium on Sunday, Aug. 23 at 7 p.m. CDT on FOX.',publishedAt:'2026-08-17T18:30:00Z',topics:['games','preseason','seahawks'],url:'https://www.tennesseetitans.com/news/game-preview-titans-host-seahawks-in-nationally-televised-game'},
   {id:'n0',type:'transaction',tier:'official',source:'Tennessee Titans',title:"Titans sign D'Ernest Johnson, waive Dominic Richardson",summary:"Tennessee's official Aug. 19 transaction log lists RB D'Ernest Johnson signed and RB Dominic Richardson waived.",publishedAt:'2026-08-19T16:00:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/team/transactions/'},
@@ -60,4 +61,4 @@ export const sources = [
   {name:'Odds-API.io',category:'Market',tier:'media',status:'Server key optional',method:'Odds-API.io v3',cost:'Free · no card',cadence:'Live / pregame',purpose:'Second free NFL odds source for cross-checks and fallback'}
 ];
 
-export const metrics=[{label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA',tone:'good'},{label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network',tone:'neutral'},{label:'Audited roster',value:'95',delta:'91 active · 4 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
+export const metrics=[{label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA',tone:'good'},{label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network',tone:'neutral'},{label:'Audited roster',value:'96',delta:'91 active · 5 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
