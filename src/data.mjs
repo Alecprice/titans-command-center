@@ -10,7 +10,7 @@ export const team = {
 
 export const games = [
   {id:'pre1',week:'P1',date:'2026-08-14T01:00:00Z',opponent:'San Francisco 49ers',opponentAbbr:'SF',homeAway:'away',status:'final',score:19,opponentScore:13,venue:"Levi's Stadium",network:'WKRN-TV News 2',source:'Tennessee Titans'},
-  {id:'pre2',week:'P2',date:'2026-08-24T00:00:00Z',opponent:'Seattle Seahawks',opponentAbbr:'SEA',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'FOX',source:'Tennessee Titans'},
+  {id:'pre2',week:'P2',date:'2026-08-24T00:00:00Z',opponent:'Seattle Seahawks',opponentAbbr:'SEA',homeAway:'home',status:'final',score:19,opponentScore:16,venue:'Nissan Stadium',network:'FOX',source:'Tennessee Titans'},
   {id:'pre3',week:'P3',date:'2026-08-29T22:00:00Z',opponent:'Chicago Bears',opponentAbbr:'CHI',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'NFL Network',source:'Tennessee Titans'},
   {id:'wk1',week:1,date:'2026-09-13T17:00:00Z',opponent:'New York Jets',opponentAbbr:'NYJ',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'CBS',source:'Tennessee Titans'},
   {id:'wk2',week:2,date:'2026-09-20T17:00:00Z',opponent:'Philadelphia Eagles',opponentAbbr:'PHI',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'FOX',source:'Tennessee Titans'},
@@ -60,4 +60,4 @@ export const sources = [
   {name:'Odds-API.io',category:'Market',tier:'media',status:'Server key optional',method:'Odds-API.io v3',cost:'Free · no card',cadence:'Live / pregame',purpose:'Second free NFL odds source for cross-checks and fallback'}
 ];
 
-export const metrics=[{label:'Preseason',value:'1–0',delta:'W 19–13 at SF',tone:'good'},{label:'Next game',value:'SEA',delta:'Aug 23 · 7 PM CDT · FOX',tone:'neutral'},{label:'Audited roster',value:'95',delta:'91 active · 4 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
+export const metrics=[{label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA',tone:'good'},{label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network',tone:'neutral'},{label:'Audited roster',value:'95',delta:'91 active · 4 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
