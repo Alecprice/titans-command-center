@@ -71,6 +71,43 @@ try:
     """)
     if not player_href or '#player?id=' not in player_href: raise RuntimeError(f'Could not resolve hydrated player route: {player_href}')
 
+    stage='cutdown:desktop'
+    wait_for(driver,"document.querySelector('[data-team-room-view=\"cutdown\"]') && document.querySelector('[data-panel=\"cutdown\"]')",timeout=10)
+    driver.execute_script("document.querySelector('[data-team-room-view=\"cutdown\"]')?.click()")
+    wait_for(driver,"document.querySelector('[data-panel=\"cutdown\"]:not([hidden]) [data-cutdown-command]')",timeout=8)
+    no_overflow(driver,'cutdown desktop')
+    cutdown=driver.execute_script("""
+      const root=document.querySelector('[data-cutdown-command]');
+      const links=[...root.querySelectorAll('a')];
+      return {
+        text:(root?.innerText||'').slice(0,2200),
+        activePressed:document.querySelector('[data-team-room-view="cutdown"]')?.getAttribute('aria-pressed')||'',
+        nflSource:links.some(x=>x.href.includes('operations.nfl.com/calendar-events/nfl-important-dates')),
+        titansMoves:links.some(x=>x.href.includes('tennesseetitans.com/team/transactions')),
+        limitText:(root?.innerText||'').includes('Final active limit') && (root?.innerText||'').includes('53'),
+        disclaimer:(root?.innerText||'').includes('not the same thing as “cuts required.”')
+      };
+    """)
+    if cutdown['activePressed']!='true' or not cutdown['nflSource'] or not cutdown['titansMoves'] or not cutdown['limitText'] or not cutdown['disclaimer']:
+        raise RuntimeError(f'Cutdown Command contract failed: {cutdown}')
+
+    stage='cutdown:mobile'
+    driver.set_window_size(390,844)
+    no_overflow(driver,'cutdown 390px')
+    cutdown_mobile=driver.execute_script("""
+      const root=document.querySelector('[data-cutdown-command]');
+      return {
+        viewport:document.documentElement.clientWidth,
+        links:[...root.querySelectorAll('a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height})),
+        rootWidth:root.getBoundingClientRect().width
+      };
+    """)
+    if not cutdown_mobile['links'] or any(x['h']<48 for x in cutdown_mobile['links']):
+        raise RuntimeError(f'Cutdown mobile targets invalid: {cutdown_mobile}')
+    if cutdown_mobile['rootWidth']>cutdown_mobile['viewport']+3:
+        raise RuntimeError(f'Cutdown mobile root overflow: {cutdown_mobile}')
+    driver.set_window_size(1440,1000)
+
     stage='player:desktop'
     driver.get(f'{BASE}/{player_href}')
     wait_for(driver,"document.querySelector('.player-profile-rich') && document.querySelector('.v16-player-intel')",timeout=16)
@@ -155,6 +192,7 @@ try:
     result={
       'ok':True,'base':BASE,'playerRoute':player_href,'playerRouteHydrated':True,'playerTabs':tabs,'favoriteToggle':[before,after,restored],
       'playerMobileTargets':mobile_player['tabs'],'playerHeadshotLoaded':mobile_player['headshot'],
+      'cutdownCommand':True,'cutdownCommandText':cutdown['text'],'cutdownMobileTargets':cutdown_mobile['links'],
       'gameDayPhase':game['phase'],'gameDayTuneLink':game['tune'],'gameDayMobileViewport':mobile_game['viewport'],
       'gameDayFastPass':game['fastPass'],'gameDayFastPassGameId':game['fastPassId'],'gameDayFastPassText':game['fastPassText'],
       'gameDayFastPassMobileTargets':mobile_game['fastPassLinks'],
