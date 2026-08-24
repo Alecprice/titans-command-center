@@ -1,0 +1,55 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+const js=read('cutdown-command-v23.js');
+const css=read('cutdown-command-v23.css');
+
+test('My 53 is a local-only fan roster exercise',()=>{
+  assert.match(js,/MY53_STORE='titans:my53:v1'/);
+  assert.match(js,/runtime\.storage\.getJSON\(MY53_STORE,\[\]\)/);
+  assert.match(js,/runtime\.storage\.setJSON\(MY53_STORE,list\)/);
+  assert.match(js,/runtime\.storage\.remove\(MY53_STORE\)/);
+  assert.match(js,/fan roster exercise—not an official roster projection or report/);
+  assert.match(js,/No selection changes the official roster or synced account settings/);
+  assert.doesNotMatch(js,/\/api\/account|preferences|PUT|POST|PATCH|DELETE/);
+});
+
+test('My 53 only offers loaded active players and caps fan picks at 53',()=>{
+  assert.match(js,/filter\(p=>String\(p\.status\|\|'\'\)\.toLowerCase\(\)==='active'\)/);
+  assert.match(js,/slice\(0,FINAL_LIMIT\)/);
+  assert.match(js,/if\(selection\.size>=FINAL_LIMIT\)/);
+  assert.match(js,/Your My 53 is full/);
+  assert.match(js,/selection\.size===FINAL_LIMIT/);
+});
+
+test('My 53 persists safely and rolls back a failed local save',()=>{
+  assert.match(js,/if\(!saveMy53\(selection\)\)\{selection\.delete\(key\)/);
+  assert.match(js,/This browser could not save that pick\. Nothing changed\./);
+  assert.match(js,/Pick removed\. Your fan board stays on this device\./);
+  assert.match(js,/My 53 cleared on this device\./);
+});
+
+test('My 53 is interactive and accessible',()=>{
+  assert.match(js,/data-my53-player/);
+  assert.match(js,/aria-pressed="false"/);
+  assert.match(js,/role="group" aria-label="Choose players for My 53"/);
+  assert.match(js,/data-my53-count/);
+  assert.match(js,/data-my53-shape aria-live="polite"/);
+  assert.match(js,/data-my53-clear/);
+});
+
+test('My 53 remains mobile and touch safe',()=>{
+  assert.match(css,/\.my53-player\{min-height:58px/);
+  assert.match(css,/@media\(max-width:720px\)/);
+  assert.match(css,/\.my53-count button\{min-height:48px/);
+  assert.match(css,/\.my53-list\{grid-template-columns:1fr;max-height:520px/);
+  assert.match(css,/\.my53-player\{min-height:52px/);
+});
+
+test('My 53 re-wires after Cutdown refresh without another observer',()=>{
+  assert.match(js,/wireMy53\(panel,snapshot\(\)\.roster\)/);
+  assert.match(js,/panel\.innerHTML=rosterPanel\(\)/);
+  assert.doesNotMatch(js,/new MutationObserver/);
+});
