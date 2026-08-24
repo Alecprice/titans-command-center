@@ -110,16 +110,26 @@ try:
     driver.get(f'{BASE}/#live')
     wait_for(driver,"document.querySelector('.v16-gameday') && ['pregame','live','postgame'].includes(document.querySelector('.v16-gameday')?.dataset.phase)",timeout=18)
     no_overflow(driver,'gameday desktop')
+    gameday_phase=driver.execute_script("return document.querySelector('.v16-gameday')?.dataset.phase||''")
+    if gameday_phase=='pregame':
+        wait_for(driver,"document.querySelector('.v22-today-brief[data-game-id]')",timeout=10)
     game=driver.execute_script("""
       const root=document.querySelector('.v16-gameday');
       return {
         phase:root?.dataset.phase||'',
         tune:Boolean(root?.querySelector('a[href="#media"]')),
         text:(root?.innerText||'').slice(0,1800),
-        fakeLive:Boolean(root?.querySelector('[data-fake-live]'))
+        fakeLive:Boolean(root?.querySelector('[data-fake-live]')),
+        fastPass:Boolean(root?.querySelector('.v22-today-brief[data-game-id]')),
+        fastPassId:root?.querySelector('.v22-today-brief')?.dataset.gameId||'',
+        fastPassTune:Boolean(root?.querySelector('.v22-today-brief a[href="#media"]')),
+        fastPassOfficial:[...root.querySelectorAll('.v22-today-brief a')].some(x=>x.href.includes('tennesseetitans.com/schedule')),
+        fastPassText:(root?.querySelector('.v22-today-brief')?.innerText||'').slice(0,900)
       }
     """)
     if not game['tune'] or game['fakeLive']: raise RuntimeError(f'Game Day source/tune contract failed: {game}')
+    if game['phase']=='pregame' and (not game['fastPass'] or not game['fastPassId'] or not game['fastPassTune'] or not game['fastPassOfficial']):
+        raise RuntimeError(f'Next-game fast pass missing or incomplete during pregame: {game}')
 
     stage='gameday:mobile'
     driver.set_window_size(390,844)
@@ -127,10 +137,13 @@ try:
     mobile_game=driver.execute_script("""
       const root=document.querySelector('.v16-gameday');
       const links=[...root.querySelectorAll('a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height}));
-      return {phase:root.dataset.phase,links,rootWidth:root.getBoundingClientRect().width,viewport:document.documentElement.clientWidth};
+      const fastPassLinks=[...root.querySelectorAll('.v22-today-actions a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height}));
+      return {phase:root.dataset.phase,links,fastPassLinks,rootWidth:root.getBoundingClientRect().width,viewport:document.documentElement.clientWidth};
     """)
     media_links=[x for x in mobile_game['links'] if 'watch' in x['label'].lower() or 'tune' in x['label'].lower()]
     if media_links and any(x['h']<44 for x in media_links): raise RuntimeError(f'Game Day mobile media target too small: {mobile_game}')
+    if mobile_game['phase']=='pregame' and (not mobile_game['fastPassLinks'] or any(x['h']<48 for x in mobile_game['fastPassLinks'])):
+        raise RuntimeError(f'Next-game fast pass mobile targets invalid: {mobile_game}')
 
     stage='console'
     warnings=[]
@@ -143,6 +156,8 @@ try:
       'ok':True,'base':BASE,'playerRoute':player_href,'playerRouteHydrated':True,'playerTabs':tabs,'favoriteToggle':[before,after,restored],
       'playerMobileTargets':mobile_player['tabs'],'playerHeadshotLoaded':mobile_player['headshot'],
       'gameDayPhase':game['phase'],'gameDayTuneLink':game['tune'],'gameDayMobileViewport':mobile_game['viewport'],
+      'gameDayFastPass':game['fastPass'],'gameDayFastPassGameId':game['fastPassId'],'gameDayFastPassText':game['fastPassText'],
+      'gameDayFastPassMobileTargets':mobile_game['fastPassLinks'],
       'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),
       'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
     }
