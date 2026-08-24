@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `9b4cb7d496e07c89c0612e9cc103e9309d4221b4`
+- Source commit: `66bb252e0bff285c4327233a0334fea74291dc47`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-23T23:19:28Z
+- Recorded: 2026-08-24T10:52:34Z
 
 ## Production regression
 
@@ -39,8 +39,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v59",
-  "precachePaths": 104,
+  "serviceWorkerCache": "titans-cc-brand-2026-v60",
+  "precachePaths": 105,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -67,54 +67,49 @@
   "statsRosterSource": "Tennessee Titans official roster · latest audited snapshot",
   "completedPreseasonGames": 1,
   "marketStatus": 200,
-  "marketRows": 268,
+  "marketRows": 334,
   "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "9b4cb7d496e07c89c0612e9cc103e9309d4221b4",
-    "builtAt": "2026-08-23T23:17:47.166Z"
+    "commit": "66bb252e0bff285c4327233a0334fea74291dc47",
+    "builtAt": "2026-08-24T10:51:01.468Z"
   },
-  "deploymentPropagationAttempts": 11,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 17,
-    "health": 157,
-    "data": 408,
-    "stats": 348,
-    "market": 212,
-    "analytics": 369
+    "root": 70,
+    "health": 778,
+    "data": 292,
+    "stats": 174,
+    "market": 513,
+    "analytics": 730
   },
-  "testedAt": "2026-08-23T23:18:27.641Z",
+  "testedAt": "2026-08-24T10:51:22.467Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-22",
     "databaseContentAudit": "2026-08-22",
-    "responseMs": 271,
-    "testedAt": "2026-08-23T23:18:27.948Z"
+    "responseMs": 191,
+    "testedAt": "2026-08-24T10:51:22.687Z"
   },
   "marketEdgeCache": {
     "ok": true,
     "base": "https://titans-command-center.alecjordanprice.workers.dev",
-    "initialStatus": "MISS",
+    "initialStatus": "HIT",
     "finalStatus": "HIT",
-    "attempts": 2,
-    "coldOrInitialMs": 751,
-    "warmHitMs": 122,
-    "rows": 268,
+    "attempts": 1,
+    "coldOrInitialMs": 142,
+    "warmHitMs": 142,
+    "rows": 334,
     "sequence": [
       {
-        "status": "MISS",
-        "durationMs": 751,
-        "rows": 268
-      },
-      {
         "status": "HIT",
-        "durationMs": 122,
-        "rows": 268
+        "durationMs": 142,
+        "rows": 334
       }
     ],
-    "testedAt": "2026-08-23T23:18:29.231Z"
+    "testedAt": "2026-08-24T10:51:22.878Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -174,8 +169,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 99,
-  "testedAt": "2026-08-23T23:18:29.767Z"
+  "durationMs": 94,
+  "testedAt": "2026-08-24T10:51:23.787Z"
 }```
 
 ## Browser navigation regression
@@ -220,11 +215,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 396,
+  "maxLongTaskMs": 319,
   "longTasksOver250ms": 1,
   "browserWarnings": [],
-  "durationSeconds": 16.96,
-  "testedAt": "2026-08-23T23:18:51Z"
+  "durationSeconds": 30.24,
+  "testedAt": "2026-08-24T10:52:03Z"
 }```
 
 ## Listen Watch browser regression
@@ -257,8 +252,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.05,
-  "testedAt": "2026-08-23T23:18:53Z"
+  "durationSeconds": 2.01,
+  "testedAt": "2026-08-24T10:52:05Z"
 }```
 
 ## Market Pulse browser regression
@@ -272,9 +267,9 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 84,
-        "total": 268,
-        "renderedRows": 84
+        "shown": 78,
+        "total": 334,
+        "renderedRows": 78
       },
       "summary": {
         "controls": [
@@ -285,7 +280,7 @@
             "pressed": null,
             "tag": "SELECT",
             "value": "all",
-            "width": 352
+            "width": 340
           },
           {
             "disabled": false,
@@ -322,18 +317,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 84 of 268 rows",
-        "resultTotal": 268,
-        "rowCount": 84,
+        "result": "Showing 78 of 334 rows",
+        "resultTotal": 334,
+        "rowCount": 78,
         "rowSample": [
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3Price-112Implied52.8%",
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine3Price-115Implied53.5%",
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine3Price-115Implied53.5%"
+          "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine2Price+100Implied50.0%",
+          "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine2.5Price-105Implied51.2%",
+          "New York Jets at Tennessee Titans Spread \u00b7 BetRivers \u2197SideNew York JetsLine2.5Price-110Implied52.4%"
         ],
         "scrollWidth": 1265,
-        "shown": 84,
+        "shown": 78,
         "title": "Live Titans market board",
-        "total": 268,
+        "total": 334,
         "viewport": 1265
       }
     },
@@ -341,37 +336,37 @@
       "event": {
         "available": true,
         "options": 3,
-        "selectedValue": "148033",
-        "before": "Showing 84 of 268 rows",
-        "after": "Showing 82 of 268 rows"
+        "selectedValue": "159453",
+        "before": "Showing 78 of 334 rows",
+        "after": "Showing 2 of 334 rows"
       },
       "book": {
         "available": true,
-        "options": 14,
-        "selectedValue": "onexbet",
-        "before": "Showing 84 of 268 rows",
-        "after": "Showing 6 of 268 rows"
+        "options": 13,
+        "selectedValue": "betonlineag",
+        "before": "Showing 78 of 334 rows",
+        "after": "Showing 6 of 334 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Showing 84 of 268 rows",
-        "after": "Showing 84 of 268 rows"
+        "before": "Showing 78 of 334 rows",
+        "after": "Showing 78 of 334 rows"
       }
     },
     "alternateLines": {
       "available": true,
-      "beforeRows": 84,
-      "afterRows": 268
+      "beforeRows": 78,
+      "afterRows": 334
     },
     "refresh": {
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 268,
-        "total": 268,
-        "renderedRows": 268
+        "shown": 334,
+        "total": 334,
+        "renderedRows": 334
       },
       "summary": {
         "controls": [
@@ -382,7 +377,7 @@
             "pressed": null,
             "tag": "SELECT",
             "value": "all",
-            "width": 352
+            "width": 340
           },
           {
             "disabled": false,
@@ -419,18 +414,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 268 of 268 rows",
-        "resultTotal": 268,
-        "rowCount": 268,
+        "result": "Showing 334 of 334 rows",
+        "resultTotal": 334,
+        "rowCount": 334,
         "rowSample": [
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3Price-112Implied52.8%",
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine3Price-115Implied53.5%",
-          "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine3Price-115Implied53.5%"
+          "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine2Price+100Implied50.0%",
+          "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine2.5Price-105Implied51.2%",
+          "New York Jets at Tennessee Titans Spread \u00b7 BetRivers \u2197SideNew York JetsLine2.5Price-110Implied52.4%"
         ],
         "scrollWidth": 1265,
-        "shown": 268,
+        "shown": 334,
         "title": "Live Titans market board",
-        "total": 268,
+        "total": 334,
         "viewport": 1265
       }
     }
@@ -439,9 +434,9 @@
     "state": {
       "quality": "Live",
       "provider": "PropLine",
-      "shown": 268,
-      "total": 268,
-      "renderedRows": 268
+      "shown": 334,
+      "total": 334,
+      "renderedRows": 334
     },
     "summary": {
       "controls": [
@@ -489,18 +484,18 @@
       "quality": "Live",
       "referenceNotice": "",
       "refreshHeight": 44,
-      "result": "Showing 268 of 268 rows",
-      "resultTotal": 268,
-      "rowCount": 268,
+      "result": "Showing 334 of 334 rows",
+      "resultTotal": 334,
+      "rowCount": 334,
       "rowSample": [
-        "Seattle Seahawks at Tennessee Titans Spread \u00b7 DraftKings \u2197SideSEA SeahawksLine3Price-112Implied52.8%",
-        "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideSeattle SeahawksLine3Price-115Implied53.5%",
-        "Seattle Seahawks at Tennessee Titans Spread \u00b7 BetUS \u2197SideSeattle SeahawksLine3Price-115Implied53.5%"
+        "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine2Price+100Implied50.0%",
+        "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine2.5Price-105Implied51.2%",
+        "New York Jets at Tennessee Titans Spread \u00b7 BetRivers \u2197SideNew York JetsLine2.5Price-110Implied52.4%"
       ],
       "scrollWidth": 375,
-      "shown": 268,
+      "shown": 334,
       "title": "Live Titans market board",
-      "total": 268,
+      "total": 334,
       "viewport": 375
     },
     "rowGeometry": [
@@ -531,8 +526,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 5.82,
-  "testedAt": "2026-08-23T23:18:59Z"
+  "durationSeconds": 4.88,
+  "testedAt": "2026-08-24T10:52:10Z"
 }```
 
 ## Command Intelligence browser regression
@@ -590,8 +585,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.6,
-  "testedAt": "2026-08-23T23:19:02Z"
+  "durationSeconds": 2.7,
+  "testedAt": "2026-08-24T10:52:13Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -641,8 +636,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 5.26,
-  "testedAt": "2026-08-23T23:19:08Z"
+  "durationSeconds": 3.75,
+  "testedAt": "2026-08-24T10:52:17Z"
 }```
 
 ## Ask Titans browser regression
@@ -655,10 +650,10 @@
     {
       "question": "Who is next?",
       "action": "#live",
-      "answer": "Tennessee is next scheduled to host Seattle Seahawks on Sun, Aug 23, 7:00 PM CDT (Nashville time).",
+      "answer": "Tennessee is next scheduled to host Chicago Bears on Sat, Aug 29, 5:00 PM CDT (Nashville time).",
       "facts": 4,
       "sources": 1,
-      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. FOX is the listed network."
+      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. NFL Network is the listed network."
     },
     {
       "question": "Cam Ward",
@@ -679,7 +674,7 @@
     {
       "question": "How do I watch?",
       "action": "#media",
-      "answer": "The next game is Sun, Aug 23, 7:00 PM CDT (Nashville time) and the loaded TV listing is FOX. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
+      "answer": "The next game is Sat, Aug 29, 5:00 PM CDT (Nashville time) and the loaded TV listing is NFL Network. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
       "facts": 2,
       "sources": 1,
       "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
@@ -748,8 +743,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 2.09,
-  "testedAt": "2026-08-23T23:19:10Z"
+  "durationSeconds": 1.97,
+  "testedAt": "2026-08-24T10:52:19Z"
 }```
 
 ## Change Intelligence browser regression
@@ -786,8 +781,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.67,
-  "testedAt": "2026-08-23T23:19:13Z"
+  "durationSeconds": 1.95,
+  "testedAt": "2026-08-24T10:52:21Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -813,7 +808,7 @@
       "display": "block",
       "height": 386.140625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL NetworkWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -821,23 +816,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1787527185543,
+          "expiresAt": 1787568773224,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787527155543,
+          "updatedAt": 1787568743224,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1787527185445,
+          "expiresAt": 1787568773204,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1787527155445,
+          "updatedAt": 1787568743204,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-23T23:19:15.283Z",
+        "at": "2026-08-24T10:52:23.113Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -848,7 +843,7 @@
       "display": "block",
       "height": 386.140625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL NetworkWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -858,7 +853,7 @@
       "display": "block",
       "height": 386.140625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL NetworkWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -940,7 +935,7 @@
       "display": "block",
       "height": 806.921875,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Seattle SeahawksSun, Aug 23, 7:00 PM CDT \u00b7 FOXWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL NetworkWHAT CHANGED?Review team changesSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.ROSTERroster_moveSigned DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 461
@@ -964,7 +959,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.83
+  "durationSeconds": 3.75
 }```
 
 ## Data freshness browser regression
@@ -974,7 +969,7 @@
   "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "desktop": {
-    "detail": "Roster 12 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days ago",
+    "detail": "Roster 24 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 6 days ago",
     "overflow": false,
     "rect": {
       "bottom": 965.3125,
@@ -986,7 +981,7 @@
     },
     "state": "recent",
     "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 12 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 24 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 6 days agoSee sources \u2192",
     "title": "The loaded roster snapshot was captured within the last 48 hours.",
     "viewport": {
       "height": 757,
@@ -994,7 +989,7 @@
     }
   },
   "mobile": {
-    "detail": "Roster 12 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days ago",
+    "detail": "Roster 24 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 6 days ago",
     "overflow": false,
     "rect": {
       "bottom": 1642.84375,
@@ -1006,7 +1001,7 @@
     },
     "state": "recent",
     "strong": "Recent server snapshot",
-    "text": "DATA FRESHNESSRecent server snapshotRoster 12 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 5 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSRecent server snapshotRoster 24 hours ago \u00b7 Moves 3 days ago \u00b7 Intel 6 days agoSee sources \u2192",
     "title": "The loaded roster snapshot was captured within the last 48 hours.",
     "viewport": {
       "height": 701,
@@ -1014,8 +1009,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 1.86,
-  "testedAt": "2026-08-23T23:19:19Z"
+  "durationSeconds": 1.18,
+  "testedAt": "2026-08-24T10:52:26Z"
 }```
 
 ## Account / Guest browser regression
@@ -1106,9 +1101,9 @@
   },
   "roster": {
     "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 12 hours ago"
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 24 hours ago"
   },
-  "durationSeconds": 1.78
+  "durationSeconds": 1.4
 }```
 
 ## Advanced analytics browser regression
@@ -1167,8 +1162,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.16,
-  "testedAt": "2026-08-23T23:19:24Z"
+  "durationSeconds": 1.59,
+  "testedAt": "2026-08-24T10:52:30Z"
 }```
 
 ## Player headshot browser regression
@@ -1182,13 +1177,13 @@
   "rosterLoadedHeadshots": 42,
   "statsPlayerRows": 96,
   "statsDecoratedHeadshots": 82,
-  "statsLoadedHeadshots": 13,
-  "mobileLoadedHeadshots": 27,
+  "statsLoadedHeadshots": 7,
+  "mobileLoadedHeadshots": 7,
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.33,
-  "testedAt": "2026-08-23T23:19:28Z"
+  "durationSeconds": 2.67,
+  "testedAt": "2026-08-24T10:52:33Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
