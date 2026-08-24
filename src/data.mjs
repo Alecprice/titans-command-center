@@ -1,17 +1,17 @@
-import { auditedRoster20260822, ROSTER_SOURCE_CONFLICT } from './roster-audit-20260822.mjs';
+import { auditedRoster20260824, ROSTER_SOURCE_CONFLICT } from './roster-audit-20260824.mjs';
 
 export const team = {
   name:'Tennessee Titans',shortName:'Titans',abbreviation:'TEN',city:'Nashville',conference:'AFC',division:'AFC South',
   owner:'Amy Adams Strunk',generalManager:'Mike Borgonzi',president:'Burke Nihill',coach:'Robert Saleh',coachOfficialHireDate:'2026-01-22',
   season:2026,phase:'Preseason',stadium:'Nissan Stadium',franchiseGranted:'1959-08-14',firstSeason:1960,firstSeasonInTennessee:1997,firstSeasonAsTitans:1999,byeWeek:9,
   colors:['Titans blue','red','white','navy blue'],primaryLogo:'The Shield',
-  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:95,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:4,asOf:'2026-08-22',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-22T20:00:00Z'
+  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:96,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:5,asOf:'2026-08-24',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-24T21:30:00Z'
 };
 
 export const games = [
   {id:'pre1',week:'P1',date:'2026-08-14T01:00:00Z',opponent:'San Francisco 49ers',opponentAbbr:'SF',homeAway:'away',status:'final',score:19,opponentScore:13,venue:"Levi's Stadium",network:'WKRN-TV News 2',source:'Tennessee Titans'},
   {id:'pre2',week:'P2',date:'2026-08-24T00:00:00Z',opponent:'Seattle Seahawks',opponentAbbr:'SEA',homeAway:'home',status:'final',score:19,opponentScore:16,venue:'Nissan Stadium',network:'FOX',source:'Tennessee Titans'},
-  {id:'pre3',week:'P3',date:'2026-08-29T22:00:00Z',opponent:'Chicago Bears',opponentAbbr:'CHI',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'NFL Network',source:'Tennessee Titans'},
+  {id:'pre3',week:'P3',date:'2026-08-29T22:00:00Z',opponent:'Chicago Bears',opponentAbbr:'CHI',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'NFL Network / WKRN-TV News 2 (regional)',source:'Tennessee Titans'},
   {id:'wk1',week:1,date:'2026-09-13T17:00:00Z',opponent:'New York Jets',opponentAbbr:'NYJ',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'CBS',source:'Tennessee Titans'},
   {id:'wk2',week:2,date:'2026-09-20T17:00:00Z',opponent:'Philadelphia Eagles',opponentAbbr:'PHI',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'FOX',source:'Tennessee Titans'},
   {id:'wk3',week:3,date:'2026-09-27T17:00:00Z',opponent:'New York Giants',opponentAbbr:'NYG',homeAway:'away',status:'scheduled',venue:'MetLife Stadium',network:'CBS',source:'Tennessee Titans'},
@@ -32,17 +32,19 @@ export const games = [
   {id:'wk18',week:18,date:null,opponent:'Houston Texans',opponentAbbr:'HOU',homeAway:'away',status:'scheduled',venue:'Reliant Stadium',network:'TBD',source:'Tennessee Titans / NFL',dateTbd:true}
 ];
 
-export const roster = auditedRoster20260822.map(player=>({...player}));
+export const roster = auditedRoster20260824.map(player=>({...player}));
 
 export const feed = [
-  {id:'n7',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign Tanoh Kpassagnon and Milo Eifler',summary:'On Aug. 21, Tennessee signed DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, and placed DB Nazeeh Johnson on Reserve/Injured.',publishedAt:'2026-08-21T15:38:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-de-tanoh-kpassagnon-and-lb-milo-eifler-while-releasing-te-matt-lauter-and-placing-db-nazeeh-johnson-on-reserve-injured'},
-  {id:'n6',type:'game',tier:'official',source:'Tennessee Titans',title:'Game preview: Titans host Seahawks on FOX',summary:'Tennessee enters preseason Week 2 at 1-0 and hosts Seattle at Nissan Stadium on Sunday, Aug. 23 at 7 p.m. CDT on FOX.',publishedAt:'2026-08-17T18:30:00Z',topics:['games','preseason','seahawks'],url:'https://www.tennesseetitans.com/news/game-preview-titans-host-seahawks-in-nationally-televised-game'},
+  {id:'n10',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign LB Reid Carrico, place LB Milo Eifler on injured reserve',summary:'The Titans announced the move Aug. 24. This newer official transaction controls over any roster page that has not yet reflected the same-day move.',publishedAt:'2026-08-24T19:19:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-lb-reid-carrico-place-lb-milo-eifler-on-injured-reserve'},
+  {id:'n9',type:'news',tier:'official',source:'Tennessee Titans',title:'Roster jobs remain open entering Bears week',summary:'Robert Saleh said a number of jobs remain open ahead of the Aug. 29 preseason finale and the roster reduction to 53.',publishedAt:'2026-08-24T13:55:00Z',topics:['coach','roster','preseason'],url:'https://www.tennesseetitans.com/news/hot-topics-from-titans-hc-robert-saleh-s-zoom-call-on-monday'},
+  {id:'n8',type:'game',tier:'official',source:'Tennessee Titans',title:'Preseason Week 2: Titans 19, Seahawks 16',summary:'Tennessee erased a 16-3 first-quarter deficit, scored the final 16 points and improved to 2-0 in preseason.',publishedAt:'2026-08-24T02:05:00Z',topics:['games','preseason','seahawks'],url:'https://www.tennesseetitans.com/news/titans-seahawks-preseason-week-2-postgame-notes'},
+  {id:'n7',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign Tanoh Kpassagnon and Milo Eifler',summary:'On Aug. 21, Tennessee signed DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, placed DB Nazeeh Johnson on Reserve/Injured, and later waived LB Sean Brown from injured reserve with an injury settlement.',publishedAt:'2026-08-21T15:38:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/team/transactions/'},
   {id:'n0',type:'transaction',tier:'official',source:'Tennessee Titans',title:"Titans sign D'Ernest Johnson, waive Dominic Richardson",summary:"Tennessee's official Aug. 19 transaction log lists RB D'Ernest Johnson signed and RB Dominic Richardson waived.",publishedAt:'2026-08-19T16:00:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/team/transactions/'},
   {id:'n1',type:'game',tier:'official',source:'Tennessee Titans',title:'Preseason Week 1: Titans 19, 49ers 13',summary:'Tennessee opened the 2026 preseason with a 19-13 road win at San Francisco on August 13.',publishedAt:'2026-08-14T04:30:00Z',topics:['games','preseason'],url:'https://www.tennesseetitans.com/schedule/'},
   {id:'n2',type:'news',tier:'official',source:'Tennessee Titans',title:'2026 preseason dates and times finalized',summary:'The Titans confirmed San Francisco on Aug. 13, Seattle at Nissan Stadium on Aug. 23, and Chicago at Nissan Stadium on Aug. 29.',publishedAt:'2026-06-03T15:16:00Z',topics:['schedule','preseason'],url:'https://www.tennesseetitans.com/news/titans-finalize-2026-preseason-dates-and-times'},
   {id:'n3',type:'news',tier:'official',source:'Tennessee Titans',title:'2026 training camp preview',summary:'The official camp preview documented the preseason schedule and Robert Saleh entering his first Titans training camp as head coach.',publishedAt:'2026-07-27T20:00:00Z',topics:['training-camp','roster','coach'],url:'https://www.tennesseetitans.com/news/tennessee-titans-training-camp-preview'},
   {id:'n4',type:'video',tier:'official',source:'Tennessee Titans',title:'Robert Saleh training-camp media availability',summary:'Official Titans training-camp media coverage from Vanderbilt Health Football Center.',publishedAt:'2026-08-21T17:30:00Z',topics:['coach','training-camp','video'],url:'https://www.tennesseetitans.com/live'},
-  {id:'n5',type:'news',tier:'official',source:'Tennessee Titans',title:'Titans unveil new 2026 uniforms and logo',summary:'The March 12 rebrand introduced The Shield as the primary logo and the Nashville-inspired 6-String Stripe.',publishedAt:'2026-03-12T18:00:00Z',topics:['brand','history'],url:'https://www.tennesseetitans.com/news/titans-unveil-new-uniforms-logo-to-represent-the-next-chapter-of-franchise-history'}
+  {id:'n5',type:'news',tier:'official',source:'Tennessee Titans',title:'Titans unveil new 2026 uniforms and logo',summary:'The March 12 rebrand introduced The Shield as the primary logo and the Nashville-inspired 6-String Stripe.',publishedAt:'2026-03-13T00:40:00Z',topics:['brand','history'],url:'https://www.tennesseetitans.com/news/titans-unveil-new-uniforms-logo-to-represent-the-next-chapter-of-franchise-history'}
 ];
 
 export const sources = [
@@ -60,4 +62,4 @@ export const sources = [
   {name:'Odds-API.io',category:'Market',tier:'media',status:'Server key optional',method:'Odds-API.io v3',cost:'Free · no card',cadence:'Live / pregame',purpose:'Second free NFL odds source for cross-checks and fallback'}
 ];
 
-export const metrics=[{label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA',tone:'good'},{label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network',tone:'neutral'},{label:'Audited roster',value:'95',delta:'91 active · 4 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
+export const metrics=[{label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA',tone:'good'},{label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network / WKRN regional',tone:'neutral'},{label:'Audited roster',value:'96',delta:'91 active · 5 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];

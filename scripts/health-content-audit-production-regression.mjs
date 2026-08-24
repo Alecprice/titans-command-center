@@ -13,7 +13,7 @@ assert(response.status===200,`Health returned ${response.status}`);
 assert(body?.status==='healthy','Health is not healthy');
 assert(contentAudit&&databaseAudit,'Health content audit metadata is missing');
 assert(contentAudit===databaseAudit,`Health content audit drifted from Neon: health=${contentAudit||'missing'} database=${databaseAudit||'missing'}`);
-assert(Date.parse(`${contentAudit}T00:00:00Z`)>=Date.parse('2026-08-22T00:00:00Z'),`Health content audit regressed to ${contentAudit}`);
+assert(Date.parse(`${contentAudit}T00:00:00Z`)>=Date.parse('2026-08-24T00:00:00Z'),`Health content audit regressed to ${contentAudit}`);
 const result={ok:true,status:response.status,contentAudit,databaseContentAudit:databaseAudit,responseMs:Date.now()-started,testedAt:new Date().toISOString()};
 mergeProductionReport('healthTruth',result);
 console.log(JSON.stringify(result,null,2));
