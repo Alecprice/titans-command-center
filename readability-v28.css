@@ -1,0 +1,15 @@
+/* v28 readability pass: raise tiny metadata without flattening hierarchy. */
+:root{--tcc-readable-muted:#50697e;--tcc-readable-muted-dark:#c4d9e9}
+.content :where(.fan-today,.v10-home,.v14-now,.v13-card,.market-hub,.team-room-panel,.v16-player-intel,.cutdown-command,.transaction-row,.intel-item,.source-card,.player-card) :where(p,li){line-height:1.55}
+.content :where(.fan-today,.v10-home,.v14-now,.v13-card,.market-hub,.team-room-panel,.v16-player-intel,.cutdown-command,.transaction-row,.intel-item,.source-card,.player-card) small{font-size:max(12px,.75rem);line-height:1.4}
+.content :where(.fan-today,.v10-home,.v14-now,.v13-card,.market-hub,.team-room-panel,.v16-player-intel,.cutdown-command) :where(p,span){line-height:1.45}
+.fan-today :where(small,span),.v10-command-card :where(small,p),.v14-now-grid :where(small,span),.v13-card :where(small,p,span){color:var(--tcc-readable-muted)}
+.fan-today-lead :where(small,span),.cutdown-command :where(small,p,span),.v16-player-command :where(small,p,span),.mh-head p,.mh-note{color:var(--tcc-readable-muted-dark)}
+.v10-command-card strong,.v14-now-grid strong,.v13-card strong,.mh-row b,.mh-row strong,.player-card strong,.transaction-row strong,.intel-item strong{line-height:1.3}
+.mh-row small,.mh-events small,.mh-status span,.mh-results,.mh-diagnostics,.mh-note{font-size:12px;line-height:1.45}
+.mh-controls label{font-size:12px;font-weight:800}.mh-controls select,.mh-controls button{min-height:44px;font-size:13px}
+.player-card small,.transaction-row small,.intel-provenance,.source-card small,.team-room-panel small{font-size:12px!important;line-height:1.4}
+.intel-provenance strong{font-size:11px}.ux-chip,.ux-filter-row button{font-size:12px}.ux-filter-label,.ux-filter-count{font-size:12px}
+.search-wrap input,.transaction-tools input,.transaction-tools select{font-size:14px}
+@media(max-width:760px){.content :where(input[type="search"],input[type="text"],input[type="number"],select,textarea){font-size:16px!important}.mh-controls select,.mh-controls button,.ux-filter-row button,.transaction-tools input,.transaction-tools select{min-height:48px}.fan-today :where(small,span),.v10-command-card :where(small,p),.v14-now-grid :where(small,span),.v13-card :where(small,p,span){font-size:13px}}
+@media(prefers-contrast:more){:root{--tcc-readable-muted:#334f66;--tcc-readable-muted-dark:#e7f2fb}.content a{text-underline-offset:3px}.content :where(.player-card,.transaction-row,.intel-item,.source-card,.v10-command-card,.v13-card){border-color:rgba(12,35,64,.3)!important}}

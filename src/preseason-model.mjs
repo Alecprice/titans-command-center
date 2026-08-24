@@ -78,10 +78,10 @@ export function positionCounts(players=[]){
   return [...counts].sort((a,b)=>{const ai=PRESEASON_POSITION_ORDER.indexOf(a[0]),bi=PRESEASON_POSITION_ORDER.indexOf(b[0]);return (ai<0?99:ai)-(bi<0?99:bi)||a[0].localeCompare(b[0])}).map(([position,count])=>({position,count}));
 }
 
-const statNumber=(stats,category,label)=>num(stats.find(x=>x.category===category)?.fields?.find(x=>x.label===label)?.value);
+const statValue=(stats,category,label)=>{const raw=stats.find(x=>x.category===category)?.fields?.find(x=>x.label===label)?.value;if(raw==null||raw==='')return null;const n=Number(String(raw).replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:null};
 export function buildLeaders(players=[]){
   const specs=[['Passing','YDS','Passing yards'],['Rushing','YDS','Rushing yards'],['Receiving','YDS','Receiving yards'],['Defense','COMB','Total tackles'],['Defense','SACK','Sacks'],['Kicking','PTS','Points']];
-  return specs.map(([category,label,title])=>{const ranked=players.map(p=>({name:p.name,number:p.number,position:p.position,value:statNumber(p.seasonStats||[],category,label)})).filter(x=>x.value>0).sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name));return ranked.length?{category,label,title,...ranked[0]}:null}).filter(Boolean);
+  return specs.map(([category,label,title])=>{const ranked=players.map(p=>({name:p.name,number:p.number,position:p.position,value:statValue(p.seasonStats||[],category,label)})).filter(x=>x.value!=null).sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name));return ranked.length?{category,label,title,...ranked[0]}:null}).filter(Boolean);
 }
 
 function sumPairText(values,sep='/'){
