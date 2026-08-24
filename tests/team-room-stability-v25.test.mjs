@@ -14,7 +14,7 @@ test('Team Room preserves the selected roster subview across app rerenders',()=>
 
 test('Team Room honors deep-linked subviews without losing keyboard behavior',()=>{
   assert.match(js,/new URLSearchParams\(location\.hash\.split\('\?'\)\[1\]\|\|''\)\.get\('view'\)/);
-  assert.match(js,/data-team-room-view=\\"cutdown\\"/);
+  assert.match(js,/data-team-room-view="cutdown"/);
   assert.match(js,/ArrowRight/);
   assert.match(js,/ArrowLeft/);
   assert.match(js,/Home/);
