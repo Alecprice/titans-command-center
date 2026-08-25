@@ -63,13 +63,28 @@ test('saved-link removal rejects invalid indexes and reports persistence failure
 test('custom URL form uses high-contrast Titans Red and remains mobile friendly',()=>{
   const css=read('media-custom-links-v14.css'),sw=read('sw.js');
   assert.match(css,/--titans-red:#C8102E/i);
-  assert.match(css,/\.media-custom-form input\{[^}]*background:#fff[^}]*color:var\(--titans-red\)[^}]*caret-color:var\(--titans-red\)/);
+  assert.match(css,/\.media-custom-links\{[^}]*background:rgba\(12,35,64,.94\)[^}]*color:#fff/);
+  assert.match(css,/\.media-custom-form input\{[^}]*background:#fff[^}]*color:#8f0b20[^}]*caret-color:var\(--titans-red\)/);
   assert.match(css,/\.media-custom-form label span\{[^}]*background:#fff[^}]*color:var\(--titans-red\)/);
   assert.match(css,/\.media-custom-form button\{[^}]*background:var\(--titans-red\)[^}]*color:#fff/);
+  assert.match(css,/\.media-custom-card\{[^}]*background:rgba\(255,255,255,.09\)[^}]*color:#fff/);
+  assert.match(css,/\.media-custom-card small\{color:#c7e3f8\}/);
+  assert.match(css,/\.media-custom-empty\{[^}]*color:#d9e8f4[^}]*font-size:.92rem/);
+  assert.match(css,/@media\(prefers-contrast:more\)/);
   assert.match(css,/@media\(max-width:759px\)/);
   assert.match(css,/@media\(max-width:390px\)/);
   assert.match(css,/min-height:48px/);
   assert.match(sw,/media-custom-links-v14\.js/);
   assert.match(sw,/media-custom-links-v14\.css/);
   assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
+});
+
+test('Alternative Watch cards keep readable text and explicit contrast',()=>{
+  const css=read('media-alternatives-v14.css');
+  assert.match(css,/\.media-alternatives\{[^}]*color:#fff/);
+  assert.match(css,/\.media-alternatives header p\{[^}]*color:#e1edf7[^}]*font-size:.95rem/);
+  assert.match(css,/\.media-alt-card small\{font-size:.8rem[^}]*color:#c7e3f8/);
+  assert.match(css,/\.media-alt-card span\{[^}]*color:#dfebf5[^}]*font-size:.94rem/);
+  assert.match(css,/\.media-alt-note\{[^}]*color:#dfebf5[^}]*font-size:.92rem/);
+  assert.match(css,/@media\(prefers-contrast:more\)/);
 });
