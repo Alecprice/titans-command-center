@@ -1,13 +1,13 @@
 # Cloudflare deployment status
 
-- Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `73f3983df4724c635ea7f8f648072eea6ceed62f`
-- Quality gate: failure
+- Status: **deployed + browser navigation regression failure**
+- Source commit: `fec7bb8f358a1da2ad59192f0cc214caa8e4b80e`
+- Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
-- Deploy outcome: skipped
-- Production regression: skipped
-- Browser navigation regression: skipped
+- Deploy outcome: success
+- Production regression: success
+- Browser navigation regression: failure
 - Listen Watch browser regression: skipped
 - Market Pulse browser regression: skipped
 - Command Intelligence browser regression: skipped
@@ -19,94 +19,202 @@
 - Account / Guest browser regression: skipped
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
-- Worker URL: existing deployment remains unchanged
-- Recorded: 2026-08-25T01:52:10Z
+- Worker URL: https://titans-command-center.alecjordanprice.workers.dev
+- Recorded: 2026-08-25T01:54:23Z
 
-## Quality gate failure context
+## Production regression
 
-```text
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "rootStatus": 200,
+  "securityHeaders": {
+    "contentTypeOptions": "nosniff",
+    "frameOptions": "DENY",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com; connect-src 'self' https://api.sleeper.app; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "robots": "noindex, nofollow",
+    "csp": true
+  },
+  "manifestStatus": 200,
+  "serviceWorkerStatus": 200,
+  "serviceWorkerCache": "titans-cc-brand-2026-v60",
+  "precachePaths": 108,
+  "pwaIcons": {
+    "icon192": {
+      "width": 192,
+      "height": 192,
+      "bytes": 2854
+    },
+    "icon512": {
+      "width": 512,
+      "height": 512,
+      "bytes": 5724
+    }
+  },
+  "healthStatus": 200,
+  "appStatus": "healthy",
+  "databaseConfigured": true,
+  "databaseOk": true,
+  "dataStatus": 200,
+  "dataRosterCount": 96,
+  "transactionCount": 28,
+  "invalidTransactionDates": 0,
+  "statsStatus": 200,
+  "statsRosterCount": 96,
+  "statsRosterMode": "live-database",
+  "statsRosterSource": "Tennessee Titans official roster / transaction snapshot · latest audited database state",
+  "completedPreseasonGames": 1,
+  "marketStatus": 200,
+  "marketRows": 520,
+  "marketMode": "configured-provider",
+  "buildMeta": {
+    "app": "titans-command-center",
+    "version": "1.0.0",
+    "commit": "fec7bb8f358a1da2ad59192f0cc214caa8e4b80e",
+    "builtAt": "2026-08-25T01:53:12.801Z"
+  },
+  "deploymentPropagationAttempts": 1,
+  "responseMs": {
+    "root": 32,
+    "health": 1397,
+    "data": 657,
+    "stats": 335,
+    "market": 303,
+    "analytics": 1376
+  },
+  "testedAt": "2026-08-25T01:53:36.981Z",
+  "healthTruth": {
+    "ok": true,
+    "status": 200,
+    "contentAudit": "2026-08-24",
+    "databaseContentAudit": "2026-08-24",
+    "responseMs": 490,
+    "testedAt": "2026-08-25T01:53:37.501Z"
+  },
+  "marketEdgeCache": {
+    "ok": true,
+    "base": "https://titans-command-center.alecjordanprice.workers.dev",
+    "initialStatus": "HIT",
+    "finalStatus": "HIT",
+    "attempts": 1,
+    "coldOrInitialMs": 297,
+    "warmHitMs": 297,
+    "rows": 520,
+    "sequence": [
+      {
+        "status": "HIT",
+        "durationMs": 297,
+        "rows": 520
+      }
+    ],
+    "testedAt": "2026-08-25T01:53:37.848Z"
+  },
+  "analyticsStatus": 200,
+  "analyticsDataSeason": 2025,
+  "analyticsSeasonFallback": true,
+  "analyticsWarehousePlays": 48771,
+  "analyticsPersonnelPlays": 45184,
+  "analyticsRecentPlays": 80,
+  "analyticsPersonnelRows": 20,
+  "analyticsOffensiveEpaPerPlay": -0.14842680811935147,
+  "analyticsDefensiveEpaPerPlayAllowed": 0.10385631037224918,
+  "analyticsPaceSecondsPerPlay": 28.914001158972834,
+  "analyticsLatestRestDays": 7
+}```
 
---- tail ---
-✔ core router degrades malformed dates and render failures instead of trapping navigation (0.473995ms)
-✔ shared feed time helpers never expose NaN labels (0.304288ms)
-✔ fan-facing base pages prefer live/backup language over storage implementation jargon (0.409795ms)
-✔ roster team-room switcher has plain button semantics, keyboard cycling and safe source links (0.548824ms)
-✔ rich player pages use the server player endpoint (0.370913ms)
-✔ fan status UI uses reader-friendly coverage language instead of implementation jargon (0.383777ms)
-✔ source activity distinguishes checked rows from new rows in fan-readable language (0.334264ms)
-✔ v0.6 database adapter uses current live schema columns (0.53556ms)
-✔ visual archive uses audited metadata instead of ambiguous legacy aliases (0.511044ms)
-✔ responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint (0.339484ms)
-✔ visual source registry includes official, specialist and Wikipedia cross-checks (1.171477ms)
-✔ active visual catalog never uses quarantined legacy aliases (0.482461ms)
-✔ representative and composite art cannot masquerade as exact official logos (1.587793ms)
-✔ 2018 is treated as a uniform and wordmark change, not a new primary logo (0.275925ms)
-✔ Tennessee Oilers transition preserves alternate-logo nuance (0.330597ms)
-✔ current Shield receives exact current-brand treatment (0.161782ms)
-✔ external workflow actions are pinned to immutable commit SHAs (2.15321ms)
-✔ Node-powered release workflows explicitly use Node 24 without package-manager caching (0.454208ms)
-✔ security-sensitive workflows retain least-privilege repository permissions (0.417589ms)
-✔ read-only workflow checkouts do not persist repository credentials (0.359321ms)
-✔ Cloudflare status writer syncs to current main before committing its generated report (0.23601ms)
-✔ critical workflow dependencies stay on the reviewed pinned releases (0.298106ms)
-ℹ tests 431
-ℹ suites 0
-ℹ pass 431
-ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 2331.239891
+## Player headshot production regression
 
-> titans-command-center@1.0.0 audit:content
-> node scripts/content-audit.mjs
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "season": 2026,
+  "generatedAt": "2026-08-24T12:02:16.151255+00:00",
+  "rosterRows": 91,
+  "headshotCount": 88,
+  "coveragePct": 96.7,
+  "omittedCount": 3,
+  "omissionReasons": {
+    "no-approved-headshot-url": 3
+  },
+  "omittedPlayers": [
+    {
+      "name": "Keydrain Calligan",
+      "number": "29",
+      "position": "DB",
+      "status": "ACT",
+      "reason": "no-approved-headshot-url"
+    },
+    {
+      "name": "Latrell McCutchin",
+      "number": "36",
+      "position": "DB",
+      "status": "ACT",
+      "reason": "no-approved-headshot-url"
+    },
+    {
+      "name": "Shad Banks",
+      "number": "40",
+      "position": "LB",
+      "status": "ACT",
+      "reason": "no-approved-headshot-url"
+    }
+  ],
+  "allowedHosts": [
+    "static.clubs.nfl.com",
+    "static.www.nfl.com",
+    "static.nfl.com",
+    "a.espncdn.com",
+    "a1.espncdn.com"
+  ],
+  "durationMs": 129,
+  "testedAt": "2026-08-25T01:53:39.445Z"
+}```
 
-✓ current team identity metadata
-✓ franchise milestone dates preserve 1959 vs 1960 distinction
-✓ 2026 schedule contains Week 9 bye
-✓ Week 18 stays genuinely TBD at current Reliant Stadium name
-✓ preseason results and Bears broadcast are current through Aug. 24
-✓ fallback roster reflects the Aug. 24 official transaction precedence
-✓ cross-source roster conflicts are explicit and freshness-aware
-✓ fallback player metadata avoids unsupported editorial tags
-✓ Peter Skoronski fallback position matches official roster
-✓ fallback feed carries the current Aug. 24 transaction and Seattle result
-✓ fallback feed contains sourceable links instead of placeholder social claims
-✓ fallback source labels distinguish primary authorities from active persistence
-✓ injury and staff semantics are current
-✓ visual labels are source-audited and active art avoids legacy aliases
-✓ base app no longer requests retired duplicate legacy assets
-✓ responsive system has deliberate phone, tablet and desktop modes
-✓ ingest runtime identifies the current production release
+## Browser navigation regression
 
-Content audit passed: 21 schedule rows, 96 audited fallback players, 10 sourced fallback feed items, 6 audited visual assets.
-
-> titans-command-center@1.0.0 secret-scan
-> node scripts/check-secrets.mjs
-
-Secret scan passed: no embedded deployment credentials detected.
-
-> titans-command-center@1.0.0 syntax-check
-> node scripts/check-syntax.mjs
-
-Syntax check passed: 170 JavaScript modules.
-
-> titans-command-center@1.0.0 build:cloudflare
-> node scripts/build-cloudflare.mjs
-
-Cloudflare static build: 116 files, 938.8 KiB
-
-> titans-command-center@1.0.0 verify:cloudflare
-> node scripts/check-cloudflare-build.mjs
-
-file:///home/runner/work/titans-command-center/titans-command-center/scripts/check-cloudflare-build.mjs:78
-    if(shellPathSet.has(importerPublic)&&!shellPathSet.has(importedPublic))throw new Error(`Offline PWA dependency is not precached: ${importerPublic} -> ${importedPublic}`);
-                                                                                 ^
-
-Error: Offline PWA dependency is not precached: /src/data.mjs -> /src/roster-audit-20260824.mjs
-    at file:///home/runner/work/titans-command-center/titans-command-center/scripts/check-cloudflare-build.mjs:78:82
-
-Node.js v24.19.0
-```
+```json
+{
+  "ok": false,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "stage": "mobile:roster-clear-filters",
+  "error": "TimeoutException: Message: \n",
+  "state": {
+    "appChildren": 11,
+    "appText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated 7 hours ago\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\nRoster coverage: 96 current player records are loaded from the",
+    "depthPressed": "false",
+    "hash": "#roster",
+    "href": "https://titans-command-center.alecjordanprice.workers.dev/#roster",
+    "marketLoading": null,
+    "moreExpanded": "false",
+    "rosterCardCount": 96,
+    "rosterFilterCount": "96 of 96 players shown",
+    "rosterGridChildren": 96,
+    "rosterGridDisplay": "grid",
+    "rosterGridExists": true,
+    "rosterGridHidden": false,
+    "rosterGridPreview": "61\nAndre James\n\nC \u00b7 Offense\n\nActive\n51\nAustin Schlottmann\n\nC \u00b7 Offense\n\nActive\n79\nPat Coogan\n\nC \u00b7 Offense\n\nActive\n73\nCordell Volson\n\nG \u00b7 Offense\n\nActive\n67\nDrew Moss\n\nG \u00b7 Offense\n\nActive\n66\nFernando Carmona Jr.\n\nG \u00b7 Offense\n\nActive\n71\nGarre",
+    "rosterPressed": "true",
+    "rosterSearchValue": null,
+    "rosterUnitValue": "all",
+    "rosterVisibleCardCount": 96,
+    "rows": 0,
+    "scrollWidth": 375,
+    "sidebarInert": true,
+    "sidebarOpen": false,
+    "staffPressed": "false",
+    "statsLoading": null,
+    "teamRoomSwitcher": true,
+    "teamRoomView": "roster",
+    "title": "Roster",
+    "transactionTools": false,
+    "viewport": 390
+  },
+  "durationSeconds": 35.99,
+  "testedAt": "2026-08-25T01:54:22Z",
+  "browserWarnings": []
+}```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
