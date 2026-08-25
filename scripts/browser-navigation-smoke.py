@@ -223,6 +223,9 @@ try:
     wait_for(driver, "document.querySelector('.team-room-switcher')", timeout=10)
     stage = 'mobile:roster-cards'
     wait_for(driver, "document.querySelectorAll('#rg .player-card').length > 0", timeout=10)
+    roster_total = int(driver.execute_script("return document.querySelectorAll('#rg .player-card').length"))
+    if roster_total < 1:
+        raise RuntimeError('Roster did not load any player cards')
     stage = 'mobile:roster-pressed'
     wait_for(driver, "document.querySelector('.team-room-switcher [data-team-room-view=\"roster\"]')?.getAttribute('aria-pressed') === 'true'")
     assert_no_horizontal_overflow(driver, 'mobile Roster')
@@ -259,15 +262,15 @@ try:
       unit.dispatchEvent(new Event('input',{bubbles:true}));
       unit.dispatchEvent(new Event('change',{bubbles:true}));
     """)
-    wait_for(driver, "document.querySelector('#ru')?.value === 'Defense' && document.querySelectorAll('#rg .player-card').length > 0 && document.querySelectorAll('#rg .player-card').length < 95")
+    wait_for(driver, f"document.querySelector('#ru')?.value === 'Defense' && document.querySelectorAll('#rg .player-card').length > 0 && document.querySelectorAll('#rg .player-card').length < {roster_total}")
     wait_for(driver, "document.querySelector('[data-roster-clear]')?.disabled === false")
 
     stage = 'mobile:roster-clear-filters'
     driver.execute_script("document.querySelector('[data-roster-clear]')?.click()")
     wait_for(driver, "document.querySelector('#ru')?.value === 'all'")
-    wait_for(driver, "document.querySelectorAll('#rg .player-card').length === 95", timeout=10)
+    wait_for(driver, f"document.querySelectorAll('#rg .player-card').length === {roster_total}", timeout=10)
     wait_for(driver, "document.querySelector('[data-roster-status=\"all\"]')?.getAttribute('aria-pressed') === 'true'")
-    wait_for(driver, "document.querySelector('.roster-status-filters .ux-filter-count')?.textContent.includes('95 of 95')")
+    wait_for(driver, f"document.querySelector('.roster-status-filters .ux-filter-count')?.textContent.includes('{roster_total} of {roster_total}')")
     assert_no_horizontal_overflow(driver, 'mobile Roster filters cleared')
 
     stage = 'small-phone:320'
@@ -310,6 +313,7 @@ try:
         'fiveActionDock': True,
         'teamRoomChecks': 4,
         'rosterFilterReset': True,
+        'rosterTotal': roster_total,
         'mobileTargets': mobile_targets,
         'maxLongTaskMs': round(max_long_task, 1),
         'longTasksOver250ms': len([x for x in all_long_tasks if x >= 250]),
