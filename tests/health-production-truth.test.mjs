@@ -10,6 +10,6 @@ test('production audit proves health content freshness matches Neon',()=>{
   assert.match(pkg.scripts['postaudit:production'],/health-content-audit-production-regression\.mjs/);
   assert.match(script,/\/api\/health/);
   assert.match(script,/contentAudit===databaseAudit/);
-  assert.match(script,/2026-08-22T00:00:00Z/);
+  assert.match(script,/2026-08-24T00:00:00Z/);
   assert.match(script,/mergeProductionReport\('healthTruth',result\)/);
 });

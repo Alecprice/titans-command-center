@@ -32,7 +32,7 @@ test('fast pass stays official and supports home and road games',()=>{
 test('Seattle fallback is final and Chicago is the current next-game fact',()=>{
   assert.match(data,/id:'pre2'.*status:'final'.*score:19,opponentScore:16/);
   assert.match(data,/label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA'/);
-  assert.match(data,/label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network'/);
+  assert.match(data,/label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network \/ WKRN regional'/);
 });
 
 test('fast pass uses shared runtime instead of another DOM observer',()=>{
