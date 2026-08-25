@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `36785c69ad52d8c6fb3e808b0488e9564d7cc39e`
+- Source commit: `61704653721c84ba5247659d8e6ea41cf07b9e02`
 - Quality gate: failure
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,93 +20,93 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: existing deployment remains unchanged
-- Recorded: 2026-08-25T01:47:02Z
+- Recorded: 2026-08-25T01:51:08Z
 
 ## Quality gate failure context
 
 ```text
 
 --- tail ---
-    "const databaseAudit=String(body?.database?.content_audit_at||'');\n" +
-    'assert(response.status===200,`Health returned ${response.status}`);\n' +
-    "assert(body?.status==='healthy','Health is not healthy');\n" +
-    "assert(contentAudit&&databaseAudit,'Health content audit metadata is missing');\n" +
-    "assert(contentAudit===databaseAudit,`Health content audit drifted from Neon: health=${contentAudit||'missing'} database=${databaseAudit||'missing'}`);\n" +
-    "assert(Date.parse(`${contentAudit}T00:00:00Z`)>=Date.parse('2026-08-24T00:00:00Z'),`Health content audit regressed to ${contentAudit}`);\n" +
-    'const result={ok:true,status:response.status,contentAudit,databaseContentAudit:databaseAudit,responseMs:Date.now()-started,testedAt:new Date().toISOString()};\n' +
-    "mergeProductionReport('healthTruth',result);\n" +
-    'console.log(JSON.stringify(result,null,2));\n'
-  
-      at TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/health-production-truth.test.mjs:13:10)
-      at Test.runInAsyncScope (node:async_hooks:227:14)
-      at Test.run (node:internal/test_runner/test:1382:25)
-      at Test.start (node:internal/test_runner/test:1242:17)
-      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
-    generatedMessage: true,
-    code: 'ERR_ASSERTION',
-    actual: "import fs from 'node:fs';\n\nconst base=String(process.env.WORKER_URL||process.env.PRODUCTION_URL||'https://titans-command-center.alecjordanprice.workers.dev').replace(/\\/$/,'');\nfunction assert(condition,message){if(!condition)throw new Error(message)}\nfunction mergeProductionReport(key,value){const path='/tmp/cloudflare-smoke.json';assert(fs.existsSync(path),'Base production regression report is missing');const report=JSON.parse(fs.readFileSync(path,'utf8'));report[key]=value;fs.writeFileSync(path,JSON.stringify(report,null,2));}\n\nconst started=Date.now();\nconst response=await fetch(`${base}/api/health`,{headers:{'User-Agent':'TitansCommandCenter-HealthTruthAudit/1.0','Cache-Control':'no-cache'},signal:AbortSignal.timeout(10000)});\nconst body=await response.json();\nconst contentAudit=String(body?.contentAudit||'');\nconst databaseAudit=String(body?.database?.content_audit_at||'');\nassert(response.status===200,`Health returned ${response.status}`);\nassert(body?.status==='healthy','Health is not healthy');\nassert(contentAudit&&databaseAudit,'Health content audit metadata is missing');\nassert(contentAudit===databaseAudit,`Health content audit drifted from Neon: health=${contentAudit||'missing'} database=${databaseAudit||'missing'}`);\nassert(Date.parse(`${contentAudit}T00:00:00Z`)>=Date.parse('2026-08-24T00:00:00Z'),`Health content audit regressed to ${contentAudit}`);\nconst result={ok:true,status:response.status,contentAudit,databaseContentAudit:databaseAudit,responseMs:Date.now()-started,testedAt:new Date().toISOString()};\nmergeProductionReport('healthTruth',result);\nconsole.log(JSON.stringify(result,null,2));\n",
-    expected: /2026-08-22T00:00:00Z/,
-    operator: 'match',
-    diff: 'simple'
-  }
+✔ core router degrades malformed dates and render failures instead of trapping navigation (0.366714ms)
+✔ shared feed time helpers never expose NaN labels (0.202619ms)
+✔ fan-facing base pages prefer live/backup language over storage implementation jargon (0.528306ms)
+✔ roster team-room switcher has plain button semantics, keyboard cycling and safe source links (0.531531ms)
+✔ rich player pages use the server player endpoint (0.357828ms)
+✔ fan status UI uses reader-friendly coverage language instead of implementation jargon (0.351496ms)
+✔ source activity distinguishes checked rows from new rows in fan-readable language (0.565144ms)
+✔ v0.6 database adapter uses current live schema columns (0.449809ms)
+✔ visual archive uses audited metadata instead of ambiguous legacy aliases (0.389216ms)
+✔ responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint (1.391887ms)
+✔ visual source registry includes official, specialist and Wikipedia cross-checks (1.007059ms)
+✔ active visual catalog never uses quarantined legacy aliases (0.426625ms)
+✔ representative and composite art cannot masquerade as exact official logos (1.383672ms)
+✔ 2018 is treated as a uniform and wordmark change, not a new primary logo (0.351736ms)
+✔ Tennessee Oilers transition preserves alternate-logo nuance (0.286515ms)
+✔ current Shield receives exact current-brand treatment (0.163645ms)
+✔ external workflow actions are pinned to immutable commit SHAs (2.589398ms)
+✔ Node-powered release workflows explicitly use Node 24 without package-manager caching (0.465639ms)
+✔ security-sensitive workflows retain least-privilege repository permissions (0.565134ms)
+✔ read-only workflow checkouts do not persist repository credentials (0.417629ms)
+✔ Cloudflare status writer syncs to current main before committing its generated report (0.322452ms)
+✔ critical workflow dependencies stay on the reviewed pinned releases (0.405556ms)
+ℹ tests 431
+ℹ suites 0
+ℹ pass 431
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2327.662058
 
-test at tests/stats-usability-v28.test.mjs:21:1
-✖ preseason API uses the current audited roster and exposes coverage (1.2283ms)
-  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /roster-audit-20260822\.mjs/. Input:
-  
-  "import { getBootstrapData } from './db.mjs';\n" +
-    "import { games as seedGames } from './data.mjs';\n" +
-    "import { auditedRoster20260824, ROSTER_AUDIT_DATE } from './roster-audit-20260824.mjs';\n" +
-    "import { auditedPreseasonGames, auditedPlayerPreseasonStats, auditedTeamPreseasonStats, auditedPreseasonSources, PRESEASON_GAMEBOOK_URL } from './preseason-p1-20260813.mjs';\n" +
-    "import { aggregatePlayerStats, aggregateTeamStats, buildLeaders, positionCounts } from './preseason-model.mjs';\n" +
-    '\n' +
-    "const TEAM_ID='10',SEASON=2026,TIMEOUT=5500;\n" +
-    "const signal=()=>typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(TIMEOUT):undefined;\n" +
-    "const norm=s=>String(s||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9 ]/g,'').replace(/\\b(jr|sr|ii|iii|iv)\\b/g,'').replace(/\\s+/g,' ').trim();\n" +
-    'const asArray=v=>Array.isArray(v)?v:[];\n' +
-    "async function json(url){const r=await fetch(url,{headers:{'User-Agent':'TitansCommandCenter/1.0'},signal:signal()});if(!r.ok)throw new Error(`ESPN ${r.status}`);return r.json();}\n" +
-    "function dbRoster(data){return asArray(data?.roster).map(p=>({id:String(p.id||''),name:p.name||p.full_name||'',number:String(p.number??p.jerseyNumber??''),position:p.position||'',unit:p.unit||'',status:p.status||'Current roster',experience:p.experience||'',headshot:''})).filter(p=>p.name);}\n" +
-    "function isPreseasonEvent(e){return Number(e?.season?.type??e?.seasonType?.type??e?.seasonType)===1||/preseason/i.test(`${e?.seasonType?.name||''} ${e?.week?.text||''} ${e?.name||''}`)}\n" +
-    "function completed(e){return Boolean(e?.status?.type?.completed)||/final/i.test(e?.status?.type?.name||e?.status?.type?.description||'')}\n" +
-    "function parseTeamBox(summary,event){const team=asArray(summary?.boxscore?.players).find(x=>String(x?.team?.id)===TEAM_ID||/tennessee titans/i.test(x?.team?.displayName||''));if(!team)return [];const rows=[];for(const category of asArray(team.statistics)){const labels=asArray(category.labels),categoryName=category.displayName||category.name||'Stats';for(const entry of asArray(category.athletes)){const a=entry.athlete||{},values=asArray(entry.stats);rows.push({name:a.displayName||a.shortName||'',position:a.position?.abbreviation||'',category:categoryName,fields:labels.map((label,i)=>({label,value:String(values[i]??'')})),eventId:String(event.id),eventName:event.shortName||event.name||'',date:event.date||null,source:'ESPN public game summary'});}}return rows;}\n" +
-    "const teamKey=name=>{const s=String(name||'').toLowerCase().replace(/[^a-z0-9]/g,'');if(/firstdown/.test(s))return'firstDowns';if(/thirddown/.test(s))return'thirdDown';if(/totalyard/.test(s))return'totalYards';if(/rushingyard/.test(s))return'rushingYards';if(/netpassingyard/.test(s)||/passingyard/.test(s))return'netPassingYards';if(/penalt/.test(s))return'penalties';if(/fumble/.test(s))return'fumbles';if(/touchdown/.test(s))return'touchdowns';if(/fieldgoal/.test(s))return'fieldGoals';if(/possession/.test(s))return'timeOfPossession';return null};\n" +
-    "function parseTeamStats(summary){const team=asArray(summary?.boxscore?.teams).find(x=>String(x?.team?.id)===TEAM_ID||/tennessee titans/i.test(x?.team?.displayName||''));const out={};for(const item of asArray(team?.statistics)){const key=teamKey(item.name||item.label||item.displayName);if(key&&!out[key])out[key]=String(item.displayValue??item.value??'');}return out;}\n" +
-    "function auditedRows(){return Object.entries(auditedPlayerPreseasonStats).flatMap(([name,rows])=>rows.map(row=>({...row,name,source:'NFL official gamebook',sourceUrl:PRESEASON_GAMEBOOK_URL})));}\n" +
-    'function sameDay(a,b){if(!a||!b)return false;return String(a).slice(0,10)===String(b).slice(0,10)}\n' +
-    "function attach(roster,statRows){const byName=new Map();for(const row of statRows){const k=norm(row.name);if(!byName.has(k))byName.set(k,[]);byName.get(k).push(row)}const used=new Set();const players=roster.map(p=>{const k=norm(p.name),stats=byName.get(k)||[];if(stats.length)used.add(k);return {...p,stats,seasonStats:aggregatePlayerStats(stats)}});const other=[];for(const [k,stats] of byName){if(used.has(k))continue;const first=stats[0];other.push({name:first.name,position:first.position||'',number:'',unit:'Preseason participant',status:'Not matched to current roster',experience:'',stats,seasonStats:aggregatePlayerStats(stats)});}return {players,other};}\n" +
-    "function scheduleRow(g,completedGames){const statsGame=completedGames.find(x=>sameDay(x.date,g.date)),seedFinal=/final/i.test(String(g.status||''));return {id:g.id,week:g.week,name:g.homeAway==='home'?`TEN vs ${g.opponentAbbr}`:`TEN @ ${g.opponentAbbr}`,opponent:g.opponent,opponentAbbr:g.opponentAbbr,date:g.date,status:statsGame?.status||g.status,completed:Boolean(statsGame)||seedFinal,statsAvailable:Boolean(statsGame),venue:g.venue||'',network:g.network||'',source:g.source||'Tennessee Titans'};}\n" +
-    "function gameBookFromAudit(){const game=auditedPreseasonGames[0];return {...game,week:'P1',teamStats:{...auditedTeamPreseasonStats},statRows:auditedRows()};}\n" +
-    "function coverageFor({roster,players,gameBooks,preseasonSchedule}){const completedSchedule=preseasonSchedule.filter(g=>g.completed),games=completedSchedule.map(g=>{const book=gameBooks.find(x=>sameDay(x.date,g.date));const statRows=asArray(book?.statRows);const teamFields=Object.keys(book?.teamStats||{}).length;return {id:g.id,week:g.week,name:g.name,date:g.date,statsAvailable:Boolean(book&&statRows.length),playerStatRows:statRows.length,teamStatFields:teamFields,source:book?.source||null};});const playersWithStats=players.filter(p=>asArray(p.stats).length).length;return {completedGames:completedSchedule.length,completedGamesWithPlayerStats:games.filter(g=>g.statsAvailable).length,completedGamesMissingPlayerStats:games.filter(g=>!g.statsAvailable).length,games,rosterPlayers:roster.length,playersWithStats,playersWithoutStats:Math.max(0,players.length-playersWithStats),expectedLowBoxPositions:['C','G','T','OL','OT','OG','LS']};}\n" +
-    '\n' +
-    'export async function preseasonStatsRoute(req,res,env=process.env){\n' +
-    "  if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({ok:false,error:'Method not allowed'})}\n" +
-    "  res.setHeader('Cache-Control','public, s-maxage=180, stale-while-revalidate=900');\n" +
-    "  const diagnostics=[];let roster=auditedRoster20260824.map(x=>({...x,id:'',headshot:''})),rosterSource=`Tennessee Titans official roster + newer official transactions · audited ${ROSTER_AUDIT_DATE}`,rosterMode='audited-fallback';\n" +
-    "  try{const db=await getBootstrapData(env);const live=db?.ok?dbRoster(db):[];if(live.length>=90){roster=live;rosterSource='Tennessee Titans official roster / transaction snapshot · latest audited database state';rosterMode='live-database';}else diagnostics.push('Live roster database unavailable; serving the dated 96-player Aug. 24 audited roster snapshot.');}catch{diagnostics.push('Live roster database unavailable; serving the dated 96-player Aug. 24 audited roster snapshot.');}\n" +
-    '  const gameBooks=[gameBookFromAudit()];let liveAdded=0,liveMisses=0;\n' +
-    "  try{const schedule=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/${TEAM_ID}/schedule?season=${SEASON}`);const liveEvents=asArray(schedule.events).filter(isPreseasonEvent).filter(completed).sort((a,b)=>new Date(a.date)-new Date(b.date));for(const event of liveEvents){if(gameBooks.some(g=>sameDay(g.date,event.date)))continue;try{const summary=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${encodeURIComponent(event.id)}`),statRows=parseTeamBox(summary,event);if(statRows.length){gameBooks.push({id:String(event.id),week:`P${gameBooks.length+1}`,name:event.shortName||event.name,date:event.date,status:event.status?.type?.shortDetail||'Final',opponent:'',source:'ESPN public game summary',sourceUrl:`https://www.espn.com/nfl/game/_/gameId/${event.id}`,teamStats:parseTeamStats(summary),statRows});liveAdded++;}else liveMisses++;}catch{liveMisses++;}}}catch{diagnostics.push('ESPN server-side feed is currently unavailable in this hosting environment; official audited gamebook data remains active.');}\n" +
-    "  gameBooks.sort((a,b)=>new Date(a.date)-new Date(b.date));const allRows=gameBooks.flatMap(g=>g.statRows||[]),linked=attach(roster,allRows),completedGames=gameBooks.map(({statRows,teamStats,...g})=>g),teamStatsByGame=Object.fromEntries(gameBooks.map(g=>[g.id,g.teamStats||{}])),seasonTeamStats=aggregateTeamStats(gameBooks.map(g=>g.teamStats||{})),preseasonSchedule=seedGames.filter(g=>String(g.week).startsWith('P')).map(g=>scheduleRow(g,completedGames)),nextGame=preseasonSchedule.find(g=>!g.completed&&g.status!=='final')||null,sources=[...auditedPreseasonSources],coverage=coverageFor({roster,players:linked.players,gameBooks,preseasonSchedule});\n" +
-    "  if(liveAdded)sources.push({label:'ESPN public game summaries · newly completed preseason games',url:'https://www.espn.com/nfl/team/schedule/_/name/ten/season/2026'});\n" +
-    "  if(coverage.completedGamesMissingPlayerStats){diagnostics.push(`${coverage.completedGamesMissingPlayerStats} completed preseason game${coverage.completedGamesMissingPlayerStats===1?' is':'s are'} missing player box-score detail from the current upstream stat source.`);}\n" +
-    "  if(liveMisses&&!coverage.completedGamesMissingPlayerStats)diagnostics.push('A completed ESPN preseason event was reachable without usable Tennessee player-stat rows.');\n" +
-    "  const statsSource=liveAdded?'NFL official gamebook + ESPN public summaries for newly completed games':'NFL official gamebook · Titans at 49ers · Aug. 13, 2026';\n" +
-    "  return res.status(200).json({ok:true,season:SEASON,seasonType:'preseason',rosterSource,rosterMode,statsSource,rosterCount:linked.players.length,completedGames,preseasonSchedule,nextGame,teamStatsByGame,seasonTeamStats,teamStats:seasonTeamStats,positionCounts:positionCounts(linked.players),leaders:buildLeaders(linked.players),players:linked.players,otherParticipants:linked.other,coverage,sources,diagnostics,dataMode:liveAdded?'audited-plus-live':'audited-fallback',fetchedAt:new Date().toISOString()});\n" +
-    '}\n'
-  
-      at TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/stats-usability-v28.test.mjs:22:10)
-      at Test.runInAsyncScope (node:async_hooks:227:14)
-      at Test.run (node:internal/test_runner/test:1382:25)
-      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
-      at Test.postRun (node:internal/test_runner/test:1522:19)
-      at Test.run (node:internal/test_runner/test:1447:12)
-      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
-    generatedMessage: true,
-    code: 'ERR_ASSERTION',
-    actual: "import { getBootstrapData } from './db.mjs';\nimport { games as seedGames } from './data.mjs';\nimport { auditedRoster20260824, ROSTER_AUDIT_DATE } from './roster-audit-20260824.mjs';\nimport { auditedPreseasonGames, auditedPlayerPreseasonStats, auditedTeamPreseasonStats, auditedPreseasonSources, PRESEASON_GAMEBOOK_URL } from './preseason-p1-20260813.mjs';\nimport { aggregatePlayerStats, aggregateTeamStats, buildLeaders, positionCounts } from './preseason-model.mjs';\n\nconst TEAM_ID='10',SEASON=2026,TIMEOUT=5500;\nconst signal=()=>typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(TIMEOUT):undefined;\nconst norm=s=>String(s||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9 ]/g,'').replace(/\\b(jr|sr|ii|iii|iv)\\b/g,'').replace(/\\s+/g,' ').trim();\nconst asArray=v=>Array.isArray(v)?v:[];\nasync function json(url){const r=await fetch(url,{headers:{'User-Agent':'TitansCommandCenter/1.0'},signal:signal()});if(!r.ok)throw new Error(`ESPN ${r.status}`);return r.json();}\nfunction dbRoster(data){return asArray(data?.roster).map(p=>({id:String(p.id||''),name:p.name||p.full_name||'',number:String(p.number??p.jerseyNumber??''),position:p.position||'',unit:p.unit||'',status:p.status||'Current roster',experience:p.experience||'',headshot:''})).filter(p=>p.name);}\nfunction isPreseasonEvent(e){return Number(e?.season?.type??e?.seasonType?.type??e?.seasonType)===1||/preseason/i.test(`${e?.seasonType?.name||''} ${e?.week?.text||''} ${e?.name||''}`)}\nfunction completed(e){return Boolean(e?.status?.type?.completed)||/final/i.test(e?.status?.type?.name||e?.status?.type?.description||'')}\nfunction parseTeamBox(summary,event){const team=asArray(summary?.boxscore?.players).find(x=>String(x?.team?.id)===TEAM_ID||/tennessee titans/i.test(x?.team?.displayName||''));if(!team)return [];const rows=[];for(const category of asArray(team.statistics)){const labels=asArray(category.labels),categoryName=category.displayName||category.name||'Stats';for(const entry of asArray(category.athletes)){const a=entry.athlete||{},values=asArray(entry.stats);rows.push({name:a.displayName||a.shortName||'',position:a.position?.abbreviation||'',category:categoryName,fields:labels.map((label,i)=>({label,value:String(values[i]??'')})),eventId:String(event.id),eventName:event.shortName||event.name||'',date:event.date||null,source:'ESPN public game summary'});}}return rows;}\nconst teamKey=name=>{const s=String(name||'').toLowerCase().replace(/[^a-z0-9]/g,'');if(/firstdown/.test(s))return'firstDowns';if(/thirddown/.test(s))return'thirdDown';if(/totalyard/.test(s))return'totalYards';if(/rushingyard/.test(s))return'rushingYards';if(/netpassingyard/.test(s)||/passingyard/.test(s))return'netPassingYards';if(/penalt/.test(s))return'penalties';if(/fumble/.test(s))return'fumbles';if(/touchdown/.test(s))return'touchdowns';if(/fieldgoal/.test(s))return'fieldGoals';if(/possession/.test(s))return'timeOfPossession';return null};\nfunction parseTeamStats(summary){const team=asArray(summary?.boxscore?.teams).find(x=>String(x?.team?.id)===TEAM_ID||/tennessee titans/i.test(x?.team?.displayName||''));const out={};for(const item of asArray(team?.statistics)){const key=teamKey(item.name||item.label||item.displayName);if(key&&!out[key])out[key]=String(item.displayValue??item.value??'');}return out;}\nfunction auditedRows(){return Object.entries(auditedPlayerPreseasonStats).flatMap(([name,rows])=>rows.map(row=>({...row,name,source:'NFL official gamebook',sourceUrl:PRESEASON_GAMEBOOK_URL})));}\nfunction sameDay(a,b){if(!a||!b)return false;return String(a).slice(0,10)===String(b).slice(0,10)}\nfunction attach(roster,statRows){const byName=new Map();for(const row of statRows){const k=norm(row.name);if(!byName.has(k))byName.set(k,[]);byName.get(k).push(row)}const used=new Set();const players=roster.map(p=>{const k=norm(p.name),stats=byName.get(k)||[];if(stats.length)used.add(k);return {...p,stats,seasonStats:aggregatePlayerStats(stats)}});const other=[];for(const [k,stats] of byName){if(used.has(k))continue;const first=stats[0];other.push({name:first.name,position:first.position||'',number:'',unit:'Preseason participant',status:'Not matched to current roster',experience:'',stats,seasonStats:aggregatePlayerStats(stats)});}return {players,other};}\nfunction scheduleRow(g,completedGames){const statsGame=completedGames.find(x=>sameDay(x.date,g.date)),seedFinal=/final/i.test(String(g.status||''));return {id:g.id,week:g.week,name:g.homeAway==='home'?`TEN vs ${g.opponentAbbr}`:`TEN @ ${g.opponentAbbr}`,opponent:g.opponent,opponentAbbr:g.opponentAbbr,date:g.date,status:statsGame?.status||g.status,completed:Boolean(statsGame)||seedFinal,statsAvailable:Boolean(statsGame),venue:g.venue||'',network:g.network||'',source:g.source||'Tennessee Titans'};}\nfunction gameBookFromAudit(){const game=auditedPreseasonGames[0];return {...game,week:'P1',teamStats:{...auditedTeamPreseasonStats},statRows:auditedRows()};}\nfunction coverageFor({roster,players,gameBooks,preseasonSchedule}){const completedSchedule=preseasonSchedule.filter(g=>g.completed),games=completedSchedule.map(g=>{const book=gameBooks.find(x=>sameDay(x.date,g.date));const statRows=asArray(book?.statRows);const teamFields=Object.keys(book?.teamStats||{}).length;return {id:g.id,week:g.week,name:g.name,date:g.date,statsAvailable:Boolean(book&&statRows.length),playerStatRows:statRows.length,teamStatFields:teamFields,source:book?.source||null};});const playersWithStats=players.filter(p=>asArray(p.stats).length).length;return {completedGames:completedSchedule.length,completedGamesWithPlayerStats:games.filter(g=>g.statsAvailable).length,completedGamesMissingPlayerStats:games.filter(g=>!g.statsAvailable).length,games,rosterPlayers:roster.length,playersWithStats,playersWithoutStats:Math.max(0,players.length-playersWithStats),expectedLowBoxPositions:['C','G','T','OL','OT','OG','LS']};}\n\nexport async function preseasonStatsRoute(req,res,env=process.env){\n  if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({ok:false,error:'Method not allowed'})}\n  res.setHeader('Cache-Control','public, s-maxage=180, stale-while-revalidate=900');\n  const diagnostics=[];let roster=auditedRoster20260824.map(x=>({...x,id:'',headshot:''})),rosterSource=`Tennessee Titans official roster + newer official transactions · audited ${ROSTER_AUDIT_DATE}`,rosterMode='audited-fallback';\n  try{const db=await getBootstrapData(env);const live=db?.ok?dbRoster(db):[];if(live.length>=90){roster=live;rosterSource='Tennessee Titans official roster / transaction snapshot · latest audited database state';rosterMode='live-database';}else diagnostics.push('Live roster database unavailable; serving the dated 96-player Aug. 24 audited roster snapshot.');}catch{diagnostics.push('Live roster database unavailable; serving the dated 96-player Aug. 24 audited roster snapshot.');}\n  const gameBooks=[gameBookFromAudit()];let liveAdded=0,liveMisses=0;\n  try{const schedule=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/${TEAM_ID}/schedule?season=${SEASON}`);const liveEvents=asArray(schedule.events).filter(isPreseasonEvent).filter(completed).sort((a,b)=>new Date(a.date)-new Date(b.date));for(const event of liveEvents){if(gameBooks.some(g=>sameDay(g.date,event.date)))continue;try{const summary=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${encodeURIComponent(event.id)}`),statRows=parseTeamBox(summary,event);if(statRows.length){gameBooks.push({id:String(event.id),week:`P${gameBooks.length+1}`,name:event.shortName||event.name,date:event.date,status:event.status?.type?.shortDetail||'Final',opponent:'',source:'ESPN public game summary',sourceUrl:`https://www.espn.com/nfl/game/_/gameId/${event.id}`,teamStats:parseTeamStats(summary),statRows});liveAdded++;}else liveMisses++;}catch{liveMisses++;}}}catch{diagnostics.push('ESPN server-side feed is currently unavailable in this hosting environment; official audited gamebook data remains active.');}\n  gameBooks.sort((a,b)=>new Date(a.date)-new Date(b.date));const allRows=gameBooks.flatMap(g=>g.statRows||[]),linked=attach(roster,allRows),completedGames=gameBooks.map(({statRows,teamStats,...g})=>g),teamStatsByGame=Object.fromEntries(gameBooks.map(g=>[g.id,g.teamStats||{}])),seasonTeamStats=aggregateTeamStats(gameBooks.map(g=>g.teamStats||{})),preseasonSchedule=seedGames.filter(g=>String(g.week).startsWith('P')).map(g=>scheduleRow(g,completedGames)),nextGame=preseasonSchedule.find(g=>!g.completed&&g.status!=='final')||null,sources=[...auditedPreseasonSources],coverage=coverageFor({roster,players:linked.players,gameBooks,preseasonSchedule});\n  if(liveAdded)sources.push({label:'ESPN public game summaries · newly completed preseason games',url:'https://www.espn.com/nfl/team/schedule/_/name/ten/season/2026'});\n  if(coverage.completedGamesMissingPlayerStats){diagnostics.push(`${coverage.completedGamesMissingPlayerStats} completed preseason game${coverage.completedGamesMissingPlayerStats===1?' is':'s are'} missing player box-score detail from the current upstream stat source.`);}\n  if(liveMisses&&!coverage.completedGamesMissingPlayerStats)diagnostics.push('A completed ESPN preseason event was reachable without usable Tennessee player-stat rows.');\n  const statsSource=liveAdded?'NFL official gamebook + ESPN public summaries for newly completed games':'NFL official gamebook · Titans at 49ers · Aug. 13, 2026';\n  return res.status(200).json({ok:true,season:SEASON,seasonType:'preseason',rosterSource,rosterMode,statsSource,rosterCount:linked.players.length,completedGames,preseasonSchedule,nextGame,teamStatsByGame,seasonTeamStats,teamStats:seasonTeamStats,positionCounts:positionCounts(linked.players),leaders:buildLeaders(linked.players),players:linked.players,otherParticipants:linked.other,coverage,sources,diagnostics,dataMode:liveAdded?'audited-plus-live':'audited-fallback',fetchedAt:new Date().toISOString()});\n}\n",
-    expected: /roster-audit-20260822\.mjs/,
-    operator: 'match',
-    diff: 'simple'
-  }
+> titans-command-center@1.0.0 audit:content
+> node scripts/content-audit.mjs
+
+✓ current team identity metadata
+✓ franchise milestone dates preserve 1959 vs 1960 distinction
+✓ 2026 schedule contains Week 9 bye
+✓ Week 18 stays genuinely TBD at current Reliant Stadium name
+✓ preseason results and Bears broadcast are current through Aug. 24
+✓ fallback roster reflects the Aug. 24 official transaction precedence
+✓ cross-source roster conflicts are explicit and freshness-aware
+✓ fallback player metadata avoids unsupported editorial tags
+✓ Peter Skoronski fallback position matches official roster
+✓ fallback feed carries the current Aug. 24 transaction and Seattle result
+✓ fallback feed contains sourceable links instead of placeholder social claims
+✓ fallback source labels distinguish primary authorities from active persistence
+✓ injury and staff semantics are current
+✓ visual labels are source-audited and active art avoids legacy aliases
+✓ base app no longer requests retired duplicate legacy assets
+✓ responsive system has deliberate phone, tablet and desktop modes
+✓ ingest runtime identifies the current production release
+
+Content audit passed: 21 schedule rows, 96 audited fallback players, 10 sourced fallback feed items, 6 audited visual assets.
+
+> titans-command-center@1.0.0 secret-scan
+> node scripts/check-secrets.mjs
+
+Secret scan passed: no embedded deployment credentials detected.
+
+> titans-command-center@1.0.0 syntax-check
+> node scripts/check-syntax.mjs
+
+Syntax check passed: 170 JavaScript modules.
+
+> titans-command-center@1.0.0 build:cloudflare
+> node scripts/build-cloudflare.mjs
+
+Cloudflare static build: 115 files, 938.2 KiB
+
+> titans-command-center@1.0.0 verify:cloudflare
+> node scripts/check-cloudflare-build.mjs
+
+file:///home/runner/work/titans-command-center/titans-command-center/scripts/check-cloudflare-build.mjs:75
+    try{await access(path.join(dist,resolved))}catch{throw new Error(`Browser module import is missing from Cloudflare build: ${relative} -> ${specifier}`)}
+                                                           ^
+
+Error: Browser module import is missing from Cloudflare build: src/data.mjs -> ./roster-audit-20260824.mjs
+    at file:///home/runner/work/titans-command-center/titans-command-center/scripts/check-cloudflare-build.mjs:75:60
+
+Node.js v24.19.0
 ```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
