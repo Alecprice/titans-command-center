@@ -57,6 +57,7 @@ test('browser-facing responses enforce a restrictive security header baseline',(
   assert.match(headers,/object-src 'none'/);
   assert.match(headers,/frame-ancestors 'none'/);
   assert.match(headers,/form-action 'self'/);
+  assert.match(headers,/\/build-meta\.json\n\s+Cache-Control: no-store, max-age=0/);
   assert.doesNotMatch(headers,/script-src[^\n;]*'unsafe-inline'/);
 });
 

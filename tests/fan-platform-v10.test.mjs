@@ -16,6 +16,13 @@ test('production regression validates the deployed release version instead of a 
   assert.match(regression,/health\.body\?\.version===buildMeta\?\.version/);
   assert.doesNotMatch(regression,/health\.body\?\.version==='0\.8\.0'/);
   assert.match(regression,/ProductionAudit\/1\.0/);
+  assert.match(regression,/const maxAttempts=45/);
+  assert.match(regression,/cache:'no-store'/);
+  assert.match(regression,/'Cache-Control':'no-cache, no-store'/);
+  assert.match(regression,/'Pragma':'no-cache'/);
+  assert.match(regression,/&ts=\$\{Date\.now\(\)\}/);
+  assert.match(regression,/if\(lastCommit===expectedSha\)return/);
+  assert.match(regression,/Expected deploy \$\{expectedSha\} did not propagate/);
 });
 
 test('v1 fan platform is loaded in browser shell and PWA shell',()=>{
