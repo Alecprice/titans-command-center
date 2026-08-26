@@ -50,3 +50,12 @@ test('post-deploy browser workflows test the exact revision that triggered deplo
   assert.doesNotMatch(workflow, /ref: main\s/);
   assert.doesNotMatch(responsiveWorkflow, /ref: main\s/);
 });
+
+test('browser diagnostics refuse to test stale production against a newer source revision', () => {
+  assert.match(workflow, /SOURCE_SHA: \$\{\{ github\.event_name == 'workflow_run' && github\.event\.workflow_run\.head_sha \|\| '' \}\}/);
+  assert.match(workflow, /build-meta\.json\?diagnostic=/);
+  assert.match(workflow, /live===expected/);
+  assert.match(workflow, /deployed=\$\{matches\?'true':'false'\}/);
+  assert.match(workflow, /if: steps\.deployment\.outputs\.deployed == 'true'/);
+  assert.match(workflow, /Source revision is not live; browser diagnostics were correctly skipped/);
+});
