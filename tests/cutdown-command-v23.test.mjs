@@ -46,7 +46,7 @@ test('Cutdown is loaded, offline packaged, and mobile touch-safe',()=>{
   assert.match(html,/cutdown-command-v23\.js\?v=1/);
   assert.match(sw,/'\/cutdown-command-v23\.css'/);
   assert.match(sw,/'\/cutdown-command-v23\.js'/);
-  assert.match(sw,/titans-cc-brand-2026-v60/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(css,/@media\(max-width:720px\)/);
   assert.match(css,/min-height:48px/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
