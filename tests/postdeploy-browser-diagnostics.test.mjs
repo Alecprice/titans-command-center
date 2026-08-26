@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const workflow = readFileSync('.github/workflows/postdeploy-browser-diagnostics.yml','utf8');
+const responsiveWorkflow = readFileSync('.github/workflows/responsive-matrix.yml','utf8');
 
 const expectedScripts = [
   'browser-navigation-smoke.py',
@@ -40,4 +41,12 @@ test('diagnostic workflow is read-only and uses pinned workflow dependencies', (
   assert.match(workflow, /actions\/checkout@[0-9a-f]{40}/);
   assert.match(workflow, /actions\/setup-node@[0-9a-f]{40}/);
   assert.match(workflow, /persist-credentials: false/);
+});
+
+test('post-deploy browser workflows test the exact revision that triggered deployment', () => {
+  const deployedRef = /ref: \$\{\{ github\.event_name == 'workflow_run' && github\.event\.workflow_run\.head_sha \|\| 'main' \}\}/;
+  assert.match(workflow, deployedRef);
+  assert.match(responsiveWorkflow, deployedRef);
+  assert.doesNotMatch(workflow, /ref: main\s/);
+  assert.doesNotMatch(responsiveWorkflow, /ref: main\s/);
 });
