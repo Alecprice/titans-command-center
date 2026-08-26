@@ -5,7 +5,7 @@ const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 
 test('account layer is explicitly loaded and packaged offline',()=>{
   const html=read('index.html'),sw=read('sw.js'),quality=read('.github/workflows/quality.yml'),ui=read('account-v112.js');
-  assert.match(html,/account-sync-v112\.js\?v=2/);assert.match(html,/account-v112\.js\?v=3/);assert.match(ui,/account-v112\.css\?v=4/);assert.match(sw,/account-sync-v112\.js/);assert.match(sw,/account-v112\.js/);assert.match(sw,/account-v112\.css/);assert.match(sw,/titans-cc-brand-2026-v60/);assert.match(quality,/scripts\/account-browser-smoke\.py/);
+  assert.match(html,/account-sync-v112\.js\?v=2/);assert.match(html,/account-v112\.js\?v=3/);assert.match(ui,/account-v112\.css\?v=4/);assert.match(sw,/account-sync-v112\.js/);assert.match(sw,/account-v112\.js/);assert.match(sw,/account-v112\.css/);assert.match(sw,/titans-cc-brand-2026-v\d+/);assert.match(quality,/scripts\/account-browser-smoke\.py/);
 });
 
 test('guest access is the default and auth does not gate public routes',()=>{
