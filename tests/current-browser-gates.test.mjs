@@ -48,7 +48,9 @@ test('market smoke validates truthful live reference unavailable modes and real 
   const source=read('scripts/market-browser-smoke.py');
   for(const token of ["quality=='Live'","quality=='Published reference'","quality=='Unavailable'",'#mh-event-filter','#mh-book-filter','#mh-category-filter','mh-alt-toggle','desktop:refresh','EC.staleness_of','Mobile market controls below 44px','horizontal overflow','SEVERE'])assert.ok(source.includes(token),`${token} missing from market smoke`);
   assert.match(source,/Select\(element\)/);
-  assert.match(source,/select\.select_by_index\(1\)/);
+  assert.match(source,/def set_select_value\(driver,selector,value\):/);
+  assert.match(source,/el\.dispatchEvent\(new Event\('change',\{bubbles:true\}\)\)/);
+  assert.match(source,/if not set_select_value\(driver,selector,chosen\)/);
   assert.match(source,/find_element\(By\.ID,'mh-alt-toggle'\)/);
   assert.match(source,/find_element\(By\.ID,'mh-refresh'\)\.click\(\)/);
 });
@@ -59,9 +61,10 @@ test('market filter regression reacquires controls after DOM replacement',()=>{
   assert.match(source,/NoSuchElementException, StaleElementReferenceException/);
   assert.match(source,/element_id=element\.id/);
   assert.match(source,/state\['stablePolls'\]>=3/);
-  assert.match(source,/element=stable_select_element\(driver,selector\)/);
-  assert.match(source,/reset_element=stable_select_element\(driver,selector\)/);
-  assert.match(source,/wait_settled\(driver\);stable_select_element\(driver,selector\)/);
+  assert.match(source,/values=select_values\(driver,selector\)/);
+  assert.match(source,/chosen=values\[1\]/);
+  assert.match(source,/wait_settled\(driver\);stable_select_element\(driver,selector\);after=read_summary\(driver\)/);
+  assert.match(source,/set_select_value\(driver,selector,'all'\)/);
   assert.doesNotMatch(source,/if driver\.find_elements\(By\.CSS_SELECTOR,selector\):filters\[key\]=exercise_select/);
 });
 
@@ -141,5 +144,5 @@ test('post-deploy audit publishes an inspectable commit status and still fails o
   assert.match(audit,/context: 'Titans Current Experience'/);
   assert.match(audit,/decisions: process\.env\.FANTASY_DECISION_OUTCOME/);
   assert.match(audit,/target_url:/);
-  assert.match(audit,/Fail audit when any current-experience check failed/);
+  assert.match(audit,/Fail audit when any evaluated current-experience check failed/);
 });
