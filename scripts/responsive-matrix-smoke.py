@@ -17,16 +17,65 @@ VIEWPORTS=[
     ('desktop',1440,1000,'desktop-shell'),
     ('wide-desktop',1920,1080,'desktop-shell'),
 ]
-ROUTES=['home','live','games','roster','stats','markets','feed','legacy','sources']
+ROUTES=[
+    ('home','home'),
+    ('game-day','live'),
+    ('schedule','games'),
+    ('roster','roster'),
+    ('depth-chart','roster?view=depth'),
+    ('staff','roster?view=staff'),
+    ('cutdown','roster?view=cutdown'),
+    ('transactions','transactions'),
+    ('stats','stats'),
+    ('fantasy','fantasy'),
+    ('markets','markets'),
+    ('intel','feed'),
+    ('legacy','legacy'),
+    ('sources','sources'),
+    ('fan-hub','fan'),
+    ('listen-watch','media'),
+    ('command-intel','command'),
+]
 
 def wait(driver,expression,timeout=10):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(f'return Boolean({expression})'))
+
+def settle(driver,timeout=4):
+    deadline=time.time()+timeout
+    stable=0
+    previous=None
+    while time.time()<deadline:
+        current=driver.execute_script("""
+          const app=document.querySelector('#app');
+          return {
+            hash:location.hash,
+            html:app?.innerHTML.length||0,
+            text:app?.innerText.length||0,
+            width:document.documentElement.scrollWidth,
+            busy:app?.getAttribute('aria-busy')||''
+          };
+        """)
+        key=(current['hash'],current['html'],current['text'],current['width'],current['busy'])
+        stable=stable+1 if key==previous else 0
+        previous=key
+        if stable>=2 and current['busy']!='true': return current
+        time.sleep(.12)
+    return previous
 
 def dimensions(driver):
     return driver.execute_script("""
       const de=document.documentElement;
       const nav=document.querySelector('.mobile-nav');
       const side=document.querySelector('#sidebar');
+      const visible=el=>{
+        const s=getComputedStyle(el),r=el.getBoundingClientRect();
+        return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>0&&r.height>0;
+      };
+      const suspiciousTiny=[...document.querySelectorAll('#app small,#app p,#app li,#app span')]
+        .filter(visible)
+        .map(el=>({text:(el.textContent||'').trim().slice(0,80),font:parseFloat(getComputedStyle(el).fontSize)}))
+        .filter(x=>x.text&&x.font<9.5)
+        .slice(0,12);
       return {
         innerWidth:innerWidth, innerHeight:innerHeight,
         clientWidth:de.clientWidth, scrollWidth:de.scrollWidth,
@@ -35,16 +84,18 @@ def dimensions(driver):
         sidebar:side?getComputedStyle(side).display:null,
         sidebarPosition:side?getComputedStyle(side).position:null,
         appWidth:document.querySelector('#app')?.getBoundingClientRect().width||0,
+        appTextLength:(document.querySelector('#app')?.innerText||'').trim().length,
         topbarWidth:document.querySelector('.topbar')?.getBoundingClientRect().width||0,
         touchTargets:[...document.querySelectorAll('.mobile-nav a,.mobile-nav button')].map(el=>({label:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})),
+        suspiciousTiny,
       };
     """)
 
 def assert_layout(state,label,mode):
     if state['scrollWidth']>state['clientWidth']+3 or state['bodyScrollWidth']>state['clientWidth']+3:
         raise RuntimeError(f'{label}: horizontal overflow {state}')
-    if state['appWidth']<=0 or state['topbarWidth']<=0:
-        raise RuntimeError(f'{label}: primary shell has zero width {state}')
+    if state['appWidth']<=0 or state['topbarWidth']<=0 or state['appTextLength']<=0:
+        raise RuntimeError(f'{label}: primary shell/content is empty {state}')
     if mode=='mobile':
         if state['mobileNav']=='none': raise RuntimeError(f'{label}: mobile dock hidden')
         if len(state['touchTargets'])!=5: raise RuntimeError(f'{label}: expected five mobile actions {state["touchTargets"]}')
@@ -66,19 +117,25 @@ try:
     driver.set_page_load_timeout(25)
     for name,width,height,mode in VIEWPORTS:
         driver.set_window_size(width,height)
-        for route in ROUTES:
-            driver.get(f'{BASE}/#{route}')
+        for route_name,route_hash in ROUTES:
+            driver.get(f'{BASE}/#{route_hash}')
             wait(driver,"document.readyState === 'complete' && document.querySelector('#app')")
             wait(driver,"document.querySelector('.page-head h1') || document.querySelector('.fan-hero')",12)
-            time.sleep(.08)
+            settle(driver)
             state=dimensions(driver)
-            assert_layout(state,f'{name}:{route}',mode)
-            rows.append({'viewport':name,'width':width,'height':height,'route':route,'scrollWidth':state['scrollWidth'],'clientWidth':state['clientWidth'],'mobileNav':state['mobileNav']})
+            label=f'{name}:{route_name}'
+            assert_layout(state,label,mode)
+            rows.append({
+                'viewport':name,'width':width,'height':height,'route':route_name,'hash':route_hash,
+                'scrollWidth':state['scrollWidth'],'clientWidth':state['clientWidth'],'mobileNav':state['mobileNav'],
+                'suspiciousTiny':state['suspiciousTiny'],
+            })
     warnings=[x for x in driver.get_log('browser') if x.get('level')=='SEVERE']
     if warnings: raise RuntimeError(f'Browser severe warnings: {warnings[:8]}')
-    payload={'ok':True,'base':BASE,'viewports':len(VIEWPORTS),'routes':len(ROUTES),'checks':len(rows),'rows':rows,'durationSeconds':round(time.time()-started,2)}
+    tiny_samples=[{'viewport':r['viewport'],'route':r['route'],'items':r['suspiciousTiny']} for r in rows if r['suspiciousTiny']]
+    payload={'ok':True,'base':BASE,'viewports':len(VIEWPORTS),'routes':len(ROUTES),'checks':len(rows),'tinyTextSurfaces':len(tiny_samples),'tinyTextSamples':tiny_samples[:12],'rows':rows,'durationSeconds':round(time.time()-started,2)}
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
-    print(json.dumps({k:v for k,v in payload.items() if k!='rows'},indent=2))
+    print(json.dumps({k:v for k,v in payload.items() if k not in ('rows','tinyTextSamples')},indent=2))
 except Exception as exc:
     payload={'ok':False,'base':BASE,'error':f'{type(exc).__name__}: {exc}','rows':rows,'durationSeconds':round(time.time()-started,2)}
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
