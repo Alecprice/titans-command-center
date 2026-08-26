@@ -64,6 +64,23 @@ def stable_select_element(driver,selector,timeout=8):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(ready)
 
 
+def select_values(driver,selector):
+    return driver.execute_script("""
+      const el=document.querySelector(arguments[0]);
+      return el?[...el.options].map(option=>option.value):[];
+    """,selector)
+
+
+def set_select_value(driver,selector,value):
+    return driver.execute_script("""
+      const el=document.querySelector(arguments[0]);
+      if(!el||el.disabled)return false;
+      el.value=arguments[1];
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+      return true;
+    """,selector,value)
+
+
 def read_summary(driver):
     return driver.execute_script(r"""
       const hub=document.querySelector('.market-hub');if(!hub)return null;
@@ -116,15 +133,18 @@ def assert_truthful_state(summary,label):
 
 def exercise_select(driver,selector):
     wait_settled(driver)
-    element=stable_select_element(driver,selector);select=Select(element);option_count=len(select.options)
+    stable_select_element(driver,selector)
+    values=select_values(driver,selector)
+    option_count=len(values)
     if option_count<2:return {'available':False,'options':option_count}
-    chosen=select.options[1].get_attribute('value');before=read_summary(driver)
-    select.select_by_index(1)
+    chosen=values[1];before=read_summary(driver)
+    if not set_select_value(driver,selector,chosen):raise RuntimeError(f'{selector}: control disappeared before selection')
     WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value===arguments[1]",selector,chosen))
     wait_settled(driver);stable_select_element(driver,selector);after=read_summary(driver)
     if after['shown'] is not None and after['shown']<0:raise RuntimeError(f'{selector}: invalid filtered count: {after}')
     if after['rowCount']<1 and not after['empty']:raise RuntimeError(f'{selector}: filter rendered neither rows nor a clear empty state: {after}')
-    reset_element=stable_select_element(driver,selector);reset=Select(reset_element);reset.select_by_value('all')
+    stable_select_element(driver,selector)
+    if not set_select_value(driver,selector,'all'):raise RuntimeError(f'{selector}: control disappeared before reset')
     WebDriverWait(driver,6,poll_frequency=.1).until(lambda d:d.execute_script("return document.querySelector(arguments[0])?.value==='all'",selector))
     wait_settled(driver);stable_select_element(driver,selector)
     return {'available':True,'options':option_count,'selectedValue':chosen,'before':before['result'],'after':after['result']}
