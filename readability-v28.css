@@ -1,98 +1,20 @@
 /* Readability/contrast layer: preserve Titans identity while keeping text clearly legible. */
-:root{
-  --tcc-readable-muted:#455f74;
-  --tcc-readable-muted-dark:#d4e5f2;
-  --tcc-readable-blue-text:#28689f;
-  --tcc-readable-light-meta:#516b80;
-}
-
-/* General reading rhythm. */
+:root{--tcc-readable-muted:#455f74;--tcc-readable-muted-dark:#d4e5f2;--tcc-readable-blue-text:#28689f;--tcc-readable-light-meta:#516b80}
 .content :where(.fan-today,.v10-home,.v14-now,.v13-card,.market-hub,.team-room-panel,.v16-player-intel,.cutdown-command,.transaction-row,.intel-item,.source-card,.player-card) :where(p,li){line-height:1.6}
 .content :where(.fan-today,.v10-home,.v14-now,.v13-card,.market-hub,.team-room-panel,.v16-player-intel,.cutdown-command,.transaction-row,.intel-item,.source-card,.player-card) small{font-size:max(12px,.75rem);line-height:1.45}
 .content :where(.fan-today,.v10-home,.v14-now,.v13-card,.market-hub,.team-room-panel,.v16-player-intel,.cutdown-command) :where(p,span){line-height:1.5}
-
-/* Dark surfaces: secondary copy needs to stay visibly lighter than the background. */
-.sidebar .brand small,
-.sidebar .nav a,
-.sidebar-foot,
-.game-meta,
-.game-footer,
-.vs,
-.intel-item p,
-.metric .label,
-.metric .delta,
-.panel-head small,
-.watch small,
-.stat-card small,
-.stat-card p{color:#b8ccdc}
-.search-wrap input::placeholder{color:#9eb4c7}
-.search-wrap kbd{color:#bfd0de}
-.intel-item time{color:#a8bfd2}
-.footer-note,.footer-note a{color:#a9bfd2!important}
-
-/* Light cards: darken gray and blue text without changing brand-color accents. */
-.team-room-panel :where(.depth-position-head small,.leadership-grid small,.staff-row span,.baseline-head p,.baseline-grid li,.source-priority p,.source-arbitration details p,.source-arbitration details small,.archive-provenance),
-.preseason-stats-hub :where(.ps-coverage small,.ps-coverage span,.ps-schedule small,.ps-schedule span,.ps-schedule em,.ps-next small,.ps-next span,.ps-team-grid small,.ps-position-index span,.ps-results-head,.ps-player-id small,.ps-stat-line small,.ps-no-stats,.ps-source-note){color:var(--tcc-readable-light-meta)!important}
-
-/* Tennessee blue is excellent as an accent, but #4b92db is weak for tiny text on white. */
-.team-room-panel :where(.depth-position a b,.baseline-head small,.baseline-grid article small,.source-priority>small),
-.preseason-stats-hub :where(.ps-sources a,.ps-position-index button.active b){color:var(--tcc-readable-blue-text)!important}
-
-/* Team Room controls and metadata. */
-.team-room-switcher button{color:#425c73;font-size:12px;line-height:1.35}
-.team-room-switcher button.active{color:#fff}
-.team-room-loading,.team-room-empty{color:#536d82;font-size:13px;line-height:1.5}
-.depth-unit>header small{color:#c5d9e8;font-size:11px}
-.depth-position-head small,.leadership-grid small,.staff-row span{font-size:11px!important}
-.depth-position a{font-size:12px;line-height:1.4}
-.depth-position a b{font-size:11px}
-.staff-row strong{font-size:12px;line-height:1.4}
-.baseline-head p{font-size:12px;line-height:1.55}
-.baseline-grid li{font-size:12px;line-height:1.45}
-.baseline-grid a{font-size:11px}
-.source-priority p{font-size:12px;line-height:1.55}
-.source-priority span{font-size:11px}
-.source-arbitration details summary,.source-arbitration details strong{font-size:12px}
-.source-arbitration details p,.source-arbitration details small{font-size:11px;line-height:1.5}
-.archive-provenance{font-size:11px!important}
-
-/* Core app cards and tables. */
-.player-card p,.source-card p,.timeline-item p,.watch small{color:#aec3d4}
-.source-card .category{color:#b7cad9;font-size:11px}
-.source-meta small{color:#a9bfd2;font-size:10px}
-.source-meta strong{font-size:11px;line-height:1.4}
-.opponent-line small,.game-date small,.week{color:#afc4d4}
-.notice{color:#d1e3f0;font-size:12px;line-height:1.6}
-.tag{color:#bfd0de;font-size:10px}
-.player-tag{color:#a9ddff;font-size:10px}
-
+/* Dark surfaces. */
+.sidebar .brand small,.sidebar .nav a,.sidebar-foot,.game-meta,.game-footer,.vs,.intel-item p,.metric .label,.metric .delta,.panel-head small,.watch small,.stat-card small,.stat-card p{color:#b8ccdc}
+.search-wrap input::placeholder{color:#9eb4c7}.search-wrap kbd{color:#bfd0de}.intel-item time{color:#a8bfd2}.footer-note,.footer-note a{color:#a9bfd2!important}
+/* Core dark app cards. */
+.player-card p,.source-card p,.timeline-item p,.watch small{color:#aec3d4}.source-card .category{color:#b7cad9;font-size:11px}.source-meta small{color:#a9bfd2;font-size:10px}.source-meta strong{font-size:11px;line-height:1.4}.opponent-line small,.game-date small,.week{color:#afc4d4}.notice{color:#d1e3f0;font-size:12px;line-height:1.6}.tag{color:#bfd0de;font-size:10px}.player-tag{color:#a9ddff;font-size:10px}
+/* Light Team Room and Stats surfaces. */
+.team-room-panel :where(.depth-position-head small,.leadership-grid small,.staff-row span,.baseline-head p,.baseline-grid li,.source-priority p,.source-arbitration details p,.source-arbitration details small,.archive-provenance),.preseason-stats-hub :where(.ps-coverage small,.ps-coverage span,.ps-schedule small,.ps-schedule span,.ps-schedule em,.ps-next small,.ps-next span,.ps-team-grid small,.ps-position-index span,.ps-results-head,.ps-player-id small,.ps-stat-line small,.ps-no-stats,.ps-source-note){color:var(--tcc-readable-light-meta)!important}
+.team-room-panel :where(.depth-position a b,.baseline-head small,.baseline-grid article small,.source-priority>small),.preseason-stats-hub :where(.ps-sources a,.ps-position-index button.active b){color:var(--tcc-readable-blue-text)!important}
+.team-room-switcher button{color:#425c73;font-size:12px;line-height:1.35}.team-room-switcher button.active{color:#fff}.team-room-loading,.team-room-empty{color:#536d82;font-size:13px;line-height:1.5}.depth-unit>header small{color:#c5d9e8;font-size:11px}.depth-position-head small,.leadership-grid small,.staff-row span{font-size:11px!important}.depth-position a{font-size:12px;line-height:1.4}.depth-position a b{font-size:11px}.staff-row strong{font-size:12px;line-height:1.4}.baseline-head p{font-size:12px;line-height:1.55}.baseline-grid li{font-size:12px;line-height:1.45}.baseline-grid a{font-size:11px}.source-priority p{font-size:12px;line-height:1.55}.source-priority span{font-size:11px}.source-arbitration details summary,.source-arbitration details strong{font-size:12px}.source-arbitration details p,.source-arbitration details small{font-size:11px;line-height:1.5}.archive-provenance{font-size:11px!important}
 /* Existing product surfaces. */
-.fan-today :where(small,span),.v10-command-card :where(small,p),.v14-now-grid :where(small,span),.v13-card :where(small,p,span){color:var(--tcc-readable-muted)}
-.fan-today-lead :where(small,span),.cutdown-command :where(small,p,span),.v16-player-command :where(small,p,span),.mh-head p,.mh-note{color:var(--tcc-readable-muted-dark)}
-.v10-command-card strong,.v14-now-grid strong,.v13-card strong,.mh-row b,.mh-row strong,.player-card strong,.transaction-row strong,.intel-item strong{line-height:1.35}
-.mh-row small,.mh-events small,.mh-status span,.mh-results,.mh-diagnostics,.mh-note{font-size:12px;line-height:1.5}
-.mh-controls label{font-size:12px;font-weight:800}.mh-controls select,.mh-controls button{min-height:44px;font-size:13px}
-.player-card small,.transaction-row small,.intel-provenance,.source-card small,.team-room-panel small{font-size:12px!important;line-height:1.45}
-.intel-provenance strong{font-size:11px}.ux-chip,.ux-filter-row button{font-size:12px}.ux-filter-label,.ux-filter-count{font-size:12px}
-.search-wrap input,.transaction-tools input,.transaction-tools select{font-size:14px}
-
-/* Focus must remain visible on both navy and white surfaces. */
-.content :where(a,button,input,select,textarea):focus-visible{outline:3px solid #74c7ff;outline-offset:2px}
-.team-room-panel :where(a,button,input,select):focus-visible,
-.preseason-stats-hub :where(a,button,input,select):focus-visible{outline-color:#28689f}
-
-@media(max-width:760px){
-  .content :where(input[type="search"],input[type="text"],input[type="number"],select,textarea){font-size:16px!important}
-  .mh-controls select,.mh-controls button,.ux-filter-row button,.transaction-tools input,.transaction-tools select{min-height:48px}
-  .fan-today :where(small,span),.v10-command-card :where(small,p),.v14-now-grid :where(small,span),.v13-card :where(small,p,span){font-size:13px}
-  .page-head p,.intel-item p,.player-card p,.source-card p,.timeline-item p{font-size:13px;line-height:1.55}
-  .game-footer,.game-meta,.opponent-line small,.game-date small{font-size:12px}
-  .team-room-switcher button{font-size:12px}
-}
-
-@media(prefers-contrast:more){
-  :root{--tcc-readable-muted:#29465e;--tcc-readable-muted-dark:#f2f8fc;--tcc-readable-blue-text:#174f7d;--tcc-readable-light-meta:#304d65}
-  .content a{text-underline-offset:3px}
-  .content :where(.player-card,.transaction-row,.intel-item,.source-card,.v10-command-card,.v13-card){border-color:rgba(12,35,64,.4)!important}
-  .sidebar .nav a,.sidebar-foot,.game-meta,.game-footer,.intel-item p{color:#e2edf5}
-}
+.fan-today :where(small,span),.v10-command-card :where(small,p),.v14-now-grid :where(small,span),.v13-card :where(small,p,span){color:var(--tcc-readable-muted)}.fan-today-lead :where(small,span),.cutdown-command :where(small,p,span),.v16-player-command :where(small,p,span),.mh-head p,.mh-note{color:var(--tcc-readable-muted-dark)}.v10-command-card strong,.v14-now-grid strong,.v13-card strong,.mh-row b,.mh-row strong,.player-card strong,.transaction-row strong,.intel-item strong{line-height:1.35}.mh-row small,.mh-events small,.mh-status span,.mh-results,.mh-diagnostics,.mh-note{font-size:12px;line-height:1.5}.mh-controls label{font-size:12px;font-weight:800}.mh-controls select,.mh-controls button{min-height:44px;font-size:13px}.player-card small,.transaction-row small,.intel-provenance,.source-card small,.team-room-panel small{font-size:12px!important;line-height:1.45}.intel-provenance strong{font-size:11px}.ux-chip,.ux-filter-row button{font-size:12px}.ux-filter-label,.ux-filter-count{font-size:12px}.search-wrap input,.transaction-tools input,.transaction-tools select{font-size:14px}
+/* Visible focus. */
+.content :where(a,button,input,select,textarea):focus-visible{outline:3px solid #74c7ff;outline-offset:2px}.team-room-panel :where(a,button,input,select):focus-visible,.preseason-stats-hub :where(a,button,input,select):focus-visible{outline-color:#28689f}
+@media(max-width:760px){.content :where(input[type="search"],input[type="text"],input[type="number"],select,textarea){font-size:16px!important}.mh-controls select,.mh-controls button,.ux-filter-row button,.transaction-tools input,.transaction-tools select{min-height:48px}.fan-today :where(small,span),.v10-command-card :where(small,p),.v14-now-grid :where(small,span),.v13-card :where(small,p,span){font-size:13px}.page-head p,.intel-item p,.player-card p,.source-card p,.timeline-item p{font-size:13px;line-height:1.55}.game-footer,.game-meta,.opponent-line small,.game-date small{font-size:12px}.team-room-switcher button{font-size:12px}}
+@media(prefers-contrast:more){:root{--tcc-readable-muted:#29465e;--tcc-readable-muted-dark:#f2f8fc;--tcc-readable-blue-text:#174f7d;--tcc-readable-light-meta:#304d65}.content a{text-underline-offset:3px}.content :where(.player-card,.transaction-row,.intel-item,.source-card,.v10-command-card,.v13-card){border-color:rgba(12,35,64,.4)!important}.sidebar .nav a,.sidebar-foot,.game-meta,.game-footer,.intel-item p{color:#e2edf5}}
