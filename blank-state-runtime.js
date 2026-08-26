@@ -1,18 +1,19 @@
 const isBlankValue=value=>value==null||String(value).trim()===''||/^(?:--|—)$/.test(String(value).trim());
-const text=(node,value)=>{if(node&&isBlankValue(node.textContent))node.textContent=value;};
-const cleanSeparatorText=node=>{if(!node)return;node.textContent=node.textContent.replace(/\s*·\s*$/,'').replace(/^\s*·\s*/,'').replace(/\s{2,}/g,' ').trim();};
+const setText=(node,value)=>{if(node&&node.textContent!==value)node.textContent=value;};
+const fillBlank=(node,value)=>{if(node&&isBlankValue(node.textContent))setText(node,value);};
+const cleanSeparatorText=node=>{if(!node)return;const next=(node.textContent||'').replace(/\s*·\s*$/,'').replace(/^\s*·\s*/,'').replace(/\s{2,}/g,' ').trim();setText(node,next);};
 
 function sanitizeSchedule(root=document){
   root.querySelectorAll('.game-row').forEach(row=>{
     const opponent=(row.querySelector('.opponent-line strong')?.textContent||'').trim();
     const venue=row.querySelector('.opponent-line small');
-    if(isBlankValue(venue?.textContent))text(venue,/BYE/i.test(opponent)?'Bye week':'Venue TBD');
+    if(isBlankValue(venue?.textContent))fillBlank(venue,/BYE/i.test(opponent)?'Bye week':'Venue TBD');
   });
   root.querySelectorAll('.ps-schedule article').forEach(card=>{
     const meta=card.querySelector('em');
     if(!meta)return;
     cleanSeparatorText(meta);
-    if(isBlankValue(meta.textContent))meta.textContent='Venue / TV not announced';
+    if(isBlankValue(meta.textContent))setText(meta,'Venue / TV not announced');
   });
 }
 
@@ -21,48 +22,45 @@ function sanitizeRoster(root=document){
     const raw=(meta.textContent||'').split('·').map(x=>x.trim()).filter(Boolean);
     const position=raw[0]||'Position unavailable';
     const unit=raw[1]||'Unit not classified';
-    meta.textContent=`${position} · ${unit}`;
+    setText(meta,`${position} · ${unit}`);
   });
-  root.querySelectorAll('.ps-leaders article:not(.is-unavailable) span').forEach(meta=>{
-    cleanSeparatorText(meta);
-    if(/·\s*$/.test(meta.textContent||''))meta.textContent=(meta.textContent||'').replace(/\s*·\s*$/,'');
-  });
+  root.querySelectorAll('.ps-leaders article:not(.is-unavailable) span').forEach(cleanSeparatorText);
 }
 
 function sanitizeSources(root=document){
   root.querySelectorAll('.source-card').forEach(card=>{
     const purpose=card.querySelector(':scope > p');
-    if(isBlankValue(purpose?.textContent))text(purpose,'Purpose not documented.');
+    if(isBlankValue(purpose?.textContent))fillBlank(purpose,'Purpose not documented.');
     card.querySelectorAll('.source-meta > div').forEach(item=>{
       const label=(item.querySelector('small')?.textContent||'').trim().toLowerCase();
       const value=item.querySelector('strong');
       if(!isBlankValue(value?.textContent))return;
-      text(value,label==='method'?'Method not documented':label==='cost'?'Free':'Not documented');
+      fillBlank(value,label==='method'?'Method not documented':label==='cost'?'Free':'Not documented');
     });
   });
   root.querySelectorAll('.source-domain-card').forEach(card=>{
-    card.querySelectorAll('.source-level span').forEach(value=>text(value,'Not documented'));
+    card.querySelectorAll('.source-level span').forEach(value=>fillBlank(value,'Not documented'));
     const note=card.querySelector(':scope > p');
-    if(isBlankValue(note?.textContent))text(note,'No additional source-policy note is documented.');
+    if(isBlankValue(note?.textContent))fillBlank(note,'No additional source-policy note is documented.');
   });
 }
 
 function sanitizeTeamRoom(root=document){
   root.querySelectorAll('.leadership-grid article').forEach(card=>{
-    text(card.querySelector('small'),'Role unavailable');
-    text(card.querySelector('strong'),'Name unavailable');
+    fillBlank(card.querySelector('small'),'Role unavailable');
+    fillBlank(card.querySelector('strong'),'Name unavailable');
   });
   root.querySelectorAll('.staff-row').forEach(row=>{
-    text(row.querySelector('span'),'Role unavailable');
-    text(row.querySelector('strong'),'Name unavailable');
+    fillBlank(row.querySelector('span'),'Role unavailable');
+    fillBlank(row.querySelector('strong'),'Name unavailable');
   });
-  root.querySelectorAll('.depth-position li a span').forEach(name=>text(name,'Player unavailable'));
+  root.querySelectorAll('.depth-position li a span').forEach(name=>fillBlank(name,'Player unavailable'));
 }
 
 function sanitizeTransactions(root=document){
   root.querySelectorAll('.transaction-row').forEach(row=>{
     const description=row.querySelector('p');
-    if(isBlankValue(description?.textContent)){
+    if(isBlankValue(description?.textContent)&&!row.hidden){
       row.hidden=true;
       row.setAttribute('data-invalid-transaction','missing-description');
     }
