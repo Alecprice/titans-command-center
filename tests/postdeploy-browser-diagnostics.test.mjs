@@ -19,6 +19,7 @@ const expectedScripts = [
   'analytics-browser-smoke.py',
   'headshot-browser-smoke.py',
   'responsive-matrix-smoke.py',
+  'readability-browser-smoke.py',
 ];
 
 test('post-deploy diagnostics exercise every major browser surface independently', () => {
@@ -34,6 +35,8 @@ test('post-deploy diagnostics still fail closed after collecting all results', (
   assert.match(workflow, /grep -Eq '\(\^\| \)failure\( \|\$\)'/);
   assert.match(workflow, /exit 1/);
   assert.match(workflow, /GITHUB_STEP_SUMMARY/);
+  assert.match(workflow, /Rendered readability \/ contrast/);
+  assert.match(workflow, /steps\.readability\.outcome/);
 });
 
 test('diagnostic workflow is read-only and uses pinned workflow dependencies', () => {
