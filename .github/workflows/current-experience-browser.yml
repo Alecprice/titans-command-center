@@ -73,6 +73,17 @@ jobs:
           process.exit(1);
           NODE
 
+      - name: Record non-deployed revision skip
+        if: steps.deployed_sha.outcome != 'success'
+        shell: bash
+        run: |
+          {
+            echo '## Titans Current Experience Audit'
+            echo
+            echo 'Browser audit skipped because this workflow source revision is not the revision currently served by production.'
+            echo 'This is not a Current Experience regression; deployment status remains owned by the Cloudflare deploy workflow.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install Selenium
         if: steps.deployed_sha.outcome == 'success'
         run: python -m pip install --disable-pip-version-check 'selenium>=4.25,<5'
@@ -120,7 +131,7 @@ jobs:
         run: python scripts/market-browser-smoke.py
 
       - name: Upload audit reports
-        if: always()
+        if: steps.deployed_sha.outcome == 'success'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: current-experience-${{ github.event.workflow_run.head_sha }}
@@ -136,10 +147,9 @@ jobs:
           retention-days: 14
 
       - name: Publish Current Experience commit status
-        if: always()
+        if: steps.deployed_sha.outcome == 'success'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          DEPLOYED_SHA_OUTCOME: ${{ steps.deployed_sha.outcome }}
           RUNTIME_OUTCOME: ${{ steps.runtime_365.outcome }}
           SEARCH_OUTCOME: ${{ steps.smart_search.outcome }}
           MOBILE_OUTCOME: ${{ steps.mobile_nav.outcome }}
@@ -150,7 +160,6 @@ jobs:
         with:
           script: |
             const checks = {
-              deploy: process.env.DEPLOYED_SHA_OUTCOME,
               runtime: process.env.RUNTIME_OUTCOME,
               search: process.env.SEARCH_OUTCOME,
               mobile: process.env.MOBILE_OUTCOME,
@@ -175,10 +184,9 @@ jobs:
               target_url: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`,
             });
 
-      - name: Fail audit when any current-experience check failed
-        if: always()
+      - name: Fail audit when any evaluated current-experience check failed
+        if: steps.deployed_sha.outcome == 'success'
         env:
-          DEPLOYED_SHA_OUTCOME: ${{ steps.deployed_sha.outcome }}
           RUNTIME_OUTCOME: ${{ steps.runtime_365.outcome }}
           SEARCH_OUTCOME: ${{ steps.smart_search.outcome }}
           MOBILE_OUTCOME: ${{ steps.mobile_nav.outcome }}
@@ -187,6 +195,6 @@ jobs:
           ACCOUNT_OUTCOME: ${{ steps.account_guest.outcome }}
           MARKET_OUTCOME: ${{ steps.live_markets.outcome }}
         run: |
-          for outcome in "$DEPLOYED_SHA_OUTCOME" "$RUNTIME_OUTCOME" "$SEARCH_OUTCOME" "$MOBILE_OUTCOME" "$FANTASY_OUTCOME" "$FANTASY_DECISION_OUTCOME" "$ACCOUNT_OUTCOME" "$MARKET_OUTCOME"; do
+          for outcome in "$RUNTIME_OUTCOME" "$SEARCH_OUTCOME" "$MOBILE_OUTCOME" "$FANTASY_OUTCOME" "$FANTASY_DECISION_OUTCOME" "$ACCOUNT_OUTCOME" "$MARKET_OUTCOME"; do
             [[ "$outcome" == "success" ]] || exit 1
           done
