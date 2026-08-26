@@ -76,6 +76,11 @@ def dimensions(driver):
         .map(el=>({text:(el.textContent||'').trim().slice(0,80),font:parseFloat(getComputedStyle(el).fontSize)}))
         .filter(x=>x.text&&x.font<9.5)
         .slice(0,12);
+      const smallControls=[...document.querySelectorAll('#app button,#app select,#app input:not([type="hidden"]),#app [role="button"]')]
+        .filter(visible)
+        .map(el=>{const r=el.getBoundingClientRect();return {tag:el.tagName,label:(el.getAttribute('aria-label')||el.textContent||el.getAttribute('placeholder')||el.id||'').trim().replace(/\s+/g,' ').slice(0,80),w:Math.round(r.width*10)/10,h:Math.round(r.height*10)/10};})
+        .filter(x=>x.w<44||x.h<44)
+        .slice(0,16);
       return {
         innerWidth:innerWidth, innerHeight:innerHeight,
         clientWidth:de.clientWidth, scrollWidth:de.scrollWidth,
@@ -88,6 +93,7 @@ def dimensions(driver):
         topbarWidth:document.querySelector('.topbar')?.getBoundingClientRect().width||0,
         touchTargets:[...document.querySelectorAll('.mobile-nav a,.mobile-nav button')].map(el=>({label:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})),
         suspiciousTiny,
+        smallControls,
       };
     """)
 
@@ -126,16 +132,23 @@ try:
             label=f'{name}:{route_name}'
             assert_layout(state,label,mode)
             rows.append({
-                'viewport':name,'width':width,'height':height,'route':route_name,'hash':route_hash,
+                'viewport':name,'width':width,'height':height,'mode':mode,'route':route_name,'hash':route_hash,
                 'scrollWidth':state['scrollWidth'],'clientWidth':state['clientWidth'],'mobileNav':state['mobileNav'],
                 'suspiciousTiny':state['suspiciousTiny'],
+                'smallControls':state['smallControls'] if mode=='mobile' else [],
             })
     warnings=[x for x in driver.get_log('browser') if x.get('level')=='SEVERE']
     if warnings: raise RuntimeError(f'Browser severe warnings: {warnings[:8]}')
     tiny_samples=[{'viewport':r['viewport'],'route':r['route'],'items':r['suspiciousTiny']} for r in rows if r['suspiciousTiny']]
-    payload={'ok':True,'base':BASE,'viewports':len(VIEWPORTS),'routes':len(ROUTES),'checks':len(rows),'tinyTextSurfaces':len(tiny_samples),'tinyTextSamples':tiny_samples[:12],'rows':rows,'durationSeconds':round(time.time()-started,2)}
+    control_samples=[{'viewport':r['viewport'],'route':r['route'],'items':r['smallControls']} for r in rows if r['smallControls']]
+    payload={
+        'ok':True,'base':BASE,'viewports':len(VIEWPORTS),'routes':len(ROUTES),'checks':len(rows),
+        'tinyTextSurfaces':len(tiny_samples),'tinyTextSamples':tiny_samples[:12],
+        'undersizedControlSurfaces':len(control_samples),'undersizedControlSamples':control_samples[:18],
+        'rows':rows,'durationSeconds':round(time.time()-started,2)
+    }
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
-    print(json.dumps({k:v for k,v in payload.items() if k not in ('rows','tinyTextSamples')},indent=2))
+    print(json.dumps({k:v for k,v in payload.items() if k not in ('rows','tinyTextSamples','undersizedControlSamples')},indent=2))
 except Exception as exc:
     payload={'ok':False,'base':BASE,'error':f'{type(exc).__name__}: {exc}','rows':rows,'durationSeconds':round(time.time()-started,2)}
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
