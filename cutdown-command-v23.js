@@ -174,27 +174,13 @@
     anchor.insertAdjacentHTML('afterend',homeCard());
   }
 
-  function syncCutdownView(app,switcher,panel){
-    if(new URLSearchParams(location.hash.split('?')[1]||'').get('view')!=='cutdown')return;
-    app.dataset.teamRoomView='cutdown';
-    switcher.querySelectorAll('[data-team-room-view]').forEach(button=>{
-      const selected=button.dataset.teamRoomView==='cutdown';
-      button.classList.toggle('active',selected);
-      button.setAttribute('aria-pressed',String(selected));
-    });
-    app.querySelectorAll('.team-room-panel').forEach(item=>item.hidden=item!==panel);
-    app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg').forEach(item=>item.hidden=true);
-  }
-
   function mountRoster(){
     const app=document.querySelector('#app');
     if(!app||route()!=='roster')return false;
-    const switcher=app.querySelector('.team-room-switcher');
     const panel=app.querySelector('.team-room-panel[data-panel="cutdown"]');
-    if(!switcher||!panel)return false;
+    if(!panel)return false;
     panel.innerHTML=rosterPanel();
     wireMy53(panel,snapshot().roster);
-    syncCutdownView(app,switcher,panel);
     return true;
   }
 
