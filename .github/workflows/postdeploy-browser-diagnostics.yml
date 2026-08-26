@@ -143,6 +143,12 @@ jobs:
         continue-on-error: true
         run: python scripts/responsive-matrix-smoke.py
 
+      - name: Rendered readability and contrast audit
+        id: readability
+        if: steps.deployment.outputs.deployed == 'true'
+        continue-on-error: true
+        run: python scripts/readability-browser-smoke.py
+
       - name: Publish diagnostic summary
         if: always()
         shell: bash
@@ -162,6 +168,7 @@ jobs:
           ANALYTICS: ${{ steps.analytics.outcome }}
           HEADSHOTS: ${{ steps.headshots.outcome }}
           RESPONSIVE: ${{ steps.responsive.outcome }}
+          READABILITY: ${{ steps.readability.outcome }}
         run: |
           {
             echo '## Titans post-deploy browser diagnostics'
@@ -185,6 +192,7 @@ jobs:
             echo "| Advanced analytics | ${ANALYTICS:-not-run} |"
             echo "| Player headshots | ${HEADSHOTS:-not-run} |"
             echo "| Expanded responsive matrix | ${RESPONSIVE:-not-run} |"
+            echo "| Rendered readability / contrast | ${READABILITY:-not-run} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Fail if any browser diagnostic failed
@@ -197,7 +205,7 @@ jobs:
             ${{ steps.command.outcome }} ${{ steps.player_gameday.outcome }} ${{ steps.ask.outcome }}
             ${{ steps.change.outcome }} ${{ steps.runtime_365.outcome }} ${{ steps.freshness.outcome }}
             ${{ steps.account.outcome }} ${{ steps.analytics.outcome }} ${{ steps.headshots.outcome }}
-            ${{ steps.responsive.outcome }}
+            ${{ steps.responsive.outcome }} ${{ steps.readability.outcome }}
         run: |
           if [[ "$DEPLOYED" != "true" ]]; then
             echo 'Source revision is not live; browser diagnostics were correctly skipped.'
