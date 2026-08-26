@@ -1,3 +1,5 @@
+import './blank-state-runtime.js';
+
 const menu=document.querySelector('#menu-button');
 const sidebar=document.querySelector('#sidebar');
 const app=document.querySelector('#app');
