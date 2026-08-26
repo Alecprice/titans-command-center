@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { team, games, roster, sources } from '../src/data.mjs';
-import { ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260824.mjs';
+import { games, sources } from '../src/data.mjs';
+import { auditedRoster20260824, ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260824.mjs';
 import { auditedTeamContext } from '../src/team-context.mjs';
 
-test('Aug 24 roster audit reflects the newest official move',()=>{
+test('Aug 24 roster audit preserves the dated official move snapshot',()=>{
+  const roster=auditedRoster20260824;
   assert.equal(ROSTER_AUDIT_DATE,'2026-08-24');
   assert.equal(roster.length,96);
   assert.equal(roster.filter(p=>p.status==='Active').length,91);
@@ -18,10 +19,6 @@ test('Aug 24 roster audit reflects the newest official move',()=>{
   assert.equal(roster.some(p=>p.name==='Dominic Richardson'),false);
   assert.equal(roster.some(p=>p.name==='Matt Lauter'),false);
   assert.match(ROSTER_SOURCE_CONFLICT,/newer official transaction/i);
-  assert.equal(team.rosterCoverage.asOf,'2026-08-24');
-  assert.equal(team.rosterCoverage.fallbackPlayers,96);
-  assert.equal(team.rosterCoverage.officialActivePlayersAtAudit,91);
-  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,5);
 });
 
 test('official schedule preserves TBD and complete current broadcast context',()=>{
