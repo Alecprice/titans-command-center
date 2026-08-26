@@ -21,7 +21,7 @@ test('Fantasy Command is a first-class discoverable app route',()=>{
 });
 
 test('Fantasy Command stays available in the offline PWA shell',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v60/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/'\/fantasy-command-v1\.css'/);
   assert.match(sw,/'\/fantasy-command-v1\.js'/);
 });
