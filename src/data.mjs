@@ -1,11 +1,11 @@
-import { auditedRoster20260824, ROSTER_SOURCE_CONFLICT } from './roster-audit-20260824.mjs';
+import { auditedRoster20260826, ROSTER_AUDIT_NOTE } from './roster-audit-20260826.mjs';
 
 export const team = {
   name:'Tennessee Titans',shortName:'Titans',abbreviation:'TEN',city:'Nashville',conference:'AFC',division:'AFC South',
   owner:'Amy Adams Strunk',generalManager:'Mike Borgonzi',president:'Burke Nihill',coach:'Robert Saleh',coachOfficialHireDate:'2026-01-22',
   season:2026,phase:'Preseason',stadium:'Nissan Stadium',franchiseGranted:'1959-08-14',firstSeason:1960,firstSeasonInTennessee:1997,firstSeasonAsTitans:1999,byeWeek:9,
   colors:['Titans blue','red','white','navy blue'],primaryLogo:'The Shield',
-  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:96,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:5,asOf:'2026-08-24',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-24T21:30:00Z'
+  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:95,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:4,asOf:'2026-08-26',sourceConflict:ROSTER_AUDIT_NOTE},auditedAt:'2026-08-26T14:31:24.193Z'
 };
 
 export const games = [
@@ -32,9 +32,10 @@ export const games = [
   {id:'wk18',week:18,date:null,opponent:'Houston Texans',opponentAbbr:'HOU',homeAway:'away',status:'scheduled',venue:'Reliant Stadium',network:'TBD',source:'Tennessee Titans / NFL',dateTbd:true}
 ];
 
-export const roster = auditedRoster20260824.map(player=>({...player}));
+export const roster = auditedRoster20260826.map(player=>({...player}));
 
 export const feed = [
+  {id:'n11',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign LB Dyontae Johnson in Aug. 25 roster moves',summary:'The Titans official transaction log lists LB Dominique Hampton waived/injured, LB Dyontae Johnson signed, and S Sanoussi Kane waived from injured reserve. The fallback roster follows that dated official transaction without guessing missing details.',publishedAt:'2026-08-25T16:00:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/team/transactions/'},
   {id:'n10',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign LB Reid Carrico, place LB Milo Eifler on injured reserve',summary:'The Titans announced the move Aug. 24. This newer official transaction controls over any roster page that has not yet reflected the same-day move.',publishedAt:'2026-08-24T19:19:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-lb-reid-carrico-place-lb-milo-eifler-on-injured-reserve'},
   {id:'n9',type:'news',tier:'official',source:'Tennessee Titans',title:'Roster jobs remain open entering Bears week',summary:'Robert Saleh said a number of jobs remain open ahead of the Aug. 29 preseason finale and the roster reduction to 53.',publishedAt:'2026-08-24T13:55:00Z',topics:['coach','roster','preseason'],url:'https://www.tennesseetitans.com/news/hot-topics-from-titans-hc-robert-saleh-s-zoom-call-on-monday'},
   {id:'n8',type:'game',tier:'official',source:'Tennessee Titans',title:'Preseason Week 2: Titans 19, Seahawks 16',summary:'Tennessee erased a 16-3 first-quarter deficit, scored the final 16 points and improved to 2-0 in preseason.',publishedAt:'2026-08-24T02:05:00Z',topics:['games','preseason','seahawks'],url:'https://www.tennesseetitans.com/news/titans-seahawks-preseason-week-2-postgame-notes'},
@@ -62,4 +63,4 @@ export const sources = [
   {name:'Odds-API.io',category:'Market',tier:'media',status:'Server key optional',method:'Odds-API.io v3',cost:'Free · no card',cadence:'Live / pregame',purpose:'Second free NFL odds source for cross-checks and fallback'}
 ];
 
-export const metrics=[{label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA',tone:'good'},{label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network / WKRN regional',tone:'neutral'},{label:'Audited roster',value:'96',delta:'91 active · 5 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
+export const metrics=[{label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA',tone:'good'},{label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network / WKRN regional',tone:'neutral'},{label:'Audited roster',value:'95',delta:'91 active · 4 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
