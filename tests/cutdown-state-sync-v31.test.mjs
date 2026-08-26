@@ -2,23 +2,34 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const source=fs.readFileSync(new URL('../cutdown-command-v23.js',import.meta.url),'utf8');
+const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+const cutdown=read('cutdown-command-v23.js');
+const teamRoom=read('team-room.js');
 
-test('Cutdown URL state synchronizes switcher accessibility without synthetic clicks',()=>{
-  assert.match(source,/function syncCutdownView\(app,switcher,panel\)/);
-  assert.match(source,/get\('view'\)!=='cutdown'/);
-  assert.match(source,/app\.dataset\.teamRoomView='cutdown'/);
-  assert.match(source,/button\.classList\.toggle\('active',selected\)/);
-  assert.match(source,/button\.setAttribute\('aria-pressed',String\(selected\)\)/);
-  assert.match(source,/item\.hidden=item!==panel/);
-  assert.match(source,/\.roster-summary-strip,.filterbar,.roster-status-filters,#rg/);
-  assert.match(source,/syncCutdownView\(app,switcher,panel\)/);
-  assert.doesNotMatch(source,/button&&button\.getAttribute\('aria-pressed'\)!=='true'\)button\.click\(\)/);
+test('Team Room exclusively owns URL-selected Cutdown accessibility and panel state',()=>{
+  assert.match(teamRoom,/const requestedRosterView=\(\)=>/);
+  assert.match(teamRoom,/TR_VIEWS=new Set\(\['roster','depth','staff','cutdown'\]\)/);
+  assert.match(teamRoom,/function setRosterView\(view,\{focus=false,persist=true\}=\{\}\)/);
+  assert.match(teamRoom,/b\.setAttribute\('aria-pressed',String\(on\)\)/);
+  assert.match(teamRoom,/p\.hidden=p\.dataset\.panel!==next/);
+  assert.match(teamRoom,/setRosterView\(requestedRosterView\(\)\|\|trPreferredRosterView,\{persist:false\}\)/);
+  assert.match(teamRoom,/setRosterView\(requestedRosterView\(\)\|\|app\.dataset\.teamRoomView\|\|trPreferredRosterView,\{persist:false\}\)/);
+  assert.doesNotMatch(cutdown,/function syncCutdownView/);
+  assert.doesNotMatch(cutdown,/dataset\.teamRoomView/);
+  assert.doesNotMatch(cutdown,/querySelectorAll\('\[data-team-room-view\]'\)/);
 });
 
-test('Cutdown state sync remains observer-light and keeps shared runtime lifecycle',()=>{
-  assert.match(source,/runtime\.onAppRender/);
-  assert.match(source,/runtime\.onRoute/);
-  assert.match(source,/runtime\.onRefresh/);
-  assert.doesNotMatch(source,/MutationObserver/);
+test('Cutdown refreshes only its panel content and leaves Team Room selection untouched',()=>{
+  assert.match(cutdown,/const panel=app\.querySelector\('\.team-room-panel\[data-panel="cutdown"\]'\)/);
+  assert.match(cutdown,/panel\.innerHTML=rosterPanel\(\)/);
+  assert.match(cutdown,/wireMy53\(panel,snapshot\(\)\.roster\)/);
+  assert.doesNotMatch(cutdown,/const switcher=app\.querySelector\('\.team-room-switcher'\)/);
+  assert.doesNotMatch(cutdown,/button\.click\(\)/);
+});
+
+test('Cutdown remains observer-light and keeps shared runtime lifecycle',()=>{
+  assert.match(cutdown,/runtime\.onAppRender/);
+  assert.match(cutdown,/runtime\.onRoute/);
+  assert.match(cutdown,/runtime\.onRefresh/);
+  assert.doesNotMatch(cutdown,/MutationObserver/);
 });
