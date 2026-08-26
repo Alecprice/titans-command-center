@@ -52,8 +52,10 @@ test('Cutdown is loaded, offline packaged, and mobile touch-safe',()=>{
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
-test('Home card deep-links directly into the Cutdown Team Room view',()=>{
+test('Home card deep-links directly into the Team Room-owned Cutdown view',()=>{
   assert.match(js,/href="#roster\?view=cutdown"/);
-  assert.match(js,/get\('view'\)!=='cutdown'/);
-  assert.match(js,/app\.dataset\.teamRoomView='cutdown'/);
+  assert.match(teamRoom,/const requestedRosterView=\(\)=>/);
+  assert.match(teamRoom,/TR_VIEWS=new Set\(\['roster','depth','staff','cutdown'\]\)/);
+  assert.match(teamRoom,/setRosterView\(requestedRosterView\(\)\|\|trPreferredRosterView,\{persist:false\}\)/);
+  assert.doesNotMatch(js,/syncCutdownView/);
 });
