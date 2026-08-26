@@ -19,8 +19,11 @@ test('zero-value leader stats remain real data instead of disappearing',()=>{
 });
 
 test('preseason API uses the current audited roster and exposes coverage',()=>{
-  assert.match(api,/roster-audit-20260824\.mjs/);
-  assert.match(api,/auditedRoster20260824/);
+  assert.match(api,/roster-audit-20260826\.mjs/);
+  assert.match(api,/auditedRoster20260826/);
+  assert.match(api,/95-player Aug\. 26 audited roster snapshot/);
+  assert.doesNotMatch(api,/auditedRoster20260824/);
+  assert.doesNotMatch(api,/96-player Aug\. 24 audited roster snapshot/);
   assert.match(api,/coverageFor\(/);
   assert.match(api,/completedGamesMissingPlayerStats/);
   assert.match(api,/playersWithoutStats/);
