@@ -54,6 +54,6 @@ test('Cutdown is loaded, offline packaged, and mobile touch-safe',()=>{
 
 test('Home card deep-links directly into the Cutdown Team Room view',()=>{
   assert.match(js,/href="#roster\?view=cutdown"/);
-  assert.match(js,/get\('view'\)==='cutdown'/);
-  assert.match(js,/data-team-room-view="cutdown"/);
+  assert.match(js,/get\('view'\)!=='cutdown'/);
+  assert.match(js,/app\.dataset\.teamRoomView='cutdown'/);
 });
