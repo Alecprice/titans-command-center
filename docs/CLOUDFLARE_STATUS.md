@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `2f2aafeca510532588593e5a330a2083cb13d3bb`
+- Source commit: `8dc9dee0fcbcd2134aede5cfee4469a8e45baefe`
 - Quality gate: failure
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: existing deployment remains unchanged
-- Recorded: 2026-08-26T16:14:22Z
+- Recorded: 2026-08-26T16:14:43Z
 
 ## Quality gate failure context
 
