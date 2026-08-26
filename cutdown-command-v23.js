@@ -11,7 +11,7 @@
   const MY53_STORE='titans:my53:v1';
   let data=null,loading=null,timer=null;
 
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const rows=v=>Array.isArray(v)?v:[];
   const route=()=>runtime.route();
   const deadlineMs=()=>Date.parse(DEADLINE);
