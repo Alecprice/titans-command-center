@@ -8,6 +8,7 @@ const labelAliases={
 };
 const normLabel=v=>String(v??'').toUpperCase().replace(/[^A-Z0-9/]/g,'');
 const field=(row,label)=>{const wanted=(labelAliases[label]||[label]).map(normLabel);return row?.fields?.find(x=>wanted.includes(normLabel(x.label)))?.value;};
+const hasField=(rows,label)=>rows.some(row=>field(row,label)!=null&&field(row,label)!=='');
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const round=(v,d=1)=>Number(v).toFixed(d).replace(/\.0$/,'');
 const canonicalCategory=v=>{const key=clean(v).toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ');return ({passing:'Passing',rushing:'Rushing',receiving:'Receiving',defense:'Defense',defensive:'Defense',kicking:'Kicking',punting:'Punting','kick return':'Kick Returns','kick returns':'Kick Returns','punt return':'Punt Returns','punt returns':'Punt Returns','special teams':'Special Teams',fumbles:'Fumbles'})[key]||clean(v)||'Stats'};
@@ -26,16 +27,22 @@ function aggregatePassing(rows){
 }
 function aggregateVolume(rows,{attempt='ATT',yards='YDS',avg='AVG',long='LG',td='TD',targets=null,receptions=null}={}){
   const attempts=sumLabel(rows,attempt),yds=sumLabel(rows,yards),result=[];
-  if(targets)result.push(out(targets,sumLabel(rows,targets)));
-  if(receptions)result.push(out(receptions,sumLabel(rows,receptions)));
+  if(targets&&hasField(rows,targets))result.push(out(targets,sumLabel(rows,targets)));
+  if(receptions&&hasField(rows,receptions))result.push(out(receptions,sumLabel(rows,receptions)));
   result.push(out(attempt,attempts),out(yards,yds),out(avg,attempts?round(yds/attempts):'0'));
-  if(rows.some(r=>field(r,long)!=null))result.push(out(long,maxLabel(rows,long)));
-  if(rows.some(r=>field(r,td)!=null))result.push(out(td,sumLabel(rows,td)));
+  if(hasField(rows,long))result.push(out(long,maxLabel(rows,long)));
+  if(hasField(rows,td))result.push(out(td,sumLabel(rows,td)));
   return result;
 }
 function aggregateReceiving(rows){
-  const tar=sumLabel(rows,'TAR'),rec=sumLabel(rows,'REC'),yds=sumLabel(rows,'YDS');
-  return [out('TAR',tar),out('REC',rec),out('YDS',yds),out('AVG',rec?round(yds/rec):'0'),out('LG',maxLabel(rows,'LG')),out('TD',sumLabel(rows,'TD'))];
+  const rec=sumLabel(rows,'REC'),yds=sumLabel(rows,'YDS'),result=[];
+  if(hasField(rows,'TAR'))result.push(out('TAR',sumLabel(rows,'TAR')));
+  if(hasField(rows,'REC'))result.push(out('REC',rec));
+  if(hasField(rows,'YDS'))result.push(out('YDS',yds));
+  if(hasField(rows,'AVG')||hasField(rows,'REC'))result.push(out('AVG',rec?round(yds/rec):'0'));
+  if(hasField(rows,'LG'))result.push(out('LG',maxLabel(rows,'LG'));
+  if(hasField(rows,'TD'))result.push(out('TD',sumLabel(rows,'TD'));
+  return result;
 }
 function aggregateKicking(rows){
   const [made,att]=rows.reduce(([m,a],r)=>{const [x,y]=pair(field(r,'FG'));return [m+x,a+y]},[0,0]);
@@ -45,11 +52,11 @@ function aggregateKicking(rows){
 function aggregatePunting(rows){
   const punts=sumLabel(rows,'NO'),yds=sumLabel(rows,'YDS');
   const netNumerator=rows.reduce((s,r)=>s+num(field(r,'NET'))*num(field(r,'NO')),0);
-  return [out('NO',punts),out('YDS',yds),out('AVG',punts?round(yds/punts):'0'),out('NET',punts?round(netNumerator/punts):'0'),out('IN20',sumLabel(rows,'IN20')),out('LG',maxLabel(rows,'LG'))];
+  return [out('NO',punts),out('YDS',yds),out('AVG',punts?round(netNumerator?yds/punts:yds/punts):'0'),out('NET',punts?round(netNumerator/punts):'0'),out('IN20',sumLabel(rows,'IN20')),out('LG',maxLabel(rows,'LG'))];
 }
 function aggregateDefense(rows){
   const labels=['TKL','AST','COMB','SACK','SACK YDS','TFL','QH','PD','INT','INT YDS','FF','FR'];
-  return labels.filter(label=>rows.some(r=>field(r,label)!=null)).map(label=>out(label,round(sumLabel(rows,label))));
+  return labels.filter(label=>hasField(rows,label)).map(label=>out(label,round(sumLabel(rows,label))));
 }
 function aggregateSimple(rows){
   const labels=[...new Set(rows.flatMap(r=>(r.fields||[]).map(x=>x.label)))];
@@ -63,7 +70,7 @@ export function aggregateCategory(category,rows){
   if(category==='Receiving')return aggregateReceiving(rows);
   if(category==='Kicking')return aggregateKicking(rows);
   if(category==='Punting')return aggregatePunting(rows);
-  if(category==='Kick Returns'||category==='Punt Returns')return aggregateVolume(rows,{attempt:'NO',yards:'YDS',avg:'AVG',long:'LG',td:'TD'}).concat(rows.some(r=>field(r,'FC')!=null)?[out('FC',sumLabel(rows,'FC'))]:[]);
+  if(category==='Kick Returns'||category==='Punt Returns')return aggregateVolume(rows,{attempt:'NO',yards:'YDS',avg:'AVG',long:'LG',td:'TD'}).concat(hasField(rows,'FC')?[out('FC',sumLabel(rows,'FC'))]:[]);
   if(category==='Defense')return aggregateDefense(rows);
   return aggregateSimple(rows);
 }
