@@ -26,14 +26,21 @@ def activate_cutdown_view(driver,timeout=8):
     last=None
     while time.time()<deadline:
         last=driver.execute_script("""
-          const button=document.querySelector('[data-team-room-view="cutdown"]');
-          const panel=document.querySelector('[data-panel="cutdown"]');
-          const root=panel?.querySelector('[data-cutdown-command]');
+          let button=document.querySelector('[data-team-room-view="cutdown"]');
+          let panel=document.querySelector('[data-panel="cutdown"]');
+          let root=panel?.querySelector('[data-cutdown-command]');
           if(!button||!panel||!root)return {exists:false,selected:false,visible:false,buttonConnected:Boolean(button?.isConnected),panelConnected:Boolean(panel?.isConnected)};
-          const selected=button.getAttribute('aria-pressed')==='true';
-          const visible=!panel.hidden;
-          if(!selected||!visible)button.click();
-          return {exists:true,selected,visible,buttonConnected:button.isConnected,panelConnected:panel.isConnected};
+          if(button.getAttribute('aria-pressed')!=='true'||panel.hidden)button.click();
+          button=document.querySelector('[data-team-room-view="cutdown"]');
+          panel=document.querySelector('[data-panel="cutdown"]');
+          root=panel?.querySelector('[data-cutdown-command]');
+          return {
+            exists:Boolean(button&&panel&&root),
+            selected:button?.getAttribute('aria-pressed')==='true',
+            visible:Boolean(panel&&!panel.hidden),
+            buttonConnected:Boolean(button?.isConnected),
+            panelConnected:Boolean(panel?.isConnected)
+          };
         """)
         if last.get('exists') and last.get('selected') and last.get('visible') and last.get('buttonConnected') and last.get('panelConnected'):
             stable+=1
@@ -49,11 +56,18 @@ def activate_player_tab(driver,tab,timeout=8):
     last=None
     while time.time()<deadline:
         last=driver.execute_script("""
-          const tab=document.querySelector(`[data-v16-player-tab="${arguments[0]}"]`),pane=document.querySelector(`[data-v16-pane="${arguments[0]}"]`);
+          let tab=document.querySelector(`[data-v16-player-tab="${arguments[0]}"]`),pane=document.querySelector(`[data-v16-pane="${arguments[0]}"]`);
           if(!tab||!pane)return {exists:false,selected:false,visible:false};
-          const selected=tab.getAttribute('aria-selected')==='true',visible=!pane.hidden;
-          if(!selected||!visible)tab.click();
-          return {exists:true,selected,visible,tabConnected:tab.isConnected,paneConnected:pane.isConnected};
+          if(tab.getAttribute('aria-selected')!=='true'||pane.hidden)tab.click();
+          tab=document.querySelector(`[data-v16-player-tab="${arguments[0]}"]`);
+          pane=document.querySelector(`[data-v16-pane="${arguments[0]}"]`);
+          return {
+            exists:Boolean(tab&&pane),
+            selected:tab?.getAttribute('aria-selected')==='true',
+            visible:Boolean(pane&&!pane.hidden),
+            tabConnected:Boolean(tab?.isConnected),
+            paneConnected:Boolean(pane?.isConnected)
+          };
         """,tab)
         if last.get('exists') and last.get('selected') and last.get('visible') and last.get('tabConnected') and last.get('paneConnected'):
             stable+=1
@@ -233,7 +247,7 @@ try:
         fastPassTune:Boolean(root?.querySelector('.v22-today-brief a[href="#media"]')),
         fastPassOfficial:[...root.querySelectorAll('.v22-today-brief a')].some(x=>x.href.includes('tennesseetitans.com/schedule')),
         fastPassText:(root?.querySelector('.v22-today-brief')?.innerText||'').slice(0,900)
-      }
+      };
     """)
     if not game['tune'] or game['fakeLive']: raise RuntimeError(f'Game Day source/tune contract failed: {game}')
     if game['phase']=='pregame' and (not game['fastPass'] or not game['fastPassId'] or not game['fastPassTune'] or not game['fastPassOfficial']):
