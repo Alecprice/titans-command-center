@@ -2,26 +2,29 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { team, games, roster, sources } from '../src/data.mjs';
-import { ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260824.mjs';
+import { ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260827.mjs';
 import { auditedTeamContext } from '../src/team-context.mjs';
 
-test('Aug 24 roster audit reflects the newest official move',()=>{
-  assert.equal(ROSTER_AUDIT_DATE,'2026-08-24');
-  assert.equal(roster.length,96);
+test('Aug 27 roster audit reflects the newest official moves',()=>{
+  assert.equal(ROSTER_AUDIT_DATE,'2026-08-27');
+  assert.equal(roster.length,95);
   assert.equal(roster.filter(p=>p.status==='Active').length,91);
-  assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,5);
-  assert.ok(roster.some(p=>p.name==='Reid Carrico'&&p.status==='Active'&&p.number===''));
+  assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,4);
+  assert.ok(roster.some(p=>p.name==='Reid Carrico'&&p.status==='Active'&&p.number==='47'));
+  assert.ok(roster.some(p=>p.name==='Dyontae Johnson'&&p.status==='Active'&&p.number==='45'));
   assert.ok(roster.some(p=>p.name==='Milo Eifler'&&p.number==='45'&&p.status==='Reserve/Injured'));
   assert.ok(roster.some(p=>p.name==='Tanoh Kpassagnon'&&p.number==='58'&&p.status==='Active'));
   assert.ok(roster.some(p=>p.name==='Nazeeh Johnson'&&p.status==='Reserve/Injured'));
+  assert.equal(roster.some(p=>p.name==='Dominique Hampton'),false);
+  assert.equal(roster.some(p=>p.name==='Sanoussi Kane'),false);
   assert.equal(roster.some(p=>p.name==='Sean Brown'),false);
   assert.equal(roster.some(p=>p.name==='Dominic Richardson'),false);
   assert.equal(roster.some(p=>p.name==='Matt Lauter'),false);
-  assert.match(ROSTER_SOURCE_CONFLICT,/newer official transaction/i);
-  assert.equal(team.rosterCoverage.asOf,'2026-08-24');
-  assert.equal(team.rosterCoverage.fallbackPlayers,96);
+  assert.equal(ROSTER_SOURCE_CONFLICT,'');
+  assert.equal(team.rosterCoverage.asOf,'2026-08-27');
+  assert.equal(team.rosterCoverage.fallbackPlayers,95);
   assert.equal(team.rosterCoverage.officialActivePlayersAtAudit,91);
-  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,5);
+  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,4);
 });
 
 test('official schedule preserves TBD and complete current broadcast context',()=>{
