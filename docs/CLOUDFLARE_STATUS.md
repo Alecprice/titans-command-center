@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + browser navigation regression cancelled**
-- Source commit: `62ceb487686cdb3770b3c548217e424b29adf67b`
+- Source commit: `ce3fe6c23d7003c68a0a8b4d620eadae40cec82a`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-27T19:27:40Z
+- Recorded: 2026-08-27T19:32:04Z
 
 ## Production regression
 
@@ -39,8 +39,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v61",
-  "precachePaths": 109,
+  "serviceWorkerCache": "titans-cc-brand-2026-v62",
+  "precachePaths": 110,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -75,26 +75,26 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "62ceb487686cdb3770b3c548217e424b29adf67b",
-    "builtAt": "2026-08-27T19:23:39.647Z"
+    "commit": "ce3fe6c23d7003c68a0a8b4d620eadae40cec82a",
+    "builtAt": "2026-08-27T19:27:58.867Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 3,
   "responseMs": {
-    "root": 25,
-    "health": 244,
-    "data": 469,
-    "stats": 491,
-    "market": 982,
-    "analytics": 705
+    "root": 75,
+    "health": 204,
+    "data": 131,
+    "stats": 213,
+    "market": 623,
+    "analytics": 396
   },
-  "testedAt": "2026-08-27T19:24:00.693Z",
+  "testedAt": "2026-08-27T19:28:27.824Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-26",
     "databaseContentAudit": "2026-08-26",
-    "responseMs": 183,
-    "testedAt": "2026-08-27T19:24:00.911Z"
+    "responseMs": 216,
+    "testedAt": "2026-08-27T19:28:28.074Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -102,17 +102,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 382,
-    "warmHitMs": 382,
+    "coldOrInitialMs": 212,
+    "warmHitMs": 212,
     "rows": 862,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 382,
+        "durationMs": 212,
         "rows": 862
       }
     ],
-    "testedAt": "2026-08-27T19:24:01.357Z"
+    "testedAt": "2026-08-27T19:28:28.343Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -172,8 +172,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 110,
-  "testedAt": "2026-08-27T19:24:02.244Z"
+  "durationMs": 217,
+  "testedAt": "2026-08-27T19:28:29.072Z"
 }```
 
 ## Browser navigation regression
@@ -183,12 +183,12 @@
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "stage": "desktop:round-1:navigate:#roster",
-  "error": "TimeoutException: Message: timeout: Timed out receiving message from renderer: 20.000\n  (Session info: chrome=151.0.7922.173)\nStacktrace:\n#0 0x55ac3e15236a <unknown>\n#1 0x55ac3dac5f49 <unknown>\n#2 0x55ac3daad99b <unknown>\n#3 0x55ac3daad616 <unknown>\n#4 0x55ac3daab1fe <unknown>\n#5 0x55ac3daabb7f <unknown>\n#6 0x55ac3dabacf0 <unknown>\n#7 0x55ac3dad4cb7 <unknown>\n#8 0x55ac3dadc68b <unknown>\n#9 0x55ac3daac2d9 <unknown>\n#10 0x55ac3dad4a12 <unknown>\n#11 0x55ac3db64416 <unknown>\n#12 0x55ac3db0ec92 <unknown>\n#13 0x55ac3db0fb11 <unknown>\n#14 0x55ac3e1178d0 <unknown>\n#15 0x55ac3e115f3a <unknown>\n#16 0x55ac3e1009b5 <unknown>\n#17 0x55ac3e116c0a <unknown>\n#18 0x55ac3e0e8740 <unknown>\n#19 0x55ac3e13d9a8 <unknown>\n#20 0x55ac3e13db45 <unknown>\n#21 0x55ac3e150f1e <unknown>\n#22 0x7f45b4e9cb84 <unknown>\n#23 0x7f45b4f29d6c <unknown>\n",
+  "error": "TimeoutException: Message: timeout: Timed out receiving message from renderer: 20.000\n  (Session info: chrome=151.0.7922.173)\nStacktrace:\n#0 0x55a63484e36a <unknown>\n#1 0x55a6341c1f49 <unknown>\n#2 0x55a6341a999b <unknown>\n#3 0x55a6341a9616 <unknown>\n#4 0x55a6341a71fe <unknown>\n#5 0x55a6341a7b7f <unknown>\n#6 0x55a6341b6cf0 <unknown>\n#7 0x55a6341d0cb7 <unknown>\n#8 0x55a6341d868b <unknown>\n#9 0x55a6341a82d9 <unknown>\n#10 0x55a6341d0a12 <unknown>\n#11 0x55a634260416 <unknown>\n#12 0x55a63420ac92 <unknown>\n#13 0x55a63420bb11 <unknown>\n#14 0x55a6348138d0 <unknown>\n#15 0x55a634811f3a <unknown>\n#16 0x55a6347fc9b5 <unknown>\n#17 0x55a634812c0a <unknown>\n#18 0x55a6347e4740 <unknown>\n#19 0x55a6348399a8 <unknown>\n#20 0x55a634839b45 <unknown>\n#21 0x55a63484cf1e <unknown>\n#22 0x7f6ee4c9cb84 <unknown>\n#23 0x7f6ee4d29d6c <unknown>\n",
   "state": {
-    "stateReadError": "TimeoutException: Message: timeout: Timed out receiving message from renderer: 20.000\n  (Session info: chrome=151.0.7922.173)\nStacktrace:\n#0 0x55ac3e15236a <unknown>\n#1 0x55ac3dac5f49 <unknown>\n#2 0x55ac3daad99b <unknown>\n#3 0x55ac3daad616 <unknown>\n#4 0x55ac3daab1fe <unknown>\n#5 0x55ac3daabb7f <unknown>\n#6 0x55ac3dabacf0 <unknown>\n#7 0x55ac3dad4cb7 <unknown>\n#8 0x55ac3dadc68b <unknown>\n#9 0x55ac3daac2d9 <unknown>\n#10 0x55ac3dad4a12 <unknown>\n#11 0x55ac3db63f86 <unknown>\n#12 0x55ac3db0ec92 <unknown>\n#13 0x55ac3db0fb11 <unknown>\n#14 0x55ac3e1178d0 <unknown>\n#15 0x55ac3e115f3a <unknown>\n#16 0x55ac3e1009b5 <unknown>\n#17 0x55ac3e116c0a <unknown>\n#18 0x55ac3e0e8740 <unknown>\n#19 0x55ac3e13d9a8 <unknown>\n#20 0x55ac3e13db45 <unknown>\n#21 0x55ac3e150f1e <unknown>\n#22 0x7f45b4e9cb84 <unknown>\n#23 0x7f45b4f29d6c <unknown>\n"
+    "stateReadError": "TimeoutException: Message: timeout: Timed out receiving message from renderer: 20.000\n  (Session info: chrome=151.0.7922.173)\nStacktrace:\n#0 0x55a63484e36a <unknown>\n#1 0x55a6341c1f49 <unknown>\n#2 0x55a6341a999b <unknown>\n#3 0x55a6341a9616 <unknown>\n#4 0x55a6341a71fe <unknown>\n#5 0x55a6341a7b7f <unknown>\n#6 0x55a6341b6cf0 <unknown>\n#7 0x55a6341d0cb7 <unknown>\n#8 0x55a6341d868b <unknown>\n#9 0x55a6341a82d9 <unknown>\n#10 0x55a6341d0a12 <unknown>\n#11 0x55a63425ff86 <unknown>\n#12 0x55a63420ac92 <unknown>\n#13 0x55a63420bb11 <unknown>\n#14 0x55a6348138d0 <unknown>\n#15 0x55a634811f3a <unknown>\n#16 0x55a6347fc9b5 <unknown>\n#17 0x55a634812c0a <unknown>\n#18 0x55a6347e4740 <unknown>\n#19 0x55a6348399a8 <unknown>\n#20 0x55a634839b45 <unknown>\n#21 0x55a63484cf1e <unknown>\n#22 0x7f6ee4c9cb84 <unknown>\n#23 0x7f6ee4d29d6c <unknown>\n"
   },
-  "durationSeconds": 44.2,
-  "testedAt": "2026-08-27T19:24:49Z"
+  "durationSeconds": 43.69,
+  "testedAt": "2026-08-27T19:29:17Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
