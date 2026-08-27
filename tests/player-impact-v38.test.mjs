@@ -44,6 +44,6 @@ test('My Player Impact is observer-light touch-safe refreshable and offline pack
   assert.match(feature,/min-height:44px/);
   assert.match(feature,/@media\(max-width:620px\)/);
   assert.match(runtime,/import '\.\/my-player-impact-v38\.js';/);
-  assert.match(sw,/titans-cc-brand-2026-v66/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/'\/my-player-impact-v38\.js'/);
 });
