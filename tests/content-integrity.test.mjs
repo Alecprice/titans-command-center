@@ -27,19 +27,22 @@ test('Week 9 is a bye and Week 18 is TBD',()=>{
   assert.equal(gameStatus(week18),'TBD');
 });
 
-test('fallback roster is the Aug 24 cross-source audited snapshot',()=>{
+test('fallback roster matches the Aug 27 official roster audit',()=>{
   assert.equal(team.rosterCoverage.fallbackType,'cross-source-audited-snapshot');
   assert.equal(team.rosterCoverage.fallbackPlayers,roster.length);
-  assert.equal(roster.length,96);
+  assert.equal(roster.length,95);
   assert.equal(team.rosterCoverage.officialActivePlayersAtAudit,91);
-  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,5);
+  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,4);
   assert.equal(roster.filter(p=>p.status==='Active').length,91);
-  assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,5);
-  assert.equal(team.rosterCoverage.asOf,'2026-08-24');
-  assert.match(team.rosterCoverage.sourceConflict,/Reid Carrico/i);
+  assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,4);
+  assert.equal(team.rosterCoverage.asOf,'2026-08-27');
+  assert.equal(team.rosterCoverage.sourceConflict,'');
   assert.ok(roster.some(p=>p.name==='Tanoh Kpassagnon'&&p.number==='58'&&p.status==='Active'));
   assert.ok(roster.some(p=>p.name==='Milo Eifler'&&p.number==='45'&&p.status==='Reserve/Injured'));
-  assert.ok(roster.some(p=>p.name==='Reid Carrico'&&p.number===''&&p.status==='Active'));
+  assert.ok(roster.some(p=>p.name==='Reid Carrico'&&p.number==='47'&&p.status==='Active'));
+  assert.ok(roster.some(p=>p.name==='Dyontae Johnson'&&p.number==='45'&&p.status==='Active'));
+  assert.equal(roster.some(p=>p.name==='Dominique Hampton'),false);
+  assert.equal(roster.some(p=>p.name==='Sanoussi Kane'),false);
   assert.equal(roster.some(p=>p.name==='Matt Lauter'),false);
 });
 
@@ -47,11 +50,13 @@ test('fallback roster does not use unsourced opinion tags',()=>{
   assert.equal(roster.some(p=>'tag' in p),false);
 });
 
-test('fallback feed is source-linked and includes the Aug 24 official roster move',()=>{
+test('fallback feed is source-linked and includes current official roster moves',()=>{
   for(const item of feed)assert.match(item.url,/^https:\/\//);
-  const move=feed.find(item=>/Reid Carrico/i.test(item.title));
+  const move=feed.find(item=>/Dyontae Johnson/i.test(item.title));
   assert.equal(move?.tier,'official');
-  assert.match(move?.summary||'',/newer official transaction/i);
+  assert.match(move?.summary||'',/four Reserve\/Injured/i);
+  const carrico=feed.find(item=>/Reid Carrico/i.test(item.title));
+  assert.equal(carrico?.tier,'official');
   const seattle=feed.find(item=>/Titans 19, Seahawks 16/i.test(item.title));
   assert.ok(seattle);
 });
