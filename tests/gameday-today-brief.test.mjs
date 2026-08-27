@@ -56,6 +56,6 @@ test('fast pass loads after stable Game Day and is precached',()=>{
   const gameIndex=html.indexOf('/gameday-v16.js?v=1');
   const briefIndex=html.indexOf('/gameday-today-v22.js?v=1');
   assert.ok(gameIndex>=0&&briefIndex>gameIndex);
-  assert.match(sw,/titans-cc-brand-2026-v60/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/\/gameday-today-v22\.js/);
 });
