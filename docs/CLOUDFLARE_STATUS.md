@@ -1,17 +1,17 @@
 # Cloudflare deployment status
 
-- Status: **deployed + Player Intelligence / Game Day browser regression failure**
-- Source commit: `f23b75dc1d02d53428e6ed76c3c1d8e517abfe91`
+- Status: **deployed + browser navigation regression failure**
+- Source commit: `e07f0794765ba3a4d80800a720ce231d4d58cbff`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
 - Deploy outcome: success
 - Production regression: success
-- Browser navigation regression: success
-- Listen Watch browser regression: success
-- Market Pulse browser regression: success
-- Command Intelligence browser regression: success
-- Player Intelligence / Game Day browser regression: failure
+- Browser navigation regression: failure
+- Listen Watch browser regression: skipped
+- Market Pulse browser regression: skipped
+- Command Intelligence browser regression: skipped
+- Player Intelligence / Game Day browser regression: skipped
 - Ask Titans browser regression: skipped
 - Change Intelligence browser regression: skipped
 - Runtime / 365 Mode browser regression: skipped
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-27T20:16:18Z
+- Recorded: 2026-08-27T20:30:49Z
 
 ## Production regression
 
@@ -39,8 +39,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v66",
-  "precachePaths": 114,
+  "serviceWorkerCache": "titans-cc-brand-2026-v67",
+  "precachePaths": 115,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -75,26 +75,26 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "f23b75dc1d02d53428e6ed76c3c1d8e517abfe91",
-    "builtAt": "2026-08-27T20:15:11.244Z"
+    "commit": "e07f0794765ba3a4d80800a720ce231d4d58cbff",
+    "builtAt": "2026-08-27T20:29:51.264Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 46,
-    "health": 240,
-    "data": 270,
-    "stats": 261,
-    "market": 2766,
-    "analytics": 457
+    "root": 42,
+    "health": 310,
+    "data": 336,
+    "stats": 369,
+    "market": 3027,
+    "analytics": 508
   },
-  "testedAt": "2026-08-27T20:15:40.611Z",
+  "testedAt": "2026-08-27T20:30:23.266Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-26",
     "databaseContentAudit": "2026-08-26",
-    "responseMs": 227,
-    "testedAt": "2026-08-27T20:15:40.868Z"
+    "responseMs": 431,
+    "testedAt": "2026-08-27T20:30:23.736Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -102,17 +102,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 404,
-    "warmHitMs": 404,
+    "coldOrInitialMs": 627,
+    "warmHitMs": 627,
     "rows": 936,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 404,
+        "durationMs": 627,
         "rows": 936
       }
     ],
-    "testedAt": "2026-08-27T20:15:41.324Z"
+    "testedAt": "2026-08-27T20:30:24.429Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -172,440 +172,59 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 155,
-  "testedAt": "2026-08-27T20:15:41.994Z"
+  "durationMs": 193,
+  "testedAt": "2026-08-27T20:30:25.206Z"
 }```
 
 ## Browser navigation regression
 
 ```json
 {
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktopRounds": 3,
-  "transactionChecks": 12,
-  "mobileChecks": 14,
-  "smallPhoneChecks": 2,
-  "smartSearchQuickJump": true,
-  "mobileDrawerInert": true,
-  "fiveActionDock": true,
-  "teamRoomChecks": 4,
-  "rosterFilterReset": true,
-  "rosterTotal": 95,
-  "mobileTargets": [
-    {
-      "height": 58,
-      "label": "Home",
-      "width": 69.796875
-    },
-    {
-      "height": 58,
-      "label": "Roster",
-      "width": 69.796875
-    },
-    {
-      "height": 58,
-      "label": "Game",
-      "width": 69.796875
-    },
-    {
-      "height": 58,
-      "label": "Search",
-      "width": 69.796875
-    },
-    {
-      "height": 58,
-      "label": "More",
-      "width": 69.8125
-    }
-  ],
-  "maxLongTaskMs": 227,
-  "longTasksOver250ms": 0,
-  "browserWarnings": [],
-  "durationSeconds": 10.2,
-  "testedAt": "2026-08-27T20:15:56Z"
-}```
-
-## Listen Watch browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "territoryChecks": [
-    "Elsewhere in U.S.",
-    "International",
-    "Nashville / Middle Tennessee"
-  ],
-  "officialTitansAudio": true,
-  "official1045Player": true,
-  "rawEmbeddedAudio": false,
-  "mobileAreaTargets": [
-    {
-      "h": 44,
-      "label": "Nashville / Middle Tennessee"
-    },
-    {
-      "h": 44,
-      "label": "Elsewhere in U.S."
-    },
-    {
-      "h": 44,
-      "label": "International"
-    }
-  ],
-  "mobileTimeRows": 4,
-  "browserWarnings": [],
-  "durationSeconds": 2.58,
-  "testedAt": "2026-08-27T20:15:58Z"
-}```
-
-## Market Pulse browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "desktop": {
-    "initial": {
-      "state": {
-        "quality": "Live",
-        "provider": "PropLine",
-        "shown": 156,
-        "total": 936,
-        "renderedRows": 156
-      },
-      "summary": {
-        "controls": [
-          {
-            "disabled": false,
-            "height": 44,
-            "id": "mh-event-filter",
-            "pressed": null,
-            "tag": "SELECT",
-            "value": "all",
-            "width": 423
-          },
-          {
-            "disabled": false,
-            "height": 44,
-            "id": "mh-book-filter",
-            "pressed": null,
-            "tag": "SELECT",
-            "value": "all",
-            "width": 160
-          },
-          {
-            "disabled": false,
-            "height": 44,
-            "id": "mh-category-filter",
-            "pressed": null,
-            "tag": "SELECT",
-            "value": "all",
-            "width": 160
-          },
-          {
-            "disabled": false,
-            "height": 44,
-            "id": "mh-alt-toggle",
-            "pressed": "false",
-            "tag": "BUTTON",
-            "value": "",
-            "width": 189.671875
-          }
-        ],
-        "empty": "",
-        "errorVisible": false,
-        "overflow": false,
-        "provider": "PropLine",
-        "quality": "Live",
-        "referenceNotice": "",
-        "refreshHeight": 44,
-        "result": "Showing 156 of 936 rows",
-        "resultTotal": 936,
-        "rowCount": 156,
-        "rowSample": [
-          "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine3Price-115Implied53.5%",
-          "Chicago Bears at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideChicago BearsLine2.5Price+100Implied50.0%",
-          "Chicago Bears at Tennessee Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine2.5Price-109Implied52.2%"
-        ],
-        "scrollWidth": 1265,
-        "shown": 156,
-        "title": "Live Titans market board",
-        "total": 936,
-        "viewport": 1265
-      }
-    },
-    "filters": {
-      "event": {
-        "available": true,
-        "options": 3,
-        "selectedValue": "159453",
-        "before": "Showing 156 of 936 rows",
-        "after": "Showing 88 of 936 rows"
-      },
-      "book": {
-        "available": true,
-        "options": 15,
-        "selectedValue": "betonlineag",
-        "before": "Showing 156 of 936 rows",
-        "after": "Showing 12 of 936 rows"
-      },
-      "category": {
-        "available": true,
-        "options": 2,
-        "selectedValue": "game_line",
-        "before": "Showing 156 of 936 rows",
-        "after": "Showing 156 of 936 rows"
-      }
-    },
-    "alternateLines": {
-      "available": true,
-      "beforeRows": 156,
-      "afterRows": 936
-    },
-    "refresh": {
-      "state": {
-        "quality": "Live",
-        "provider": "PropLine",
-        "shown": 936,
-        "total": 936,
-        "renderedRows": 936
-      },
-      "summary": {
-        "controls": [
-          {
-            "disabled": false,
-            "height": 44,
-            "id": "mh-event-filter",
-            "pressed": null,
-            "tag": "SELECT",
-            "value": "all",
-            "width": 423
-          },
-          {
-            "disabled": false,
-            "height": 44,
-            "id": "mh-book-filter",
-            "pressed": null,
-            "tag": "SELECT",
-            "value": "all",
-            "width": 160
-          },
-          {
-            "disabled": false,
-            "height": 44,
-            "id": "mh-category-filter",
-            "pressed": null,
-            "tag": "SELECT",
-            "value": "all",
-            "width": 160
-          },
-          {
-            "disabled": false,
-            "height": 44,
-            "id": "mh-alt-toggle",
-            "pressed": "true",
-            "tag": "BUTTON",
-            "value": "",
-            "width": 183.171875
-          }
-        ],
-        "empty": "",
-        "errorVisible": false,
-        "overflow": false,
-        "provider": "PropLine",
-        "quality": "Live",
-        "referenceNotice": "",
-        "refreshHeight": 44,
-        "result": "Showing 936 of 936 rows",
-        "resultTotal": 936,
-        "rowCount": 936,
-        "rowSample": [
-          "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine3Price-115Implied53.5%",
-          "Chicago Bears at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideChicago BearsLine2.5Price+100Implied50.0%",
-          "Chicago Bears at Tennessee Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine2.5Price-109Implied52.2%"
-        ],
-        "scrollWidth": 1265,
-        "shown": 936,
-        "title": "Live Titans market board",
-        "total": 936,
-        "viewport": 1265
-      }
-    }
-  },
-  "mobile": {
-    "state": {
-      "quality": "Live",
-      "provider": "PropLine",
-      "shown": 936,
-      "total": 936,
-      "renderedRows": 936
-    },
-    "summary": {
-      "controls": [
-        {
-          "disabled": false,
-          "height": 48,
-          "id": "mh-event-filter",
-          "pressed": null,
-          "tag": "SELECT",
-          "value": "all",
-          "width": 331
-        },
-        {
-          "disabled": false,
-          "height": 48,
-          "id": "mh-book-filter",
-          "pressed": null,
-          "tag": "SELECT",
-          "value": "all",
-          "width": 331
-        },
-        {
-          "disabled": false,
-          "height": 48,
-          "id": "mh-category-filter",
-          "pressed": null,
-          "tag": "SELECT",
-          "value": "all",
-          "width": 331
-        },
-        {
-          "disabled": false,
-          "height": 44,
-          "id": "mh-alt-toggle",
-          "pressed": "true",
-          "tag": "BUTTON",
-          "value": "",
-          "width": 331
-        }
-      ],
-      "empty": "",
-      "errorVisible": false,
-      "overflow": false,
-      "provider": "PropLine",
-      "quality": "Live",
-      "referenceNotice": "",
-      "refreshHeight": 44,
-      "result": "Showing 936 of 936 rows",
-      "resultTotal": 936,
-      "rowCount": 936,
-      "rowSample": [
-        "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine3Price-115Implied53.5%",
-        "Chicago Bears at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideChicago BearsLine2.5Price+100Implied50.0%",
-        "Chicago Bears at Tennessee Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine2.5Price-109Implied52.2%"
-      ],
-      "scrollWidth": 375,
-      "shown": 936,
-      "title": "Live Titans market board",
-      "total": 936,
-      "viewport": 375
-    },
-    "rowGeometry": [
-      {
-        "height": 155.59375,
-        "left": 9,
-        "right": 366,
-        "width": 357
-      },
-      {
-        "height": 155.59375,
-        "left": 9,
-        "right": 366,
-        "width": 357
-      },
-      {
-        "height": 155.59375,
-        "left": 9,
-        "right": 366,
-        "width": 357
-      },
-      {
-        "height": 155.59375,
-        "left": 9,
-        "right": 366,
-        "width": 357
-      }
-    ]
-  },
-  "browserWarnings": [],
-  "durationSeconds": 6.06,
-  "testedAt": "2026-08-27T20:16:05Z"
-}```
-
-## Command Intelligence browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "tabsVisited": [
-    "changes",
-    "press",
-    "scheme",
-    "global",
-    "stadium",
-    "gm",
-    "history"
-  ],
-  "addonsVerified": [
-    "changes",
-    "scheme",
-    "global",
-    "gm"
-  ],
-  "spoilerToggle": true,
-  "mediaTuneGuideAfterPushState": true,
-  "mobileTabTargets": [
-    {
-      "h": 48,
-      "label": "Changes"
-    },
-    {
-      "h": 48,
-      "label": "Press Room"
-    },
-    {
-      "h": 48,
-      "label": "Scheme Lab"
-    },
-    {
-      "h": 48,
-      "label": "Global Fans"
-    },
-    {
-      "h": 48,
-      "label": "Stadium"
-    },
-    {
-      "h": 48,
-      "label": "Fan GM"
-    },
-    {
-      "h": 48,
-      "label": "Time Machine"
-    }
-  ],
-  "mobileViewport": 375,
-  "browserWarnings": [],
-  "durationSeconds": 2.1,
-  "testedAt": "2026-08-27T20:16:07Z"
-}```
-
-## Player Intelligence / Game Day browser regression
-
-```json
-{
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "cutdown:desktop",
-  "error": "TimeoutError: Cutdown view did not settle after roster refresh: {'buttonConnected': True, 'exists': True, 'panelConnected': True, 'selected': False, 'visible': True}",
-  "durationSeconds": 10.25,
-  "testedAt": "2026-08-27T20:16:18Z",
-  "hash": "#roster?view=cutdown",
-  "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated yesterday\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\n53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n3d 1h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.\n\n2026-08-24\n\nSigned LB Reid Carrico and placed LB Milo Eifler on injured reserve.\n\n2026-08-21\n\nWaived LB Sean Brown from injured reserve with an injury settlement; placed DB Nazeeh Johnson on injured reserve; waived TE Matt Lauter; signed free agents LB Milo Eifler and DE Tanoh Kpassagnon.\n\n2026-08-19\n\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\n\n2026-08-17\n\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\n\n2026-08-16\n\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+\n#8\nWill Levis\nQB \u00b7 Offense\n+\n#21\nD'Ernest Johnson\nRB \u00b7 Offense\n+\n#36\nJulius Chestnut",
-  "browserWarnings": []
+  "stage": "mobile:roster-clear-filters",
+  "error": "TimeoutException: Message: \n",
+  "state": {
+    "appChildren": 11,
+    "appText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated yesterday\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\nRoster coverage: 95 player records are loaded from the current s",
+    "depthPressed": "false",
+    "hash": "#roster",
+    "href": "https://titans-command-center.alecjordanprice.workers.dev/#roster",
+    "marketLoading": null,
+    "moreExpanded": "false",
+    "rosterCardCount": 46,
+    "rosterFilterCount": "46 of 95 players shown",
+    "rosterGridChildren": 46,
+    "rosterGridDisplay": "grid",
+    "rosterGridExists": true,
+    "rosterGridHidden": false,
+    "rosterGridPreview": "24\nAlontae Taylor\n\nCB \u00b7 Defense\n\nActive\n18\nCor'Dale Flott\n\nCB \u00b7 Defense\n\nActive\n13\nCorey Mayfield Jr.\n\nCB \u00b7 Defense\n\nActive\n16\nJalen McMurray\n\nCB \u00b7 Defense\n\nActive\n25\nJoshua Williams\n\nCB \u00b7 Defense\n\nActive\n29\nKeydrain Calligan\n\nCB \u00b7 Defense\n",
+    "rosterPressed": "true",
+    "rosterSearchValue": null,
+    "rosterUnitValue": "Defense",
+    "rosterVisibleCardCount": 46,
+    "rows": 0,
+    "scrollWidth": 375,
+    "sidebarInert": true,
+    "sidebarOpen": false,
+    "staffPressed": "false",
+    "statsLoading": null,
+    "teamRoomSwitcher": true,
+    "teamRoomView": "roster",
+    "title": "Roster",
+    "transactionTools": false,
+    "viewport": 390
+  },
+  "durationSeconds": 18.14,
+  "testedAt": "2026-08-27T20:30:49Z",
+  "browserWarnings": [
+    {
+      "level": "SEVERE",
+      "message": "https://titans-command-center.alecjordanprice.workers.dev/schedule-calendar-v39.js 24:48 Uncaught ReferenceError: mount is not defined",
+      "source": "javascript",
+      "timestamp": 1787862640126
+    }
+  ]
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
