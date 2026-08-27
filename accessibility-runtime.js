@@ -2,6 +2,7 @@ import './blank-state-runtime.js';
 import './continue-command-v35.js';
 import './my-titans-home-v35.js';
 import './my-player-watch-v36.js';
+import './gameday-personal-v37.js';
 
 const menu=document.querySelector('#menu-button');
 const sidebar=document.querySelector('#sidebar');
@@ -42,15 +43,21 @@ function reconcileTeamRoom(explicitView=null,{syncUrl=false}={}){
   const stored=TEAM_VIEWS.has(app.dataset.teamRoomView)?app.dataset.teamRoomView:null;
   const pressed=[...switcher.querySelectorAll('[data-team-room-view]')].find(button=>button.getAttribute('aria-pressed')==='true')?.dataset.teamRoomView;
   const next=TEAM_VIEWS.has(explicitView)?explicitView:(requestedTeamView()||stored||(TEAM_VIEWS.has(pressed)?pressed:'roster'));
-  app.dataset.teamRoomView=next;
+  if(app.dataset.teamRoomView!==next)app.dataset.teamRoomView=next;
   switcher.querySelectorAll('[data-team-room-view]').forEach(button=>{
     const selected=button.dataset.teamRoomView===next;
-    button.classList.toggle('active',selected);
-    button.setAttribute('aria-pressed',String(selected));
+    if(button.classList.contains('active')!==selected)button.classList.toggle('active',selected);
+    const pressedValue=String(selected);
+    if(button.getAttribute('aria-pressed')!==pressedValue)button.setAttribute('aria-pressed',pressedValue);
   });
-  app.querySelectorAll('.team-room-panel').forEach(panel=>{panel.hidden=panel.dataset.panel!==next;});
+  app.querySelectorAll('.team-room-panel').forEach(panel=>{
+    const hidden=panel.dataset.panel!==next;
+    if(panel.hidden!==hidden)panel.hidden=hidden;
+  });
   const hideRoster=next!=='roster';
-  app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg').forEach(element=>{element.hidden=hideRoster;});
+  app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg').forEach(element=>{
+    if(element.hidden!==hideRoster)element.hidden=hideRoster;
+  });
   if(syncUrl)syncTeamViewUrl(next);
 }
 function scheduleTeamRoomReconcile(){
