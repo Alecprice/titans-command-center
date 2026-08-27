@@ -30,6 +30,29 @@ function requestedTeamView(){
   const value=new URLSearchParams(location.hash.split('?')[1]||'').get('view');
   return TEAM_VIEWS.has(value)?value:null;
 }
+function teamRoomMismatch(next){
+  if(!app||teamRoomRoute()!=='roster')return false;
+  const switcher=app.querySelector('.team-room-switcher');
+  const button=switcher?.querySelector(`[data-team-room-view="${next}"]`);
+  const panel=app.querySelector(`.team-room-panel[data-panel="${next}"]`);
+  const baseVisible=next==='roster';
+  const baseMismatch=[...app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg')].some(element=>element.hidden===baseVisible);
+  return Boolean(button&&(button.getAttribute('aria-pressed')!=='true'||button.classList.contains('active')===false||(panel&&panel.hidden)||baseMismatch));
+}
+function applyTeamRoomFallback(next){
+  if(!app||teamRoomRoute()!=='roster'||!TEAM_VIEWS.has(next))return;
+  const switcher=app.querySelector('.team-room-switcher');
+  if(!switcher)return;
+  app.dataset.teamRoomView=next;
+  switcher.querySelectorAll('[data-team-room-view]').forEach(button=>{
+    const selected=button.dataset.teamRoomView===next;
+    button.classList.toggle('active',selected);
+    button.setAttribute('aria-pressed',String(selected));
+  });
+  app.querySelectorAll('.team-room-panel').forEach(panel=>{panel.hidden=panel.dataset.panel!==next;});
+  const hideRoster=next!=='roster';
+  app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg').forEach(element=>{element.hidden=hideRoster;});
+}
 function reconcileTeamRoom(){
   if(!app||teamRoomRoute()!=='roster')return;
   const switcher=app.querySelector('.team-room-switcher');
@@ -38,13 +61,9 @@ function reconcileTeamRoom(){
   const pressed=[...switcher.querySelectorAll('[data-team-room-view]')].find(button=>button.getAttribute('aria-pressed')==='true')?.dataset.teamRoomView;
   const next=requestedTeamView()||stored||(TEAM_VIEWS.has(pressed)?pressed:'roster');
   const button=switcher.querySelector(`[data-team-room-view="${next}"]`);
-  const panel=app.querySelector(`.team-room-panel[data-panel="${next}"]`);
-  const baseVisible=next==='roster';
-  const baseMismatch=[...app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg')].some(element=>element.hidden===baseVisible);
-  if(!button)return;
-  if(button.getAttribute('aria-pressed')!=='true'||button.classList.contains('active')===false||(panel&&panel.hidden)||baseMismatch){
-    button.click();
-  }
+  if(!button||!teamRoomMismatch(next))return;
+  button.click();
+  queueMicrotask(()=>{if(teamRoomMismatch(next))applyTeamRoomFallback(next);});
 }
 function scheduleTeamRoomReconcile(){
   if(teamRoomQueued)return;
@@ -66,6 +85,10 @@ if(menu&&sidebar){
 if(app){
   new MutationObserver(syncAsyncRegions).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-polished']});
   new MutationObserver(scheduleTeamRoomReconcile).observe(app,{subtree:true,childList:true});
+  app.addEventListener('click',event=>{
+    const button=event.target instanceof Element?event.target.closest('[data-team-room-view]'):null;
+    if(button&&app.contains(button))scheduleTeamRoomReconcile();
+  },true);
 }
 addEventListener('hashchange',scheduleTeamRoomReconcile);
 syncAsyncRegions();
