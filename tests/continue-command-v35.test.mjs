@@ -15,11 +15,11 @@ test('Continue Command remembers only bounded same-app hash destinations',()=>{
 });
 
 test('Home exposes an accessible clearable Continue shortcut without trapping navigation',()=>{
-  assert.match(feature,/aria-label','Continue where you left off'/);
+  assert.match(feature,/setAttribute\('aria-label','Continue where you left off'\)/);
   assert.match(feature,/data-clear-continue/);
   assert.match(feature,/min-height:44px/);
   assert.match(feature,/@media\(max-width:620px\)/);
-  assert.match(feature,/prefers/); // guarded below: feature intentionally has no animation dependency
+  assert.doesNotMatch(feature,/animation:/);
 });
 
 test('Continue Command is loaded by the stable runtime and available in the offline shell',()=>{
