@@ -3,6 +3,7 @@ import './continue-command-v35.js';
 import './my-titans-home-v35.js';
 import './my-player-watch-v36.js';
 import './gameday-personal-v37.js';
+import './my-player-impact-v38.js';
 
 const menu=document.querySelector('#menu-button');
 const sidebar=document.querySelector('#sidebar');
@@ -29,36 +30,21 @@ function requestedTeamView(){
   const value=new URLSearchParams(location.hash.split('?')[1]||'').get('view');
   return TEAM_VIEWS.has(value)?value:null;
 }
-function syncTeamViewUrl(view){
-  if(teamRoomRoute()!=='roster')return;
-  const params=new URLSearchParams(location.hash.split('?')[1]||'');
-  if(view==='roster')params.delete('view');else params.set('view',view);
-  const query=params.toString(),next=`#roster${query?`?${query}`:''}`;
-  if(location.hash!==next)history.replaceState(history.state,'',next);
-}
-function reconcileTeamRoom(explicitView=null,{syncUrl=false}={}){
+function reconcileTeamRoom(){
   if(!app||teamRoomRoute()!=='roster')return;
   const switcher=app.querySelector('.team-room-switcher');
   if(!switcher)return;
   const stored=TEAM_VIEWS.has(app.dataset.teamRoomView)?app.dataset.teamRoomView:null;
   const pressed=[...switcher.querySelectorAll('[data-team-room-view]')].find(button=>button.getAttribute('aria-pressed')==='true')?.dataset.teamRoomView;
-  const next=TEAM_VIEWS.has(explicitView)?explicitView:(requestedTeamView()||stored||(TEAM_VIEWS.has(pressed)?pressed:'roster'));
-  if(app.dataset.teamRoomView!==next)app.dataset.teamRoomView=next;
-  switcher.querySelectorAll('[data-team-room-view]').forEach(button=>{
-    const selected=button.dataset.teamRoomView===next;
-    if(button.classList.contains('active')!==selected)button.classList.toggle('active',selected);
-    const pressedValue=String(selected);
-    if(button.getAttribute('aria-pressed')!==pressedValue)button.setAttribute('aria-pressed',pressedValue);
-  });
-  app.querySelectorAll('.team-room-panel').forEach(panel=>{
-    const hidden=panel.dataset.panel!==next;
-    if(panel.hidden!==hidden)panel.hidden=hidden;
-  });
-  const hideRoster=next!=='roster';
-  app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg').forEach(element=>{
-    if(element.hidden!==hideRoster)element.hidden=hideRoster;
-  });
-  if(syncUrl)syncTeamViewUrl(next);
+  const next=requestedTeamView()||stored||(TEAM_VIEWS.has(pressed)?pressed:'roster');
+  const button=switcher.querySelector(`[data-team-room-view="${next}"]`);
+  const panel=app.querySelector(`.team-room-panel[data-panel="${next}"]`);
+  const baseVisible=next==='roster';
+  const baseMismatch=[...app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg')].some(element=>element.hidden===baseVisible);
+  if(!button)return;
+  if(button.getAttribute('aria-pressed')!=='true'||button.classList.contains('active')===false||(panel&&panel.hidden)||baseMismatch){
+    button.click();
+  }
 }
 function scheduleTeamRoomReconcile(){
   if(teamRoomQueued)return;
@@ -79,11 +65,7 @@ if(menu&&sidebar){
 
 if(app){
   new MutationObserver(syncAsyncRegions).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-polished']});
-  new MutationObserver(scheduleTeamRoomReconcile).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','aria-pressed','data-team-room-view']});
-  app.addEventListener('click',event=>{
-    const button=event.target instanceof Element?event.target.closest('[data-team-room-view]'):null;
-    if(button&&app.contains(button))reconcileTeamRoom(button.dataset.teamRoomView,{syncUrl:true});
-  },true);
+  new MutationObserver(scheduleTeamRoomReconcile).observe(app,{subtree:true,childList:true});
 }
 addEventListener('hashchange',scheduleTeamRoomReconcile);
 syncAsyncRegions();
