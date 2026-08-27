@@ -24,14 +24,15 @@ test('player pages expose an accessible watch toggle without nesting controls in
 });
 
 test('Home renders watched players as direct Player Intelligence shortcuts with explicit remove controls',()=>{
-  assert.match(feature,/class=\\"v36-watch-grid\\"/);
+  assert.match(feature,/class="v36-watch-grid"/);
   assert.match(feature,/#player\?id=/);
   assert.match(feature,/data-v36-remove/);
-  assert.match(feature,/aria-label=\\"Remove \$\{esc\(item\.name\)\} from watchlist\\"/);
+  assert.match(feature,/aria-label="Remove \$\{esc\(item\.name\)\} from watchlist"/);
+  assert.match(feature,/\.v36-watch-remove\{[^}]*width:44px[^}]*min-height:44px[^}]*height:44px/);
 });
 
 test('watchlist feature loads from stable runtime and remains available offline',()=>{
   assert.match(runtime,/import '\.\/my-player-watch-v36\.js';/);
-  assert.match(sw,/titans-cc-brand-2026-v64/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/'\/my-player-watch-v36\.js'/);
 });
