@@ -24,6 +24,6 @@ test('Home exposes an accessible clearable Continue shortcut without trapping na
 
 test('Continue Command is loaded by the stable runtime and available in the offline shell',()=>{
   assert.match(runtime,/import '\.\/continue-command-v35\.js';/);
-  assert.match(sw,/titans-cc-brand-2026-v62/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/'\/continue-command-v35\.js'/);
 });

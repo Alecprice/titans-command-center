@@ -1,5 +1,6 @@
 import './blank-state-runtime.js';
 import './continue-command-v35.js';
+import './my-titans-home-v35.js';
 
 const menu=document.querySelector('#menu-button');
 const sidebar=document.querySelector('#sidebar');
