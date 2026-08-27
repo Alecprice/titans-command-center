@@ -33,6 +33,11 @@ test('schedule calendar keeps official schedule provenance and safe calendar tex
   assert.match(feature,/target="_blank" rel="noopener noreferrer"/);
 });
 
+test('schedule calendar load lifecycle returns to the real render function without an undefined mount callback',()=>{
+  assert.match(feature,/\.finally\(\(\)=>\{loading=null;queueMicrotask\(render\);\}\)/);
+  assert.doesNotMatch(feature,/queueMicrotask\(mount\)/);
+});
+
 test('schedule calendar is Schedule-only observer-light touch-safe and packaged offline',()=>{
   assert.match(feature,/route\(\)!=='games'/);
   assert.match(feature,/runtime\.onRoute/);
