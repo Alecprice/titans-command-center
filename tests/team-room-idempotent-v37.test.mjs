@@ -7,8 +7,8 @@ const js=fs.readFileSync(new URL('../accessibility-runtime.js',import.meta.url),
 test('Team Room semantic repair no longer rewrites Team Room attributes itself',()=>{
   assert.doesNotMatch(js,/setAttribute\('aria-pressed'/);
   assert.doesNotMatch(js,/classList\.toggle\('active'/);
-  assert.doesNotMatch(js,/panel\.hidden=/);
-  assert.doesNotMatch(js,/element\.hidden=/);
+  assert.doesNotMatch(js,/panel\.hidden\s*=(?!=)/);
+  assert.doesNotMatch(js,/element\.hidden\s*=(?!=)/);
   assert.match(js,/button\.click\(\)/);
 });
 
