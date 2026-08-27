@@ -1,6 +1,7 @@
 import {getSql} from './db.mjs';
 
 const AUTH_ORIGIN='https://ep-cold-moon-a6z7a2ag.neonauth.us-west-2.aws.neon.tech/neondb/auth';
+const PUBLIC_APP_ORIGIN='https://titans-command-center.alecjprice.com';
 const V10_PREF_KEY='titans:v10Prefs';
 const PREF_KEYS=new Set(['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY,'titans-fantasy-v1']);
 const HOME_KEYS=['game','favorites','moves','intel','markets','freshness'];
@@ -26,7 +27,12 @@ function mutationIsCrossSite(request){
   if(String(request.headers.get('sec-fetch-site')||'').toLowerCase()==='cross-site')return true;
   const origin=request.headers.get('origin');
   if(!origin)return false;
-  try{return new URL(origin).origin!==new URL(request.url).origin;}catch{return true;}
+  try{
+    const browserOrigin=new URL(origin).origin;
+    const workerOrigin=new URL(request.url).origin;
+    // CloudFront intentionally sends the workers.dev Host to the Worker while the browser stays on the public hostname.
+    return browserOrigin!==workerOrigin&&browserOrigin!==PUBLIC_APP_ORIGIN;
+  }catch{return true;}
 }
 
 function declaredBodyTooLarge(request,maxBytes){
