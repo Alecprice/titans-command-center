@@ -2,19 +2,21 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const js=fs.readFileSync(new URL('../accessibility-runtime.js',import.meta.url),'utf8');
+const accessibility=fs.readFileSync(new URL('../accessibility-runtime.js',import.meta.url),'utf8');
+const teamRoom=fs.readFileSync(new URL('../team-room.js',import.meta.url),'utf8');
 
-test('Team Room semantic repair keeps the selected control and visible panel atomic',()=>{
-  assert.match(js,/TEAM_VIEWS=new Set\(\['roster','depth','staff','cutdown'\]\)/);
-  assert.match(js,/if\(button\.getAttribute\('aria-pressed'\)!==pressedValue\)button\.setAttribute\('aria-pressed',pressedValue\)/);
-  assert.match(js,/const hidden=panel\.dataset\.panel!==next/);
-  assert.match(js,/if\(panel\.hidden!==hidden\)panel\.hidden=hidden/);
-  assert.match(js,/if\(app\.dataset\.teamRoomView!==next\)app\.dataset\.teamRoomView=next/);
+test('Team Room controller owns selected control and visible panel semantics',()=>{
+  assert.match(teamRoom,/app\.dataset\.teamRoomView=next/);
+  assert.match(teamRoom,/b\.setAttribute\('aria-pressed',String\(on\)\)/);
+  assert.match(teamRoom,/p\.hidden=p\.dataset\.panel!==next/);
+  assert.match(teamRoom,/syncRosterBaseVisibility\(app,next\)/);
 });
 
-test('Team Room repair survives dynamic renders and delegated clicks',()=>{
-  assert.match(js,/attributeFilter:\['hidden','aria-pressed','data-team-room-view'\]/);
-  assert.match(js,/closest\('\[data-team-room-view\]'\)/);
-  assert.match(js,/reconcileTeamRoom\(button\.dataset\.teamRoomView,\{syncUrl:true\}\)/);
-  assert.match(js,/addEventListener\('hashchange',scheduleTeamRoomReconcile\)/);
+test('accessibility repair delegates a mismatch to the real Team Room control',()=>{
+  assert.match(accessibility,/TEAM_VIEWS=new Set\(\['roster','depth','staff','cutdown'\]\)/);
+  assert.match(accessibility,/button\.getAttribute\('aria-pressed'\)!=='true'/);
+  assert.match(accessibility,/button\.click\(\)/);
+  assert.doesNotMatch(accessibility,/button\.setAttribute\('aria-pressed'/);
+  assert.doesNotMatch(accessibility,/panel\.hidden=/);
+  assert.match(accessibility,/addEventListener\('hashchange',scheduleTeamRoomReconcile\)/);
 });
