@@ -8,6 +8,7 @@ test('Team Room preserves the selected roster subview across app rerenders',()=>
   assert.match(js,/TR_VIEWS=new Set\(\['roster','depth','staff','cutdown'\]\)/);
   assert.match(js,/trPreferredRosterView='roster'/);
   assert.match(js,/if\(persist\)\{trPreferredRosterView=next;syncRosterViewUrl\(next\);\}/);
+  assert.match(js,/const initialView=requestedRosterView\(\)\|\|trPreferredRosterView/);
   assert.match(js,/setRosterView\(requestedRosterView\(\)\|\|app\.dataset\.teamRoomView\|\|trPreferredRosterView,\{persist:false\}\)/);
   assert.doesNotMatch(js,/wireTeamRoomSwitcher\(switcher\);setRosterView\('roster'\)/);
 });
@@ -22,7 +23,8 @@ test('Team Room persists subview selection in a shareable roster URL without his
 
 test('Team Room honors deep-linked subviews without losing keyboard behavior',()=>{
   assert.match(js,/new URLSearchParams\(location\.hash\.split\('\?'\)\[1\]\|\|''\)\.get\('view'\)/);
-  assert.match(js,/data-team-room-view="cutdown"/);
+  assert.match(js,/teamRoomButton\('cutdown','Cutdown',view==='cutdown'\)/);
+  assert.match(js,/switcher\.innerHTML=teamRoomSwitcherMarkup\(initialView\)/);
   assert.match(js,/ArrowRight/);
   assert.match(js,/ArrowLeft/);
   assert.match(js,/Home/);
