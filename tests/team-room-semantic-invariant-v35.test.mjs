@@ -6,9 +6,10 @@ const js=fs.readFileSync(new URL('../accessibility-runtime.js',import.meta.url),
 
 test('Team Room semantic repair keeps the selected control and visible panel atomic',()=>{
   assert.match(js,/TEAM_VIEWS=new Set\(\['roster','depth','staff','cutdown'\]\)/);
-  assert.match(js,/button\.setAttribute\('aria-pressed',String\(selected\)\)/);
-  assert.match(js,/panel\.hidden=panel\.dataset\.panel!==next/);
-  assert.match(js,/app\.dataset\.teamRoomView=next/);
+  assert.match(js,/if\(button\.getAttribute\('aria-pressed'\)!==pressedValue\)button\.setAttribute\('aria-pressed',pressedValue\)/);
+  assert.match(js,/const hidden=panel\.dataset\.panel!==next/);
+  assert.match(js,/if\(panel\.hidden!==hidden\)panel\.hidden=hidden/);
+  assert.match(js,/if\(app\.dataset\.teamRoomView!==next\)app\.dataset\.teamRoomView=next/);
 });
 
 test('Team Room repair survives dynamic renders and delegated clicks',()=>{
