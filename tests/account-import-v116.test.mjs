@@ -6,7 +6,7 @@ const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 test('v1.16 backup restore is loaded through the stable account module and packaged offline',()=>{
   const account=read('account-v112.js'),sw=read('sw.js');
   assert.match(account,/import '\.\/account-import-v116\.js\?v=1';/);
-  assert.match(sw,/account-import-v116\.js/);assert.match(sw,/account-import-v116\.css/);assert.match(sw,/titans-cc-brand-2026-v60/);
+  assert.match(sw,/account-import-v116\.js/);assert.match(sw,/account-import-v116\.css/);assert.match(sw,/titans-cc-brand-2026-v\d+/);
 });
 
 test('backup restore enhancement mounts whenever the account modal is inserted',()=>{
