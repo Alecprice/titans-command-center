@@ -1,7 +1,8 @@
 (() => {
   'use strict';
   const V10_PREF_KEY='titans:v10Prefs';
-  const KEYS=['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY];
+  const FANTASY_PREF_KEY='titans-fantasy-v1';
+  const KEYS=['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY,FANTASY_PREF_KEY];
   const MAX_IMPORT_BYTES=32000;
   let syncing=false,timer=0,lastUser='';
   const parse=key=>{try{const raw=localStorage.getItem(key);return raw==null?undefined:JSON.parse(raw)}catch{return undefined}};
@@ -27,12 +28,13 @@
       const remotePreferences=remote?.preferences&&typeof remote.preferences==='object'?remote.preferences:{};
       const merged={...local,...remotePreferences};
       const refreshV10=V10_PREF_KEY in remotePreferences&&!same(local[V10_PREF_KEY],merged[V10_PREF_KEY]);
+      const refreshFantasy=FANTASY_PREF_KEY in remotePreferences&&!same(local[FANTASY_PREF_KEY],merged[FANTASY_PREF_KEY]);
       apply(merged);
       await request('PUT',merged);
       lastUser=id;
       status('synced','Your Titans settings are synced.');
       window.dispatchEvent(new CustomEvent('titans:preferences-synced',{detail:{keys:Object.keys(merged)}}));
-      if(refreshV10)setTimeout(()=>location.reload(),120);
+      if(refreshV10||refreshFantasy)setTimeout(()=>location.reload(),120);
     }catch(err){reportFailure(err);}
     finally{syncing=false;}
   }
@@ -104,7 +106,8 @@
   function schedule(){clearTimeout(timer);timer=setTimeout(push,500);}
   addEventListener('titans:account',event=>{const user=event.detail?.user;if(user)initialSync(user);else{lastUser='';status('guest','Guest settings stay on this device.')}});
   addEventListener('storage',event=>{if(KEYS.includes(event.key))schedule();});
-  document.addEventListener('click',event=>{const el=event.target instanceof Element?event.target:null;if(!el)return;if(el.closest('[data-v15-profile-save],[data-v15-alert-save],[data-v16-favorite],[data-custom-remove],[data-save-settings]'))setTimeout(schedule,0);});
-  document.addEventListener('submit',event=>{const form=event.target;if(form instanceof Element&&form.matches('[data-custom-form]'))setTimeout(schedule,0);});
+  document.addEventListener('click',event=>{const el=event.target instanceof Element?event.target:null;if(!el)return;if(el.closest('[data-v15-profile-save],[data-v15-alert-save],[data-v16-favorite],[data-custom-remove],[data-save-settings],[data-scoring],[data-ftab],[data-remove-player]'))setTimeout(schedule,0);});
+  document.addEventListener('submit',event=>{const form=event.target;if(form instanceof Element&&form.matches('[data-custom-form],.fantasy-add,.fantasy-connect'))setTimeout(schedule,0);});
+  document.addEventListener('change',event=>{const el=event.target instanceof Element?event.target:null;if(el?.matches('#sleeper-league,#sleeper-week'))setTimeout(schedule,0);});
   window.TitansAccountSync={sync:push,exportSettings,resetSettings,exportPayload,prepareImport,importSettings,keys:[...KEYS]};
 })();

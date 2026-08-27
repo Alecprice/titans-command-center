@@ -26,10 +26,11 @@ test('v1.15 server only accepts known fan-platform preference fields and values'
   assert.match(api,/encoded\.length>12000/);
 });
 
-test('remote v1.0 preferences refresh the live fan shell once only when changed',()=>{
+test('remote account preferences refresh the live shell only when a changed namespace needs it',()=>{
   const sync=read('account-sync-v112.js');
   assert.match(sync,/const refreshV10=V10_PREF_KEY in remotePreferences&&!same\(local\[V10_PREF_KEY\],merged\[V10_PREF_KEY\]\)/);
-  assert.match(sync,/if\(refreshV10\)setTimeout\(\(\)=>location\.reload\(\),120\)/);
+  assert.match(sync,/const refreshFantasy=FANTASY_PREF_KEY in remotePreferences&&!same\(local\[FANTASY_PREF_KEY\],merged\[FANTASY_PREF_KEY\]\)/);
+  assert.match(sync,/if\(refreshV10\|\|refreshFantasy\)setTimeout\(\(\)=>location\.reload\(\),120\)/);
   assert.match(sync,/const merged=\{\.\.\.local,\.\.\.remotePreferences\}/);
 });
 

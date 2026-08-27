@@ -2,7 +2,7 @@ import {getSql} from './db.mjs';
 
 const AUTH_ORIGIN='https://ep-cold-moon-a6z7a2ag.neonauth.us-west-2.aws.neon.tech/neondb/auth';
 const V10_PREF_KEY='titans:v10Prefs';
-const PREF_KEYS=new Set(['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY]);
+const PREF_KEYS=new Set(['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY,'titans-fantasy-v1']);
 const HOME_KEYS=['game','favorites','moves','intel','markets','freshness'];
 const HOME_KEY_SET=new Set(HOME_KEYS);
 const V10_THEMES=new Set(['system','dark','light']);
