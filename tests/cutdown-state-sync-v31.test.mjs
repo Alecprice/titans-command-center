@@ -12,7 +12,10 @@ test('Team Room exclusively owns URL-selected Cutdown accessibility and panel st
   assert.match(teamRoom,/function setRosterView\(view,\{focus=false,persist=true\}=\{\}\)/);
   assert.match(teamRoom,/b\.setAttribute\('aria-pressed',String\(on\)\)/);
   assert.match(teamRoom,/p\.hidden=p\.dataset\.panel!==next/);
-  assert.match(teamRoom,/setRosterView\(requestedRosterView\(\)\|\|trPreferredRosterView,\{persist:false\}\)/);
+  assert.match(teamRoom,/const initialView=requestedRosterView\(\)\|\|trPreferredRosterView/);
+  assert.match(teamRoom,/switcher\.innerHTML=teamRoomSwitcherMarkup\(initialView\)/);
+  assert.match(teamRoom,/cutdown\.hidden=initialView!=='cutdown'/);
+  assert.match(teamRoom,/setRosterView\(initialView,\{persist:false\}\)/);
   assert.match(teamRoom,/setRosterView\(requestedRosterView\(\)\|\|app\.dataset\.teamRoomView\|\|trPreferredRosterView,\{persist:false\}\)/);
   assert.doesNotMatch(cutdown,/function syncCutdownView/);
   assert.doesNotMatch(cutdown,/dataset\.teamRoomView/);
