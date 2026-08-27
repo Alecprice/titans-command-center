@@ -3,7 +3,7 @@ import { team, games as fallbackGames, roster as fallbackRoster } from './src/da
 const OFFICIAL_ROSTER_URL='https://www.tennesseetitans.com/team/players-roster/';
 const OFFICIAL_SCHEDULE_URL='https://www.tennesseetitans.com/schedule/';
 const NFL_ROSTER_URL='https://www.nfl.com/teams/tennessee-titans/roster';
-const AUDIT_DATE='Aug. 22, 2026';
+const AUDIT_DATE='Aug. 27, 2026';
 const AUDITED_ACTIVE=fallbackRoster.filter(player=>player.status==='Active').length;
 const AUDITED_RESERVE=fallbackRoster.filter(player=>player.status==='Reserve/Injured').length;
 const SOURCE_CONFLICT=team.rosterCoverage?.sourceConflict||'';
@@ -25,16 +25,23 @@ function polishHome(){
 
 function polishRoster(){
   const head=document.querySelector('.page-head');
-  if(!head||document.querySelector('.roster-fact-disclosure'))return;
-  const loaded=document.querySelectorAll('#rg .player-card').length;
-  const fullSnapshot=loaded>=AUDITED_ACTIVE+AUDITED_RESERVE;
-  const body=fullSnapshot
-    ? `<strong>Roster coverage:</strong> ${loaded} current player records are loaded from the cross-source roster snapshot audited ${AUDIT_DATE}: ${AUDITED_ACTIVE} Active + ${AUDITED_RESERVE} Reserve/Injured. This is a dated preseason snapshot and can change after any roster move.`
-    : `<strong>Roster coverage:</strong> this page is currently using a ${loaded}-player partial fallback. That count is <em>not</em> the size of the Titans roster.`;
+  if(!head)return;
+  const cards=[...document.querySelectorAll('#rg .player-card')];
+  const loaded=cards.length;
+  if(!loaded)return;
+  const serverBacked=cards.some(card=>(card.getAttribute('href')||'').includes('#player?id='));
+  const snapshotLabel=serverBacked
+    ? `${loaded} player records are loaded from the current server-backed roster snapshot.`
+    : `${loaded} player records are loaded from the verified backup snapshot audited ${AUDIT_DATE}.`;
+  const body=`<strong>Roster coverage:</strong> ${snapshotLabel} Active-roster and Reserve/Injured entries are shown together; reserve-list players are separate from the active-roster limit.`;
   const conflict=SOURCE_CONFLICT?`<div class="fact-conflict"><strong>Source note:</strong> ${SOURCE_CONFLICT} <a href="${NFL_ROSTER_URL}" target="_blank" rel="noopener noreferrer">NFL roster cross-check ↗</a></div>`:'';
-  const notice=makeDisclosure(`${body} <a href="${OFFICIAL_ROSTER_URL}" target="_blank" rel="noopener noreferrer">Titans roster ↗</a><span>Content audit: ${AUDIT_DATE}</span>${conflict}`);
-  notice.classList.add('roster-fact-disclosure');
-  head.insertAdjacentElement('afterend',notice);
+  const markup=`${body} <a href="${OFFICIAL_ROSTER_URL}" target="_blank" rel="noopener noreferrer">Titans roster ↗</a><span>Content audit: ${AUDIT_DATE} · audited backup ${AUDITED_ACTIVE} active + ${AUDITED_RESERVE} Reserve/Injured</span>${conflict}`;
+  const signature=`${loaded}:${serverBacked?'server':'backup'}:${AUDITED_ACTIVE}:${AUDITED_RESERVE}:${SOURCE_CONFLICT}`;
+  let notice=document.querySelector('.roster-fact-disclosure');
+  if(!notice){notice=makeDisclosure(markup);notice.classList.add('roster-fact-disclosure');notice.dataset.factSignature=signature;head.insertAdjacentElement('afterend',notice);return;}
+  if(notice.dataset.factSignature===signature)return;
+  notice.dataset.factSignature=signature;
+  notice.innerHTML=markup;
 }
 
 function byeMarkup(){return `<div class="week">Wk 9</div><div class="opponent-line"><div class="mini-token">BYE</div><div><strong>Bye week</strong><small>No Titans game scheduled</small></div></div><div class="game-date"><strong>Week 9</strong><small>Official 2026 schedule</small></div><div class="score">BYE</div>`}
