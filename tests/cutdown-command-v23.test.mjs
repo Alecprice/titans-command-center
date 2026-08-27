@@ -26,7 +26,7 @@ test('Cutdown Command reports loaded roster facts without predicting cuts',()=>{
 });
 
 test('Cutdown is a keyboard-compatible Team Room view',()=>{
-  assert.match(teamRoom,/data-team-room-view="cutdown"/);
+  assert.match(teamRoom,/teamRoomButton\('cutdown','Cutdown',view==='cutdown'\)/);
   assert.match(teamRoom,/cutdown\.dataset\.panel='cutdown'/);
   assert.match(teamRoom,/wireTeamRoomSwitcher\(switcher\)/);
   assert.match(teamRoom,/setRosterView\(target\.dataset\.teamRoomView,\{focus:true\}\)/);
@@ -56,6 +56,7 @@ test('Home card deep-links directly into the Team Room-owned Cutdown view',()=>{
   assert.match(js,/href="#roster\?view=cutdown"/);
   assert.match(teamRoom,/const requestedRosterView=\(\)=>/);
   assert.match(teamRoom,/TR_VIEWS=new Set\(\['roster','depth','staff','cutdown'\]\)/);
-  assert.match(teamRoom,/setRosterView\(requestedRosterView\(\)\|\|trPreferredRosterView,\{persist:false\}\)/);
+  assert.match(teamRoom,/const initialView=requestedRosterView\(\)\|\|trPreferredRosterView/);
+  assert.match(teamRoom,/setRosterView\(initialView,\{persist:false\}\)/);
   assert.doesNotMatch(js,/syncCutdownView/);
 });
