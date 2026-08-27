@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + browser navigation regression failure**
-- Source commit: `e07f0794765ba3a4d80800a720ce231d4d58cbff`
+- Source commit: `d934ff3f315189a9986c2e68aab911a4a6fb3051`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-27T20:30:49Z
+- Recorded: 2026-08-27T20:34:44Z
 
 ## Production regression
 
@@ -75,26 +75,26 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "e07f0794765ba3a4d80800a720ce231d4d58cbff",
-    "builtAt": "2026-08-27T20:29:51.264Z"
+    "commit": "d934ff3f315189a9986c2e68aab911a4a6fb3051",
+    "builtAt": "2026-08-27T20:33:42.669Z"
   },
   "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 42,
-    "health": 310,
-    "data": 336,
-    "stats": 369,
-    "market": 3027,
-    "analytics": 508
+    "root": 61,
+    "health": 183,
+    "data": 163,
+    "stats": 189,
+    "market": 97,
+    "analytics": 333
   },
-  "testedAt": "2026-08-27T20:30:23.266Z",
+  "testedAt": "2026-08-27T20:34:10.994Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-26",
     "databaseContentAudit": "2026-08-26",
-    "responseMs": 431,
-    "testedAt": "2026-08-27T20:30:23.736Z"
+    "responseMs": 215,
+    "testedAt": "2026-08-27T20:34:11.241Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -102,17 +102,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 627,
-    "warmHitMs": 627,
+    "coldOrInitialMs": 291,
+    "warmHitMs": 291,
     "rows": 936,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 627,
+        "durationMs": 291,
         "rows": 936
       }
     ],
-    "testedAt": "2026-08-27T20:30:24.429Z"
+    "testedAt": "2026-08-27T20:34:11.587Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -172,8 +172,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 193,
-  "testedAt": "2026-08-27T20:30:25.206Z"
+  "durationMs": 204,
+  "testedAt": "2026-08-27T20:34:12.229Z"
 }```
 
 ## Browser navigation regression
@@ -215,16 +215,9 @@
     "transactionTools": false,
     "viewport": 390
   },
-  "durationSeconds": 18.14,
-  "testedAt": "2026-08-27T20:30:49Z",
-  "browserWarnings": [
-    {
-      "level": "SEVERE",
-      "message": "https://titans-command-center.alecjordanprice.workers.dev/schedule-calendar-v39.js 24:48 Uncaught ReferenceError: mount is not defined",
-      "source": "javascript",
-      "timestamp": 1787862640126
-    }
-  ]
+  "durationSeconds": 26.03,
+  "testedAt": "2026-08-27T20:34:44Z",
+  "browserWarnings": []
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
