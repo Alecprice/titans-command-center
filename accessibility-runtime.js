@@ -56,6 +56,10 @@ function scheduleTeamRoomReconcile(){
   teamRoomQueued=true;
   queueMicrotask(()=>{teamRoomQueued=false;reconcileTeamRoom();});
 }
+function watchTeamRoomMutations(records){
+  const relevant=records.some(record=>record.type==='childList'||(record.type==='attributes'&&record.target instanceof Element&&record.target.matches('[data-team-room-view]')));
+  if(relevant)scheduleTeamRoomReconcile();
+}
 
 if(menu&&sidebar){
   syncMenuState();
@@ -70,7 +74,7 @@ if(menu&&sidebar){
 
 if(app){
   new MutationObserver(syncAsyncRegions).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-polished']});
-  new MutationObserver(scheduleTeamRoomReconcile).observe(app,{subtree:true,childList:true});
+  new MutationObserver(watchTeamRoomMutations).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['aria-pressed']});
 }
 addEventListener('hashchange',scheduleTeamRoomReconcile);
 syncAsyncRegions();

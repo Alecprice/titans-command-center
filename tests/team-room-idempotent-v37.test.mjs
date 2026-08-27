@@ -15,8 +15,11 @@ test('Team Room owns button activation synchronously at the app boundary',()=>{
   assert.doesNotMatch(teamRoom,/trQsa\('button',switcher\)\.forEach\(btn=>btn\.addEventListener\('click'/);
 });
 
-test('accessibility layer only retries after hydration and never writes Team Room semantics',()=>{
-  assert.match(accessibility,/new MutationObserver\(scheduleTeamRoomReconcile\)\.observe\(app,\{subtree:true,childList:true\}\)/);
+test('accessibility layer retries only relevant Team Room hydration or aria drift and never writes Team Room semantics',()=>{
+  assert.match(accessibility,/function watchTeamRoomMutations\(records\)/);
+  assert.match(accessibility,/record\.type==='childList'/);
+  assert.match(accessibility,/record\.target instanceof Element&&record\.target\.matches\('\[data-team-room-view\]'\)/);
+  assert.match(accessibility,/new MutationObserver\(watchTeamRoomMutations\)\.observe\(app,\{subtree:true,childList:true,attributes:true,attributeFilter:\['aria-pressed'\]\}\)/);
   assert.match(accessibility,/if\(button&&teamRoomMismatch\(next\)\)button\.click\(\)/);
   assert.doesNotMatch(accessibility,/setAttribute\('aria-pressed'/);
   assert.doesNotMatch(accessibility,/classList\.toggle\('active'/);
