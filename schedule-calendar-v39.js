@@ -22,7 +22,7 @@
     loading=Promise.resolve(runtime?.apiJson?.('/api/data',{ttl:30000,force}))
       .then(value=>{data=value?.ok?value:{};return data;})
       .catch(()=>{data={};return data;})
-      .finally(()=>{loading=null;queueMicrotask(mount);});
+      .finally(()=>{loading=null;queueMicrotask(render);});
     return loading;
   }
 
