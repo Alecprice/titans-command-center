@@ -30,16 +30,17 @@ test('Team Room honors deep-linked subviews without losing keyboard behavior',()
   assert.match(js,/setRosterView\(target\.dataset\.teamRoomView,\{focus:true\}\)/);
 });
 
-test('async Team Room enhancements are single-flight and refuse detached writes',()=>{
+test('async Team Room enhancements are single-flight and reacquire live DOM targets before writes',()=>{
   for(const key of ['trStatsPending','trInjuryPending','trSourcesPending']) assert.match(js,new RegExp(key));
   assert.match(js,/trBegin\(app,'trInjuryPending'\)/);
   assert.match(js,/finally\{trEnd\(app,'trInjuryPending'\);\}/);
-  assert.match(js,/!app\.isConnected\|\|!head\.isConnected/);
-  assert.match(js,/trQs\('\.official-injury-state',app\)\)return/);
+  assert.match(js,/currentApp=trQs\('#app'\),head=trQs\('\.page-head',currentApp\)/);
+  assert.match(js,/!inj\|\|!currentApp\|\|!head\|\|!\['live','roster'\]\.includes\(trRoute\(\)\)\|\|trQs\('\.official-injury-state',currentApp\)\)return/);
+  assert.match(js,/head\.insertAdjacentElement\('afterend',el\)/);
   assert.match(js,/if\(!depth\.isConnected\|\|!staff\.isConnected\)return/);
 });
 
 test('injury state cannot duplicate while the first async enhancement is pending',()=>{
   assert.match(js,/trQs\('\.official-injury-state',app\)\|\|!trBegin\(app,'trInjuryPending'\)/);
-  assert.match(js,/trQs\('\.official-injury-state',app\)\)return;const el=document\.createElement\('aside'\)/);
+  assert.match(js,/trQs\('\.official-injury-state',currentApp\)\)return;const el=document\.createElement\('aside'\)/);
 });
