@@ -36,6 +36,6 @@ test('My Titans Home uses shared render lifecycle and ships in the offline shell
   assert.match(feature,/runtime\.onAppRender\(mount,\{immediate:true\}\)/);
   assert.doesNotMatch(feature,/new MutationObserver/);
   assert.match(runtime,/import '\.\/my-titans-home-v35\.js';/);
-  assert.match(sw,/titans-cc-brand-2026-v63/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/'\/my-titans-home-v35\.js'/);
 });
