@@ -5,6 +5,7 @@ import './my-player-watch-v36.js';
 import './gameday-personal-v37.js';
 import './my-player-impact-v38.js';
 import './schedule-calendar-v39.js';
+import './roster-filter-guard-v40.js';
 
 const menu=document.querySelector('#menu-button');
 const sidebar=document.querySelector('#sidebar');

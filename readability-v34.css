@@ -12,6 +12,11 @@
   --tcc-control-bg-hover:#1a3a59;
   --tcc-control-active:#79bdf4;
   --tcc-control-active-text:#061421;
+  --tcc-mobile-text:#f7fbff;
+  --tcc-mobile-body:#e7f1f8;
+  --tcc-mobile-muted:#c8d8e5;
+  --tcc-mobile-subtle:#b6cada;
+  --tcc-mobile-link:#9edcff;
 }
 
 /* Global dark-shell text that was visually receding into navy surfaces. */
@@ -110,15 +115,100 @@
   outline-offset:3px!important;
 }
 
+/* Mobile-first contrast and legibility hardening.
+   These values intentionally clear WCAG AA; the muted dock/body text also clears AAA
+   against the darkest Titans navy surfaces used by the mobile shell. */
 @media(max-width:760px){
-  .sidebar .nav a{color:#d0deea!important}
-  #sidebar>.account-sheet-card{background:#102f4b!important;border-color:rgba(158,210,247,.38)!important}
+  .mobile-nav a,.mobile-nav button{
+    color:var(--tcc-mobile-muted)!important;
+    font-size:10.5px!important;
+    font-weight:850!important;
+    letter-spacing:.015em!important;
+  }
+  .mobile-nav a.active,.mobile-nav button.active,.mobile-nav .mobile-game-action{color:var(--tcc-mobile-text)!important}
+  .mobile-nav a:focus-visible,.mobile-nav button:focus-visible{outline:3px solid #fff!important;outline-offset:-1px!important}
+
+  .sidebar .brand-copy small{color:var(--tcc-mobile-muted)!important;font-size:10px!important;line-height:1.25!important}
+  .sidebar .nav a{color:var(--tcc-mobile-body)!important;font-size:12px!important;font-weight:820!important}
+  .sidebar .nav a b{color:var(--tcc-mobile-subtle)!important;font-size:10px!important;font-weight:900!important}
+  .sidebar-foot,.sidebar-foot small{color:var(--tcc-mobile-muted)!important;font-size:11px!important;line-height:1.45!important}
+  .sidebar .status-pill{color:var(--tcc-mobile-text)!important}
+
+  .search-wrap input{color:var(--tcc-mobile-text)!important;font-size:16px!important}
+  .search-wrap input::placeholder{color:var(--tcc-mobile-subtle)!important;opacity:1!important}
+  .topbar-wordmark span{color:var(--tcc-mobile-link)!important}
+  .topbar-wordmark strong{color:var(--tcc-mobile-text)!important}
+  #refresh-button{color:var(--tcc-mobile-text)!important;border-color:rgba(158,220,255,.42)!important}
+
+  .page-head p,
+  .fan-hero-copy,
+  .metric .label,
+  .metric .delta,
+  .panel-head small,
+  .game-meta,
+  .game-footer,
+  .player-card p,
+  .source-card p,
+  .source-card .category,
+  .source-meta small,
+  .opponent-line small,
+  .game-date small,
+  .week,
+  .timeline-item p,
+  .watch small,
+  .intel-item p,
+  .intel-item time,
+  .notice,
+  .empty,
+  .footer-note,
+  .footer-note a{
+    color:var(--tcc-mobile-muted)!important;
+  }
+
+  .page-head p,.fan-hero-copy,.intel-item p,.player-card p,.source-card p,.timeline-item p,.notice,.empty{
+    font-size:max(13px,.82rem)!important;
+    line-height:1.6!important;
+  }
+  .game-footer,.game-meta,.opponent-line small,.game-date small,.week,.source-meta small,.panel-head small{
+    font-size:12px!important;
+    line-height:1.5!important;
+  }
+  .tag,.player-tag,.intel-provenance{font-size:11px!important;line-height:1.4!important}
+
+  .ux-filter-label,.ux-filter-count{color:var(--tcc-mobile-body)!important;font-size:12px!important}
+  .ux-filter-row button:not(.active){color:var(--tcc-mobile-body)!important;border-color:rgba(158,220,255,.38)!important;background:#132b43!important}
+  .ux-filter-row button.active{color:#061421!important;background:#86d2ff!important;border-color:#b9e6ff!important}
+
+  .fantasy-panel p,.fantasy-player span,.fantasy-impact-list span,.fantasy-lineup-row span,.fantasy-matchup span,.fantasy-draft-board small,.fantasy-empty,.fantasy-disclaimer{color:var(--tcc-mobile-muted)!important}
+  .fantasy-tabs button,.fantasy-score-mode button{min-height:48px;font-size:13px!important}
+
+  .v37-my-gameday :where(p,small,span),
+  .v38-impact :where(p,small,span){font-size:max(12px,.75rem)!important;line-height:1.5!important}
+  .v38-impact-card li b{font-size:12px!important}
+  .v38-impact-card li span{color:var(--tcc-mobile-body)!important;font-size:13px!important}
+  .v38-impact>header span,.v38-impact-empty{color:var(--tcc-mobile-muted)!important;font-size:13px!important}
+  .v38-impact-card header a,.v38-impact-actions a,.v38-impact-empty a{color:var(--tcc-mobile-link)!important;font-size:12px!important}
+
+  #sidebar>.account-sheet-card{background:#102f4b!important;border-color:rgba(158,220,255,.45)!important}
+  .account-mini-status,.account-tools-head span,.account-panel p,.account-sync-status,.account-benefits span,.account-tool-note{color:var(--tcc-mobile-muted)!important}
+
   .fantasy-tabs button,.fantasy-score-mode button{min-height:48px}
   .fantasy-panel p,.page-head p{font-size:max(13px,.82rem)}
 }
 
+@media(max-width:430px){
+  .mobile-nav a,.mobile-nav button{font-size:10px!important}
+}
+
+@media(max-width:360px){
+  .mobile-nav a,.mobile-nav button{font-size:10px!important}
+  .sidebar .nav a{font-size:12px!important}
+}
+
 @media(prefers-contrast:more){
-  :root{--tcc-dark-body:#f0f6fa;--tcc-dark-muted:#e2edf5;--tcc-dark-subtle:#d7e5ef;--tcc-dark-border:rgba(210,231,245,.58)}
+  :root{--tcc-dark-body:#f0f6fa;--tcc-dark-muted:#e2edf5;--tcc-dark-subtle:#d7e5ef;--tcc-dark-border:rgba(210,231,245,.58);--tcc-mobile-body:#f7fbff;--tcc-mobile-muted:#edf6fb;--tcc-mobile-subtle:#e0edf5}
   .fantasy-score-mode button,.fantasy-tabs button,.account-sheet-card button,.account-tabs button{border-width:2px!important}
   .content :where(.panel,.metric,.player-card,.source-card,.game-row,.watch,.stat-card){border-width:2px!important}
+  .mobile-nav,.sidebar{border-width:2px!important}
+  .mobile-nav a,.mobile-nav button,.sidebar .nav a{font-weight:900!important}
 }

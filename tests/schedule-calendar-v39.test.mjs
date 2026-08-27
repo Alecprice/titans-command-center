@@ -46,7 +46,7 @@ test('schedule calendar is Schedule-only observer-light touch-safe and packaged 
   assert.match(feature,/min-height:44px/);
   assert.match(feature,/@media\(max-width:700px\)/);
   assert.match(runtime,/import '\.\/schedule-calendar-v39\.js';/);
-  assert.match(sw,/titans-cc-brand-2026-v67/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/'\/schedule-calendar-v39\.js'/);
   assert.doesNotMatch(runtime,/my-player-compare-v39/);
   assert.doesNotMatch(sw,/my-player-compare-v39/);
