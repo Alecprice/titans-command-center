@@ -29,9 +29,9 @@ function mutationIsCrossSite(request){
   if(!origin)return false;
   try{
     const browserOrigin=new URL(origin).origin;
-    const workerOrigin=new URL(request.url).origin;
+    const directOriginMismatch=new URL(origin).origin!==new URL(request.url).origin;
     // CloudFront intentionally sends the workers.dev Host to the Worker while the browser stays on the public hostname.
-    return browserOrigin!==workerOrigin&&browserOrigin!==PUBLIC_APP_ORIGIN;
+    return directOriginMismatch&&browserOrigin!==PUBLIC_APP_ORIGIN;
   }catch{return true;}
 }
 
