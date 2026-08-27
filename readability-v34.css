@@ -1,0 +1,124 @@
+/* Cross-surface readability pass · 2026-08-27
+   Loaded after component styles so muted text and interactive states remain readable
+   without changing the Titans visual identity. */
+:root{
+  --tcc-dark-text:#f7fbff;
+  --tcc-dark-body:#d5e2ec;
+  --tcc-dark-muted:#bfd0de;
+  --tcc-dark-subtle:#a9bfd1;
+  --tcc-dark-link:#9ed4ff;
+  --tcc-dark-border:rgba(157,199,232,.28);
+  --tcc-control-bg:#132b43;
+  --tcc-control-bg-hover:#1a3a59;
+  --tcc-control-active:#79bdf4;
+  --tcc-control-active-text:#061421;
+}
+
+/* Global dark-shell text that was visually receding into navy surfaces. */
+.sidebar .nav a,
+.sidebar-foot,
+.sidebar .brand small,
+.page-head p,
+.metric .label,
+.metric .delta,
+.panel-head small,
+.game-meta,
+.game-footer,
+.vs,
+.player-card p,
+.source-card p,
+.source-card .category,
+.source-meta small,
+.opponent-line small,
+.game-date small,
+.week,
+.timeline-item p,
+.watch small,
+.intel-item p,
+.intel-item time,
+.footer-note,
+.footer-note a{
+  color:var(--tcc-dark-muted)!important;
+}
+.search-wrap input::placeholder{color:var(--tcc-dark-subtle)!important;opacity:1}
+.search-wrap kbd,.tag{color:var(--tcc-dark-muted)!important}
+.notice{color:var(--tcc-dark-body)!important}
+
+/* Make boundaries visible without turning every panel into a bright outline. */
+.content :where(.panel,.metric,.player-card,.source-card,.game-row,.watch,.stat-card),
+.sidebar .account-sheet-card{
+  border-color:var(--tcc-dark-border)!important;
+}
+
+/* Account surfaces. */
+.account-sheet-card{background:rgba(14,40,63,.78)!important;border-color:rgba(158,210,247,.32)!important}
+.account-sheet-card small,.account-eyebrow,.account-tools-head small{color:#a8d8fb!important}
+.account-sheet-card strong{color:var(--tcc-dark-text)!important}
+.account-mini-status,.account-tools-head span{color:#c9d9e6!important}
+.account-sheet-card button{background:#173b5d!important;border-color:rgba(158,210,247,.38)!important;color:#fff!important}
+.account-sheet-card button:hover{background:#20517d!important}
+.account-panel p,.account-sync-status,.account-benefits span{color:#d0dfeb!important}
+.account-tabs button{color:#c6d7e4!important;border:1px solid transparent!important}
+.account-tabs button:hover{background:rgba(255,255,255,.07)!important;color:#fff!important}
+.account-tabs button.active{background:#23577f!important;border-color:#7cc5fb!important;color:#fff!important}
+.account-form label{color:#dbe8f1!important}
+.account-form input{border-color:rgba(158,210,247,.38)!important;background:#061522!important;color:#fff!important}
+.account-form input:focus{border-color:#86d2ff!important;box-shadow:0 0 0 3px rgba(134,210,255,.2)!important}
+.account-primary{background:#4b92db!important;color:#061421!important}
+.account-guest,.account-tool{color:#e0ebf3!important;border-color:rgba(188,211,228,.26)!important;background:rgba(255,255,255,.045)!important}
+.account-tool-note{color:#b7cad9!important}
+.account-danger{color:#ffdabf!important;border-color:rgba(255,190,145,.4)!important;background:rgba(151,76,32,.16)!important}
+.account-reset-hint{color:#ffd6b6!important}
+
+/* Fantasy Command was added after the original readability layer. */
+.fantasy-head p,.fantasy-panel p{color:var(--tcc-dark-body)!important}
+.fantasy-kicker,.fantasy-panel>small,.fantasy-panel-head small{color:#9ed4ff!important}
+.fantasy-panel{border-color:rgba(157,199,232,.28)!important;background:linear-gradient(180deg,rgba(14,42,68,.94),rgba(7,24,41,.96))!important}
+.fantasy-score-mode button,.fantasy-tabs button{
+  border-color:rgba(173,205,229,.38)!important;
+  background:var(--tcc-control-bg)!important;
+  color:#f2f7fb!important;
+}
+.fantasy-score-mode button:hover,.fantasy-tabs button:hover{background:var(--tcc-control-bg-hover)!important;border-color:#7ab8e6!important}
+.fantasy-score-mode button.active,.fantasy-tabs button.active{
+  background:var(--tcc-control-active)!important;
+  border-color:#a8dcff!important;
+  color:var(--tcc-control-active-text)!important;
+}
+.fantasy-panel-head a,.fantasy-panel-head span,.fantasy-decision-links a{color:var(--tcc-dark-link)!important}
+.fantasy-player{border-color:rgba(157,199,232,.24)!important;background:rgba(14,40,63,.72)!important}
+.fantasy-player:hover{border-color:#76bdf4!important;background:rgba(38,91,137,.34)!important}
+.fantasy-player span,.fantasy-impact-list span,.fantasy-lineup-row span,.fantasy-matchup span,.fantasy-draft-board small{color:#c5d6e3!important}
+.fantasy-player em.neutral{color:#bdd0df!important}
+.fantasy-impact-list>div,.fantasy-matchup>div,.fantasy-draft-board>div,.fantasy-lineup section{border-color:rgba(157,199,232,.22)!important;background:rgba(17,45,70,.64)!important}
+.fantasy-calc label,.fantasy-add input,.fantasy-add select,.fantasy-connect input,.fantasy-select{color:#d2e0ea!important}
+.fantasy-calc input,.fantasy-add input,.fantasy-add select,.fantasy-connect input,.fantasy-select select{border-color:rgba(157,199,232,.35)!important;background:#061a2b!important;color:#f7fbff!important}
+.fantasy-action{background:#69b0eb!important;color:#061421!important}
+.fantasy-empty,.fantasy-disclaimer{color:#bdcedc!important}
+.fantasy-disclaimer{background:rgba(17,45,70,.5)!important;border:1px solid rgba(157,199,232,.2)!important}
+
+/* Status and warning messaging should never look disabled. */
+.empty{color:#c3d4e1!important;border-color:rgba(157,199,232,.3)!important}
+.toast{color:#f7fbff!important;border-color:rgba(157,199,232,.35)!important;background:#102b45!important}
+
+/* Preserve the existing light-surface readability layer while strengthening outlines. */
+.team-room-switcher button:not(.active){color:#344f66!important;border-color:rgba(52,79,102,.3)!important}
+.team-room-loading,.team-room-empty{color:#405d73!important}
+
+.content :where(a,button,input,select,textarea):focus-visible{
+  outline:3px solid #9edcff!important;
+  outline-offset:3px!important;
+}
+
+@media(max-width:760px){
+  .sidebar .nav a{color:#d0deea!important}
+  #sidebar>.account-sheet-card{background:#102f4b!important;border-color:rgba(158,210,247,.38)!important}
+  .fantasy-tabs button,.fantasy-score-mode button{min-height:48px}
+  .fantasy-panel p,.page-head p{font-size:max(13px,.82rem)}
+}
+
+@media(prefers-contrast:more){
+  :root{--tcc-dark-body:#f0f6fa;--tcc-dark-muted:#e2edf5;--tcc-dark-subtle:#d7e5ef;--tcc-dark-border:rgba(210,231,245,.58)}
+  .fantasy-score-mode button,.fantasy-tabs button,.account-sheet-card button,.account-tabs button{border-width:2px!important}
+  .content :where(.panel,.metric,.player-card,.source-card,.game-row,.watch,.stat-card){border-width:2px!important}
+}
