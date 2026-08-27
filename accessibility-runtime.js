@@ -4,7 +4,7 @@ import './my-titans-home-v35.js';
 import './my-player-watch-v36.js';
 import './gameday-personal-v37.js';
 import './my-player-impact-v38.js';
-import './my-player-compare-v39.js';
+import './schedule-calendar-v39.js';
 
 const menu=document.querySelector('#menu-button');
 const sidebar=document.querySelector('#sidebar');
