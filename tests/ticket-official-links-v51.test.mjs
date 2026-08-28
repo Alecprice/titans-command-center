@@ -33,12 +33,15 @@ test('home and away filters also work when live price summaries are unavailable'
   assert.match(ui,/tickets-next-official-v51/);
 });
 
-test('free ticket enhancement remains mobile accessible and source-transparent',async()=>{
+test('free ticket enhancement remains mobile accessible, observer-light, and source-transparent',async()=>{
   const [ui,css]=await Promise.all([read('tickets-official-v51.js'),read('tickets-official-v51.css')]);
   assert.match(ui,/Source: TennesseeTitans\.com ↗/);
   assert.match(ui,/\$0<\/b> API cost/);
+  assert.match(ui,/observer\.observe\(app,\{childList:true,subtree:false\}\)/);
+  assert.doesNotMatch(ui,/observer\.observe\(app,\{childList:true,subtree:true\}\)/);
   assert.match(css,/@media\(max-width:760px\)/);
-  assert.match(css,/min-height:42px/);
+  assert.match(css,/min-height:44px/);
+  assert.match(css,/tickets-next-label-v51[^\n]*font-size:10px/);
   assert.match(css,/focus-visible/);
 });
 
