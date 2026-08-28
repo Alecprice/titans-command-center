@@ -105,7 +105,9 @@ def assert_layout(state,label,mode):
     if mode=='mobile':
         if state['mobileNav']=='none': raise RuntimeError(f'{label}: mobile dock hidden')
         if len(state['touchTargets'])!=5: raise RuntimeError(f'{label}: expected five mobile actions {state["touchTargets"]}')
-        if any(x['w']<44 or x['h']<44 for x in state['touchTargets']): raise RuntimeError(f'{label}: undersized touch target {state["touchTargets"]}')
+        if any(x['w']<44 or x['h']<44 for x in state['touchTargets']): raise RuntimeError(f'{label}: undersized mobile dock target {state["touchTargets"]}')
+        if state['smallControls']: raise RuntimeError(f'{label}: undersized app controls {state["smallControls"]}')
+        if state['suspiciousTiny']: raise RuntimeError(f'{label}: text below 9.5px {state["suspiciousTiny"]}')
     else:
         if state['mobileNav']!='none': raise RuntimeError(f'{label}: mobile dock visible on desktop/tablet shell')
 

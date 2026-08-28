@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows: ['Titans Cloudflare Deploy']
     types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -15,18 +16,88 @@ concurrency:
 
 jobs:
   responsive:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      WORKER_URL: https://titans-command-center.alecjordanprice.workers.dev
+      EXPECTED_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
     steps:
       - name: Checkout deployed revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || 'main' }}
           persist-credentials: false
+
+      - name: Use Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Confirm deployed SHA
+        id: deployed_sha
+        continue-on-error: true
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const base = process.env.WORKER_URL.replace(/\/$/, '');
+          const expected = process.env.EXPECTED_SHA;
+          let last = null;
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          for (let attempt = 1; attempt <= 15; attempt++) {
+            try {
+              const response = await fetch(`${base}/build-meta.json?responsive=${attempt}`, {
+                cache: 'no-store',
+                headers: {
+                  accept: 'application/json',
+                  'user-agent': 'Titans-Responsive-Matrix/1.0',
+                },
+              });
+              const text = await response.text();
+              if (!response.ok) {
+                last = `HTTP ${response.status}: ${text.slice(0, 160)}`;
+              } else {
+                const data = JSON.parse(text);
+                last = data?.commit || null;
+                if (last === expected) {
+                  console.log(JSON.stringify({ok: true, commit: last, attempt}));
+                  process.exit(0);
+                }
+              }
+            } catch (error) {
+              last = `${error?.name || 'Error'}: ${error?.message || String(error)}`;
+            }
+            await sleep(2000);
+          }
+          console.error(`Expected deployed SHA ${expected}; last observed ${last}`);
+          process.exit(1);
+          NODE
+
+      - name: Record non-deployed revision skip
+        if: steps.deployed_sha.outcome != 'success'
+        shell: bash
+        run: |
+          {
+            echo '## Titans Responsive Matrix'
+            echo
+            echo 'Responsive audit skipped because this source revision is not the revision currently served by production.'
+            echo 'This avoids reporting stale production as a pass for a failed or superseded deployment.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install Selenium
+        if: steps.deployed_sha.outcome == 'success'
         run: python -m pip install --disable-pip-version-check 'selenium>=4.25,<5'
+
       - name: Run multi-viewport production regression
-        env:
-          WORKER_URL: https://titans-command-center.alecjordanprice.workers.dev
+        if: steps.deployed_sha.outcome == 'success'
         run: python scripts/responsive-matrix-smoke.py
+
+      - name: Upload responsive report
+        if: always() && steps.deployed_sha.outcome == 'success'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: responsive-matrix-${{ env.EXPECTED_SHA }}
+          path: /tmp/responsive-matrix-smoke.json
+          if-no-files-found: ignore
+          retention-days: 14
