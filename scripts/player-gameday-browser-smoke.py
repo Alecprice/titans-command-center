@@ -20,6 +20,63 @@ def no_overflow(driver,label):
     state=driver.execute_script("return {w:document.documentElement.clientWidth,s:document.documentElement.scrollWidth}")
     if state['s']>state['w']+3: raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
+def install_cutdown_aria_trace(driver):
+    return driver.execute_script(r"""
+      if(window.__cutdownAriaTraceInstalled)return true;
+      window.__cutdownAriaTraceInstalled=true;
+      window.__cutdownAriaTrace=[];
+      window.__cutdownTraceButton=document.querySelector('[data-team-room-view="cutdown"]')||null;
+      const originalSetAttribute=Element.prototype.setAttribute;
+      Element.prototype.setAttribute=function(name,value){
+        if(name==='aria-pressed'&&this.matches?.('[data-team-room-view="cutdown"]')){
+          window.__cutdownAriaTrace.push({
+            kind:'setAttribute',
+            value:String(value),
+            hash:location.hash,
+            connected:Boolean(this.isConnected),
+            sameButton:this===window.__cutdownTraceButton,
+            time:Math.round(performance.now()*100)/100,
+            stack:String(new Error('cutdown aria write').stack||'').split('\n').slice(1,12)
+          });
+        }
+        return originalSetAttribute.call(this,name,value);
+      };
+      const originalRemoveAttribute=Element.prototype.removeAttribute;
+      Element.prototype.removeAttribute=function(name){
+        if(name==='aria-pressed'&&this.matches?.('[data-team-room-view="cutdown"]')){
+          window.__cutdownAriaTrace.push({
+            kind:'removeAttribute',
+            value:null,
+            hash:location.hash,
+            connected:Boolean(this.isConnected),
+            sameButton:this===window.__cutdownTraceButton,
+            time:Math.round(performance.now()*100)/100,
+            stack:String(new Error('cutdown aria remove').stack||'').split('\n').slice(1,12)
+          });
+        }
+        return originalRemoveAttribute.call(this,name);
+      };
+      new MutationObserver(records=>{
+        for(const record of records){
+          if(record.type!=='childList')continue;
+          const current=document.querySelector('[data-team-room-view="cutdown"]');
+          if(current&&current!==window.__cutdownTraceButton){
+            window.__cutdownAriaTrace.push({
+              kind:'button-replaced',
+              value:current.getAttribute('aria-pressed'),
+              hash:location.hash,
+              connected:Boolean(current.isConnected),
+              sameButton:false,
+              time:Math.round(performance.now()*100)/100,
+              stack:[]
+            });
+            window.__cutdownTraceButton=current;
+          }
+        }
+      }).observe(document.querySelector('#app'),{subtree:true,childList:true});
+      return true;
+    """)
+
 def activate_cutdown_view(driver,timeout=8):
     deadline=time.time()+timeout
     stable=0
@@ -29,7 +86,7 @@ def activate_cutdown_view(driver,timeout=8):
           let button=document.querySelector('[data-team-room-view="cutdown"]');
           let panel=document.querySelector('[data-panel="cutdown"]');
           let root=panel?.querySelector('[data-cutdown-command]');
-          if(!button||!panel||!root)return {exists:false,selected:false,visible:false,buttonConnected:Boolean(button?.isConnected),panelConnected:Boolean(panel?.isConnected)};
+          if(!button||!panel||!root)return {exists:false,selected:false,visible:false,buttonConnected:Boolean(button?.isConnected),panelConnected:Boolean(panel?.isConnected),sameButton:Boolean(button&&button===window.__cutdownTraceButton)};
           if(button.getAttribute('aria-pressed')!=='true'||panel.hidden)button.click();
           button=document.querySelector('[data-team-room-view="cutdown"]');
           panel=document.querySelector('[data-panel="cutdown"]');
@@ -39,7 +96,8 @@ def activate_cutdown_view(driver,timeout=8):
             selected:button?.getAttribute('aria-pressed')==='true',
             visible:Boolean(panel&&!panel.hidden),
             buttonConnected:Boolean(button?.isConnected),
-            panelConnected:Boolean(panel?.isConnected)
+            panelConnected:Boolean(panel?.isConnected),
+            sameButton:Boolean(button&&button===window.__cutdownTraceButton)
           };
         """)
         if last.get('exists') and last.get('selected') and last.get('visible') and last.get('buttonConnected') and last.get('panelConnected'):
@@ -123,6 +181,7 @@ try:
 
     stage='cutdown:desktop'
     wait_for(driver,"document.querySelector('[data-team-room-view=\"cutdown\"]') && document.querySelector('[data-panel=\"cutdown\"]')",timeout=10)
+    install_cutdown_aria_trace(driver)
     cutdown_settle=activate_cutdown_view(driver)
     no_overflow(driver,'cutdown desktop')
     cutdown=driver.execute_script("""
@@ -293,6 +352,7 @@ except Exception as exc:
       if driver is not None:
         result['hash']=driver.execute_script('return location.hash')
         result['pageText']=driver.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,2400)")
+        result['cutdownAriaTrace']=driver.execute_script("return (window.__cutdownAriaTrace||[]).slice(-80)")
         result['browserWarnings']=[x for x in driver.get_log('browser') if x.get('level') in ('SEVERE','WARNING')][:20]
     except Exception: pass
     write_report(result);print(json.dumps(result,indent=2),file=sys.stderr);sys.exit(1)
