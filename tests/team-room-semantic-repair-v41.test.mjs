@@ -9,7 +9,7 @@ test('Team Room semantic repair observes only relevant aria drift plus hydration
   assert.match(runtime,/function watchTeamRoomMutations\(records\)/);
   assert.match(runtime,/record\.type==='childList'/);
   assert.match(runtime,/record\.type==='attributes'/);
-  assert.match(runtime,/record\.target\.matches\('\[data-team-room-view\]'\)/);
+  assert.match(runtime,/record\.target\.matches\('\.team-room-switcher \[data-team-room-view\]'\)/);
   assert.match(runtime,/attributeFilter:\['aria-pressed'\]/);
 });
 
