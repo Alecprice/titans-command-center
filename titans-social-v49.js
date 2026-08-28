@@ -6,75 +6,59 @@
   if(!runtime||!app)return;
 
   const DEFAULT_LINKS=[
-    {label:'#TitanUp',url:'https://x.com/search?q=%23TitanUp&src=typed_query&f=live'},
-    {label:'#TitansNation',url:'https://x.com/search?q=%23TitansNation&src=typed_query&f=live'},
-    {label:'Titans Nation',url:'https://x.com/search?q=%22Titans%20Nation%22&src=typed_query&f=live'},
-    {label:'Tennessee Titans',url:'https://x.com/search?q=%22Tennessee%20Titans%22&src=typed_query&f=live'},
+    {label:'Titans News',url:'https://www.tennesseetitans.com/news/'},
+    {label:'r/TennesseeTitans',url:'https://www.reddit.com/r/Tennesseetitans/'},
+    {label:'Bluesky',url:'https://bsky.app/search?q=Tennessee%20Titans'},
+    {label:'Facebook',url:'https://www.facebook.com/titans'},
+    {label:'YouTube',url:'https://www.youtube.com/titans'},
   ];
   const state={payload:null,loading:null};
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const route=()=>runtime.route();
-  const safeX=value=>{try{const url=new URL(String(value||''));const host=url.hostname.toLowerCase();return url.protocol==='https:'&&(host==='x.com'||host.endsWith('.x.com')||host==='t.co'||host==='pbs.twimg.com'||host.endsWith('.twimg.com'))?url.href:'#'}catch{return'#'}};
-  const profileUrl=username=>`https://x.com/${encodeURIComponent(String(username||'').replace(/[^A-Za-z0-9_]/g,''))}`;
+  const allowedHosts=['tennesseetitans.com','titansonline.com','reddit.com','bsky.app','facebook.com','youtube.com','youtu.be'];
+  const safeUrl=value=>{try{const url=new URL(String(value||''));const host=url.hostname.toLowerCase();return url.protocol==='https:'&&allowedHosts.some(allowed=>host===allowed||host.endsWith(`.${allowed}`))?url.href:'#'}catch{return'#'}};
   function relativeTime(value){
     const stamp=Date.parse(value);if(!Number.isFinite(stamp))return'Recent';
     const seconds=Math.max(0,Math.round((Date.now()-stamp)/1000));
     if(seconds<60)return'Just now';if(seconds<3600)return`${Math.floor(seconds/60)}m`;if(seconds<86400)return`${Math.floor(seconds/3600)}h`;return`${Math.floor(seconds/86400)}d`;
   }
-  function entityHref(entity){
-    if(entity?.type==='hashtag'&&entity.tag)return`https://x.com/hashtag/${encodeURIComponent(entity.tag)}`;
-    if(entity?.type==='mention'&&entity.username)return profileUrl(entity.username);
-    if(entity?.type==='url')return safeX(entity.url||entity.expandedUrl);
-    return'#';
-  }
-  function linkedText(post){
-    const chars=Array.from(String(post?.text||''));
-    const entities=(Array.isArray(post?.entities)?post.entities:[]).filter(entity=>Number.isInteger(entity?.start)&&Number.isInteger(entity?.end)&&entity.start>=0&&entity.end<=chars.length&&entity.end>entity.start).sort((a,b)=>a.start-b.start||a.end-b.end);
-    let cursor=0,html='';
-    for(const entity of entities){
-      if(entity.start<cursor)continue;
-      html+=esc(chars.slice(cursor,entity.start).join(''));
-      const original=chars.slice(entity.start,entity.end).join('');
-      const label=entity.type==='url'&&entity.displayUrl?entity.displayUrl:original;
-      const href=entityHref(entity);
-      html+=href==='#'?esc(label):`<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
-      cursor=entity.end;
-    }
-    html+=esc(chars.slice(cursor).join(''));
-    return html;
-  }
-  function postCard(post){
-    const user=post?.author||{};
-    const postUrl=safeX(post?.url);
-    const userUrl=profileUrl(user.username);
-    const avatar=safeX(user.profileImageUrl);
-    return `<article class="social-post-v49">
-      <header>
-        <a class="social-author-v49" href="${esc(userUrl)}" target="_blank" rel="noopener noreferrer">${avatar!=='#'?`<img src="${esc(avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:'<span class="social-avatar-fallback-v49" aria-hidden="true">T</span>'}<span><strong>${esc(user.name||user.username)}</strong><small>@${esc(user.username)}</small></span></a>
-        <a class="social-x-mark-v49" href="${esc(postUrl)}" target="_blank" rel="noopener noreferrer" aria-label="View this post on X">𝕏</a>
-      </header>
-      <div class="social-post-text-v49">${linkedText(post)}</div>
-      <footer><a href="${esc(postUrl)}" target="_blank" rel="noopener noreferrer"><time datetime="${esc(post.createdAt)}">${esc(relativeTime(post.createdAt))}</time> · View on X</a></footer>
+  function itemCard(item){
+    const url=safeUrl(item?.url);
+    const source=String(item?.source||'Titans Pulse');
+    const official=Boolean(item?.official);
+    const title=String(item?.title||source);
+    const text=String(item?.text||'').trim();
+    const author=String(item?.author||'').trim();
+    return `<article class="social-post-v49 ${official?'is-official-v49':'is-fan-v49'}">
+      <header><span class="social-source-badge-v49">${official?'✓ ':''}${esc(source)}</span><time datetime="${esc(item?.createdAt||'')}">${esc(relativeTime(item?.createdAt))}</time></header>
+      <a class="social-item-link-v49" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><strong>${esc(title)}</strong>${text?`<span>${esc(text)}</span>`:''}</a>
+      <footer>${author?`<span>${esc(author)}</span>`:'<span>Public source</span>'}<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open ↗</a></footer>
     </article>`;
   }
-  function searchLinks(payload){
-    const links=Array.isArray(payload?.searchLinks)&&payload.searchLinks.length?payload.searchLinks:DEFAULT_LINKS;
-    return links.map(link=>`<a href="${esc(safeX(link.url))}" target="_blank" rel="noopener noreferrer">${esc(link.label)}</a>`).join('');
+  function sourceLinks(payload){
+    const links=Array.isArray(payload?.links)&&payload.links.length?payload.links:DEFAULT_LINKS;
+    return links.map(link=>{const url=safeUrl(link.url);return url==='#'?'':`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(link.label)}</a>`;}).join('');
+  }
+  function sourceStatus(){
+    const sources=state.payload?.sources;if(!sources)return'';
+    const labels=[['officialNews','Official news'],['officialVideo','Official video'],['bluesky','Bluesky'],['reddit','Reddit']];
+    return `<div class="social-source-status-v49" aria-label="Free source status">${labels.map(([key,label])=>`<span class="${sources[key]?.available?'is-live':'is-down'}"><i aria-hidden="true"></i>${esc(label)}</span>`).join('')}</div>`;
   }
   function sectionBody(){
-    if(state.payload?.available&&Array.isArray(state.payload.posts)&&state.payload.posts.length)return `<div class="social-post-grid-v49">${state.payload.posts.slice(0,6).map(postCard).join('')}</div>`;
-    if(state.loading&&!state.payload)return'<div class="social-pulse-loading-v49" role="status"><span></span><strong>Checking Titans Nation on X…</strong></div>';
-    return `<div class="social-pulse-fallback-v49"><strong>${esc(state.payload?.configured?'X pulse temporarily unavailable':'Live X feed is ready to connect')}</strong><p>${esc(state.payload?.message||'Open a live Titans-branded search now, or connect an X API bearer token to surface recent public posts directly in this section.')}</p></div>`;
+    const items=Array.isArray(state.payload?.items)?state.payload.items:Array.isArray(state.payload?.posts)?state.payload.posts:[];
+    if(state.payload?.available&&items.length)return `<div class="social-post-grid-v49">${items.slice(0,8).map(itemCard).join('')}</div>`;
+    if(state.loading&&!state.payload)return'<div class="social-pulse-loading-v49" role="status"><span></span><strong>Loading free Titans sources…</strong></div>';
+    return `<div class="social-pulse-fallback-v49"><strong>Free feeds are temporarily quiet</strong><p>${esc(state.payload?.message||'Use the source shortcuts below for official Titans updates and fan conversation while the feed refreshes.')}</p></div>`;
   }
   function render(){
     if(route()!=='home')return;
     let section=app.querySelector('[data-titans-social-pulse]');
     if(!section){section=document.createElement('section');section.className='titans-social-pulse-v49';section.dataset.titansSocialPulse='1';app.append(section);}
-    section.innerHTML=`<header class="social-pulse-head-v49"><div><div class="eyebrow">TITANS SOCIAL PULSE · X</div><h2>What Titans Nation is saying</h2><p>Recent public posts matching #TitanUp, #TitansNation, “Titans Nation,” and Tennessee Titans. Fan posts are shown as public conversation, not endorsements.</p></div><a class="social-open-x-v49" href="https://x.com/search?q=%23TitanUp&src=typed_query&f=live" target="_blank" rel="noopener noreferrer">Open live X search ↗</a></header><div class="social-search-chips-v49" aria-label="Titans X searches">${searchLinks(state.payload)}</div>${sectionBody()}<footer class="social-pulse-note-v49"><span>Source: X recent public search · cached to keep Home fast and API usage low.</span><button type="button" data-social-refresh>Refresh pulse</button></footer>`;
+    section.innerHTML=`<header class="social-pulse-head-v49"><div><div class="eyebrow">TITANS PULSE · FREE SOURCES</div><h2>Official updates + Titans fan conversation</h2><p>A fast, no-subscription feed combining Tennessee Titans official news and video with public Bluesky and Reddit conversation. Facebook and YouTube stay one tap away without paid API dependencies.</p></div><a class="social-primary-link-v49" href="https://www.tennesseetitans.com/news/" target="_blank" rel="noopener noreferrer">Official Titans news ↗</a></header>${sourceStatus()}<div class="social-search-chips-v49" aria-label="Free Titans sources">${sourceLinks(state.payload)}</div>${sectionBody()}<footer class="social-pulse-note-v49"><span>Free only · Titans RSS + Bluesky public API + Reddit RSS · cached for speed and source courtesy.</span><button type="button" data-social-refresh>Refresh pulse</button></footer>`;
   }
   async function load(force=false){
     if(state.loading&&!force)return state.loading;
-    state.loading=runtime.apiJson('/api/social-pulse',{ttl:15*60*1000,force}).then(payload=>{if(payload)state.payload=payload;render();return payload;}).finally(()=>{state.loading=null;});
+    state.loading=runtime.apiJson('/api/social-pulse',{ttl:10*60*1000,force}).then(payload=>{if(payload)state.payload=payload;render();return payload;}).finally(()=>{state.loading=null;});
     render();
     return state.loading;
   }
