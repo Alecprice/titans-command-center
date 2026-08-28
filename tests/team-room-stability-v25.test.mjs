@@ -9,7 +9,7 @@ test('Team Room preserves the selected roster subview across app rerenders',()=>
   assert.match(js,/trPreferredRosterView='roster'/);
   assert.match(js,/if\(persist\)\{trPreferredRosterView=next;syncRosterViewUrl\(next\);\}/);
   assert.match(js,/const initialView=requestedRosterView\(\)\|\|trPreferredRosterView/);
-  assert.match(js,/setRosterView\(requestedRosterView\(\)\|\|app\.dataset\.teamRoomView\|\|trPreferredRosterView,\{persist:false\}\)/);
+  assert.match(js,/setRosterView\(requestedRosterView\(\)\|\|app\.dataset\.teamRoomActiveView\|\|trPreferredRosterView,\{persist:false\}\)/);
   assert.doesNotMatch(js,/wireTeamRoomSwitcher\(switcher\);setRosterView\('roster'\)/);
 });
 
