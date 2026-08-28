@@ -1,3 +1,4 @@
+@import url('/tickets-resilience-v53.css');
 .tickets-free-mode-v51 .tickets-hero{background:linear-gradient(135deg,#071a2f 0%,#0c2340 55%,#174f7d 100%)}
 .tickets-free-mode-v51 .tickets-hero-price-rule{border-color:rgba(123,204,255,.35);background:rgba(75,146,219,.16)}
 .tickets-free-mode-v51 .tickets-offline-state{border-color:rgba(75,146,219,.42);background:linear-gradient(135deg,#f8fcff 0%,#eef7fd 100%)}
