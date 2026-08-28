@@ -4,10 +4,11 @@ import fs from 'node:fs';
 
 const source=fs.readFileSync(new URL('../accessibility-runtime.js',import.meta.url),'utf8');
 
-test('mobile app controls get a real 44px touch-height floor',()=>{
+test('mobile app controls get a real 44 by 44 touch floor',()=>{
   assert.match(source,/#app button,/);
   assert.match(source,/#app select,/);
   assert.match(source,/input:not\(\[type="hidden"\]\):not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/);
+  assert.match(source,/min-width:44px!important/);
   assert.match(source,/min-height:44px!important/);
 });
 
