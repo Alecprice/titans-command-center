@@ -11,6 +11,7 @@ import './fantasy-weekly-command-v42.js';
 const menu=document.querySelector('#menu-button');
 const sidebar=document.querySelector('#sidebar');
 const app=document.querySelector('#app');
+const mobileTypeFloor=matchMedia('(max-width:760px)');
 const TEAM_VIEWS=new Set(['roster','depth','staff','cutdown']);
 let teamRoomQueued=false;
 
@@ -21,6 +22,7 @@ function installMobileReadabilityFloor(){
   style.textContent=`
     @media (max-width:760px){
       #app small{font-size:10px!important;line-height:1.35!important}
+      #app .tcc-mobile-readable-micro{font-size:10px!important;line-height:1.35!important}
       #app .pulse-item small,
       #app .fan-tile .tile-label,
       #app .fan-hero-brand .era-chip,
@@ -67,9 +69,25 @@ function dedupeHomeEnhancements(){
   }
 }
 
+function enforceMobileComputedTextFloor(){
+  if(!app)return;
+  const candidates=[...app.querySelectorAll('small,p,li,span')];
+  if(!mobileTypeFloor.matches){
+    candidates.forEach(element=>element.classList.remove('tcc-mobile-readable-micro'));
+    return;
+  }
+  candidates.forEach(element=>{
+    if(element.classList.contains('tcc-mobile-readable-micro'))return;
+    if(!String(element.textContent||'').trim())return;
+    const size=Number.parseFloat(getComputedStyle(element).fontSize);
+    if(Number.isFinite(size)&&size<10)element.classList.add('tcc-mobile-readable-micro');
+  });
+}
+
 function syncAsyncRegions(){
   document.querySelectorAll('.legacy-page[data-polished]').forEach(page=>page.setAttribute('aria-busy','false'));
   dedupeHomeEnhancements();
+  enforceMobileComputedTextFloor();
 }
 
 function teamRoomRoute(){return location.hash.replace(/^#/,'').split('?')[0]||'home';}
@@ -121,6 +139,7 @@ if(app){
   new MutationObserver(syncAsyncRegions).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-polished']});
   new MutationObserver(watchTeamRoomMutations).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['aria-pressed']});
 }
+mobileTypeFloor.addEventListener?.('change',syncAsyncRegions);
 addEventListener('hashchange',scheduleTeamRoomReconcile);
 syncAsyncRegions();
 scheduleTeamRoomReconcile();
