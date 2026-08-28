@@ -2,4 +2,35 @@
 .tickets-provider-health{display:grid;gap:9px;padding:13px 14px;border:1px solid rgba(12,35,64,.14);border-radius:15px;background:#f8fbfd}.tickets-provider-health>header{display:flex;align-items:center;justify-content:space-between;gap:10px}.tickets-provider-health>header strong{font-size:12px}.tickets-provider-health>header span{color:#526b80;font-size:10px}.tickets-provider-health>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.tickets-provider-pill{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;min-height:58px;padding:9px 10px;border:1px solid rgba(12,35,64,.12);border-radius:11px;background:#fff}.tickets-provider-pill b{font-size:12px}.tickets-provider-pill em{justify-self:end;padding:3px 7px;border-radius:999px;font-size:9px;font-style:normal;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.tickets-provider-pill small{grid-column:1/-1;color:#526b80;font-size:10px;line-height:1.35}.tickets-provider-pill.live em{background:#e8f6ec;color:#176b35}.tickets-provider-pill.down em{background:#fff0f1;color:#9b1730}.tickets-provider-pill.pending em{background:#eef2f5;color:#526b80}
 .tickets-price-block em{display:block;margin-top:5px;color:#34566f;font-size:10px;font-style:normal;font-weight:800;line-height:1.3}.tickets-compare-card.global-cheapest .tickets-price-block em{color:#174f7d}
 @media(max-width:760px){.tickets-provider-health>header{align-items:flex-start;flex-direction:column}.tickets-provider-health>div{grid-template-columns:1fr}.tickets-provider-pill{min-height:54px}.tickets-stale-banner{padding:12px 13px}}
-@media(max-width:390px){.tickets-price-block em{grid-column:1/-1;margin-top:1px}}
+@media(max-width:540px){
+  .tickets-center-v47{min-width:0;gap:13px;padding-bottom:calc(118px + env(safe-area-inset-bottom))}
+  .tickets-body,.tickets-comparison-board,.tickets-compare-list{min-width:0}
+  .tickets-comparison-board>header,.tickets-price-group>header{align-items:flex-start;flex-direction:column;gap:4px}
+  .tickets-comparison-board>header h2,.tickets-price-group>header h2{max-width:100%;font-size:20px;line-height:1.14}
+  .tickets-comparison-board>header>span,.tickets-price-group>header>span{font-size:11px}
+  .tickets-compare-list{gap:12px}
+  .tickets-compare-card{grid-template-columns:minmax(0,1fr);gap:12px;min-width:0;padding:12px;border-radius:16px}
+  .tickets-compare-card.global-cheapest{box-shadow:inset 4px 0 0 var(--ticket-blue),0 8px 20px rgba(12,35,64,.06)}
+  .tickets-event-copy{order:1;min-width:0}
+  .tickets-event-tags{flex-wrap:wrap;align-items:flex-start;gap:6px;margin-bottom:8px}
+  .tickets-event-tags span,.tickets-event-tags b{max-width:100%;min-height:26px;padding:3px 8px;line-height:1.15;text-align:center;white-space:normal}
+  .tickets-event-copy h3{margin-bottom:7px;font-size:18px;line-height:1.18;overflow-wrap:anywhere}
+  .tickets-event-copy p{font-size:13px;line-height:1.4}
+  .tickets-price-block{order:2;display:grid;grid-template-columns:minmax(0,1fr);gap:3px;min-height:0;padding:12px 13px}
+  .tickets-price-block small,.tickets-price-block strong,.tickets-price-block span,.tickets-price-block em{grid-column:1;min-width:0}
+  .tickets-price-block strong{font-size:24px;line-height:1.06;overflow-wrap:anywhere}
+  .tickets-price-block span{padding:0;font-size:11px}
+  .tickets-price-block em{margin-top:4px;font-size:10px}
+  .tickets-offer-list{order:3;grid-column:1;min-width:0;gap:8px}
+  .tickets-offer-row{grid-template-columns:minmax(0,1fr) auto;gap:8px;min-width:0;min-height:0;padding:10px}
+  .tickets-offer-row>div:first-child strong{font-size:13px}
+  .tickets-offer-row>div:first-child span{font-size:10px;line-height:1.35}
+  .tickets-offer-price{min-width:0}
+  .tickets-offer-price b{font-size:18px;line-height:1.05;text-align:right;overflow-wrap:anywhere}
+  .tickets-offer-row>a{grid-column:1/-1;width:100%;min-height:48px;font-size:12px}
+  .tickets-toolbar>div:first-child{gap:7px}
+  .tickets-toolbar button,.tickets-toolbar>a{padding:0 10px}
+  .tickets-toolbar-actions>span{padding:0 4px;line-height:1.45}
+  .tickets-provider-health{padding:12px}
+}
+@media(max-width:390px){.tickets-price-block em{grid-column:1;margin-top:4px}}
