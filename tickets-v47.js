@@ -135,8 +135,10 @@ import './titans-social-v49.js';
   function mountTickets(){
     if(route()!=='tickets')return;
     if(!state.payload)state.payload=readCachedPayload();
-    if(state.payload)renderCurrent();
-    else if(!app.querySelector('[data-ticket-center]'))app.innerHTML=loading();
+    if(!app.querySelector('[data-ticket-center]')){
+      if(state.payload)renderCurrent();
+      else app.innerHTML=loading();
+    }
     loadTickets(false);
   }
   function prefetchTickets(){
@@ -172,6 +174,9 @@ import './titans-social-v49.js';
     renderCurrent();
   });
   runtime.onRoute(()=>{state.renderToken++;state.loading=null;queueMicrotask(reconcile);},{immediate:true});
-  runtime.onAppRender(()=>queueMicrotask(reconcile),{immediate:true});
+  runtime.onAppRender(()=>queueMicrotask(()=>{
+    if(route()==='home')enhanceHome();
+    else if(route()==='tickets'&&!app.querySelector('[data-ticket-center]'))mountTickets();
+  }),{immediate:true});
   runtime.onRefresh(()=>{if(route()==='tickets'){state.loading=null;loadTickets(true);}});
 })();
