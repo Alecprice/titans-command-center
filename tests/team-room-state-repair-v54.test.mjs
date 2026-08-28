@@ -17,16 +17,17 @@ test('requested roster deep link remains authoritative during semantic drift',()
   assert.match(repair,/VIEWS\.has\(view\)/);
 });
 
-test('repair restores button panel and base visibility as one invariant',()=>{
-  assert.match(repair,/app\.dataset\.teamRoomView=view/);
-  assert.match(repair,/button\.setAttribute\('aria-pressed',String\(active\)\)/);
-  assert.match(repair,/button\.classList\.toggle\('active',active\)/);
-  assert.match(repair,/panel\.hidden=panel\.dataset\.panel!==view/);
-  assert.match(repair,/element\.hidden=hideBase/);
+test('v54 asks Team Room to repair the invariant instead of becoming another semantic writer',()=>{
+  assert.match(repair,/TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request'/);
+  assert.match(repair,/new CustomEvent\(TEAM_ROOM_VIEW_REQUEST/);
+  assert.match(repair,/if\(hasMismatch\(view\)\)requestRepair\(view\)/);
+  assert.doesNotMatch(repair,/app\.dataset\.teamRoomView\s*=/);
+  assert.doesNotMatch(repair,/button\.setAttribute\('aria-pressed'/);
+  assert.doesNotMatch(repair,/button\.classList\.toggle/);
+  assert.doesNotMatch(repair,/panel\.hidden\s*=/);
 });
 
-test('repair only writes when current Team Room semantics actually disagree',()=>{
-  assert.match(repair,/if\(!hasMismatch\(view\)\)return/);
+test('repair only requests owner reconciliation when current semantics disagree',()=>{
   assert.match(repair,/button\.getAttribute\('aria-pressed'\)!=='true'/);
   assert.match(repair,/!button\.classList\.contains\('active'\)/);
   assert.match(repair,/panel&&panel\.hidden/);
