@@ -1,3 +1,5 @@
+import './team-room-aria-diagnostic-v55.js';
+
 (() => {
   'use strict';
   if(window.__TitansTeamRoomStateRepairV54)return;
