@@ -26,6 +26,13 @@ test('Ticket Center removes general bootstrap data from the critical price path'
   assert.doesNotMatch(ui,/Promise\.all\(\[\s*runtime\.apiJson\('\/api\/tickets'[\s\S]*runtime\.apiJson\('\/api\/data'/);
 });
 
+test('Ticket Center app-render reconciliation cannot recursively rewrite its own surface',async()=>{
+  const ui=await read('tickets-v47.js');
+  assert.match(ui,/if\(!app\.querySelector\('\[data-ticket-center\]'\)\)\{\s*if\(state\.payload\)renderCurrent\(\)/);
+  assert.match(ui,/route\(\)==='tickets'&&!app\.querySelector\('\[data-ticket-center\]'\)\)mountTickets\(\)/);
+  assert.doesNotMatch(ui,/runtime\.onAppRender\(\(\)=>queueMicrotask\(reconcile\)/);
+});
+
 test('Cloudflare edge cache owns tickets instead of relying on response headers alone',async()=>{
   const [worker,api]=await Promise.all([read('cloudflare/worker.mjs'),read('src/tickets-api.mjs')]);
   assert.match(worker,/route==='tickets'\)return await cachedAdapterData/);
