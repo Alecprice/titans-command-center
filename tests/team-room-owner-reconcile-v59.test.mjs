@@ -9,12 +9,12 @@ test('Team Room owner detects complete selected-state drift instead of only pane
   assert.match(source,/button\.getAttribute\('aria-pressed'\)!==String\(on\)/);
   assert.match(source,/button\.classList\.contains\('active'\)!==on/);
   assert.match(source,/panel\.hidden!==\(panel\.dataset\.panel!==view\)/);
-  assert.match(source,/app\.dataset\.teamRoomView!==view/);
+  assert.match(source,/app\.dataset\.teamRoomActiveView!==view/);
 });
 
 test('Team Room owner self-heals semantic drift through its canonical setter',()=>{
   assert.match(source,/function reconcileRosterViewInvariant\(\)/);
-  assert.match(source,/const view=requestedRosterView\(\)\|\|app\.dataset\.teamRoomView\|\|trPreferredRosterView/);
+  assert.match(source,/const view=requestedRosterView\(\)\|\|app\.dataset\.teamRoomActiveView\|\|trPreferredRosterView/);
   assert.match(source,/if\(rosterViewInvariantMismatch\(app,view\)\)setRosterView\(view,\{persist:false\}\)/);
   assert.doesNotMatch(source,/setInterval/);
 });
