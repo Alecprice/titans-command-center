@@ -43,6 +43,7 @@ function installMobileReadabilityFloor(){
       #app select,
       #app input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
       #app [role="button"]{
+        min-width:44px!important;
         min-height:44px!important;
       }
     }
