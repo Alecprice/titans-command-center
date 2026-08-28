@@ -9,6 +9,7 @@
   const NFL_SOURCE='https://operations.nfl.com/calendar-events/nfl-important-dates';
   const TITANS_MOVES='https://www.tennesseetitans.com/team/transactions/';
   const MY53_STORE='titans:my53:v1';
+  const TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request';
   let data=null,loading=null,timer=null;
 
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -166,6 +167,13 @@
     </section>`;
   }
 
+  function requestCutdownOwner(app){
+    if(!app||route()!=='roster')return;
+    const requested=new URLSearchParams(location.hash.split('?')[1]||'').get('view');
+    if(requested!=='cutdown'&&app.dataset.teamRoomView!=='cutdown')return;
+    app.dispatchEvent(new CustomEvent(TEAM_ROOM_VIEW_REQUEST,{detail:{view:'cutdown',persist:false,reason:'cutdown-panel-mounted'}}));
+  }
+
   function mountHome(){
     const app=document.querySelector('#app');
     if(!app||route()!=='home'||app.querySelector('[data-cutdown-home]'))return;
@@ -181,6 +189,8 @@
     if(!panel)return false;
     panel.innerHTML=rosterPanel();
     wireMy53(panel,snapshot().roster);
+    queueMicrotask(()=>requestCutdownOwner(app));
+    requestAnimationFrame(()=>requestCutdownOwner(app));
     return true;
   }
 
