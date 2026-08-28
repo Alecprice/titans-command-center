@@ -114,7 +114,7 @@ function reconcileTeamRoom(){
   if(!app||teamRoomRoute()!=='roster')return;
   const switcher=app.querySelector('.team-room-switcher');
   if(!switcher)return;
-  const stored=TEAM_VIEWS.has(app.dataset.teamRoomView)?app.dataset.teamRoomView:null;
+  const stored=TEAM_VIEWS.has(app.dataset.teamRoomActiveView)?app.dataset.teamRoomActiveView:null;
   const pressed=[...switcher.querySelectorAll('[data-team-room-view]')].find(button=>button.getAttribute('aria-pressed')==='true')?.dataset.teamRoomView;
   const next=requestedTeamView()||stored||(TEAM_VIEWS.has(pressed)?pressed:'roster');
   const button=switcher.querySelector(`[data-team-room-view="${next}"]`);
@@ -126,7 +126,7 @@ function scheduleTeamRoomReconcile(){
   queueMicrotask(()=>{teamRoomQueued=false;reconcileTeamRoom();});
 }
 function watchTeamRoomMutations(records){
-  const relevant=records.some(record=>record.type==='childList'||(record.type==='attributes'&&record.target instanceof Element&&record.target.matches('[data-team-room-view]')));
+  const relevant=records.some(record=>record.type==='childList'||(record.type==='attributes'&&record.target instanceof Element&&record.target.matches('.team-room-switcher [data-team-room-view]')));
   if(relevant)scheduleTeamRoomReconcile();
 }
 
