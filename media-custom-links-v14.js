@@ -14,16 +14,19 @@
     document.head.append(style);
   }
 
-  // Keep the permanent device key stable. The versioned alias remains only because
-  // account sync already recognizes it; every save keeps both copies synchronized.
+  // Keep the permanent device key stable. The versioned alias remains because the
+  // existing account sync namespace recognizes it; every save keeps both copies aligned.
   const STORAGE_KEY='titans:customMediaLinks';
   const SYNC_STORAGE_KEY='titans:v14CustomMediaLinks';
   const STORAGE_VERSION=1;
   const LEGACY_STORAGE_RE=/^titans:v\d+CustomMediaLinks$/i;
   const MAX_LINKS=12;
-  const PRIORITY_ACCOUNT='titans77fan@gmail.com';
+  // UI-order preference only, never authorization. Store only a one-way account fingerprint
+  // in public client code rather than publishing the account address in the bundle.
+  const PRIORITY_ACCOUNT_HASH='ca45320c96fc21c7b4dfa800eb5b249569716334f053537d065fea88574e78d2';
+  let priorityAccount=false,priorityFingerprint='';
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   function normalizeUrl(value){
     try{
@@ -68,8 +71,8 @@
     try{
       const payload=encodedLinks(value);
       localStorage.setItem(STORAGE_KEY,payload);
-      // Compatibility alias for the existing account preference namespace. This is
-      // presentation data only; account identity still comes from the authenticated session.
+      // Best-effort compatibility copy for signed-in account sync. The permanent key
+      // remains the device source of truth and normal guest behavior is unchanged.
       try{localStorage.setItem(SYNC_STORAGE_KEY,payload)}catch{}
       return true;
     }catch{return false}
@@ -113,9 +116,23 @@
     try{localStorage.setItem(STORAGE_KEY,encodedLinks(links));return true}catch{return false}
   }
 
+  async function refreshPriorityAccount(){
+    const email=String(window.TitansAccount?.user?.email||'').trim().toLowerCase();
+    if(email===priorityFingerprint)return priorityAccount;
+    priorityFingerprint=email;
+    priorityAccount=false;
+    if(!email||!globalThis.crypto?.subtle)return false;
+    try{
+      const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(email));
+      const hash=[...new Uint8Array(bytes)].map(value=>value.toString(16).padStart(2,'0')).join('');
+      priorityAccount=hash===PRIORITY_ACCOUNT_HASH;
+    }catch{priorityAccount=false}
+    if(route()==='media')queueMicrotask(render);
+    return priorityAccount;
+  }
+
   const readLinks=()=>migrateAndReadLinks();
   const writeLinks=value=>persistLinks(value);
-  const priorityAccount=()=>String(window.TitansAccount?.user?.email||'').trim().toLowerCase()===PRIORITY_ACCOUNT;
 
   function card(item,index){
     return `<article class="media-custom-card"><div><small>USER SAVED</small><strong>${esc(item.label||'Custom link')}</strong><span>${esc(new URL(item.url).hostname)}</span></div><div class="media-custom-actions"><a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">Open ↗</a><button type="button" data-custom-remove="${index}" aria-label="Remove ${esc(item.label||'custom link')}">Remove</button></div></article>`;
@@ -129,7 +146,7 @@
     if(!section)return;
     const watch=document.querySelector('.media-watch'),page=document.querySelector('.media-page');
     if(!watch)return;
-    const priority=priorityAccount()&&links.length>0;
+    const priority=priorityAccount&&links.length>0;
     section.classList.toggle('media-custom-links-priority',priority);
     section.dataset.savedPriority=String(priority);
     if(priority){
@@ -179,12 +196,13 @@
   addEventListener('storage',event=>{
     if(event.key===STORAGE_KEY||event.key===SYNC_STORAGE_KEY||LEGACY_STORAGE_RE.test(String(event.key||'')))render();
   });
-  addEventListener('titans:account',()=>queueMicrotask(render));
-  addEventListener('titans:preferences-synced',()=>{adoptSyncedLinks();queueMicrotask(render)});
-  addEventListener('titans:preferences-imported',()=>{adoptSyncedLinks();queueMicrotask(render)});
-  addEventListener('titans:preferences-reset',()=>{try{localStorage.removeItem(STORAGE_KEY)}catch{};queueMicrotask(render)});
-  addEventListener('hashchange',()=>setTimeout(render,0));
+  addEventListener('titans:account',()=>{refreshPriorityAccount();queueMicrotask(render)});
+  addEventListener('titans:preferences-synced',()=>{adoptSyncedLinks();refreshPriorityAccount();queueMicrotask(render)});
+  addEventListener('titans:preferences-imported',()=>{adoptSyncedLinks();refreshPriorityAccount();queueMicrotask(render)});
+  addEventListener('titans:preferences-reset',()=>{try{localStorage.removeItem(STORAGE_KEY)}catch{};priorityAccount=false;queueMicrotask(render)});
+  addEventListener('hashchange',()=>setTimeout(()=>{refreshPriorityAccount();render()},0));
   const app=document.querySelector('#app');
   if(app)new MutationObserver(()=>{if(route()==='media')queueMicrotask(render)}).observe(app,{childList:true});
+  refreshPriorityAccount();
   render();
 })();
