@@ -62,7 +62,7 @@ def browser_state(driver):
             transactionTools:Boolean(document.querySelector('.transaction-tools')),
             marketLoading:app?.dataset?.marketHub||null,
             statsLoading:app?.dataset?.preseasonHub||null,
-            teamRoomView:app?.dataset?.teamRoomView||null,
+            teamRoomView:app?.dataset?.teamRoomActiveView||null,
             teamRoomSwitcher:Boolean(document.querySelector('.team-room-switcher')),
             rosterGridExists:Boolean(grid),
             rosterGridHidden:grid?.hidden??null,
@@ -232,7 +232,7 @@ try:
 
     stage = 'mobile:depth-route-state'
     driver.execute_script("document.querySelector('.team-room-switcher [data-team-room-view=\"depth\"]')?.click()")
-    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'depth'")
+    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomActiveView === 'depth'")
     stage = 'mobile:depth-pressed'
     wait_for(driver, "document.querySelector('.team-room-switcher [data-team-room-view=\"depth\"]')?.getAttribute('aria-pressed') === 'true'")
     stage = 'mobile:depth-panel'
@@ -244,14 +244,14 @@ try:
     stage = 'mobile:staff-arrow-key'
     depth_button = driver.find_element('css selector', '.team-room-switcher [data-team-room-view="depth"]')
     depth_button.send_keys(Keys.ARROW_RIGHT)
-    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'staff'")
+    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomActiveView === 'staff'")
     wait_for(driver, "document.querySelector('.team-room-switcher [data-team-room-view=\"staff\"]')?.getAttribute('aria-pressed') === 'true'")
     wait_for(driver, "document.querySelector('.team-room-panel[data-panel=\"staff\"]')?.hidden === false")
     assert_no_horizontal_overflow(driver, 'mobile Staff')
 
     stage = 'mobile:return-roster'
     driver.execute_script("document.querySelector('.team-room-switcher [data-team-room-view=\"roster\"]')?.click()")
-    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomView === 'roster'")
+    wait_for(driver, "document.querySelector('#app')?.dataset.teamRoomActiveView === 'roster'")
     wait_for(driver, "document.querySelector('#rg')?.hidden === false && getComputedStyle(document.querySelector('#rg')).display !== 'none' && document.querySelectorAll('#rg .player-card').length > 0")
     assert_no_horizontal_overflow(driver, 'mobile Roster restored')
 
