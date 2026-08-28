@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Player Intelligence / Game Day browser regression failure**
-- Source commit: `0ece56fd9c0941e091230771bca411dc1cdfdeff`
+- Source commit: `9d3be25383f59a4e4e9f29d64b140321f05f4f76`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-28T14:19:44Z
+- Recorded: 2026-08-28T14:25:57Z
 
 ## Production regression
 
@@ -75,49 +75,44 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "0ece56fd9c0941e091230771bca411dc1cdfdeff",
-    "builtAt": "2026-08-28T14:18:42.186Z"
+    "commit": "9d3be25383f59a4e4e9f29d64b140321f05f4f76",
+    "builtAt": "2026-08-28T14:24:27.054Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 3,
   "responseMs": {
-    "root": 35,
-    "health": 183,
-    "data": 226,
-    "stats": 211,
-    "market": 497,
-    "analytics": 407
+    "root": 51,
+    "health": 224,
+    "data": 284,
+    "stats": 217,
+    "market": 2231,
+    "analytics": 372
   },
-  "testedAt": "2026-08-28T14:19:05.708Z",
+  "testedAt": "2026-08-28T14:24:58.736Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-26",
     "databaseContentAudit": "2026-08-26",
-    "responseMs": 423,
-    "testedAt": "2026-08-28T14:19:06.172Z"
+    "responseMs": 212,
+    "testedAt": "2026-08-28T14:24:58.982Z"
   },
   "marketEdgeCache": {
     "ok": true,
     "base": "https://titans-command-center.alecjordanprice.workers.dev",
-    "initialStatus": "MISS",
+    "initialStatus": "HIT",
     "finalStatus": "HIT",
-    "attempts": 2,
-    "coldOrInitialMs": 971,
-    "warmHitMs": 556,
+    "attempts": 1,
+    "coldOrInitialMs": 322,
+    "warmHitMs": 322,
     "rows": 942,
     "sequence": [
       {
-        "status": "MISS",
-        "durationMs": 971,
-        "rows": 942
-      },
-      {
         "status": "HIT",
-        "durationMs": 556,
+        "durationMs": 322,
         "rows": 942
       }
     ],
-    "testedAt": "2026-08-28T14:19:08.119Z"
+    "testedAt": "2026-08-28T14:24:59.360Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -177,8 +172,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 134,
-  "testedAt": "2026-08-28T14:19:08.733Z"
+  "durationMs": 171,
+  "testedAt": "2026-08-28T14:24:59.988Z"
 }```
 
 ## Browser navigation regression
@@ -224,11 +219,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 383,
-  "longTasksOver250ms": 1,
+  "maxLongTaskMs": 136,
+  "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 8.43,
-  "testedAt": "2026-08-28T14:19:20Z"
+  "durationSeconds": 28.97,
+  "testedAt": "2026-08-28T14:25:35Z"
 }```
 
 ## Listen Watch browser regression
@@ -261,8 +256,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.18,
-  "testedAt": "2026-08-28T14:19:23Z"
+  "durationSeconds": 2.07,
+  "testedAt": "2026-08-28T14:25:37Z"
 }```
 
 ## Market Pulse browser regression
@@ -451,7 +446,7 @@
       "controls": [
         {
           "disabled": false,
-          "height": 48,
+          "height": 44,
           "id": "mh-event-filter",
           "pressed": null,
           "tag": "SELECT",
@@ -460,7 +455,7 @@
         },
         {
           "disabled": false,
-          "height": 48,
+          "height": 44,
           "id": "mh-book-filter",
           "pressed": null,
           "tag": "SELECT",
@@ -469,7 +464,7 @@
         },
         {
           "disabled": false,
-          "height": 48,
+          "height": 44,
           "id": "mh-category-filter",
           "pressed": null,
           "tag": "SELECT",
@@ -535,8 +530,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 6.5,
-  "testedAt": "2026-08-28T14:19:30Z"
+  "durationSeconds": 6.42,
+  "testedAt": "2026-08-28T14:25:44Z"
 }```
 
 ## Command Intelligence browser regression
@@ -564,38 +559,38 @@
   "mediaTuneGuideAfterPushState": true,
   "mobileTabTargets": [
     {
-      "h": 48,
+      "h": 44,
       "label": "Changes"
     },
     {
-      "h": 48,
+      "h": 44,
       "label": "Press Room"
     },
     {
-      "h": 48,
+      "h": 44,
       "label": "Scheme Lab"
     },
     {
-      "h": 48,
+      "h": 44,
       "label": "Global Fans"
     },
     {
-      "h": 48,
+      "h": 44,
       "label": "Stadium"
     },
     {
-      "h": 48,
+      "h": 44,
       "label": "Fan GM"
     },
     {
-      "h": 48,
+      "h": 44,
       "label": "Time Machine"
     }
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
   "durationSeconds": 2.38,
-  "testedAt": "2026-08-28T14:19:32Z"
+  "testedAt": "2026-08-28T14:25:46Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -606,8 +601,8 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "stage": "cutdown:desktop",
   "error": "TimeoutError: Cutdown view did not settle after roster refresh: {'buttonConnected': True, 'exists': True, 'panelConnected': True, 'selected': False, 'visible': True}",
-  "durationSeconds": 10.36,
-  "testedAt": "2026-08-28T14:19:43Z",
+  "durationSeconds": 10.45,
+  "testedAt": "2026-08-28T14:25:57Z",
   "hash": "#roster?view=cutdown",
   "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\n53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n2d 7h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.\n\n2026-08-24\n\nSigned LB Reid Carrico and placed LB Milo Eifler on injured reserve.\n\n2026-08-21\n\nWaived LB Sean Brown from injured reserve with an injury settlement; placed DB Nazeeh Johnson on injured reserve; waived TE Matt Lauter; signed free agents LB Milo Eifler and DE Tanoh Kpassagnon.\n\n2026-08-19\n\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\n\n2026-08-17\n\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\n\n2026-08-16\n\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+",
   "browserWarnings": []
