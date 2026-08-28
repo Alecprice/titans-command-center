@@ -37,6 +37,12 @@ function installMobileReadabilityFloor(){
         font-size:10px!important;
         line-height:1.35!important;
       }
+      #app button,
+      #app select,
+      #app input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+      #app [role="button"]{
+        min-height:44px!important;
+      }
     }
   `;
   document.head.appendChild(style);
@@ -53,8 +59,17 @@ function syncMenuState(){
   menu.setAttribute('aria-label',open?'Close navigation':'Open navigation');
 }
 
+function dedupeHomeEnhancements(){
+  if(!app)return;
+  for(const selector of ['.fan-today[data-fan-v09="today"]','.v10-home[data-v10-home]']){
+    const matches=[...app.querySelectorAll(selector)];
+    matches.slice(1).forEach(node=>node.remove());
+  }
+}
+
 function syncAsyncRegions(){
   document.querySelectorAll('.legacy-page[data-polished]').forEach(page=>page.setAttribute('aria-busy','false'));
+  dedupeHomeEnhancements();
 }
 
 function teamRoomRoute(){return location.hash.replace(/^#/,'').split('?')[0]||'home';}
