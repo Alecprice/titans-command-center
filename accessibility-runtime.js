@@ -1,7 +1,6 @@
 import './blank-state-runtime.js';
 import './continue-command-v35.js';
 import './my-titans-home-v35.js';
-import './my-player-watch-v36.js';
 import './gameday-personal-v37.js';
 import './my-player-impact-v38.js';
 import './schedule-calendar-v39.js';
@@ -13,6 +12,7 @@ const sidebar=document.querySelector('#sidebar');
 const app=document.querySelector('#app');
 const mobileTypeFloor=matchMedia('(max-width:760px)');
 const TEAM_VIEWS=new Set(['roster','depth','staff','cutdown']);
+const TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request';
 let teamRoomQueued=false;
 
 function installMobileReadabilityFloor(){
@@ -105,6 +105,10 @@ function teamRoomMismatch(next){
   const baseMismatch=[...app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg')].some(element=>element.hidden===baseVisible);
   return Boolean(button&&(button.getAttribute('aria-pressed')!=='true'||button.classList.contains('active')===false||(panel&&panel.hidden)||baseMismatch));
 }
+function requestTeamRoomView(view){
+  if(!app||!TEAM_VIEWS.has(view))return;
+  app.dispatchEvent(new CustomEvent(TEAM_ROOM_VIEW_REQUEST,{detail:{view,persist:false,reason:'accessibility-reconcile'}}));
+}
 function reconcileTeamRoom(){
   if(!app||teamRoomRoute()!=='roster')return;
   const switcher=app.querySelector('.team-room-switcher');
@@ -113,7 +117,7 @@ function reconcileTeamRoom(){
   const pressed=[...switcher.querySelectorAll('[data-team-room-view]')].find(button=>button.getAttribute('aria-pressed')==='true')?.dataset.teamRoomView;
   const next=requestedTeamView()||stored||(TEAM_VIEWS.has(pressed)?pressed:'roster');
   const button=switcher.querySelector(`[data-team-room-view="${next}"]`);
-  if(button&&teamRoomMismatch(next))button.click();
+  if(button&&teamRoomMismatch(next))requestTeamRoomView(next);
 }
 function scheduleTeamRoomReconcile(){
   if(teamRoomQueued)return;
