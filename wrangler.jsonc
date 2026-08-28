@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "titans-command-center",
-  "main": "cloudflare/worker.mjs",
+  "main": "cloudflare/worker-v47.mjs",
   "compatibility_date": "2026-08-19",
   "compatibility_flags": ["nodejs_compat"],
   "placement": {"mode": "smart"},
