@@ -1,6 +1,10 @@
 import {getSql} from './db.mjs';
 
 const AUTH_ORIGIN='https://ep-cold-moon-a6z7a2ag.neonauth.us-west-2.aws.neon.tech/neondb/auth';
+const TRUSTED_ACCOUNT_ORIGINS=new Set([
+  'https://titans-command-center.alecjprice.com',
+  'https://titans-command-center.alecjordanprice.workers.dev'
+]);
 const V10_PREF_KEY='titans:v10Prefs';
 const PREF_KEYS=new Set(['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY,'titans-fantasy-v1']);
 const HOME_KEYS=['game','favorites','moves','intel','markets','freshness'];
@@ -22,11 +26,19 @@ function authHeaders(request){
   return headers;
 }
 
-function mutationIsCrossSite(request){
-  if(String(request.headers.get('sec-fetch-site')||'').toLowerCase()==='cross-site')return true;
-  const origin=request.headers.get('origin');
-  if(!origin)return false;
-  try{return new URL(origin).origin!==new URL(request.url).origin;}catch{return true;}
+export function accountMutationIsCrossSite(request){
+  const fetchSite=String(request.headers.get('sec-fetch-site')||'').toLowerCase();
+  const rawOrigin=request.headers.get('origin');
+  if(rawOrigin){
+    try{
+      const origin=new URL(rawOrigin).origin;
+      const requestOrigin=new URL(request.url).origin;
+      if(origin===requestOrigin)return false;
+      if(TRUSTED_ACCOUNT_ORIGINS.has(origin)&&TRUSTED_ACCOUNT_ORIGINS.has(requestOrigin))return false;
+      return true;
+    }catch{return true;}
+  }
+  return fetchSite==='cross-site';
 }
 
 function declaredBodyTooLarge(request,maxBytes){
@@ -57,7 +69,7 @@ export async function accountAuthProxy(request,subpath){
   if(!['get-session','sign-in/email','sign-up/email','sign-out'].includes(safe))return json({ok:false,error:'Unknown account route'},404);
   const allowedMethod=safe==='get-session'?'GET':'POST';
   if(request.method!==allowedMethod)return json({ok:false,error:'Method not allowed'},405,{Allow:allowedMethod});
-  if(request.method==='POST'&&mutationIsCrossSite(request))return json({ok:false,error:'Cross-site account request rejected'},403);
+  if(request.method==='POST'&&accountMutationIsCrossSite(request))return json({ok:false,error:'Cross-site account request rejected'},403);
   let body;
   if(request.method!=='GET'){
     const limited=await limitedBody(request,MAX_AUTH_BODY_BYTES);
@@ -137,7 +149,7 @@ function preferenceFailure(error){
 
 export async function accountPreferencesRoute(request,env){
   if(!['GET','PUT'].includes(request.method))return json({ok:false,error:'Method not allowed'},405,{Allow:'GET, PUT'});
-  if(request.method==='PUT'&&mutationIsCrossSite(request))return json({ok:false,error:'Cross-site account request rejected'},403);
+  if(request.method==='PUT'&&accountMutationIsCrossSite(request))return json({ok:false,error:'Cross-site account request rejected'},403);
   const session=await authSession(request);
   const user=session?.user||null;
   if(!user?.id)return json({ok:false,error:'Authentication required'},401);
