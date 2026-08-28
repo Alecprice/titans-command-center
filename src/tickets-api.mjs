@@ -1,4 +1,5 @@
 const SEATGEEK_EVENTS='https://api.seatgeek.com/2/events';
+const TICKETMASTER_EVENTS='https://app.ticketmaster.com/discovery/v2/events.json';
 export const TITANS_TICKETS_URL='https://seatgeek.com/tennessee-titans-tickets';
 const TITANS_SLUG='tennessee-titans';
 
@@ -7,6 +8,12 @@ export function safeSeatGeekUrl(value){
   try{
     const url=new URL(String(value||''));
     return url.protocol==='https:'&&(url.hostname==='seatgeek.com'||url.hostname.endsWith('.seatgeek.com'))?url.href:TITANS_TICKETS_URL;
+  }catch{return TITANS_TICKETS_URL;}
+}
+export function safeTicketmasterUrl(value){
+  try{
+    const url=new URL(String(value||''));
+    return url.protocol==='https:'&&(url.hostname==='ticketmaster.com'||url.hostname.endsWith('.ticketmaster.com'))?url.href:TITANS_TICKETS_URL;
   }catch{return TITANS_TICKETS_URL;}
 }
 export function ticketPriceBand(value){
@@ -23,11 +30,12 @@ function homeAway(title){
   if(value.includes('tennessee titans at '))return'away';
   return'all';
 }
-function normalizeEvent(event){
+function normalizeSeatGeekEvent(event){
   const stats=event?.stats||{};
   const lowestPrice=finite(stats.lowest_price);
   return {
     id:String(event?.id||''),
+    provider:'SeatGeek',
     title:String(event?.title||'Tennessee Titans tickets'),
     url:safeSeatGeekUrl(event?.url),
     datetimeLocal:String(event?.datetime_local||''),
@@ -48,7 +56,51 @@ function normalizeEvent(event){
 }
 export function normalizeSeatGeekEvents(events=[]){
   return (Array.isArray(events)?events:[])
-    .map(normalizeEvent)
+    .map(normalizeSeatGeekEvent)
+    .filter(event=>event.id&&event.url)
+    .sort((a,b)=>(a.lowestPrice??Number.MAX_SAFE_INTEGER)-(b.lowestPrice??Number.MAX_SAFE_INTEGER)||String(a.datetimeUtc).localeCompare(String(b.datetimeUtc))||a.title.localeCompare(b.title));
+}
+function ticketmasterLocalDate(event){
+  const start=event?.dates?.start||{};
+  if(start.localDate&&start.localTime)return`${start.localDate}T${start.localTime}`;
+  return String(start.localDate||start.dateTime||'');
+}
+function ticketmasterPriceRange(event){
+  const ranges=Array.isArray(event?.priceRanges)?event.priceRanges:[];
+  const minimums=ranges.map(range=>finite(range?.min)).filter(value=>value!=null);
+  const maximums=ranges.map(range=>finite(range?.max)).filter(value=>value!=null);
+  return {min:minimums.length?Math.min(...minimums):null,max:maximums.length?Math.max(...maximums):null};
+}
+function normalizeTicketmasterEvent(event){
+  const title=String(event?.name||'');
+  if(!title.toLowerCase().includes('tennessee titans'))return null;
+  const range=ticketmasterPriceRange(event);
+  const venue=Array.isArray(event?._embedded?.venues)?event._embedded.venues[0]:null;
+  return {
+    id:`tm:${String(event?.id||'')}`,
+    provider:'Ticketmaster',
+    title:title||'Tennessee Titans tickets',
+    url:safeTicketmasterUrl(event?.url),
+    datetimeLocal:ticketmasterLocalDate(event),
+    datetimeUtc:String(event?.dates?.start?.dateTime||''),
+    timeTbd:Boolean(event?.dates?.start?.timeTBA||event?.dates?.start?.noSpecificTime),
+    homeAway:homeAway(title),
+    venue:{
+      name:String(venue?.name||'Venue TBD'),
+      city:String(venue?.city?.name||''),
+      state:String(venue?.state?.stateCode||venue?.state?.name||''),
+    },
+    listingCount:null,
+    lowestPrice:range.min,
+    averagePrice:null,
+    highestPrice:range.max,
+    priceBand:ticketPriceBand(range.min),
+  };
+}
+export function normalizeTicketmasterEvents(events=[]){
+  return (Array.isArray(events)?events:[])
+    .map(normalizeTicketmasterEvent)
+    .filter(Boolean)
     .filter(event=>event.id&&event.url)
     .sort((a,b)=>(a.lowestPrice??Number.MAX_SAFE_INTEGER)-(b.lowestPrice??Number.MAX_SAFE_INTEGER)||String(a.datetimeUtc).localeCompare(String(b.datetimeUtc))||a.title.localeCompare(b.title));
 }
@@ -57,36 +109,63 @@ function methodOnly(req,res){
   if(req.method!=='GET'){res.status(405).json({ok:false,error:'Method not allowed'});return true;}
   return false;
 }
-export async function ticketsRoute(req,res,env=process.env){
-  if(methodOnly(req,res))return;
-  res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=180');
-  const clientId=String(env?.SEATGEEK_CLIENT_ID||'').trim();
-  const base={
-    ok:true,
-    provider:'SeatGeek',
-    providerType:'official-primary-ticketing-partner',
-    officialUrl:TITANS_TICKETS_URL,
-    scope:'event-inventory-summary',
-    pricing:'lowest available ticket price per event; mandatory SeatGeek fees are included in displayed marketplace prices, while taxes, delivery, or optional add-ons may still apply',
-    cheapestFirst:true,
-    fetchedAt:new Date().toISOString(),
-  };
-  if(!clientId)return res.status(200).json({...base,configured:false,available:false,events:[],message:'Live SeatGeek event pricing is not connected to this deployment.'});
+async function fetchSeatGeek(clientId,aid){
   const url=new URL(SEATGEEK_EVENTS);
   url.searchParams.set('client_id',clientId);
   url.searchParams.set('performers.slug',TITANS_SLUG);
   url.searchParams.set('listing_count.gt','0');
   url.searchParams.set('datetime_utc.gte',new Date().toISOString().slice(0,10));
   url.searchParams.set('per_page','50');
-  if(env?.SEATGEEK_AID)url.searchParams.set('aid',String(env.SEATGEEK_AID).trim());
-  try{
-    const upstream=await fetch(url,{headers:{Accept:'application/json','User-Agent':'TitansCommandCenter/1.0 tickets'},signal:AbortSignal.timeout(5000)});
-    if(!upstream.ok)throw new Error(`SeatGeek ${upstream.status}`);
-    const payload=await upstream.json();
-    const events=normalizeSeatGeekEvents(payload?.events);
-    return res.status(200).json({...base,configured:true,available:true,events,count:events.length});
-  }catch(error){
-    console.error('[tickets-seatgeek]',error);
-    return res.status(200).json({...base,configured:true,available:false,events:[],message:'Live SeatGeek event pricing is temporarily unavailable.'});
+  if(aid)url.searchParams.set('aid',aid);
+  const upstream=await fetch(url,{headers:{Accept:'application/json','User-Agent':'TitansCommandCenter/1.0 tickets'},signal:AbortSignal.timeout(2200)});
+  if(!upstream.ok)throw new Error(`SeatGeek ${upstream.status}`);
+  const payload=await upstream.json();
+  return normalizeSeatGeekEvents(payload?.events);
+}
+async function fetchTicketmaster(apiKey){
+  const url=new URL(TICKETMASTER_EVENTS);
+  url.searchParams.set('apikey',apiKey);
+  url.searchParams.set('keyword','Tennessee Titans');
+  url.searchParams.set('countryCode','US');
+  url.searchParams.set('classificationName','football');
+  url.searchParams.set('size','50');
+  url.searchParams.set('sort','date,asc');
+  const upstream=await fetch(url,{headers:{Accept:'application/json','User-Agent':'TitansCommandCenter/1.0 tickets'},signal:AbortSignal.timeout(2200)});
+  if(!upstream.ok)throw new Error(`Ticketmaster ${upstream.status}`);
+  const payload=await upstream.json();
+  return normalizeTicketmasterEvents(payload?._embedded?.events);
+}
+export async function ticketsRoute(req,res,env=process.env){
+  if(methodOnly(req,res))return;
+  res.setHeader('Cache-Control','public, s-maxage=300, stale-while-revalidate=3600');
+  const clientId=String(env?.SEATGEEK_CLIENT_ID||'').trim();
+  const aid=String(env?.SEATGEEK_AID||'').trim();
+  const ticketmasterKey=String(env?.TICKETMASTER_API_KEY||'').trim();
+  const base={
+    ok:true,
+    providerType:'ticket-marketplace-event-summary',
+    officialUrl:TITANS_TICKETS_URL,
+    scope:'event-inventory-summary',
+    pricing:'lowest available event price when exposed by the active provider; marketplace taxes, delivery, fees, or optional add-ons may vary by source',
+    cheapestFirst:true,
+    fetchedAt:new Date().toISOString(),
+    configuredProviders:{seatGeek:Boolean(clientId),ticketmaster:Boolean(ticketmasterKey)},
+  };
+
+  if(clientId){
+    try{
+      const events=await fetchSeatGeek(clientId,aid);
+      if(events.length)return res.status(200).json({...base,provider:'SeatGeek',configured:true,available:true,events,count:events.length});
+    }catch(error){console.error('[tickets-seatgeek]',error);}
   }
+
+  if(ticketmasterKey){
+    try{
+      const events=await fetchTicketmaster(ticketmasterKey);
+      if(events.length)return res.status(200).json({...base,provider:'Ticketmaster',configured:true,available:true,events,count:events.length,message:'Ticketmaster Discovery is providing event-level price ranges while the SeatGeek summary feed is unavailable.'});
+    }catch(error){console.error('[tickets-ticketmaster]',error);}
+  }
+
+  if(!clientId&&!ticketmasterKey)return res.status(200).json({...base,provider:'SeatGeek',configured:false,available:false,events:[],message:'Live ticket pricing is not connected to this deployment yet.'});
+  return res.status(200).json({...base,provider:clientId?'SeatGeek':'Ticketmaster',configured:true,available:false,events:[],message:'Live ticket pricing is temporarily unavailable. Open SeatGeek for the complete current marketplace.'});
 }

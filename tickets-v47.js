@@ -1,3 +1,5 @@
+import './titans-social-v49.js';
+
 (() => {
   'use strict';
 
@@ -6,11 +8,13 @@
   if(!runtime||!app)return;
 
   const OFFICIAL_URL='https://seatgeek.com/tennessee-titans-tickets';
-  const state={payload:null,data:null,filter:'all',loading:null,renderToken:0};
+  const CACHE_KEY='titans:tickets-fast-v49';
+  const CACHE_TTL=10*60*1000;
+  const state={payload:null,data:null,filter:'all',loading:null,dataLoading:null,renderToken:0,prefetched:false};
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const route=()=>runtime.route();
   const money=value=>Number.isFinite(Number(value))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(value)):'Price unavailable';
-  const safeUrl=value=>{try{const url=new URL(String(value||''));return url.protocol==='https:'&&(url.hostname==='seatgeek.com'||url.hostname.endsWith('.seatgeek.com'))?url.href:OFFICIAL_URL}catch{return OFFICIAL_URL}};
+  const safeUrl=value=>{try{const url=new URL(String(value||''));const host=url.hostname.toLowerCase();return url.protocol==='https:'&&(host==='seatgeek.com'||host.endsWith('.seatgeek.com')||host==='ticketmaster.com'||host.endsWith('.ticketmaster.com'))?url.href:OFFICIAL_URL}catch{return OFFICIAL_URL}};
   function venueLocal(value,timeTbd=false){
     const match=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/);
     if(!match)return'Date TBD';
@@ -43,6 +47,7 @@
     const count=Number(event.listingCount);
     const listingText=Number.isFinite(count)?`${count.toLocaleString()} ${count===1?'listing':'listings'} available`:'Live inventory';
     const where=[event.venue?.name,event.venue?.city,event.venue?.state].filter(Boolean).join(' · ');
+    const source=String(event.provider||state.payload?.provider||'SeatGeek');
     return `<article class="tickets-event-card${index===0?' cheapest-event':''}">
       <div class="tickets-price-block"><small>${index===0?'CHEAPEST IN THIS GROUP':'STARTING AT'}</small><strong>${esc(money(event.lowestPrice))}</strong><span>per ticket</span></div>
       <div class="tickets-event-copy">
@@ -50,7 +55,7 @@
         <h3>${esc(event.title)}</h3>
         <p>${esc(venueLocal(event.datetimeLocal,event.timeTbd))}</p>
         <p>${esc(where||'Venue TBD')}</p>
-        <div class="tickets-event-meta"><span>${esc(listingText)}</span>${Number.isFinite(Number(event.averagePrice))?`<span>Average ${esc(money(event.averagePrice))}</span>`:''}</div>
+        <div class="tickets-event-meta"><span>${esc(listingText)}</span>${Number.isFinite(Number(event.averagePrice))?`<span>Average ${esc(money(event.averagePrice))}</span>`:''}<span>${esc(source)}</span></div>
       </div>
       <a class="tickets-buy-button" href="${esc(safeUrl(event.url))}" target="_blank" rel="noopener noreferrer">See all tickets <span aria-hidden="true">↗</span></a>
     </article>`;
@@ -64,7 +69,6 @@
     </section>`).join('');
   }
   function fallbackGames(){
-    const now=Date.now();
     return (Array.isArray(state.data?.games)?state.data.games:[]).filter(game=>{
       const stamp=Date.parse(game.date);
       return game.status!=='final'&&game.status!=='bye'&&(!Number.isFinite(stamp)||stamp>Date.now()-21600000);
@@ -79,44 +83,72 @@
     ${games.length?`<section class="tickets-upcoming"><header><small>UPCOMING TITANS GAMES</small><h2>Pick a game, then compare every available seat.</h2></header><div class="tickets-upcoming-list">${games.map(game=>`<a href="${OFFICIAL_URL}" target="_blank" rel="noopener noreferrer"><span><b>${esc(game.homeAway==='home'?'VS':'AT')}</b><strong>${esc(game.opponent||game.opponentAbbr||'Opponent TBD')}</strong></span><em>${esc(runtime.formatTeamKickoff?.(game.date,{weekday:'short',month:'short',day:'numeric'})||'Date TBD')}</em><i>View tickets ↗</i></a>`).join('')}</div></section>`:''}`;
   }
   function shell(body){
+    const providerNote=state.payload?.provider==='Ticketmaster'?'SeatGeek is the Titans official single-game marketplace; Ticketmaster Discovery is filling this price view because the SeatGeek summary feed is unavailable.':'SeatGeek is the Titans official single-game marketplace. Ticketmaster Discovery can fill event-price gaps when configured.';
     return `<section class="tickets-center-v47" data-ticket-center>
       <header class="tickets-hero">
-        <div class="tickets-hero-copy"><div class="eyebrow">TICKETS · OFFICIAL SEATGEEK PATH</div><h1>Titans Tickets</h1><p>Find the cheapest available Titans games first. Price groups always run low to high, and every buy button opens the complete verified SeatGeek inventory for that game.</p></div>
+        <div class="tickets-hero-copy"><div class="eyebrow">TICKETS · VERIFIED MARKETPLACE DATA</div><h1>Titans Tickets</h1><p>Find the cheapest available Titans games first. Price groups always run low to high, and buy buttons open the source marketplace for the complete available inventory.</p></div>
         <div class="tickets-hero-price-rule"><small>DEFAULT SORT</small><strong>Cheapest first. Always.</strong><span>No deal-score reshuffling.</span></div>
       </header>
-      <div class="tickets-trust-strip"><span><b>Official source:</b> Titans single-game ticket purchases route to SeatGeek.</span><span><b>Price note:</b> SeatGeek includes mandatory fees in displayed ticket prices; taxes, delivery, or optional add-ons may still apply.</span></div>
+      <div class="tickets-trust-strip"><span><b>Official path:</b> Titans single-game ticket purchases route to SeatGeek.</span><span><b>Fallback:</b> ${esc(providerNote)}</span></div>
       <div class="tickets-toolbar" aria-label="Ticket game filters"><div role="group" aria-label="Filter ticketed games"><button type="button" data-ticket-filter="all" aria-pressed="${state.filter==='all'}">All games</button><button type="button" data-ticket-filter="home" aria-pressed="${state.filter==='home'}">Home</button><button type="button" data-ticket-filter="away" aria-pressed="${state.filter==='away'}">Away</button></div><a href="${OFFICIAL_URL}" target="_blank" rel="noopener noreferrer">Open SeatGeek ↗</a></div>
       <div class="tickets-body">${body}</div>
-      <footer class="tickets-source-note"><strong>Why no individual seat rows here?</strong><span>The standard SeatGeek developer feed exposes live event inventory summaries and starting prices, while SeatGeek owns the complete seat-by-seat marketplace. Titans Command Center sends you directly to that verified inventory instead of scraping or inventing listings.</span></footer>
+      <footer class="tickets-source-note"><strong>Why no individual seat rows here?</strong><span>The standard SeatGeek developer feed exposes live event inventory summaries and starting prices, while SeatGeek owns the complete seat-by-seat marketplace. Titans Command Center sends you directly to that complete verified SeatGeek inventory instead of scraping or inventing listings. A Ticketmaster Discovery fallback may provide event-level price ranges when configured, but it also does not expose unrestricted seat-by-seat inventory.</span></footer>
     </section>`;
   }
-  function loading(){return shell('<div class="tickets-loading" role="status"><span></span><strong>Checking Titans ticket inventory…</strong></div>');}
+  function loading(){return shell('<div class="tickets-loading" role="status"><span></span><strong>Loading the fastest available ticket view…</strong></div>');}
+  function readCachedPayload(){
+    const cached=runtime.storage.getJSON(CACHE_KEY,null);
+    if(!cached||!cached.payload||!Number.isFinite(Number(cached.savedAt)))return null;
+    if(Date.now()-Number(cached.savedAt)>CACHE_TTL)return null;
+    return cached.payload;
+  }
+  function cachePayload(payload){
+    if(payload?.available&&Array.isArray(payload.events)&&payload.events.length)runtime.storage.setJSON(CACHE_KEY,{savedAt:Date.now(),payload});
+  }
   function renderCurrent(){
     if(route()!=='tickets')return;
     const events=sortedEvents(state.payload?.events||[]);
     app.innerHTML=shell(state.payload?.available&&events.length?priceGroups(events):unavailableBody());
   }
+  async function loadFallbackData(){
+    if(state.dataLoading||state.data)return state.dataLoading;
+    state.dataLoading=runtime.apiJson('/api/data',{ttl:60000,force:false}).then(data=>{
+      if(data)state.data=data;
+      if(route()==='tickets'&&!state.payload?.available)renderCurrent();
+      return data;
+    }).finally(()=>{state.dataLoading=null;});
+    return state.dataLoading;
+  }
   async function loadTickets(force=false){
     if(state.loading&&!force)return state.loading;
     const token=++state.renderToken;
-    state.loading=Promise.all([
-      runtime.apiJson('/api/tickets',{ttl:60000,force}),
-      runtime.apiJson('/api/data',{ttl:30000,force:false}),
-    ]).then(([payload,data])=>{
-      if(token!==state.renderToken)return;
-      state.payload=payload||{configured:false,available:false,events:[],message:'Ticket inventory is unavailable.'};
-      state.data=data||state.data;
+    state.loading=runtime.apiJson('/api/tickets',{ttl:300000,force}).then(payload=>{
+      if(token!==state.renderToken)return payload;
+      if(payload)state.payload=payload;
+      cachePayload(payload);
       renderCurrent();
+      if(!payload?.available)loadFallbackData();
+      return payload;
     }).finally(()=>{if(token===state.renderToken)state.loading=null;});
     return state.loading;
   }
   function mountTickets(){
     if(route()!=='tickets')return;
-    if(!app.querySelector('[data-ticket-center]'))app.innerHTML=loading();
+    if(!state.payload)state.payload=readCachedPayload();
+    if(state.payload)renderCurrent();
+    else if(!app.querySelector('[data-ticket-center]'))app.innerHTML=loading();
     loadTickets(false);
   }
+  function prefetchTickets(){
+    if(state.prefetched)return;
+    state.prefetched=true;
+    const run=()=>runtime.apiJson('/api/tickets',{ttl:300000,force:false}).then(payload=>{cachePayload(payload);return payload;});
+    if('requestIdleCallback'in window)requestIdleCallback(()=>run(),{timeout:1800});else setTimeout(run,250);
+  }
   function enhanceHome(){
-    if(route()!=='home'||app.querySelector('[data-ticket-home]'))return;
+    if(route()!=='home')return;
+    prefetchTickets();
+    if(app.querySelector('[data-ticket-home]'))return;
     const actions=app.querySelector('.fan-hero-actions');
     if(!actions)return;
     const link=document.createElement('a');
