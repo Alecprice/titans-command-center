@@ -5,6 +5,7 @@ import {preseasonStatsRoute} from '../src/preseason-api.mjs';
 import {marketDataRoute} from '../src/market-api.mjs';
 import {advancedAnalyticsRoute} from '../src/advanced-analytics-api.mjs';
 import {fanIntelRoute} from '../src/fan-intel-api.mjs';
+import {ticketsRoute} from '../src/tickets-api.mjs';
 import {accountAuthProxy,accountPreferencesRoute} from '../src/account-api.mjs';
 import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflverseStats,syncNwsNextHomeGame,syncFreeOdds,recordSyncRun} from '../src/ingest.mjs';
 
@@ -53,6 +54,7 @@ async function runApi(request,env,ctx){
     if(route==='market-data')return await cachedMarketData(request,env,ctx);
     if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
     if(route==='fan-intel')return await adapterRoute(request,route,fanIntelRoute,env);
+    if(route==='tickets')return await adapterRoute(request,route,ticketsRoute,env);
 
     const req=vercelRequest(request,route);const res=vercelResponse();await apiHandler(req,res.api,env);return res.result();
   }catch(error){console.error('[cloudflare-api-adapter]',route,error);return jsonResponse({ok:false,error:'API request failed'},500);}
