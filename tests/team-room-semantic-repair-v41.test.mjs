@@ -13,12 +13,15 @@ test('Team Room semantic repair observes only relevant aria drift plus hydration
   assert.match(runtime,/attributeFilter:\['aria-pressed'\]/);
 });
 
-test('semantic repair delegates state ownership back to Team Room instead of writing aria itself',()=>{
-  assert.match(runtime,/if\(button&&teamRoomMismatch\(next\)\)button\.click\(\)/);
+test('semantic repair requests owner reconciliation instead of clicking or writing aria itself',()=>{
+  assert.match(runtime,/TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request'/);
+  assert.match(runtime,/new CustomEvent\(TEAM_ROOM_VIEW_REQUEST/);
+  assert.match(runtime,/if\(button&&teamRoomMismatch\(next\)\)requestTeamRoomView\(next\)/);
+  assert.doesNotMatch(runtime,/button\.click\(\)/);
   assert.doesNotMatch(runtime,/button\.setAttribute\('aria-pressed'/);
   assert.doesNotMatch(runtime,/panel\.hidden\s*=/);
-  assert.match(teamRoom,/function handleTeamRoomActivation\(event\)/);
-  assert.match(teamRoom,/setRosterView\(button\.dataset\.teamRoomView\)/);
+  assert.match(teamRoom,/function handleTeamRoomViewRequest\(event\)/);
+  assert.match(teamRoom,/setRosterView\(view,/);
 });
 
 test('requested roster deep link remains authoritative when a pressed state drifts',()=>{
@@ -28,7 +31,7 @@ test('requested roster deep link remains authoritative when a pressed state drif
   assert.match(runtime,/panel&&panel\.hidden/);
 });
 
-test('repair is microtask-coalesced so its own Team Room writes do not create a mutation loop',()=>{
+test('repair is microtask-coalesced so owner writes do not create a mutation loop',()=>{
   assert.match(runtime,/if\(teamRoomQueued\)return/);
   assert.match(runtime,/queueMicrotask\(\(\)=>\{teamRoomQueued=false;reconcileTeamRoom\(\);\}\)/);
   assert.doesNotMatch(runtime,/setInterval/);

@@ -4,6 +4,7 @@
   window.__TitansTeamRoomStateRepairV54=true;
 
   const VIEWS=new Set(['roster','depth','staff','cutdown']);
+  const TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request';
   const app=document.querySelector('#app');
   if(!app)return;
   let queued=false;
@@ -33,25 +34,15 @@
     return button.getAttribute('aria-pressed')!=='true'||!button.classList.contains('active')||(panel&&panel.hidden)||baseMismatch;
   }
 
+  function requestRepair(view){
+    app.dispatchEvent(new CustomEvent(TEAM_ROOM_VIEW_REQUEST,{detail:{view,persist:false,reason:'semantic-repair'}}));
+  }
   function repair(){
     queued=false;
     if(route()!=='roster')return;
     const view=targetView();
-    if(!hasMismatch(view))return;
-    const switcher=app.querySelector('.team-room-switcher');
-    if(!switcher)return;
-
-    app.dataset.teamRoomView=view;
-    switcher.querySelectorAll('[data-team-room-view]').forEach(button=>{
-      const active=button.dataset.teamRoomView===view;
-      button.classList.toggle('active',active);
-      button.setAttribute('aria-pressed',String(active));
-    });
-    app.querySelectorAll('.team-room-panel').forEach(panel=>{panel.hidden=panel.dataset.panel!==view;});
-    const hideBase=view!=='roster';
-    app.querySelectorAll('.roster-summary-strip,.filterbar,.roster-status-filters,#rg').forEach(element=>{element.hidden=hideBase;});
+    if(hasMismatch(view))requestRepair(view);
   }
-
   function schedule(){
     if(queued)return;
     queued=true;

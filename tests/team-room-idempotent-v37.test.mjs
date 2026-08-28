@@ -20,7 +20,9 @@ test('accessibility layer retries only relevant Team Room hydration or aria drif
   assert.match(accessibility,/record\.type==='childList'/);
   assert.match(accessibility,/record\.target instanceof Element&&record\.target\.matches\('\[data-team-room-view\]'\)/);
   assert.match(accessibility,/new MutationObserver\(watchTeamRoomMutations\)\.observe\(app,\{subtree:true,childList:true,attributes:true,attributeFilter:\['aria-pressed'\]\}\)/);
-  assert.match(accessibility,/if\(button&&teamRoomMismatch\(next\)\)button\.click\(\)/);
+  assert.match(accessibility,/if\(button&&teamRoomMismatch\(next\)\)requestTeamRoomView\(next\)/);
+  assert.match(accessibility,/new CustomEvent\(TEAM_ROOM_VIEW_REQUEST/);
+  assert.doesNotMatch(accessibility,/button\.click\(\)/);
   assert.doesNotMatch(accessibility,/setAttribute\('aria-pressed'/);
   assert.doesNotMatch(accessibility,/classList\.toggle\('active'/);
   assert.doesNotMatch(accessibility,/panel\.hidden=/);
