@@ -14,6 +14,35 @@ const app=document.querySelector('#app');
 const TEAM_VIEWS=new Set(['roster','depth','staff','cutdown']);
 let teamRoomQueued=false;
 
+function installMobileReadabilityFloor(){
+  if(document.querySelector('#tcc-mobile-type-floor-v44'))return;
+  const style=document.createElement('style');
+  style.id='tcc-mobile-type-floor-v44';
+  style.textContent=`
+    @media (max-width:760px){
+      #app small{font-size:10px!important;line-height:1.35!important}
+      #app .pulse-item small,
+      #app .fan-tile .tile-label,
+      #app .fan-hero-brand .era-chip,
+      #app .legacy-peek span,
+      #app .legal-mark-note,
+      #app .home-quality-strip span,
+      #app .roster-summary-strip span,
+      #app .transaction-source-link,
+      #app .game-day-brief-head a,
+      #app .fan-health-item small,
+      #app .warehouse-health-head>span,
+      #app .warehouse-health-card span,
+      #app .source-quality-meta span{
+        font-size:10px!important;
+        line-height:1.35!important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+installMobileReadabilityFloor();
 if(app&&!app.hasAttribute('tabindex'))app.setAttribute('tabindex','-1');
 
 function syncMenuState(){
