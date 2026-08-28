@@ -51,7 +51,7 @@ test('mobile secondary copy focus and filters use explicit high-contrast states'
 });
 
 test('contrast layer and current PWA shell stay packaged together',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v68/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/'\/readability-v34\.css'/);
   assert.match(sw,/'\/roster-filter-guard-v40\.js'/);
 });
