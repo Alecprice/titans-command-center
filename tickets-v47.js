@@ -1,3 +1,5 @@
+import './titans-social-v49.js';
+
 (() => {
   'use strict';
 
