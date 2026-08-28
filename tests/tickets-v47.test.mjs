@@ -61,7 +61,7 @@ test('Ticket Center is first-class, searchable, PWA packaged, and in responsive 
 
 test('Home has a prominent Ticket Center entry without changing the five-action mobile dock',async()=>{
   const [ui,html]=await Promise.all([read('tickets-v47.js'),read('index.html')]);
-  assert.match(ui,/data\.ticketHome='1'/);
+  assert.match(ui,/dataset\.ticketHome='1'/);
   assert.match(ui,/Buy Titans tickets/);
   const dock=html.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0]||'';
   const actions=[...dock.matchAll(/<(?:a|button)\b/g)];
