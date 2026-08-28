@@ -1,6 +1,7 @@
 import './blank-state-runtime.js';
 import './continue-command-v35.js';
 import './my-titans-home-v35.js';
+import './my-player-watch-v36.js';
 import './gameday-personal-v37.js';
 import './my-player-impact-v38.js';
 import './schedule-calendar-v39.js';
