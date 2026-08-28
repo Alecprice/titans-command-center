@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+  if(!document.querySelector('link[data-titans-social-v49]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/titans-social-v49.css';link.dataset.titansSocialV49='1';document.head.append(link);}
   const runtime=window.TitansRuntime;
   const app=document.querySelector('#app');
   if(!runtime||!app)return;
