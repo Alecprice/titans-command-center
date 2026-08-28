@@ -78,7 +78,12 @@ def dimensions(driver):
         .slice(0,12);
       const smallControls=[...document.querySelectorAll('#app button,#app select,#app input:not([type="hidden"]),#app [role="button"]')]
         .filter(visible)
-        .map(el=>{const r=el.getBoundingClientRect();return {tag:el.tagName,label:(el.getAttribute('aria-label')||el.textContent||el.getAttribute('placeholder')||el.id||'').trim().replace(/\s+/g,' ').slice(0,80),w:Math.round(r.width*10)/10,h:Math.round(r.height*10)/10};})
+        .map(el=>{
+          const type=(el.getAttribute('type')||'').toLowerCase();
+          const hitTarget=(type==='checkbox'||type==='radio')?(el.closest('label')||el):el;
+          const r=hitTarget.getBoundingClientRect();
+          return {tag:el.tagName,type,label:(el.getAttribute('aria-label')||el.textContent||el.getAttribute('placeholder')||el.id||'').trim().replace(/\\s+/g,' ').slice(0,80),w:Math.round(r.width*10)/10,h:Math.round(r.height*10)/10};
+        })
         .filter(x=>x.w<44||x.h<44)
         .slice(0,16);
       return {
