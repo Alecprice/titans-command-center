@@ -17,7 +17,13 @@ test('explicit Team Room activation cannot fall through to competing click-state
   assert.match(teamRoom,/trApp\.addEventListener\('click',handleTeamRoomActivation,true\)/);
   assert.match(teamRoom,/event\.stopImmediatePropagation\(\)/);
   assert.match(teamRoom,/setRosterView\(button\.dataset\.teamRoomView\)/);
-  assert.doesNotMatch(accessibility,/applyTeamRoomFallback/);
   assert.doesNotMatch(accessibility,/setAttribute\('aria-pressed'/);
-  assert.match(accessibility,/addEventListener\('hashchange',scheduleTeamRoomReconcile\)/);
+});
+
+test('async repair routes through Team Room owner instead of synthetic clicks',()=>{
+  assert.match(teamRoom,/TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request'/);
+  assert.match(teamRoom,/function handleTeamRoomViewRequest\(event\)/);
+  assert.match(teamRoom,/trApp\.addEventListener\(TEAM_ROOM_VIEW_REQUEST,handleTeamRoomViewRequest\)/);
+  assert.match(accessibility,/new CustomEvent\(TEAM_ROOM_VIEW_REQUEST/);
+  assert.doesNotMatch(accessibility,/button\.click\(\)/);
 });
