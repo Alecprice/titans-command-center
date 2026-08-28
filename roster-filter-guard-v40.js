@@ -1,3 +1,5 @@
+import './team-room-state-repair-v54.js';
+
 (() => {
   'use strict';
   if(window.__TitansRosterFilterGuardV40)return;
