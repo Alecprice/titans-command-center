@@ -1,9 +1,13 @@
 const SEATGEEK_EVENTS='https://api.seatgeek.com/2/events';
 const TICKETMASTER_EVENTS='https://app.ticketmaster.com/discovery/v2/events.json';
+const STUBHUB_TOKEN='https://account.stubhub.com/oauth2/token';
+const STUBHUB_EVENTS='https://api.stubhub.net/catalog/events/search';
 export const TITANS_TICKETS_URL='https://seatgeek.com/tennessee-titans-tickets';
 const TITANS_SLUG='tennessee-titans';
+let stubHubTokenCache={token:'',expiresAt:0};
 
 const finite=value=>{if(value==null||value==='')return null;const number=Number(value);return Number.isFinite(number)&&number>=0?number:null;};
+const datePart=value=>String(value||'').match(/^\d{4}-\d{2}-\d{2}/)?.[0]||'';
 export function safeSeatGeekUrl(value){
   try{
     const url=new URL(String(value||''));
@@ -14,6 +18,12 @@ export function safeTicketmasterUrl(value){
   try{
     const url=new URL(String(value||''));
     return url.protocol==='https:'&&(url.hostname==='ticketmaster.com'||url.hostname.endsWith('.ticketmaster.com'))?url.href:TITANS_TICKETS_URL;
+  }catch{return TITANS_TICKETS_URL;}
+}
+export function safeStubHubUrl(value){
+  try{
+    const url=new URL(String(value||''));
+    return url.protocol==='https:'&&(url.hostname==='stubhub.com'||url.hostname.endsWith('.stubhub.com'))?url.href:TITANS_TICKETS_URL;
   }catch{return TITANS_TICKETS_URL;}
 }
 export function ticketPriceBand(value){
@@ -42,11 +52,7 @@ function normalizeSeatGeekEvent(event){
     datetimeUtc:String(event?.datetime_utc||''),
     timeTbd:Boolean(event?.time_tbd),
     homeAway:homeAway(event?.title),
-    venue:{
-      name:String(event?.venue?.name||'Venue TBD'),
-      city:String(event?.venue?.city||''),
-      state:String(event?.venue?.state||''),
-    },
+    venue:{name:String(event?.venue?.name||'Venue TBD'),city:String(event?.venue?.city||''),state:String(event?.venue?.state||'')},
     listingCount:finite(stats.listing_count),
     lowestPrice,
     averagePrice:finite(stats.average_price),
@@ -55,10 +61,7 @@ function normalizeSeatGeekEvent(event){
   };
 }
 export function normalizeSeatGeekEvents(events=[]){
-  return (Array.isArray(events)?events:[])
-    .map(normalizeSeatGeekEvent)
-    .filter(event=>event.id&&event.url)
-    .sort((a,b)=>(a.lowestPrice??Number.MAX_SAFE_INTEGER)-(b.lowestPrice??Number.MAX_SAFE_INTEGER)||String(a.datetimeUtc).localeCompare(String(b.datetimeUtc))||a.title.localeCompare(b.title));
+  return (Array.isArray(events)?events:[]).map(normalizeSeatGeekEvent).filter(event=>event.id&&event.url).sort(compareOffers);
 }
 function ticketmasterLocalDate(event){
   const start=event?.dates?.start||{};
@@ -85,11 +88,7 @@ function normalizeTicketmasterEvent(event){
     datetimeUtc:String(event?.dates?.start?.dateTime||''),
     timeTbd:Boolean(event?.dates?.start?.timeTBA||event?.dates?.start?.noSpecificTime),
     homeAway:homeAway(title),
-    venue:{
-      name:String(venue?.name||'Venue TBD'),
-      city:String(venue?.city?.name||''),
-      state:String(venue?.state?.stateCode||venue?.state?.name||''),
-    },
+    venue:{name:String(venue?.name||'Venue TBD'),city:String(venue?.city?.name||''),state:String(venue?.state?.stateCode||venue?.state?.name||'')},
     listingCount:null,
     lowestPrice:range.min,
     averagePrice:null,
@@ -98,11 +97,55 @@ function normalizeTicketmasterEvent(event){
   };
 }
 export function normalizeTicketmasterEvents(events=[]){
-  return (Array.isArray(events)?events:[])
-    .map(normalizeTicketmasterEvent)
-    .filter(Boolean)
-    .filter(event=>event.id&&event.url)
-    .sort((a,b)=>(a.lowestPrice??Number.MAX_SAFE_INTEGER)-(b.lowestPrice??Number.MAX_SAFE_INTEGER)||String(a.datetimeUtc).localeCompare(String(b.datetimeUtc))||a.title.localeCompare(b.title));
+  return (Array.isArray(events)?events:[]).map(normalizeTicketmasterEvent).filter(Boolean).filter(event=>event.id&&event.url).sort(compareOffers);
+}
+function stubHubWebUrl(event){return event?._links?.['event:webpage']?.href||event?._links?.webpage?.href||'';}
+function normalizeStubHubEvent(event){
+  const title=String(event?.name||'');
+  if(!title.toLowerCase().includes('tennessee titans'))return null;
+  const price=finite(event?.min_ticket_price?.amount);
+  const venue=event?._embedded?.venue||{};
+  return {
+    id:`sh:${String(event?.id||'')}`,
+    provider:'StubHub',
+    title:title||'Tennessee Titans tickets',
+    url:safeStubHubUrl(stubHubWebUrl(event)),
+    datetimeLocal:String(event?.start_date||''),
+    datetimeUtc:String(event?.start_date||''),
+    timeTbd:event?.time_confirmed===false,
+    homeAway:homeAway(title),
+    venue:{name:String(venue?.name||'Venue TBD'),city:String(venue?.city||''),state:String(venue?.state_province||'')},
+    listingCount:null,
+    lowestPrice:price,
+    averagePrice:null,
+    highestPrice:null,
+    priceBand:ticketPriceBand(price),
+  };
+}
+export function normalizeStubHubEvents(events=[]){
+  return (Array.isArray(events)?events:[]).map(normalizeStubHubEvent).filter(Boolean).filter(event=>event.id&&event.url).sort(compareOffers);
+}
+function compareOffers(a,b){return (a.lowestPrice??Number.MAX_SAFE_INTEGER)-(b.lowestPrice??Number.MAX_SAFE_INTEGER)||String(a.datetimeUtc||'').localeCompare(String(b.datetimeUtc||''))||String(a.provider||'').localeCompare(String(b.provider||''));}
+function gameKey(event){return datePart(event?.datetimeLocal)||datePart(event?.datetimeUtc)||`${event?.provider||'provider'}:${event?.id||'unknown'}`;}
+export function groupTicketOffers(events=[]){
+  const groups=new Map();
+  for(const event of Array.isArray(events)?events:[]){
+    if(!event?.id||!event?.provider)continue;
+    const key=gameKey(event);
+    if(!groups.has(key))groups.set(key,{key,title:event.title,datetimeLocal:event.datetimeLocal,datetimeUtc:event.datetimeUtc,timeTbd:event.timeTbd,homeAway:event.homeAway,venue:event.venue,offers:[]});
+    const group=groups.get(key);
+    const existing=group.offers.findIndex(offer=>offer.provider===event.provider);
+    if(existing<0)group.offers.push(event);
+    else if(compareOffers(event,group.offers[existing])<0)group.offers[existing]=event;
+    if(group.homeAway==='all'&&event.homeAway!=='all')group.homeAway=event.homeAway;
+  }
+  return [...groups.values()].map(group=>{
+    group.offers.sort(compareOffers);
+    const priced=group.offers.filter(offer=>finite(offer.lowestPrice)!=null);
+    const cheapest=priced[0]||group.offers[0]||null;
+    const lowestPrice=cheapest?finite(cheapest.lowestPrice):null;
+    return {...group,cheapestProvider:cheapest?.provider||null,lowestPrice,providerCount:group.offers.length,priceBand:ticketPriceBand(lowestPrice)};
+  }).sort((a,b)=>(a.lowestPrice??Number.MAX_SAFE_INTEGER)-(b.lowestPrice??Number.MAX_SAFE_INTEGER)||String(a.datetimeUtc||a.datetimeLocal||'').localeCompare(String(b.datetimeUtc||b.datetimeLocal||'')));
 }
 function methodOnly(req,res){
   res.setHeader('Allow','GET');
@@ -117,7 +160,7 @@ async function fetchSeatGeek(clientId,aid){
   url.searchParams.set('datetime_utc.gte',new Date().toISOString().slice(0,10));
   url.searchParams.set('per_page','50');
   if(aid)url.searchParams.set('aid',aid);
-  const upstream=await fetch(url,{headers:{Accept:'application/json','User-Agent':'TitansCommandCenter/1.0 tickets'},signal:AbortSignal.timeout(2200)});
+  const upstream=await fetch(url,{headers:{Accept:'application/json','User-Agent':'TitansCommandCenter/1.0 tickets'},signal:AbortSignal.timeout(2400)});
   if(!upstream.ok)throw new Error(`SeatGeek ${upstream.status}`);
   const payload=await upstream.json();
   return normalizeSeatGeekEvents(payload?.events);
@@ -130,42 +173,86 @@ async function fetchTicketmaster(apiKey){
   url.searchParams.set('classificationName','football');
   url.searchParams.set('size','50');
   url.searchParams.set('sort','date,asc');
-  const upstream=await fetch(url,{headers:{Accept:'application/json','User-Agent':'TitansCommandCenter/1.0 tickets'},signal:AbortSignal.timeout(2200)});
+  const upstream=await fetch(url,{headers:{Accept:'application/json','User-Agent':'TitansCommandCenter/1.0 tickets'},signal:AbortSignal.timeout(2400)});
   if(!upstream.ok)throw new Error(`Ticketmaster ${upstream.status}`);
   const payload=await upstream.json();
   return normalizeTicketmasterEvents(payload?._embedded?.events);
 }
+function base64(value){
+  if(typeof btoa==='function')return btoa(value);
+  if(globalThis.Buffer)return globalThis.Buffer.from(value,'utf8').toString('base64');
+  throw new Error('Base64 encoder unavailable');
+}
+async function stubHubToken(clientId,clientSecret){
+  if(stubHubTokenCache.token&&stubHubTokenCache.expiresAt>Date.now()+60000)return stubHubTokenCache.token;
+  const credentials=base64(`${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`);
+  const body=new URLSearchParams({grant_type:'client_credentials',scope:'read:events'});
+  const upstream=await fetch(STUBHUB_TOKEN,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/x-www-form-urlencoded',Authorization:`Basic ${credentials}`},body,signal:AbortSignal.timeout(2200)});
+  if(!upstream.ok)throw new Error(`StubHub auth ${upstream.status}`);
+  const payload=await upstream.json();
+  const token=String(payload?.access_token||'');
+  if(!token)throw new Error('StubHub auth missing token');
+  const ttl=Math.max(300,Number(payload?.expires_in)||3600);
+  stubHubTokenCache={token,expiresAt:Date.now()+ttl*1000};
+  return token;
+}
+async function fetchStubHub(clientId,clientSecret){
+  const token=await stubHubToken(clientId,clientSecret);
+  const url=new URL(STUBHUB_EVENTS);
+  url.searchParams.set('q','Tennessee Titans');
+  url.searchParams.set('country_code','US');
+  url.searchParams.set('page_size','50');
+  url.searchParams.set('exclude_parking_passes','true');
+  const upstream=await fetch(url,{headers:{Accept:'application/hal+json',Authorization:`Bearer ${token}`,'User-Agent':'TitansCommandCenter/1.0 tickets'},signal:AbortSignal.timeout(2400)});
+  if(!upstream.ok)throw new Error(`StubHub ${upstream.status}`);
+  const payload=await upstream.json();
+  return normalizeStubHubEvents(payload?._embedded?.events);
+}
+async function runProvider(provider,run){
+  const started=Date.now();
+  try{
+    const events=await run();
+    return {provider,ok:true,events,durationMs:Date.now()-started,count:events.length,priceCount:events.filter(event=>finite(event.lowestPrice)!=null).length};
+  }catch(error){
+    console.error(`[tickets-${provider.toLowerCase()}]`,error);
+    return {provider,ok:false,events:[],durationMs:Date.now()-started,count:0,priceCount:0};
+  }
+}
 export async function ticketsRoute(req,res,env=process.env){
   if(methodOnly(req,res))return;
-  res.setHeader('Cache-Control','public, s-maxage=300, stale-while-revalidate=3600');
+  res.setHeader('Cache-Control','public, s-maxage=300, stale-while-revalidate=900');
   const clientId=String(env?.SEATGEEK_CLIENT_ID||'').trim();
   const aid=String(env?.SEATGEEK_AID||'').trim();
   const ticketmasterKey=String(env?.TICKETMASTER_API_KEY||'').trim();
+  const stubHubClientId=String(env?.STUBHUB_CLIENT_ID||'').trim();
+  const stubHubClientSecret=String(env?.STUBHUB_CLIENT_SECRET||'').trim();
+  const configuredProviders={seatGeek:Boolean(clientId),ticketmaster:Boolean(ticketmasterKey),stubHub:Boolean(stubHubClientId&&stubHubClientSecret)};
+  const jobs=[];
+  if(configuredProviders.seatGeek)jobs.push(runProvider('SeatGeek',()=>fetchSeatGeek(clientId,aid)));
+  if(configuredProviders.ticketmaster)jobs.push(runProvider('Ticketmaster',()=>fetchTicketmaster(ticketmasterKey)));
+  if(configuredProviders.stubHub)jobs.push(runProvider('StubHub',()=>fetchStubHub(stubHubClientId,stubHubClientSecret)));
   const base={
     ok:true,
-    providerType:'ticket-marketplace-event-summary',
+    providerType:'ticket-marketplace-price-comparison',
     officialUrl:TITANS_TICKETS_URL,
-    scope:'event-inventory-summary',
-    pricing:'lowest available event price when exposed by the active provider; marketplace taxes, delivery, fees, or optional add-ons may vary by source',
+    scope:'event-level current marketplace minimums',
+    pricing:'starting prices reported by each connected marketplace; fees, taxes, delivery, quantity, seat quality, and checkout totals may differ, so verify the final total before buying',
     cheapestFirst:true,
     fetchedAt:new Date().toISOString(),
-    configuredProviders:{seatGeek:Boolean(clientId),ticketmaster:Boolean(ticketmasterKey)},
+    configuredProviders,
+    providerCatalog:[
+      {provider:'SeatGeek',freeAccess:'developer key',priceField:'lowest_price'},
+      {provider:'Ticketmaster',freeAccess:'Discovery API key',priceField:'priceRanges.min'},
+      {provider:'StubHub',freeAccess:'approved application credentials',priceField:'min_ticket_price'},
+    ],
   };
+  if(!jobs.length)return res.status(200).json({...base,provider:'Comparison',configured:false,available:false,priceAvailable:false,events:[],games:[],providerResults:[],count:0,offerCount:0,message:'No live price providers are connected yet. Add any free SeatGeek, Ticketmaster, or approved StubHub credentials to start comparing current marketplace minimums.'});
 
-  if(clientId){
-    try{
-      const events=await fetchSeatGeek(clientId,aid);
-      if(events.length)return res.status(200).json({...base,provider:'SeatGeek',configured:true,available:true,events,count:events.length});
-    }catch(error){console.error('[tickets-seatgeek]',error);}
-  }
-
-  if(ticketmasterKey){
-    try{
-      const events=await fetchTicketmaster(ticketmasterKey);
-      if(events.length)return res.status(200).json({...base,provider:'Ticketmaster',configured:true,available:true,events,count:events.length,message:'Ticketmaster Discovery is providing event-level price ranges while the SeatGeek summary feed is unavailable.'});
-    }catch(error){console.error('[tickets-ticketmaster]',error);}
-  }
-
-  if(!clientId&&!ticketmasterKey)return res.status(200).json({...base,provider:'SeatGeek',configured:false,available:false,events:[],message:'Live ticket pricing is not connected to this deployment yet.'});
-  return res.status(200).json({...base,provider:clientId?'SeatGeek':'Ticketmaster',configured:true,available:false,events:[],message:'Live ticket pricing is temporarily unavailable. Open SeatGeek for the complete current marketplace.'});
+  const providerResults=await Promise.all(jobs);
+  const events=providerResults.flatMap(result=>result.events).sort(compareOffers);
+  const games=groupTicketOffers(events);
+  const priceAvailable=games.some(game=>finite(game.lowestPrice)!=null);
+  const successful=providerResults.filter(result=>result.ok);
+  const provider=successful.length>1?'Comparison':successful[0]?.provider||'Comparison';
+  return res.status(200).json({...base,provider,configured:true,available:Boolean(games.length),priceAvailable,events,games,count:games.length,offerCount:events.length,providersCompared:successful.length,providerResults:providerResults.map(({events:ignored,...result})=>result),message:priceAvailable?`Compared ${successful.length} connected ticket source${successful.length===1?'':'s'} and sorted Titans games by the lowest reported starting price.`:'Connected ticket sources did not return a current starting price. Official game links remain available.'});
 }

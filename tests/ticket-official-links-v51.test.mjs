@@ -33,6 +33,12 @@ test('home and away filters also work when live price summaries are unavailable'
   assert.match(ui,/tickets-next-official-v51/);
 });
 
+test('official-link fallback never overwrites the live multi-market comparison board',async()=>{
+  const ui=await read('tickets-official-v51.js');
+  assert.match(ui,/const comparisonBoard=center\.querySelector\('\.tickets-comparison-board'\)/);
+  assert.match(ui,/if\(priceGroups\|\|comparisonBoard\)return/);
+});
+
 test('free ticket enhancement remains mobile accessible, observer-light, and source-transparent',async()=>{
   const [ui,css]=await Promise.all([read('tickets-official-v51.js'),read('tickets-official-v51.css')]);
   assert.match(ui,/Source: TennesseeTitans\.com ↗/);
