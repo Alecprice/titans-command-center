@@ -140,7 +140,7 @@
     if(filter)schedule();
   });
   const observer=new MutationObserver(schedule);
-  observer.observe(app,{childList:true,subtree:true});
+  observer.observe(app,{childList:true,subtree:false});
   runtime.onRoute(schedule,{immediate:true});
   runtime.onAppRender(schedule,{immediate:true});
 })();
