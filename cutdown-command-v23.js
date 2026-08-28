@@ -170,7 +170,7 @@
   function requestCutdownOwner(app){
     if(!app||route()!=='roster')return;
     const requested=new URLSearchParams(location.hash.split('?')[1]||'').get('view');
-    if(requested!=='cutdown'&&app.dataset.teamRoomView!=='cutdown')return;
+    if(requested!=='cutdown')return;
     app.dispatchEvent(new CustomEvent(TEAM_ROOM_VIEW_REQUEST,{detail:{view:'cutdown',persist:false,reason:'cutdown-panel-mounted'}}));
   }
 
