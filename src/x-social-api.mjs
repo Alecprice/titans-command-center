@@ -31,7 +31,7 @@ export function normalizeXPosts(payload={}){
     const metrics=post?.public_metrics||{};
     return {
       id:cleanId(post?.id),
-      text:String(post?.text||'').trim().slice(0,1000),
+      text:String(post?.text||''),
       createdAt:String(post?.created_at||''),
       author:{name:String(user?.name||username||'X user').slice(0,120),username,verified:Boolean(user?.verified),profileImageUrl:cleanImageUrl(user?.profile_image_url)},
       metrics:{likes:Number(metrics.like_count)||0,reposts:Number(metrics.retweet_count)||0,replies:Number(metrics.reply_count)||0,quotes:Number(metrics.quote_count)||0},
