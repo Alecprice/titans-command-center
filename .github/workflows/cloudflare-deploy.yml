@@ -20,6 +20,11 @@ jobs:
     timeout-minutes: 25
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
+      SEATGEEK_AID: ${{ secrets.SEATGEEK_AID }}
+      TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+      STUBHUB_CLIENT_ID: ${{ secrets.STUBHUB_CLIENT_ID }}
+      STUBHUB_CLIENT_SECRET: ${{ secrets.STUBHUB_CLIENT_SECRET }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -50,6 +55,33 @@ jobs:
         run: |
           [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]] && echo "cloudflare=true" >> "$GITHUB_OUTPUT" || echo "cloudflare=false" >> "$GITHUB_OUTPUT"
           [[ -n "$DATABASE_URL" ]] && echo "database=true" >> "$GITHUB_OUTPUT" || echo "database=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$SEATGEEK_CLIENT_ID" ]] && echo "seatgeek=true" >> "$GITHUB_OUTPUT" || echo "seatgeek=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$TICKETMASTER_API_KEY" ]] && echo "ticketmaster=true" >> "$GITHUB_OUTPUT" || echo "ticketmaster=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$STUBHUB_CLIENT_ID" && -n "$STUBHUB_CLIENT_SECRET" ]] && echo "stubhub=true" >> "$GITHUB_OUTPUT" || echo "stubhub=false" >> "$GITHUB_OUTPUT"
+
+      - name: Build Worker secret bundle
+        if: steps.quality.outcome == 'success' && steps.creds.outputs.cloudflare == 'true' && steps.creds.outputs.database == 'true'
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const keys = [
+            'DATABASE_URL',
+            'SEATGEEK_CLIENT_ID',
+            'SEATGEEK_AID',
+            'TICKETMASTER_API_KEY',
+            'STUBHUB_CLIENT_ID',
+            'STUBHUB_CLIENT_SECRET',
+          ];
+          const secrets = {};
+          for (const key of keys) {
+            const value = String(process.env[key] || '').trim();
+            if (value) secrets[key] = value;
+          }
+          if (!secrets.DATABASE_URL) throw new Error('DATABASE_URL is required for production deployment');
+          fs.writeFileSync('/tmp/titans-worker-secrets.json', JSON.stringify(secrets), {mode: 0o600});
+          console.log(`Prepared ${Object.keys(secrets).length} Worker secret binding(s) without printing values.`);
+          NODE
 
       - name: Deploy to Cloudflare
         id: deploy
@@ -59,11 +91,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4'
-          command: deploy
-          secrets: |
-            DATABASE_URL
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          command: deploy --secrets-file /tmp/titans-worker-secrets.json
 
       - name: Run production regression audit
         id: smoke
@@ -168,6 +196,9 @@ jobs:
           QUALITY_OUTCOME: ${{ steps.quality.outcome }}
           CLOUDFLARE_READY: ${{ steps.creds.outputs.cloudflare }}
           DATABASE_READY: ${{ steps.creds.outputs.database }}
+          SEATGEEK_READY: ${{ steps.creds.outputs.seatgeek }}
+          TICKETMASTER_READY: ${{ steps.creds.outputs.ticketmaster }}
+          STUBHUB_READY: ${{ steps.creds.outputs.stubhub }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
           BROWSER_OUTCOME: ${{ steps.browser.outcome }}
@@ -216,6 +247,7 @@ jobs:
             echo "- Quality gate: ${QUALITY_OUTCOME:-unknown}"
             echo "- Cloudflare credentials available: ${CLOUDFLARE_READY:-unknown}"
             echo "- DATABASE_URL GitHub secret supplied: ${DATABASE_READY:-unknown}"
+            echo "- Ticket providers configured: SeatGeek=${SEATGEEK_READY:-false}, Ticketmaster=${TICKETMASTER_READY:-false}, StubHub=${STUBHUB_READY:-false}"
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
             echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"
             echo "- Browser navigation regression: ${BROWSER_OUTCOME:-not-run}"
