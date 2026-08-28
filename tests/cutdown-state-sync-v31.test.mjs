@@ -16,7 +16,7 @@ test('Team Room exclusively owns URL-selected Cutdown accessibility and panel st
   assert.match(teamRoom,/switcher\.innerHTML=teamRoomSwitcherMarkup\(initialView\)/);
   assert.match(teamRoom,/cutdown\.hidden=initialView!=='cutdown'/);
   assert.match(teamRoom,/setRosterView\(initialView,\{persist:false\}\)/);
-  assert.match(teamRoom,/setRosterView\(requestedRosterView\(\)\|\|app\.dataset\.teamRoomView\|\|trPreferredRosterView,\{persist:false\}\)/);
+  assert.match(teamRoom,/setRosterView\(requestedRosterView\(\)\|\|app\.dataset\.teamRoomActiveView\|\|trPreferredRosterView,\{persist:false\}\)/);
   assert.doesNotMatch(cutdown,/function syncCutdownView/);
   assert.doesNotMatch(cutdown,/dataset\.teamRoomView/);
   assert.doesNotMatch(cutdown,/querySelectorAll\('\[data-team-room-view\]'\)/);

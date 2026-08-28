@@ -15,7 +15,7 @@
     return VIEWS.has(view)?view:null;
   };
   const selected=()=>{
-    const view=app.dataset.teamRoomView;
+    const view=app.dataset.teamRoomActiveView;
     if(VIEWS.has(view))return view;
     const pressed=app.querySelector('.team-room-switcher [data-team-room-view][aria-pressed="true"]')?.dataset.teamRoomView;
     return VIEWS.has(pressed)?pressed:'roster';
@@ -54,7 +54,7 @@
     const relevant=records.some(record=>
       record.type==='childList'||
       (record.type==='attributes'&&record.target instanceof Element&&(
-        record.target.matches('[data-team-room-view]')||
+        record.target.matches('.team-room-switcher [data-team-room-view]')||
         record.target.matches('.team-room-panel')
       ))
     );

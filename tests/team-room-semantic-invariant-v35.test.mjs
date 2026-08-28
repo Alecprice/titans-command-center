@@ -6,7 +6,7 @@ const accessibility=fs.readFileSync(new URL('../accessibility-runtime.js',import
 const teamRoom=fs.readFileSync(new URL('../team-room.js',import.meta.url),'utf8');
 
 test('Team Room controller owns selected control visible panel base visibility and URL state',()=>{
-  assert.match(teamRoom,/app\.dataset\.teamRoomView=next/);
+  assert.match(teamRoom,/app\.dataset\.teamRoomActiveView=next/);
   assert.match(teamRoom,/b\.setAttribute\('aria-pressed',String\(on\)\)/);
   assert.match(teamRoom,/p\.hidden=p\.dataset\.panel!==next/);
   assert.match(teamRoom,/syncRosterBaseVisibility\(app,next\)/);
