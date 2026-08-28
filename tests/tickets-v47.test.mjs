@@ -30,15 +30,17 @@ test('ticket purchase URLs fail closed to the official SeatGeek Titans page',()=
   assert.equal(safeSeatGeekUrl('https://seatgeek.com/titans-test'),'https://seatgeek.com/titans-test');
 });
 
-test('Ticket Center explains provider scope instead of inventing individual seat listings',async()=>{
+test('Ticket Center explains comparison scope instead of inventing individual seat listings',async()=>{
   const [api,ui]=await Promise.all([read('src/tickets-api.mjs'),read('tickets-v47.js')]);
-  assert.match(api,/scope:'event-inventory-summary'/);
+  assert.match(api,/scope:'event-level current marketplace minimums'/);
+  assert.match(api,/providerType:'ticket-marketplace-price-comparison'/);
   assert.match(api,/SEATGEEK_CLIENT_ID/);
+  assert.match(api,/TICKETMASTER_API_KEY/);
+  assert.match(api,/STUBHUB_CLIENT_ID/);
   assert.match(api,/listing_count\.gt/);
-  assert.doesNotMatch(api,/client_secret/);
-  assert.match(ui,/Cheapest first\. Always\./);
-  assert.match(ui,/complete verified SeatGeek inventory/);
-  assert.match(ui,/instead of scraping or inventing listings/);
+  assert.match(ui,/Cheapest among the currently connected official marketplace APIs/);
+  assert.match(ui,/Individual seat inventory and final checkout totals stay on the marketplace/);
+  assert.match(ui,/starting prices are not guaranteed final totals/i);
   assert.match(ui,/data-ticket-filter="home"/);
   assert.match(ui,/data-ticket-filter="away"/);
 });
@@ -59,10 +61,10 @@ test('Ticket Center is first-class, searchable, PWA packaged, and in responsive 
   assert.match(css,/@media\(max-width:390px\)/);
 });
 
-test('Home has a prominent Ticket Center entry without changing the five-action mobile dock',async()=>{
+test('Home has a prominent Ticket Finder entry without changing the five-action mobile dock',async()=>{
   const [ui,html]=await Promise.all([read('tickets-v47.js'),read('index.html')]);
   assert.match(ui,/dataset\.ticketHome='1'/);
-  assert.match(ui,/Buy Titans tickets/);
+  assert.match(ui,/Find cheapest Titans tickets/);
   const dock=html.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0]||'';
   const actions=[...dock.matchAll(/<(?:a|button)\b/g)];
   assert.equal(actions.length,5);
