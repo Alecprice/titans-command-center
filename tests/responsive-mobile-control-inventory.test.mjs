@@ -17,7 +17,7 @@ test('responsive report surfaces control and tiny-text inventories separately', 
   assert.match(script, /'tinyTextSamples':tiny_samples\[:12\]/);
 });
 
-test('mobile dock remains a hard 44px gate while legacy controls are diagnostic-only', () => {
+test('all visible phone controls and dock actions are hard 44px gates', () => {
   assert.match(script, /if any\(x\['w'\]<44 or x\['h'\]<44 for x in state\['touchTargets'\]\): raise RuntimeError/);
-  assert.doesNotMatch(script, /raise RuntimeError\(f'.*smallControls/);
+  assert.match(script, /if state\['smallControls'\]: raise RuntimeError\(f'\{label\}: undersized app controls/);
 });
