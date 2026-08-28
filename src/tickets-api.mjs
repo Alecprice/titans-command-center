@@ -2,7 +2,7 @@ const SEATGEEK_EVENTS='https://api.seatgeek.com/2/events';
 export const TITANS_TICKETS_URL='https://seatgeek.com/tennessee-titans-tickets';
 const TITANS_SLUG='tennessee-titans';
 
-const finite=value=>{const number=Number(value);return Number.isFinite(number)&&number>=0?number:null;};
+const finite=value=>{if(value==null||value==='')return null;const number=Number(value);return Number.isFinite(number)&&number>=0?number:null;};
 export function safeSeatGeekUrl(value){
   try{
     const url=new URL(String(value||''));
