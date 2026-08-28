@@ -26,6 +26,6 @@ test('responsive matrix measures checkbox and radio labels as their real hit tar
   assert.match(matrix,/el\.closest\('label'\)\|\|el/);
 });
 
-test('responsive matrix escapes whitespace regex without Python syntax warnings',()=>{
-  assert.ok(matrix.includes("replace(/\\\\s+/g,' ')"));
+test('responsive matrix keeps embedded JavaScript regex safe from Python syntax warnings',()=>{
+  assert.ok(matrix.includes('driver.execute_script(r"""')||matrix.includes("replace(/\\\\s+/g,' ')"));
 });

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const ROOT=new URL('../',import.meta.url);
-const allowedRoutes=new Set(['home','live','games','roster','transactions','stats','fantasy','markets','feed','legacy','sources','fan','media','command','player']);
+const allowedRoutes=new Set(['home','live','games','tickets','roster','transactions','stats','fantasy','markets','feed','legacy','sources','fan','media','command','player']);
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const documentAnchors=new Set([...html.matchAll(/\sid=["']([a-z0-9_-]+)["']/gi)].map(x=>x[1]));
 const browserFiles=['index.html',...fs.readdirSync(ROOT).filter(name=>name.endsWith('.js'))];

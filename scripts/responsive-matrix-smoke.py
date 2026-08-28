@@ -21,6 +21,7 @@ ROUTES=[
     ('home','home'),
     ('game-day','live'),
     ('schedule','games'),
+    ('tickets','tickets'),
     ('roster','roster'),
     ('depth-chart','roster?view=depth'),
     ('staff','roster?view=staff'),
@@ -63,7 +64,7 @@ def settle(driver,timeout=4):
     return previous
 
 def dimensions(driver):
-    return driver.execute_script("""
+    return driver.execute_script(r"""
       const de=document.documentElement;
       const nav=document.querySelector('.mobile-nav');
       const side=document.querySelector('#sidebar');
@@ -82,7 +83,7 @@ def dimensions(driver):
           const type=(el.getAttribute('type')||'').toLowerCase();
           const hitTarget=(type==='checkbox'||type==='radio')?(el.closest('label')||el):el;
           const r=hitTarget.getBoundingClientRect();
-          return {tag:el.tagName,type,label:(el.getAttribute('aria-label')||el.textContent||el.getAttribute('placeholder')||el.id||'').trim().replace(/\\s+/g,' ').slice(0,80),w:Math.round(r.width*10)/10,h:Math.round(r.height*10)/10};
+          return {tag:el.tagName,type,label:(el.getAttribute('aria-label')||el.textContent||el.getAttribute('placeholder')||el.id||'').trim().replace(/\s+/g,' ').slice(0,80),w:Math.round(r.width*10)/10,h:Math.round(r.height*10)/10};
         })
         .filter(x=>x.w<44||x.h<44)
         .slice(0,16);
@@ -133,7 +134,7 @@ try:
         for route_name,route_hash in ROUTES:
             driver.get(f'{BASE}/#{route_hash}')
             wait(driver,"document.readyState === 'complete' && document.querySelector('#app')")
-            wait(driver,"document.querySelector('.page-head h1') || document.querySelector('.fan-hero')",12)
+            wait(driver,"document.querySelector('.page-head h1') || document.querySelector('.fan-hero') || document.querySelector('[data-ticket-center]')",12)
             settle(driver)
             state=dimensions(driver)
             label=f'{name}:{route_name}'
