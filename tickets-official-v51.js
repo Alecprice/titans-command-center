@@ -53,10 +53,11 @@
     const center=app.querySelector('[data-ticket-center]');
     if(!center)return;
     const priceGroups=center.querySelector('.tickets-price-group');
+    const comparisonBoard=center.querySelector('.tickets-comparison-board');
     const toolbarLink=center.querySelector('.tickets-toolbar>a');
     if(toolbarLink){toolbarLink.href=TEAM_HUB;setText(toolbarLink,'Official Titans tickets ↗');}
 
-    if(priceGroups)return;
+    if(priceGroups||comparisonBoard)return;
 
     center.classList.add('tickets-free-mode-v51');
     const eyebrow=center.querySelector('.tickets-hero .eyebrow');
@@ -129,16 +130,8 @@
     if(note){setText(note.querySelector('strong'),'What is free here?');setText(note.querySelector('span'),'Official game-by-game purchase destinations are available without an API key. Live starting-price summaries remain optional because marketplace pricing APIs require separate credentials and do not expose unrestricted seat-by-seat inventory.');}
   }
 
-  function schedule(){
-    if(scheduled)return;
-    scheduled=true;
-    queueMicrotask(enhance);
-  }
-
-  app.addEventListener('click',event=>{
-    const filter=event.target instanceof Element?event.target.closest('[data-ticket-filter]'):null;
-    if(filter)schedule();
-  });
+  function schedule(){if(scheduled)return;scheduled=true;queueMicrotask(enhance);}
+  app.addEventListener('click',event=>{const filter=event.target instanceof Element?event.target.closest('[data-ticket-filter]'):null;if(filter)schedule();});
   const observer=new MutationObserver(schedule);
   observer.observe(app,{childList:true,subtree:false});
   runtime.onRoute(schedule,{immediate:true});
