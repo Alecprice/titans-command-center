@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Player Intelligence / Game Day browser regression failure**
-- Source commit: `cf5cf5d00e95faa2ad789d3149fd7b81ff6500c8`
+- Source commit: `1eeed231e69dbedc7c60420200ea87f942a218cb`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -20,7 +20,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-28T16:49:34Z
+- Recorded: 2026-08-28T16:55:23Z
 
 ## Production regression
 
@@ -75,26 +75,26 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "cf5cf5d00e95faa2ad789d3149fd7b81ff6500c8",
-    "builtAt": "2026-08-28T16:48:17.301Z"
+    "commit": "1eeed231e69dbedc7c60420200ea87f942a218cb",
+    "builtAt": "2026-08-28T16:54:12.524Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 25,
-    "health": 188,
-    "data": 235,
-    "stats": 207,
-    "market": 5430,
-    "analytics": 481
+    "root": 38,
+    "health": 149,
+    "data": 128,
+    "stats": 168,
+    "market": 748,
+    "analytics": 509
   },
-  "testedAt": "2026-08-28T16:48:46.007Z",
+  "testedAt": "2026-08-28T16:54:35.275Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-26",
     "databaseContentAudit": "2026-08-26",
-    "responseMs": 183,
-    "testedAt": "2026-08-28T16:48:46.230Z"
+    "responseMs": 254,
+    "testedAt": "2026-08-28T16:54:35.564Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -102,22 +102,22 @@
     "initialStatus": "MISS",
     "finalStatus": "HIT",
     "attempts": 2,
-    "coldOrInitialMs": 5346,
-    "warmHitMs": 31,
+    "coldOrInitialMs": 894,
+    "warmHitMs": 57,
     "rows": 946,
     "sequence": [
       {
         "status": "MISS",
-        "durationMs": 5346,
+        "durationMs": 894,
         "rows": 946
       },
       {
         "status": "HIT",
-        "durationMs": 31,
+        "durationMs": 57,
         "rows": 946
       }
     ],
-    "testedAt": "2026-08-28T16:48:52.020Z"
+    "testedAt": "2026-08-28T16:54:36.926Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -177,8 +177,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 186,
-  "testedAt": "2026-08-28T16:48:52.820Z"
+  "durationMs": 158,
+  "testedAt": "2026-08-28T16:54:37.689Z"
 }```
 
 ## Browser navigation regression
@@ -224,11 +224,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 61,
+  "maxLongTaskMs": 97,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 14.83,
-  "testedAt": "2026-08-28T16:49:10Z"
+  "durationSeconds": 16.83,
+  "testedAt": "2026-08-28T16:54:59Z"
 }```
 
 ## Listen Watch browser regression
@@ -261,8 +261,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.4,
-  "testedAt": "2026-08-28T16:49:13Z"
+  "durationSeconds": 2.04,
+  "testedAt": "2026-08-28T16:55:01Z"
 }```
 
 ## Market Pulse browser regression
@@ -535,8 +535,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 6.29,
-  "testedAt": "2026-08-28T16:49:20Z"
+  "durationSeconds": 6.4,
+  "testedAt": "2026-08-28T16:55:08Z"
 }```
 
 ## Command Intelligence browser regression
@@ -594,8 +594,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.81,
-  "testedAt": "2026-08-28T16:49:23Z"
+  "durationSeconds": 2.85,
+  "testedAt": "2026-08-28T16:55:11Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -606,10 +606,10 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "stage": "cutdown:desktop",
   "error": "TimeoutError: Cutdown view did not settle after roster refresh: {'buttonConnected': True, 'exists': True, 'panelConnected': True, 'selected': False, 'visible': True}",
-  "durationSeconds": 10.37,
-  "testedAt": "2026-08-28T16:49:33Z",
+  "durationSeconds": 10.62,
+  "testedAt": "2026-08-28T16:55:22Z",
   "hash": "#roster?view=cutdown",
-  "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated 2 days ago\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\n53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n2d 5h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.\n\n2026-08-24\n\nSigned LB Reid Carrico and placed LB Milo Eifler on injured reserve.\n\n2026-08-21\n\nWaived LB Sean Brown from injured reserve with an injury settlement; placed DB Nazeeh Johnson on injured reserve; waived TE Matt Lauter; signed free agents LB Milo Eifler and DE Tanoh Kpassagnon.\n\n2026-08-19\n\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\n\n2026-08-17\n\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\n\n2026-08-16\n\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+\n#8\nWill Levis\nQB \u00b7 Offense\n+\n#21\nD'Ernest Johnson\nRB \u00b7 Offense\n+\n#36\nJulius Chestnu",
+  "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\n53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n2d 5h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.\n\n2026-08-24\n\nSigned LB Reid Carrico and placed LB Milo Eifler on injured reserve.\n\n2026-08-21\n\nWaived LB Sean Brown from injured reserve with an injury settlement; placed DB Nazeeh Johnson on injured reserve; waived TE Matt Lauter; signed free agents LB Milo Eifler and DE Tanoh Kpassagnon.\n\n2026-08-19\n\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\n\n2026-08-17\n\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\n\n2026-08-16\n\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitc",
   "browserWarnings": []
 }```
 
