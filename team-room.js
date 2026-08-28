@@ -3,7 +3,7 @@ const trRoute=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
 const TR_VIEWS=new Set(['roster','depth','staff','cutdown']);
 const TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request';
 let trData=null,trPromise=null,trPreferredRosterView='roster';
-const trEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const trEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const trSafeUrl=v=>{try{const u=new URL(String(v||''),location.origin);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return''}};
 const prettyDate=v=>{if(!v)return 'date unavailable';const d=new Date(`${String(v).slice(0,10)}T12:00:00Z`);return Number.isNaN(d.getTime())?'date unavailable':new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}).format(d)};
 const sourceLink=(url,label)=>{const safe=trSafeUrl(url);return safe?`<a href="${trEsc(safe)}" target="_blank" rel="noopener noreferrer">${trEsc(label)} ↗</a>`:''};
