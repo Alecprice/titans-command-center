@@ -22,7 +22,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-29T03:54:49Z
+- Recorded: 2026-08-29T03:56:51Z
 
 ## Production regression
 
@@ -31,7 +31,7 @@
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "error": "Application health is not healthy",
-  "testedAt": "2026-08-29T03:54:48.940Z"
+  "testedAt": "2026-08-29T03:56:51.342Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
