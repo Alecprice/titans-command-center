@@ -10,6 +10,7 @@ const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const headers=fs.readFileSync(new URL('../_headers',import.meta.url),'utf8');
 const envExample=fs.readFileSync(new URL('../.env.example',import.meta.url),'utf8');
 const workflow=fs.readFileSync(new URL('../.github/workflows/cloudflare-deploy.yml',import.meta.url),'utf8');
+const productionSmoke=fs.readFileSync(new URL('../scripts/media-browser-smoke.py',import.meta.url),'utf8');
 
 const {OFFICIAL_CHANNELS,allowedVideo}=youtubeMediaInternals;
 const titans={...OFFICIAL_CHANNELS.find(channel=>channel.key==='titans'),id:'UCtitans123',title:'Tennessee Titans'};
@@ -60,6 +61,18 @@ test('IFrame API loads only after explicit Play interaction and handles revoked 
   assert.match(frontend,/autoplay:0/);
   assert.match(frontend,/onReady:event=>event\.target\.playVideo\(\)/);
   assert.match(frontend,/onError:event=>fallbackPlayer/);
+});
+
+test('production media smoke proves lazy-before-Play and real IFrame creation after Play',()=>{
+  assert.match(productionSmoke,/stage = 'desktop:official-video-playback'/);
+  assert.match(productionSmoke,/querySelector\('\[data-youtube-play\]'\)\?\.click\(\)/);
+  assert.match(productionSmoke,/script\[data-titans-youtube-iframe-api\]/);
+  assert.match(productionSmoke,/querySelector\('\[data-youtube-video\] iframe'\)/);
+  assert.match(productionSmoke,/media-youtube-unavailable/);
+  assert.match(productionSmoke,/Official video fell back instead of creating an IFrame player/);
+  assert.match(productionSmoke,/\/embed\/\{selected_id\}/);
+  assert.match(productionSmoke,/https:\/\/www\.youtube\.com\/embed\//);
+  assert.match(productionSmoke,/'iframeAfterPlay': playback/);
 });
 
 test('media shell and CSP explicitly allow only the YouTube resources needed for embeds',()=>{
