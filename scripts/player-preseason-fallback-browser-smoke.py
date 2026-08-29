@@ -3,7 +3,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -24,6 +24,12 @@ def no_overflow(driver,label):
     state=driver.execute_script("return {w:document.documentElement.clientWidth,s:document.documentElement.scrollWidth}")
     if state['s']>state['w']+3:
         raise RuntimeError(f'Horizontal overflow on {label}: {state}')
+
+
+def player_id_from_href(href):
+    raw=str(href or '')
+    query=raw.split('?',1)[1] if '?' in raw else ''
+    return parse_qs(query).get('id',[''])[0]
 
 
 def fetch_player_context(driver,player_id):
@@ -81,7 +87,7 @@ try:
     """)
     if not player_href or '#player?id=' not in player_href:
         raise RuntimeError(f'Could not resolve hydrated Cam Ward route: {player_href}')
-    player_id=parse_qs(urlparse(player_href.replace('#','?',1)).query).get('id',[''])[0]
+    player_id=player_id_from_href(player_href)
     if len(player_id)!=36:
         raise RuntimeError(f'Cam Ward route did not contain a UUID: {player_href}')
 

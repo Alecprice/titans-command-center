@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 25
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
       SEATGEEK_AID: ${{ secrets.SEATGEEK_AID }}
       TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
@@ -55,6 +56,7 @@ jobs:
         run: |
           [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]] && echo "cloudflare=true" >> "$GITHUB_OUTPUT" || echo "cloudflare=false" >> "$GITHUB_OUTPUT"
           [[ -n "$DATABASE_URL" ]] && echo "database=true" >> "$GITHUB_OUTPUT" || echo "database=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$YOUTUBE_API_KEY" ]] && echo "youtube=true" >> "$GITHUB_OUTPUT" || echo "youtube=false" >> "$GITHUB_OUTPUT"
           [[ -n "$SEATGEEK_CLIENT_ID" ]] && echo "seatgeek=true" >> "$GITHUB_OUTPUT" || echo "seatgeek=false" >> "$GITHUB_OUTPUT"
           [[ -n "$TICKETMASTER_API_KEY" ]] && echo "ticketmaster=true" >> "$GITHUB_OUTPUT" || echo "ticketmaster=false" >> "$GITHUB_OUTPUT"
           [[ -n "$STUBHUB_CLIENT_ID" && -n "$STUBHUB_CLIENT_SECRET" ]] && echo "stubhub=true" >> "$GITHUB_OUTPUT" || echo "stubhub=false" >> "$GITHUB_OUTPUT"
@@ -67,6 +69,7 @@ jobs:
           const fs = require('node:fs');
           const keys = [
             'DATABASE_URL',
+            'YOUTUBE_API_KEY',
             'SEATGEEK_CLIENT_ID',
             'SEATGEEK_AID',
             'TICKETMASTER_API_KEY',
@@ -196,6 +199,7 @@ jobs:
           QUALITY_OUTCOME: ${{ steps.quality.outcome }}
           CLOUDFLARE_READY: ${{ steps.creds.outputs.cloudflare }}
           DATABASE_READY: ${{ steps.creds.outputs.database }}
+          YOUTUBE_READY: ${{ steps.creds.outputs.youtube }}
           SEATGEEK_READY: ${{ steps.creds.outputs.seatgeek }}
           TICKETMASTER_READY: ${{ steps.creds.outputs.ticketmaster }}
           STUBHUB_READY: ${{ steps.creds.outputs.stubhub }}
@@ -247,6 +251,7 @@ jobs:
             echo "- Quality gate: ${QUALITY_OUTCOME:-unknown}"
             echo "- Cloudflare credentials available: ${CLOUDFLARE_READY:-unknown}"
             echo "- DATABASE_URL GitHub secret supplied: ${DATABASE_READY:-unknown}"
+            echo "- YouTube Data API configured: ${YOUTUBE_READY:-false}"
             echo "- Ticket providers configured: SeatGeek=${SEATGEEK_READY:-false}, Ticketmaster=${TICKETMASTER_READY:-false}, StubHub=${STUBHUB_READY:-false}"
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
             echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"

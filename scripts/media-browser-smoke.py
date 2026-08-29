@@ -27,6 +27,16 @@ def no_overflow(driver, label):
         raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
 
+def media_video_context(driver):
+    return driver.execute_async_script("""
+      const done=arguments[arguments.length-1];
+      fetch('/api/media-videos',{cache:'no-store'}).then(async response=>{
+        const body=await response.json().catch(()=>null);
+        done({status:response.status,body});
+      }).catch(error=>done({status:0,error:String(error),body:null}));
+    """)
+
+
 options = webdriver.ChromeOptions()
 options.add_argument('--headless=new')
 options.add_argument('--no-sandbox')
@@ -41,7 +51,7 @@ started = time.time()
 try:
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(20)
-    driver.set_script_timeout(5)
+    driver.set_script_timeout(8)
 
     stage = 'desktop:home'
     driver.get(f'{BASE}/#home')
@@ -56,6 +66,34 @@ try:
     if not driver.execute_script("return Boolean(document.querySelector('.media-page'))"):
         raise RuntimeError('Media route was overwritten after interaction')
     no_overflow(driver, 'desktop media')
+
+    stage = 'desktop:official-video-api'
+    youtube = media_video_context(driver)
+    body = youtube.get('body') or {}
+    if youtube.get('status') != 200 or not body.get('ok'):
+        raise RuntimeError(f'Official media API unavailable: {youtube}')
+    if body.get('provider') != 'YouTube Data API v3' or body.get('scope') != 'official-embeddable-vod-only' or body.get('liveRightsExcluded') is not True:
+        raise RuntimeError(f'Official media API rights contract invalid: {body}')
+    videos = body.get('videos') if isinstance(body.get('videos'), list) else []
+    if body.get('configured'):
+        if any(not item.get('official') or not item.get('embeddable') or item.get('live') for item in videos):
+            raise RuntimeError(f'Official media API returned a non-embeddable/non-official/live row: {videos[:3]}')
+        if videos:
+            wait_for(driver, "document.querySelector('[data-youtube-official-shelf]')", timeout=12)
+            shelf = driver.execute_script("""
+              const root=document.querySelector('[data-youtube-official-shelf]');
+              return {
+                cards:root?.querySelectorAll('[data-youtube-video]').length||0,
+                playButtons:[...root?.querySelectorAll('[data-youtube-play]')||[]].map(x=>x.getBoundingClientRect().height),
+                iframeCount:root?.querySelectorAll('iframe').length||0,
+                iframeApiScripts:document.querySelectorAll('script[data-titans-youtube-iframe-api]').length,
+                text:(root?.innerText||'').slice(0,800)
+              };
+            """)
+            if shelf['cards'] < 1 or shelf['iframeCount'] != 0 or shelf['iframeApiScripts'] != 0 or any(height < 44 for height in shelf['playButtons']):
+                raise RuntimeError(f'Official video shelf is not lazy/safe before interaction: {shelf}')
+    elif driver.execute_script("return Boolean(document.querySelector('[data-youtube-official-shelf]'))"):
+        raise RuntimeError('Official video shelf rendered even though YouTube Data API is unconfigured')
 
     stage = 'desktop:radio-safety'
     radio = driver.execute_script("""
@@ -95,19 +133,25 @@ try:
     driver.set_window_size(390, 844)
     driver.get(f'{BASE}/#media')
     wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-tune-guide')", timeout=12)
+    if body.get('configured') and videos:
+        wait_for(driver, "document.querySelector('[data-youtube-official-shelf]')", timeout=12)
     no_overflow(driver, '390px media')
     mobile = driver.execute_script("""
       return {
         areaButtons:[...document.querySelectorAll('[data-media-area]')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height})),
         launchCards:document.querySelectorAll('.media-radio-launch a').length,
         timeRows:document.querySelectorAll('.media-time-row').length,
-        page:Boolean(document.querySelector('.media-page'))
+        page:Boolean(document.querySelector('.media-page')),
+        youtubeCards:document.querySelectorAll('[data-youtube-video]').length,
+        youtubePlayTargets:[...document.querySelectorAll('[data-youtube-play]')].map(x=>x.getBoundingClientRect().height)
       }
     """)
     if len(mobile['areaButtons']) != 3 or any(x['h'] < 44 for x in mobile['areaButtons']):
         raise RuntimeError(f'Mobile territory controls invalid: {mobile}')
     if mobile['launchCards'] != 2 or mobile['timeRows'] != 4 or not mobile['page']:
         raise RuntimeError(f'Mobile media layout incomplete: {mobile}')
+    if body.get('configured') and videos and (mobile['youtubeCards'] < 1 or any(height < 44 for height in mobile['youtubePlayTargets'])):
+        raise RuntimeError(f'Mobile official video shelf controls invalid: {mobile}')
 
     stage = 'console'
     warnings = []
@@ -126,8 +170,16 @@ try:
         'officialTitansAudio': True,
         'official1045Player': True,
         'rawEmbeddedAudio': False,
+        'youtube': {
+            'configured': bool(body.get('configured')),
+            'available': bool(body.get('available')),
+            'videos': len(videos),
+            'liveRightsExcluded': body.get('liveRightsExcluded') is True,
+            'lazyBeforePlay': True,
+        },
         'mobileAreaTargets': mobile['areaButtons'],
         'mobileTimeRows': mobile['timeRows'],
+        'mobileYoutubeCards': mobile['youtubeCards'],
         'browserWarnings': warnings[:20],
         'durationSeconds': round(time.time() - started, 2),
         'testedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
@@ -146,7 +198,7 @@ except Exception as exc:
     try:
         if driver is not None:
             result['hash'] = driver.execute_script('return location.hash')
-            result['pageText'] = driver.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,800)")
+            result['pageText'] = driver.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,1200)")
             result['browserWarnings'] = [x for x in driver.get_log('browser') if x.get('level') in ('SEVERE', 'WARNING')][:20]
     except Exception:
         pass

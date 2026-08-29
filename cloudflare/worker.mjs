@@ -7,6 +7,7 @@ import {advancedAnalyticsRoute} from '../src/advanced-analytics-api.mjs';
 import {fanIntelRoute} from '../src/fan-intel-api.mjs';
 import {ticketsRoute} from '../src/tickets-api.mjs';
 import {xSocialRoute} from '../src/x-social-api.mjs';
+import {youtubeMediaRoute} from '../src/youtube-media-api.mjs';
 import {accountAuthProxy,accountPreferencesRoute} from '../src/account-api.mjs';
 import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflverseStats,syncNwsNextHomeGame,syncFreeOdds,recordSyncRun} from '../src/ingest.mjs';
 
@@ -26,7 +27,7 @@ function jsonResponse(payload,status=200,headers={}){return new Response(JSON.st
 function withEdgeCacheStatus(response,status){const headers=new Headers(response.headers);headers.set('X-Titans-Edge-Cache',status);return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
 function marketCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 function apiCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
-async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
+async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
 async function nativeData(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});const headers={'Cache-Control':'public, s-maxage=30, stale-while-revalidate=120'};const data=await getBootstrapData(env);if(!data.configured)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);if(!data.ok)return jsonResponse(data,503,headers);const sql=await getSql(env);const teamContext=await getAuditedTeamContext(sql);return jsonResponse({...data,teamContext},200,headers);}
 async function nativeScoreboard(request){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const headers={'Cache-Control':'public, s-maxage=15, stale-while-revalidate=30'};try{const upstream=await fetch(SCOREBOARD_URL,{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`},signal:AbortSignal.timeout(4500)});if(!upstream.ok)throw new Error(`ESPN ${upstream.status}`);return jsonResponse({ok:true,provider:'ESPN',unofficial:true,available:true,fetchedAt:new Date().toISOString(),payload:await upstream.json()},200,headers);}catch(error){console.error('[cloudflare-scoreboard]',error);return jsonResponse({ok:false,provider:'ESPN',unofficial:true,available:false,error:'Live scoreboard provider unavailable',fetchedAt:new Date().toISOString(),payload:{events:[]}},200,headers);}}
 async function adapterRoute(request,route,handler,env){const req=vercelRequest(request,route);const res=vercelResponse();await handler(req,res.api,env);return res.result();}
@@ -72,6 +73,7 @@ async function runApi(request,env,ctx){
     if(route==='fan-intel')return await adapterRoute(request,route,fanIntelRoute,env);
     if(route==='tickets')return await cachedAdapterData(request,route,ticketsRoute,env,ctx);
     if(route==='social-pulse')return await cachedAdapterData(request,route,xSocialRoute,env,ctx);
+    if(route==='media-videos')return await cachedAdapterData(request,route,youtubeMediaRoute,env,ctx);
 
     const req=vercelRequest(request,route);const res=vercelResponse();await apiHandler(req,res.api,env);return res.result();
   }catch(error){console.error('[cloudflare-api-adapter]',route,error);return jsonResponse({ok:false,error:'API request failed'},500);}
