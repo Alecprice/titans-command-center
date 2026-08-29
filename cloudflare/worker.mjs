@@ -1,6 +1,7 @@
 import apiHandler from '../api/index.js';
 import {databaseHealth,getBootstrapData,getSql} from '../src/db.mjs';
 import {getAuditedTeamContext} from '../src/team-context.mjs';
+import {team as fallbackTeam,games as fallbackGames,roster as fallbackRoster,feed as fallbackFeed,sources as fallbackSources} from '../src/data.mjs';
 import {preseasonStatsRoute} from '../src/preseason-api.mjs';
 import {marketDataRoute} from '../src/market-api.mjs';
 import {advancedAnalyticsRoute} from '../src/advanced-analytics-api.mjs';
@@ -27,8 +28,23 @@ function jsonResponse(payload,status=200,headers={}){return new Response(JSON.st
 function withEdgeCacheStatus(response,status){const headers=new Headers(response.headers);headers.set('X-Titans-Edge-Cache',status);return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
 function marketCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 function apiCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
+function auditedBootstrapFallback(reason='Live database unavailable'){
+  const transactions=fallbackFeed.filter(row=>row.type==='transaction').map(row=>({id:String(row.id||''),date:row.publishedAt||null,type:'transaction',description:row.summary||row.title||'',sourceUrl:row.url||''}));
+  const coverage={};
+  return {
+    configured:true,ok:true,mode:'audited-fallback',databaseAvailable:false,
+    fallback:{active:true,reason,auditedAt:fallbackTeam.auditedAt||fallbackTeam.rosterCoverage?.asOf||null},
+    meta:{app_version:APP_VERSION,content_audit_at:fallbackTeam.rosterCoverage?.asOf||null,roster_snapshot_at:fallbackTeam.auditedAt||null},
+    games:fallbackGames.map(game=>({...game})),
+    roster:fallbackRoster.map(player=>({...player,id:String(player.id||'')})),
+    sources:fallbackSources.map(source=>({...source})),transactions,feed:fallbackFeed.map(row=>({...row})),syncRuns:[],
+    analytics:{coverage,efficiency:[]},weather:{rows:[],status:'database-unavailable'},markets:{rows:[],futures:[],status:'database-unavailable'},
+    dataQuality:{contentAuditAt:fallbackTeam.rosterCoverage?.asOf||null,rosterSnapshotAt:fallbackTeam.auditedAt||null,rosterPlayers:fallbackRoster.length,eventRows:fallbackFeed.length,transactionRows:transactions.length,coverage},
+    fetchedAt:new Date().toISOString()
+  };
+}
 async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
-async function nativeData(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});const headers={'Cache-Control':'public, s-maxage=60, stale-while-revalidate=300'};const data=await getBootstrapData(env);if(!data.configured)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);if(!data.ok)return jsonResponse(data,503,headers);const sql=await getSql(env);const teamContext=await getAuditedTeamContext(sql);return jsonResponse({...data,teamContext},200,headers);}
+async function nativeData(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});const headers={'Cache-Control':'public, s-maxage=60, stale-while-revalidate=300'};const data=await getBootstrapData(env);if(!data.configured)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);if(!data.ok){const fallback=auditedBootstrapFallback(data.error||'Live database query failed');return jsonResponse({...fallback,teamContext:await getAuditedTeamContext(null)},200,headers);}const sql=await getSql(env);let teamContext;try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}return jsonResponse({...data,mode:'live-database',databaseAvailable:true,teamContext},200,headers);}
 async function cachedNativeData(request,env,ctx){
   const url=new URL(request.url);
   if(request.method!=='GET'||url.searchParams.size)return withEdgeCacheStatus(await nativeData(request,env),'BYPASS');
