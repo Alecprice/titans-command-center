@@ -54,7 +54,7 @@ export async function getD1Snapshot(env,key,{allowExpired=false}={}){
     select cache_key,payload,source,fetched_at,expires_at,updated_at
     from api_snapshots
     where cache_key=?
-      and (?=1 or expires_at is null or expires_at>CURRENT_TIMESTAMP)
+      and (?=1 or expires_at is null or datetime(expires_at)>CURRENT_TIMESTAMP)
     limit 1
   `).bind(String(key),allowExpired?1:0).first();
   return normalizeRow(row);
