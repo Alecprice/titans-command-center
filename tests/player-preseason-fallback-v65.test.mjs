@@ -53,9 +53,22 @@ test('post-deploy fallback gate checks the exact successful Cloudflare revision 
   assert.match(fallbackWorkflow,/github\.event\.workflow_run\.conclusion == 'success'/);
   assert.match(fallbackWorkflow,/EXPECTED_SHA: \$\{\{ github\.event\.workflow_run\.head_sha \}\}/);
   assert.match(fallbackWorkflow,/ref: \$\{\{ github\.event\.workflow_run\.head_sha \}\}/);
-  assert.match(fallbackWorkflow,/last\.get\('commit'\)==expected/);
   assert.match(fallbackWorkflow,/python scripts\/player-preseason-fallback-browser-smoke\.py/);
   assert.match(fallbackWorkflow,/persist-credentials: false/);
+});
+
+test('exact revision probe uses the same production-safe Node fetch contract as the main release audit',()=>{
+  assert.match(fallbackWorkflow,/name: Use Node 24/);
+  assert.match(fallbackWorkflow,/actions\/setup-node@820762786026740c76f36085b0efc47a31fe5020/);
+  assert.match(fallbackWorkflow,/node-version: 24/);
+  assert.match(fallbackWorkflow,/await fetch\(`\$\{base\}\/build-meta\.json\?expected=/);
+  assert.match(fallbackWorkflow,/'User-Agent':'TitansCommandCenter-ProductionAudit\/1\.0'/);
+  assert.match(fallbackWorkflow,/'Cache-Control':'no-cache, no-store'/);
+  assert.match(fallbackWorkflow,/cache:'no-store'/);
+  assert.match(fallbackWorkflow,/AbortSignal\.timeout\(15000\)/);
+  assert.match(fallbackWorkflow,/lastCommit===expected/);
+  assert.doesNotMatch(fallbackWorkflow,/urllib\.request/);
+  assert.doesNotMatch(fallbackWorkflow,/urllib\.request\.urlopen/);
 });
 
 test('new production browser smoke compiles with SyntaxWarning promoted to failure',()=>{

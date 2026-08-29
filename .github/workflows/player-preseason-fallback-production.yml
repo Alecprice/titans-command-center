@@ -28,24 +28,51 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
 
+      - name: Use Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6.2.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
       - name: Verify exact production revision
         shell: bash
         run: |
-          python - <<'PY'
-          import json, os, time, urllib.request
-          base=os.environ['WORKER_URL'].rstrip('/')
-          expected=os.environ['EXPECTED_SHA']
-          last=None
-          for attempt in range(1,7):
-              with urllib.request.urlopen(f'{base}/build-meta.json?verify={attempt}',timeout=10) as response:
-                  last=json.load(response)
-              if last.get('commit')==expected:
-                  print(json.dumps({'ok':True,'expected':expected,'buildMeta':last,'attempt':attempt},indent=2))
-                  break
-              time.sleep(2)
-          else:
-              raise SystemExit(f'Production revision mismatch: expected {expected}, got {last}')
-          PY
+          node - <<'NODE'
+          const base=String(process.env.WORKER_URL||'').replace(/\/$/,'');
+          const expected=String(process.env.EXPECTED_SHA||'').trim();
+          const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+          let lastCommit=null,lastStatus=null,lastError=null;
+          (async()=>{
+            for(let attempt=1;attempt<=10;attempt++){
+              try{
+                const response=await fetch(`${base}/build-meta.json?expected=${encodeURIComponent(expected)}&attempt=${attempt}&ts=${Date.now()}`,{
+                  cache:'no-store',
+                  headers:{
+                    'User-Agent':'TitansCommandCenter-ProductionAudit/1.0',
+                    'Cache-Control':'no-cache, no-store',
+                    'Pragma':'no-cache'
+                  },
+                  signal:AbortSignal.timeout(15000)
+                });
+                lastStatus=response.status;
+                if(response.ok){
+                  const meta=await response.json();
+                  lastCommit=meta?.commit||null;
+                  if(lastCommit===expected){
+                    console.log(JSON.stringify({ok:true,expected,buildMeta:meta,attempt,status:response.status},null,2));
+                    return;
+                  }
+                }else{
+                  lastError=`HTTP ${response.status}`;
+                }
+              }catch(error){
+                lastError=error instanceof Error?error.message:String(error);
+              }
+              if(attempt<10)await wait(2000);
+            }
+            throw new Error(`Production revision mismatch: expected ${expected}, got ${lastCommit||'unknown'} (status ${lastStatus||'unknown'}${lastError?`, ${lastError}`:''})`);
+          })().catch(error=>{console.error(error);process.exit(1)});
+          NODE
 
       - name: Install Selenium
         run: python -m pip install --disable-pip-version-check 'selenium>=4.25,<5'
