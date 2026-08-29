@@ -123,5 +123,7 @@ test('read-plane routes persist only successful warehouse payloads and preserve 
   assert.match(analytics,/writeApiSnapshot\(env,snapshotKey,payload/);
   assert.match(player,/PLAYER_SNAPSHOT_TTL_SECONDS=21600/);
   assert.match(player,/if\(data\.ok\)[\s\S]*writeApiSnapshot\(env,snapshotKey,data/);
-  assert.doesNotMatch(analytics,/writeApiSnapshot\([\s\S]*status:'database-unavailable'/);
+  const analyticsCatch=analytics.match(/catch\(error\)\{[\s\S]*?error:'Advanced analytics query failed'[\s\S]*?\n  \}/)?.[0]||'';
+  assert.ok(analyticsCatch);
+  assert.doesNotMatch(analyticsCatch,/writeApiSnapshot/);
 });
