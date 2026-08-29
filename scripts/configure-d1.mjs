@@ -20,8 +20,12 @@ function databaseId(row){return String(row?.uuid||row?.id||row?.database_id||'')
 
 function serializeConfig(config){
   return JSON.stringify(config,null,2)
-    .replace(/"required": \[\n\s*"DATABASE_URL"\n\s*\]/,'"required": ["DATABASE_URL"]')
-    .replace(/"run_worker_first": \[\n\s*"\\/api\\/\\*"\n\s*\]/,'"run_worker_first": ["/api/*"]');
+    .replace(`"required": [
+      "DATABASE_URL"
+    ]`,'"required": ["DATABASE_URL"]')
+    .replace(`"run_worker_first": [
+      "/api/*"
+    ]`,'"run_worker_first": ["/api/*"]');
 }
 
 if(!fs.existsSync(CONFIG))throw new Error(`${CONFIG} not found. Run this command from the repository root.`);
