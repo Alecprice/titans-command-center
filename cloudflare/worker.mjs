@@ -16,6 +16,7 @@ const API_PREFIX='/api/';
 const APP_VERSION='1.0.0';
 const SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
 const BOOTSTRAP_CACHE_CONTROL='public, s-maxage=900, stale-while-revalidate=21600';
+const QUERY_CACHE_CONTROL='public, s-maxage=900, stale-while-revalidate=21600';
 
 function requestHeaders(headers){const out={};for(const [key,value] of headers.entries())out[key.toLowerCase()]=value;return out;}
 function requestQuery(url,route){const query={route};for(const [key,value] of url.searchParams.entries()){if(key==='route')continue;const current=query[key];if(current===undefined)query[key]=value;else if(Array.isArray(current))current.push(value);else query[key]=[current,value];}return query;}
@@ -27,8 +28,11 @@ function vercelResponse(){
 }
 function jsonResponse(payload,status=200,headers={}){return new Response(JSON.stringify(payload),{status,headers:{'Content-Type':'application/json; charset=utf-8',...headers}});}
 function withEdgeCacheStatus(response,status){const headers=new Headers(response.headers);headers.set('X-Titans-Edge-Cache',status);return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
+function withCacheControl(response,value){const headers=new Headers(response.headers);headers.set('Cache-Control',value);return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
 function marketCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 function apiCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
+function queryAwareApiCacheKey(request,keys=[]){const input=new URL(request.url),url=new URL(`${input.origin}${input.pathname}`);for(const key of [...keys].sort()){const value=input.searchParams.get(key);if(value!=null&&value!=='')url.searchParams.set(key,value);}return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
+function edgeResponseCacheable(response){const policy=String(response.headers.get('Cache-Control')||'').toLowerCase();return response.ok&&!policy.includes('no-store')&&!policy.includes('private');}
 function auditedBootstrapFallback(reason='Live database unavailable'){
   const transactions=fallbackFeed.filter(row=>row.type==='transaction').map(row=>({id:String(row.id||''),date:row.publishedAt||null,type:'transaction',description:row.summary||row.title||'',sourceUrl:row.url||''}));
   const coverage={};
@@ -103,6 +107,20 @@ async function cachedAdapterData(request,route,handler,env,ctx){
   if(fresh.ok){const write=cache.put(key,fresh.clone()).catch(error=>console.warn(`[${route}-edge-cache]`,error));if(ctx?.waitUntil)ctx.waitUntil(write);else await write;}
   return withEdgeCacheStatus(fresh,'MISS');
 }
+async function cachedQueryAdapterData(request,route,handler,env,ctx,keys){
+  if(request.method!=='GET')return withEdgeCacheStatus(await adapterRoute(request,route,handler,env),'BYPASS');
+  const cache=globalThis.caches?.default;
+  if(!cache)return withEdgeCacheStatus(await adapterRoute(request,route,handler,env),'UNAVAILABLE');
+  const key=queryAwareApiCacheKey(request,keys),hit=await cache.match(key);
+  if(hit)return withEdgeCacheStatus(hit,'HIT');
+  let fresh=await adapterRoute(request,route,handler,env);
+  if(edgeResponseCacheable(fresh)){
+    fresh=withCacheControl(fresh,QUERY_CACHE_CONTROL);
+    const write=cache.put(key,fresh.clone()).catch(error=>console.warn(`[${route}-query-edge-cache]`,error));
+    if(ctx?.waitUntil)ctx.waitUntil(write);else await write;
+  }
+  return withEdgeCacheStatus(fresh,'MISS');
+}
 async function resilientAccountAuth(request,subpath){
   const response=await accountAuthProxy(request,subpath);
   if(!accountInfrastructureFailure(response.status))return response;
@@ -123,9 +141,10 @@ async function runApi(request,env,ctx){
     if(route==='espn-scoreboard')return await nativeScoreboard(request);
     if(route.startsWith('account/auth/'))return await resilientAccountAuth(request,route.slice('account/auth/'.length));
     if(route==='account/preferences')return await accountPreferencesRoute(request,env);
+    if(route==='player')return await cachedQueryAdapterData(request,route,apiHandler,env,ctx,['id']);
     if(route==='preseason-stats')return await adapterRoute(request,route,preseasonStatsRoute,env);
     if(route==='market-data')return await cachedMarketData(request,env,ctx);
-    if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
+    if(route==='advanced-analytics')return await cachedQueryAdapterData(request,route,advancedAnalyticsRoute,env,ctx,['season','team']);
     if(route==='fan-intel')return await resilientFanIntel(request,env,ctx);
     if(route==='tickets')return await cachedAdapterData(request,route,ticketsRoute,env,ctx);
     if(route==='social-pulse')return await cachedAdapterData(request,route,xSocialRoute,env,ctx);
