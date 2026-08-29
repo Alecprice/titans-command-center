@@ -75,6 +75,13 @@ try:
     if body.get('provider') != 'YouTube Data API v3' or body.get('scope') != 'official-embeddable-vod-only' or body.get('liveRightsExcluded') is not True:
         raise RuntimeError(f'Official media API rights contract invalid: {body}')
     videos = body.get('videos') if isinstance(body.get('videos'), list) else []
+    playback = {
+        'attempted': False,
+        'iframeApiScript': False,
+        'iframe': False,
+        'videoId': '',
+        'iframeSrc': '',
+    }
     if body.get('configured'):
         if any(not item.get('official') or not item.get('embeddable') or item.get('live') for item in videos):
             raise RuntimeError(f'Official media API returned a non-embeddable/non-official/live row: {videos[:3]}')
@@ -92,6 +99,40 @@ try:
             """)
             if shelf['cards'] < 1 or shelf['iframeCount'] != 0 or shelf['iframeApiScripts'] != 0 or any(height < 44 for height in shelf['playButtons']):
                 raise RuntimeError(f'Official video shelf is not lazy/safe before interaction: {shelf}')
+
+            stage = 'desktop:official-video-playback'
+            selected_id = driver.execute_script("return document.querySelector('[data-youtube-video]')?.dataset.youtubeVideo || ''")
+            if len(selected_id) != 11:
+                raise RuntimeError(f'Official video card has invalid YouTube id: {selected_id!r}')
+            driver.execute_script("document.querySelector('[data-youtube-play]')?.click()")
+            wait_for(driver, "document.querySelector('script[data-titans-youtube-iframe-api]')", timeout=4)
+            wait_for(
+                driver,
+                "document.querySelector('[data-youtube-video] iframe') || document.querySelector('[data-youtube-video] .media-youtube-unavailable')",
+                timeout=14,
+            )
+            playback = driver.execute_script("""
+              const card=document.querySelector('[data-youtube-video]');
+              const iframe=card?.querySelector('iframe');
+              const fallback=card?.querySelector('.media-youtube-unavailable');
+              return {
+                attempted:true,
+                iframeApiScript:Boolean(document.querySelector('script[data-titans-youtube-iframe-api]')),
+                iframe:Boolean(iframe),
+                videoId:card?.dataset.youtubeVideo||'',
+                iframeSrc:iframe?.src||'',
+                fallback:Boolean(fallback),
+                fallbackText:(fallback?.innerText||'').slice(0,300)
+              };
+            """)
+            if playback.get('fallback'):
+                raise RuntimeError(f'Official video fell back instead of creating an IFrame player: {playback}')
+            if not playback.get('iframeApiScript') or not playback.get('iframe'):
+                raise RuntimeError(f'Official video did not instantiate the YouTube IFrame player after Play: {playback}')
+            if playback.get('videoId') != selected_id or f'/embed/{selected_id}' not in playback.get('iframeSrc', ''):
+                raise RuntimeError(f'YouTube IFrame does not match the selected official video: {playback}')
+            if not playback.get('iframeSrc', '').startswith('https://www.youtube.com/embed/'):
+                raise RuntimeError(f'YouTube IFrame used an unexpected origin: {playback}')
     elif driver.execute_script("return Boolean(document.querySelector('[data-youtube-official-shelf]'))"):
         raise RuntimeError('Official video shelf rendered even though YouTube Data API is unconfigured')
 
@@ -176,6 +217,7 @@ try:
             'videos': len(videos),
             'liveRightsExcluded': body.get('liveRightsExcluded') is True,
             'lazyBeforePlay': True,
+            'iframeAfterPlay': playback,
         },
         'mobileAreaTargets': mobile['areaButtons'],
         'mobileTimeRows': mobile['timeRows'],
