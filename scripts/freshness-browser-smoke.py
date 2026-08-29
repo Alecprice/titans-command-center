@@ -53,7 +53,7 @@ def wait_card(driver,timeout=15):
         card=read_card(d)
         if not card:return False
         if card['strong'] in ('Live source check','Checking snapshot age…'):return False
-        if card['state'] not in ('recent','stale','unknown'):return False
+        if card['state'] not in ('recent','stale','unknown','fallback'):return False
         return card
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(ready)
 
@@ -67,11 +67,22 @@ def assert_card(card,label):
     elif card['state']=='stale':
         if card['strong']!='Roster snapshot needs review' or 'more than 48 hours old' not in card['title']:
             raise RuntimeError(f'{label}: stale freshness metadata inconsistent: {card}')
+    elif card['state']=='fallback':
+        if not card['strong'].startswith('Verified backup · ') or 'unknown date' in card['strong']:
+            raise RuntimeError(f'{label}: fallback audit label is missing or unknown: {card}')
+        if not card['detail'].startswith('Roster verified '):
+            raise RuntimeError(f'{label}: fallback roster detail is not audit-date based: {card}')
+        if 'verified roster backup audited' not in card['title'].lower():
+            raise RuntimeError(f'{label}: fallback title does not explain the verified backup: {card}')
+        if any(term in card['text'].lower() for term in ('neon','database degraded','database unavailable')):
+            raise RuntimeError(f'{label}: backend jargon leaked into fan freshness UI: {card}')
     elif card['state']=='unknown':
         if card['strong'] not in ('Freshness unknown','Snapshot age unavailable'):
             raise RuntimeError(f'{label}: unknown freshness metadata inconsistent: {card}')
     if 'Roster ' not in card['detail'] or 'Moves ' not in card['detail'] or 'Intel ' not in card['detail']:
         raise RuntimeError(f'{label}: freshness detail is incomplete: {card}')
+    if '20,695 days ago' in card['detail'] or '20,696 days ago' in card['detail']:
+        raise RuntimeError(f'{label}: null roster timestamp was coerced to epoch time: {card}')
     if card['rect']['width']<=0 or card['rect']['height']<=0:
         raise RuntimeError(f'{label}: freshness card is not rendered: {card}')
     if card['overflow']:

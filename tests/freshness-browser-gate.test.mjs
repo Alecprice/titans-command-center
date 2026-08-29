@@ -11,8 +11,14 @@ test('freshness production smoke validates rendered truth states on desktop and 
   assert.match(smoke,/Checking snapshot age…/);
   assert.match(smoke,/Recent server snapshot/);
   assert.match(smoke,/Roster snapshot needs review/);
+  assert.match(smoke,/Verified backup ·/);
+  assert.match(smoke,/Roster verified/);
+  assert.match(smoke,/verified roster backup audited/);
+  assert.match(smoke,/\('recent','stale','unknown','fallback'\)/);
   assert.match(smoke,/within the last 48 hours/);
   assert.match(smoke,/more than 48 hours old/);
+  assert.match(smoke,/backend jargon leaked into fan freshness UI/);
+  assert.match(smoke,/null roster timestamp was coerced to epoch time/);
   assert.match(smoke,/set_window_size\(390,844\)/);
   assert.match(smoke,/horizontal overflow/);
   assert.match(smoke,/titans:v10Onboarded/);

@@ -29,6 +29,20 @@ test('home freshness reflects capture age instead of API reachability',()=>{
   assert.doesNotMatch(js,/Live source check/);
 });
 
+test('audited fallback freshness uses its verified audit date instead of epoch coercion',()=>{
+  const js=read('freshness-truth-v20.js');
+  assert.match(js,/if\(value==null\|\|value===''\)return null/);
+  assert.match(js,/data\?\.mode==='audited-fallback'/);
+  assert.match(js,/data\?\.fallback\?\.active===true/);
+  assert.match(js,/data\?\.fallback\?\.auditedAt/);
+  assert.match(js,/data\?\.dataQuality\?\.rosterSnapshotAt/);
+  assert.match(js,/Verified backup · \$\{verified\}/);
+  assert.match(js,/Roster verified \$\{verified\}/);
+  assert.match(js,/verified roster backup audited \$\{verified\}/);
+  assert.match(js,/const state=fallback\?'fallback':rosterState/);
+  assert.doesNotMatch(js,/Neon|database degraded/i);
+});
+
 test('freshness detail prioritizes roster moves and intel timestamps',()=>{
   const js=read('freshness-truth-v20.js');
   assert.match(js,/transactions:latestDate/);

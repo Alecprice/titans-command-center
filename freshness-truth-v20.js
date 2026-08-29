@@ -9,6 +9,7 @@
   let queued=false;
 
   function validDate(value){
+    if(value==null||value==='')return null;
     const date=new Date(value);
     return Number.isNaN(date.getTime())?null:date;
   }
@@ -24,6 +25,20 @@
     const abs=Math.abs(diff);
     const [size,unit]=abs>=86400000?[86400000,'day']:abs>=3600000?[3600000,'hour']:[60000,'minute'];
     return new Intl.RelativeTimeFormat('en',{numeric:'auto'}).format(Math.round(diff/size),unit);
+  }
+
+  function shortDate(value){
+    const date=validDate(value);
+    if(!date)return'unknown date';
+    return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',timeZone:'America/Chicago'}).format(date);
+  }
+
+  function fallbackAuditDate(data){
+    return validDate(data?.fallback?.auditedAt||data?.dataQuality?.rosterSnapshotAt||data?.meta?.roster_snapshot_at||data?.dataQuality?.contentAuditAt||data?.meta?.content_audit_at);
+  }
+
+  function isAuditedFallback(data){
+    return data?.mode==='audited-fallback'||data?.fallback?.active===true;
   }
 
   function freshness(data){
@@ -60,11 +75,20 @@
 
   function render(card,data){
     const fresh=freshness(data);
-    const state=rosterState(fresh.roster);
+    const fallback=isAuditedFallback(data);
+    const auditDate=fallbackAuditDate(data);
+    const state=fallback?'fallback':rosterState(fresh.roster);
     const strong=card.querySelector('strong');
     const detail=card.querySelector('p');
     card.classList.add('v10-freshness-card');
     card.dataset.freshnessState=state;
+    if(fallback){
+      const verified=shortDate(auditDate);
+      if(strong)strong.textContent=`Verified backup · ${verified}`;
+      if(detail)detail.textContent=`Roster verified ${verified} · Moves ${rel(fresh.transactions)} · Intel ${rel(fresh.feed)}`;
+      card.title=`Live roster updates are temporarily unavailable. Showing the verified roster backup audited ${verified}.`;
+      return;
+    }
     if(strong)strong.textContent=state==='recent'?'Recent server snapshot':state==='stale'?'Roster snapshot needs review':'Freshness unknown';
     if(detail)detail.textContent=`Roster ${rel(fresh.roster)} · Moves ${rel(fresh.transactions)} · Intel ${rel(fresh.feed)}`;
     card.title=state==='stale'?'The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.':state==='recent'?'The loaded roster snapshot was captured within the last 48 hours.':'The loaded roster does not provide a usable capture timestamp.';
