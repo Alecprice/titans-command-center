@@ -96,3 +96,11 @@ test('D1 migration creates portable preferences and durable API snapshots',()=>{
   assert.match(migration,/CREATE TABLE IF NOT EXISTS api_snapshots/i);
   assert.match(migration,/CREATE INDEX IF NOT EXISTS api_snapshots_expiry_idx/i);
 });
+
+test('Wrangler 4 D1 migrations do not pass the removed --yes flag',()=>{
+  const configure=fs.readFileSync(new URL('../scripts/configure-d1.mjs',import.meta.url),'utf8');
+  const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
+  assert.doesNotMatch(configure,/d1['"],['"]migrations['"],['"]apply[\s\S]*--yes/);
+  assert.doesNotMatch(pkg.scripts['d1:migrate'],/--yes/);
+  assert.match(pkg.scripts['d1:migrate'],/d1 migrations apply titans-command-center --remote/);
+});
