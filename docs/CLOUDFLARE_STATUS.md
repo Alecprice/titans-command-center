@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + production regression failure**
-- Source commit: `6bdbcf1782b61091b8f83a473bae465eb7728696`
+- Source commit: `d60713172715bd33739f33260fe5d0b81d9ca1f5`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -22,7 +22,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-29T03:56:51Z
+- Recorded: 2026-08-29T04:13:14Z
 
 ## Production regression
 
@@ -31,7 +31,7 @@
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "error": "Application health is not healthy",
-  "testedAt": "2026-08-29T03:56:51.342Z"
+  "testedAt": "2026-08-29T04:13:14.188Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
