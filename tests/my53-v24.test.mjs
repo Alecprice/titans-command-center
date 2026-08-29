@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const js=read('cutdown-command-v23.js');
 const css=read('cutdown-command-v23.css');
+const accessibility=read('accessibility-runtime.js');
 
 test('My 53 is a local-only fan roster exercise',()=>{
   assert.match(js,/MY53_STORE='titans:my53:v1'/);
@@ -48,9 +49,10 @@ test('My 53 remains mobile and touch safe',()=>{
   assert.match(css,/\.my53-player\{min-height:52px/);
 });
 
-test('My 53 mobile clear action cannot be reduced by the global 44px floor',()=>{
+test('My 53 clear action outspecifies the injected global 44px mobile floor',()=>{
+  assert.match(accessibility,/#app button,[\s\S]*min-height:44px!important/);
   const mobileBlock=css.slice(css.indexOf('@media(max-width:720px)'));
-  assert.match(mobileBlock,/\.my53-count button\{min-height:48px!important\}/);
+  assert.match(mobileBlock,/#app \.my53-count button\[data-my53-clear\]\{min-height:48px!important\}/);
 });
 
 test('My 53 re-wires after Cutdown refresh without another observer',()=>{
