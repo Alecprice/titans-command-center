@@ -20,7 +20,7 @@ test('audited player route resolves from current fallback data and official pres
   assert.match(player,/playerNorm\(row\?\.name\)===playerNorm\(name\)/);
   assert.match(player,/Tennessee Titans roster · audited fallback/);
   assert.match(player,/official preseason production/i);
-  assert.match(player,/data-mode="audited-fallback"/);
+  assert.match(player,/layer\.dataset\.mode='audited-fallback'/);
   assert.match(player,/No salary\/cap values are inferred/);
   assert.match(player,/No live injury or depth-chart claim is made/);
 });
