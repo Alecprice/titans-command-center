@@ -170,6 +170,11 @@ export async function advancedAnalyticsRoute(req,res,env=process.env){
     });
   }catch(error){
     console.error('[advancedAnalyticsRoute]',error);
-    return res.status(500).json({ok:false,error:'Advanced analytics query failed'});
+    res.setHeader('Cache-Control','no-store');
+    return res.status(200).json({
+      ok:false,available:false,status:'database-unavailable',configured:true,requestedSeason,dataSeason:null,team,seasonFallback:false,
+      coverage:null,summary:null,weeks:[],league:[],recentPlays:[],byDown:[],personnel:[],sources:sources(),
+      error:'Advanced analytics query failed',fetchedAt:new Date().toISOString()
+    });
   }
 }
