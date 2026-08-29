@@ -1,3 +1,5 @@
+import './player-degraded-route-v76.js';
+
 const playerQs=(s,r=document)=>r.querySelector(s);
 const playerRoute=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
 const playerId=()=>new URLSearchParams(location.hash.split('?')[1]||'').get('id')||'';
