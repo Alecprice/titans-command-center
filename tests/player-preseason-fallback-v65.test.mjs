@@ -75,6 +75,15 @@ test('new production browser smoke compiles with SyntaxWarning promoted to failu
   assert.doesNotThrow(()=>execFileSync('python',['-W','error::SyntaxWarning','-m','py_compile','scripts/player-preseason-fallback-browser-smoke.py'],{stdio:'pipe'}));
 });
 
+test('hydrated player hash parser preserves the UUID query instead of rewriting the route',()=>{
+  assert.match(browserSmoke,/def player_id_from_href\(href\):/);
+  assert.match(browserSmoke,/raw\.split\('\?',1\)\[1\] if '\?' in raw else ''/);
+  assert.match(browserSmoke,/return parse_qs\(query\)\.get\('id',\[''\]\)\[0\]/);
+  assert.match(browserSmoke,/player_id=player_id_from_href\(player_href\)/);
+  assert.doesNotMatch(browserSmoke,/replace\('#','\?',1\)/);
+  assert.doesNotMatch(browserSmoke,/urlparse\(/);
+});
+
 test('live fallback smoke is conditional on the real warehouse state and fail-closed when fallback is required',()=>{
   assert.match(browserSmoke,/Cam Ward/);
   assert.match(browserSmoke,/warehouseRows/);
