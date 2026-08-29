@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + browser navigation regression failure**
-- Source commit: `92099184c349250fed6773991ada2cc448676636`
+- Source commit: `3bd8d9b3b86fdd8d500265a3d9f1f496bbfe4ace`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -22,7 +22,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-29T04:33:25Z
+- Recorded: 2026-08-29T13:04:04Z
 
 ## Production regression
 
@@ -74,24 +74,24 @@
   "completedPreseasonGamesWithPlayerStats": 2,
   "completedPreseasonGamesMissingPlayerStats": 0,
   "marketStatus": 200,
-  "marketRows": 960,
+  "marketRows": 975,
   "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "92099184c349250fed6773991ada2cc448676636",
-    "builtAt": "2026-08-29T04:32:32.452Z"
+    "commit": "3bd8d9b3b86fdd8d500265a3d9f1f496bbfe4ace",
+    "builtAt": "2026-08-29T13:03:14.118Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 70,
-    "health": 323,
-    "data": 380,
-    "stats": 373,
-    "market": 1450,
-    "analytics": 467
+    "root": 28,
+    "health": 248,
+    "data": 59,
+    "stats": 183,
+    "market": 2246,
+    "analytics": 279
   },
-  "testedAt": "2026-08-29T04:33:10.242Z",
+  "testedAt": "2026-08-29T13:03:44.939Z",
   "healthTruth": {
     "ok": true,
     "mode": "audited-fallback",
@@ -101,8 +101,8 @@
     "databaseContentAudit": null,
     "fallbackContentAudit": "2026-08-27",
     "databaseAvailable": false,
-    "responseMs": 479,
-    "testedAt": "2026-08-29T04:33:10.758Z"
+    "responseMs": 443,
+    "testedAt": "2026-08-29T13:03:45.415Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -110,17 +110,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 548,
-    "warmHitMs": 548,
-    "rows": 960,
+    "coldOrInitialMs": 266,
+    "warmHitMs": 266,
+    "rows": 975,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 548,
-        "rows": 960
+        "durationMs": 266,
+        "rows": 975
       }
     ],
-    "testedAt": "2026-08-29T04:33:11.339Z"
+    "testedAt": "2026-08-29T13:03:45.714Z"
   },
   "analyticsStatus": 500,
   "analyticsMode": "database-unavailable",
@@ -173,8 +173,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 254,
-  "testedAt": "2026-08-29T04:33:12.124Z"
+  "durationMs": 183,
+  "testedAt": "2026-08-29T13:03:46.264Z"
 }```
 
 ## Browser navigation regression
@@ -184,7 +184,7 @@
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "stage": "read-console",
-  "error": "RuntimeError: Browser console has severe errors: [{'level': 'SEVERE', 'message': 'https://titans-command-center.alecjordanprice.workers.dev/api/fan-intel - Failed to load resource: the server responded with a status of 500 ()', 'source': 'network', 'timestamp': 1787977999063}, {'level': 'SEVERE', 'message': 'https://titans-command-center.alecjordanprice.workers.dev/api/account/auth/get-session - Failed to load resource: the server responded with a status of 500 ()', 'source': 'network', 'timestamp': 1787977999257}, {'level': 'SEVERE', 'message': 'https://titans-command-center.alecjordanprice.workers.dev/api/fan-intel - Failed to load resource: the server responded with a status of 500 ()', 'source': 'network', 'timestamp': 1787977999280}]",
+  "error": "RuntimeError: Browser console has severe errors: [{'level': 'SEVERE', 'message': 'https://titans-command-center.alecjordanprice.workers.dev/api/advanced-analytics?season=2026&team=TEN - Failed to load resource: the server responded with a status of 500 ()', 'source': 'network', 'timestamp': 1788008638126}, {'level': 'SEVERE', 'message': 'https://titans-command-center.alecjordanprice.workers.dev/api/advanced-analytics?season=2026&team=TEN - Failed to load resource: the server responded with a status of 500 ()', 'source': 'network', 'timestamp': 1788008639623}, {'level': 'SEVERE', 'message': 'https://titans-command-center.alecjordanprice.workers.dev/api/advanced-analytics?season=2026&team=TEN - Failed to load resource: the server responded with a status of 500 ()', 'source': 'network', 'timestamp': 1788008641099}]",
   "state": {
     "appChildren": 3,
     "appText": "PERSONNEL MOVEMENT\nTRANSACTIONS\n\nLatest Titans roster moves, signings, waivers, releases, and reserve-list changes.\n\nMoves \u00b7 updated 4 days ago\nAll move types\ntransaction\nTRANSACTIONS \u00b7 4\nAug 25, 2026\ntransaction\n\nTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.\n\nAug 24, 2026\ntransaction\n\nThe Titans announced the move Aug. 24. This newer official transaction controls o",
@@ -216,8 +216,8 @@
     "transactionTools": true,
     "viewport": 320
   },
-  "durationSeconds": 8.66,
-  "testedAt": "2026-08-29T04:33:25Z",
+  "durationSeconds": 13.93,
+  "testedAt": "2026-08-29T13:04:03Z",
   "browserWarnings": []
 }```
 
