@@ -37,9 +37,24 @@ ROUTES=[
     ('listen-watch','media'),
     ('command-intel','command'),
 ]
+ROUTE_READY_SELECTORS={
+    'fantasy':'#app[data-fantasy-command="ready"]',
+}
 
 def wait(driver,expression,timeout=10):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(f'return Boolean({expression})'))
+
+def wait_route_ready(driver,route_name,route_hash,timeout=12):
+    expected=f'#{route_hash}'
+    selector=ROUTE_READY_SELECTORS.get(route_name,'')
+    def ready(d):
+        return d.execute_script("""
+          const expected=arguments[0],selector=arguments[1];
+          if(document.readyState!=='complete'||!document.querySelector('#app')||location.hash!==expected)return false;
+          if(selector)return Boolean(document.querySelector(selector));
+          return Boolean(document.querySelector('.page-head h1')||document.querySelector('.fan-hero')||document.querySelector('[data-ticket-center]'));
+        """,expected,selector)
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(ready)
 
 def settle(driver,timeout=4):
     deadline=time.time()+timeout
@@ -126,15 +141,16 @@ options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
 driver=None
 started=time.time()
 rows=[]
+current={'viewport':None,'route':None,'hash':None}
 try:
     driver=webdriver.Chrome(options=options)
     driver.set_page_load_timeout(25)
     for name,width,height,mode in VIEWPORTS:
         driver.set_window_size(width,height)
         for route_name,route_hash in ROUTES:
+            current={'viewport':name,'route':route_name,'hash':route_hash}
             driver.get(f'{BASE}/#{route_hash}')
-            wait(driver,"document.readyState === 'complete' && document.querySelector('#app')")
-            wait(driver,"document.querySelector('.page-head h1') || document.querySelector('.fan-hero') || document.querySelector('[data-ticket-center]')",12)
+            wait_route_ready(driver,route_name,route_hash)
             settle(driver)
             state=dimensions(driver)
             label=f'{name}:{route_name}'
@@ -158,7 +174,7 @@ try:
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
     print(json.dumps({k:v for k,v in payload.items() if k not in ('rows','tinyTextSamples','undersizedControlSamples')},indent=2))
 except Exception as exc:
-    payload={'ok':False,'base':BASE,'error':f'{type(exc).__name__}: {exc}','rows':rows,'durationSeconds':round(time.time()-started,2)}
+    payload={'ok':False,'base':BASE,'stage':current,'error':f'{type(exc).__name__}: {exc}','rows':rows,'durationSeconds':round(time.time()-started,2)}
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
     print(json.dumps(payload,indent=2))
     raise
