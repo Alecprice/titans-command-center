@@ -12,7 +12,7 @@ test('TENX query cache preserves functional dimensions and discards cache-buster
 });
 
 test('player and advanced analytics use query-aware Cloudflare edge caching',()=>{
-  assert.match(worker,/route==='player'\)return await cachedQueryAdapterData\(request,route,apiHandler,env,ctx,\['id'\]\)/);
+  assert.match(worker,/route==='player'\)return await cachedQueryAdapterData\(request,route,playerProfileRoute,env,ctx,\['id'\]\)/);
   assert.match(worker,/route==='advanced-analytics'\)return await cachedQueryAdapterData\(request,route,advancedAnalyticsRoute,env,ctx,\['season','team'\]\)/);
   assert.match(worker,/QUERY_CACHE_CONTROL='public, s-maxage=900, stale-while-revalidate=21600'/);
 });
