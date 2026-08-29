@@ -34,8 +34,10 @@ function aggregateVolume(rows,{attempt='ATT',yards='YDS',avg='AVG',long='LG',td=
   return result;
 }
 function aggregateReceiving(rows){
-  const tar=sumLabel(rows,'TAR'),rec=sumLabel(rows,'REC'),yds=sumLabel(rows,'YDS');
-  return [out('TAR',tar),out('REC',rec),out('YDS',yds),out('AVG',rec?round(yds/rec):'0'),out('LG',maxLabel(rows,'LG')),out('TD',sumLabel(rows,'TD'))];
+  const completeTargets=rows.every(r=>field(r,'TAR')!=null),rec=sumLabel(rows,'REC'),yds=sumLabel(rows,'YDS');
+  const result=[];if(completeTargets)result.push(out('TAR',sumLabel(rows,'TAR')));
+  result.push(out('REC',rec),out('YDS',yds),out('AVG',rec?round(yds/rec):'0'),out('LG',maxLabel(rows,'LG')),out('TD',sumLabel(rows,'TD')));
+  return result;
 }
 function aggregateKicking(rows){
   const [made,att]=rows.reduce(([m,a],r)=>{const [x,y]=pair(field(r,'FG'));return [m+x,a+y]},[0,0]);
