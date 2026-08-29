@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + production regression failure**
-- Source commit: `d60713172715bd33739f33260fe5d0b81d9ca1f5`
+- Source commit: `dbd9b7f6f16b2f0aa3cf91dbd0428ec56f04c72c`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -22,7 +22,7 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-29T04:13:14Z
+- Recorded: 2026-08-29T04:20:57Z
 
 ## Production regression
 
@@ -30,8 +30,8 @@
 {
   "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "error": "Application health is not healthy",
-  "testedAt": "2026-08-29T04:13:14.188Z"
+  "error": "Data API failed with 503",
+  "testedAt": "2026-08-29T04:20:57.462Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
