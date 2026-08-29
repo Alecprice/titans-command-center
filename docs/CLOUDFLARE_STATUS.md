@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + Player Intelligence / Game Day browser regression failure**
-- Source commit: `9be33f2f3a680f48b7215f6be270e7bf4334f455`
+- Status: **deployed + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
+- Source commit: `ef52fca0831c51f9f3163513366005be664952b0`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -12,16 +12,16 @@
 - Listen Watch browser regression: success
 - Market Pulse browser regression: success
 - Command Intelligence browser regression: success
-- Player Intelligence / Game Day browser regression: failure
-- Ask Titans browser regression: skipped
-- Change Intelligence browser regression: skipped
-- Runtime / 365 Mode browser regression: skipped
-- Data freshness browser regression: skipped
-- Account / Guest browser regression: skipped
-- Advanced analytics browser regression: skipped
-- Player headshot browser regression: skipped
+- Player Intelligence / Game Day browser regression: success
+- Ask Titans browser regression: success
+- Change Intelligence browser regression: success
+- Runtime / 365 Mode browser regression: success
+- Data freshness browser regression: success
+- Account / Guest browser regression: success
+- Advanced analytics browser regression: success
+- Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-29T01:03:00Z
+- Recorded: 2026-08-29T01:07:37Z
 
 ## Production regression
 
@@ -71,54 +71,49 @@
   "completedPreseasonGamesWithPlayerStats": 1,
   "completedPreseasonGamesMissingPlayerStats": 1,
   "marketStatus": 200,
-  "marketRows": 0,
-  "marketMode": "no-current-source",
+  "marketRows": 950,
+  "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "9be33f2f3a680f48b7215f6be270e7bf4334f455",
-    "builtAt": "2026-08-29T01:01:36.917Z"
+    "commit": "ef52fca0831c51f9f3163513366005be664952b0",
+    "builtAt": "2026-08-29T01:05:52.884Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 23,
-    "health": 849,
-    "data": 554,
-    "stats": 301,
-    "market": 11462,
-    "analytics": 1360
+    "root": 34,
+    "health": 143,
+    "data": 164,
+    "stats": 179,
+    "market": 2921,
+    "analytics": 330
   },
-  "testedAt": "2026-08-29T01:02:12.384Z",
+  "testedAt": "2026-08-29T01:06:16.013Z",
   "healthTruth": {
     "ok": true,
     "status": 200,
     "contentAudit": "2026-08-26",
     "databaseContentAudit": "2026-08-26",
-    "responseMs": 304,
-    "testedAt": "2026-08-29T01:02:12.725Z"
+    "responseMs": 228,
+    "testedAt": "2026-08-29T01:06:16.278Z"
   },
   "marketEdgeCache": {
     "ok": true,
     "base": "https://titans-command-center.alecjordanprice.workers.dev",
-    "initialStatus": "MISS",
+    "initialStatus": "HIT",
     "finalStatus": "HIT",
-    "attempts": 2,
-    "coldOrInitialMs": 6715,
-    "warmHitMs": 32,
+    "attempts": 1,
+    "coldOrInitialMs": 209,
+    "warmHitMs": 209,
     "rows": 950,
     "sequence": [
       {
-        "status": "MISS",
-        "durationMs": 6715,
-        "rows": 950
-      },
-      {
         "status": "HIT",
-        "durationMs": 32,
+        "durationMs": 209,
         "rows": 950
       }
     ],
-    "testedAt": "2026-08-29T01:02:19.893Z"
+    "testedAt": "2026-08-29T01:06:16.553Z"
   },
   "analyticsStatus": 200,
   "analyticsDataSeason": 2025,
@@ -179,7 +174,7 @@
     "a1.espncdn.com"
   ],
   "durationMs": 123,
-  "testedAt": "2026-08-29T01:02:21.483Z"
+  "testedAt": "2026-08-29T01:06:17.131Z"
 }```
 
 ## Browser navigation regression
@@ -225,11 +220,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 133,
-  "longTasksOver250ms": 0,
+  "maxLongTaskMs": 278,
+  "longTasksOver250ms": 1,
   "browserWarnings": [],
-  "durationSeconds": 16.79,
-  "testedAt": "2026-08-29T01:02:43Z"
+  "durationSeconds": 38.13,
+  "testedAt": "2026-08-29T01:07:00Z"
 }```
 
 ## Listen Watch browser regression
@@ -262,8 +257,8 @@
   ],
   "mobileTimeRows": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.68,
-  "testedAt": "2026-08-29T01:02:46Z"
+  "durationSeconds": 2.12,
+  "testedAt": "2026-08-29T01:07:02Z"
 }```
 
 ## Market Pulse browser regression
@@ -536,8 +531,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 6.44,
-  "testedAt": "2026-08-29T01:02:53Z"
+  "durationSeconds": 6.39,
+  "testedAt": "2026-08-29T01:07:09Z"
 }```
 
 ## Command Intelligence browser regression
@@ -595,45 +590,707 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.1,
-  "testedAt": "2026-08-29T01:02:56Z"
+  "durationSeconds": 2.04,
+  "testedAt": "2026-08-29T01:07:11Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
 
 ```json
 {
-  "ok": false,
+  "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
-  "stage": "cutdown:mobile",
-  "error": "RuntimeError: My 53 mobile targets invalid: {'links': [{'h': 48, 'label': 'Full roster \u2192'}, {'h': 48, 'label': 'All moves \u2192'}, {'h': 48, 'label': 'NFL roster deadline \u2197'}, {'h': 48, 'label': 'Official Titans transactions \u2197'}], 'my53Targets': [{'h': 44, 'label': 'Clear picks'}, {'h': 56.6875, 'label': '#61Andre JamesC \u00b7 Offense+'}, {'h': 56.6875, 'label': '#51Austin SchlottmannC \u00b7 Offense+'}, {'h': 56.6875, 'label': '#79Pat CooganC \u00b7 Offense+'}, {'h': 56.6875, 'label': '#73Cordell VolsonG \u00b7 Offense+'}, {'h': 56.6875, 'label': '#67Drew MossG \u00b7 Offense+'}, {'h': 56.6875, 'label': '#66Fernando Carmona Jr.G \u00b7 Offense+'}, {'h': 56.6875, 'label': '#71Garrett DellingerG \u00b7 Offense+'}], 'rootWidth': 357, 'viewport': 375}",
-  "durationSeconds": 2.84,
-  "testedAt": "2026-08-29T01:02:59Z",
-  "hash": "#roster?view=cutdown",
-  "pageText": "PERSONNEL\nROSTER\n\nSearch the latest verified Titans roster by name, number, position, or unit.\n\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\nRoster \u00b7 updated 2 days ago\n2026 INJURY-REPORT STATUS\nOfficial weekly injury report not yet published\n\nThe Titans state that injury reports become available in the regular season. Reserve/Injured roster status is tracked separately and should not be presented as the weekly injury report.\n\nOFFICIAL REPORT \u2197\nROSTER\nDEPTH CHART\nSTAFF\nCUTDOWN\n53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n1d 20h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.\n\n2026-08-24\n\nSigned LB Reid Carrico and placed LB Milo Eifler on injured reserve.\n\n2026-08-21\n\nWaived LB Sean Brown from injured reserve with an injury settlement; placed DB Nazeeh Johnson on injured reserve; waived TE Matt Lauter; signed free agents LB Milo Eifler and DE Tanoh Kpassagnon.\n\n2026-08-19\n\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\n\n2026-08-17\n\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\n\n2026-08-16\n\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+\n#8\nWill Levis\nQB \u00b7 Offense",
-  "cutdownAriaTrace": [
+  "playerRoute": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
+  "playerRouteHydrated": true,
+  "playerTabs": [
+    "overview",
+    "games",
+    "trends",
+    "career",
+    "timeline"
+  ],
+  "favoriteToggle": [
+    "false",
+    "true",
+    "false"
+  ],
+  "playerMobileTargets": [
     {
-      "connected": true,
-      "hash": "#roster?view=cutdown",
-      "kind": "setAttribute",
-      "sameButton": true,
-      "stack": [
-        "    at Element.setAttribute (eval at executeScript (:416:16), <anonymous>:18:26)",
-        "    at https://titans-command-center.alecjordanprice.workers.dev/team-room.js?v=28:27:349",
-        "    at Array.forEach (<anonymous>)",
-        "    at setRosterView (https://titans-command-center.alecjordanprice.workers.dev/team-room.js?v=28:27:264)",
-        "    at HTMLDivElement.handleTeamRoomActivation (https://titans-command-center.alecjordanprice.workers.dev/team-room.js?v=28:32:298)",
-        "    at eval (eval at executeScript (:416:16), <anonymous>:8:80)",
-        "    at executeScript (<anonymous>:418:30)",
-        "    at <anonymous>:423:24",
-        "    at callFunction (<anonymous>:386:22)",
-        "    at <anonymous>:400:23"
-      ],
-      "time": 1807,
-      "value": "true"
+      "h": 44,
+      "label": "Overview"
+    },
+    {
+      "h": 44,
+      "label": "Game Log"
+    },
+    {
+      "h": 44,
+      "label": "Trends"
+    },
+    {
+      "h": 44,
+      "label": "Career + Contract"
+    },
+    {
+      "h": 44,
+      "label": "Timeline"
     }
   ],
-  "browserWarnings": []
+  "playerHeadshotLoaded": true,
+  "rosterEnhancementState": {
+    "cutdownButtons": 1,
+    "cutdownPanels": 1,
+    "injuryBanners": 1,
+    "switchers": 1
+  },
+  "cutdownCommand": true,
+  "cutdownCommandText": "53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n1d 20h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.\n\n2026-08-24\n\nSigned LB Reid Carrico and placed LB Milo Eifler on injured reserve.\n\n2026-08-21\n\nWaived LB Sean Brown from injured reserve with an injury settlement; placed DB Nazeeh Johnson on injured reserve; waived TE Matt Lauter; signed free agents LB Milo Eifler and DE Tanoh Kpassagnon.\n\n2026-08-19\n\nWaived RB Dominic Richardson and signed free-agent RB D'Ernest Johnson.\n\n2026-08-17\n\nWaived injured LB Sean Brown and signed free-agent CB Corey Mayfield Jr.\n\n2026-08-16\n\nPlaced DE Jaylen Harrell and TE Jaren Kanak on injured reserve and signed free-agent TE Matt Lauter and RB Dominic Richardson.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+\n#8\nWill Levis\nQB \u00b7 Offense\n+\n#21\nD'Ernest Johnson\nRB \u00b7 Offense\n+\n#36\nJulius Chestnut\nRB \u00b7 Offense\n+\n#31\nKalel Mullings\nRB \u00b7 Offense\n+\n#35\nMichael Carter\nRB \u00b7 Offense\n+\n#32\nNicholas Singleton\nRB \u00b7 Offense\n+\n#20\nTony Pollard\nRB \u00b7 Offense\n+\n#2\nTyjae Spears\nRB \u00b7 Offense\n+\n#69\nAamil Wagner\nT \u00b7 Offense\n+\n#76\nAustin Deculus\nT \u00b7 Offense\n+\n#78\nBrandon Crenshaw-Dickson\nT \u00b7 Offense\n+\n#75\nDan Moore Jr.\nT \u00b7 Offense\n+\n#55\nJC Latham\nT \u00b7 Offense\n+\n#62\nRasheed Miller\nT \u00b7 Offense\n+\n#72\nZachary Thomas\nT \u00b7 Offense\n+\n#82\nDaniel Bellinger\nTE \u00b7 Offense\n+\n#88\nDavid Martin-Robinson\nTE \u00b7 Offense\n+\n#84\nGunnar Helm\nTE \u00b7 Offense\n+\n#83\nJoel Wilson\nTE \u00b7 Offense\n+\n#86\nKylen Granson\nTE \u00b7 Offense\n+\n#80\nBryce Oliver\nWR \u00b7 Offense\n+\n#0\nCalvin Rid",
+  "cutdownMobileTargets": [
+    {
+      "h": 48,
+      "label": "Full roster \u2192"
+    },
+    {
+      "h": 48,
+      "label": "All moves \u2192"
+    },
+    {
+      "h": 48,
+      "label": "NFL roster deadline \u2197"
+    },
+    {
+      "h": 48,
+      "label": "Official Titans transactions \u2197"
+    }
+  ],
+  "my53Interaction": {
+    "before": {
+      "count": "0 / 53",
+      "key": "86088925-3ab1-4187-9e62-c3c7acdf89c1",
+      "pressed": "false"
+    },
+    "added": {
+      "count": "1 / 53",
+      "note": "Pick saved on this device.",
+      "pressed": "true",
+      "stored": 1
+    },
+    "removed": {
+      "count": "0 / 53",
+      "note": "Pick removed. Your fan board stays on this device.",
+      "stored": 0
+    }
+  },
+  "my53MobileTargets": [
+    {
+      "h": 48,
+      "label": "Clear picks"
+    },
+    {
+      "h": 56.6875,
+      "label": "#61Andre JamesC \u00b7 Offense+"
+    },
+    {
+      "h": 56.6875,
+      "label": "#51Austin SchlottmannC \u00b7 Offense+"
+    },
+    {
+      "h": 56.6875,
+      "label": "#79Pat CooganC \u00b7 Offense+"
+    },
+    {
+      "h": 56.6875,
+      "label": "#73Cordell VolsonG \u00b7 Offense+"
+    },
+    {
+      "h": 56.6875,
+      "label": "#67Drew MossG \u00b7 Offense+"
+    },
+    {
+      "h": 56.6875,
+      "label": "#66Fernando Carmona Jr.G \u00b7 Offense+"
+    },
+    {
+      "h": 56.6875,
+      "label": "#71Garrett DellingerG \u00b7 Offense+"
+    }
+  ],
+  "gameDayPhase": "pregame",
+  "gameDayTuneLink": true,
+  "gameDayMobileViewport": 375,
+  "gameDayFastPass": true,
+  "gameDayFastPassGameId": "c294d349-dc5a-4f82-a796-f82cac0fd776",
+  "gameDayFastPassText": "NEXT GAME FAST PASS\nChicago Bears at Titans\nPRESEASON 3\nWHEN\nSat, Aug 29, 5:00 PM CDT \u00b7 20h 52m\nWATCH / LISTEN\nNFL Network / WKRN-TV News 2 (regional) \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
+  "gameDayFastPassMobileTargets": [
+    {
+      "h": 48,
+      "label": "Open Listen / Watch"
+    },
+    {
+      "h": 48,
+      "label": "Official schedule \u2197"
+    },
+    {
+      "h": 48,
+      "label": "Stadium guide \u2197"
+    }
+  ],
+  "browserWarnings": [],
+  "durationSeconds": 4.94,
+  "testedAt": "2026-08-29T01:07:17Z"
+}```
+
+## Ask Titans browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "answers": [
+    {
+      "question": "Who is next?",
+      "action": "#live",
+      "answer": "Tennessee is next scheduled to host Chicago Bears on Sat, Aug 29, 5:00 PM CDT (Nashville time).",
+      "facts": 4,
+      "sources": 1,
+      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. NFL Network / WKRN-TV News 2 (regional) is the listed network."
+    },
+    {
+      "question": "Cam Ward",
+      "action": "#player?id=cb885a93-e510-4a22-8834-78fc4b32a54b",
+      "answer": "Cam Ward is listed as QB #1 with roster status Active.",
+      "facts": 6,
+      "sources": 2,
+      "why": "I found structured player-game rows for 2 recent loaded stat groups. The numbers below are sums of loaded numeric fields only, not a film grade."
+    },
+    {
+      "question": "What is EPA?",
+      "action": "#stats",
+      "answer": "EPA: Expected Points Added estimates how much a play helped or hurt scoring expectation.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Advanced metrics are context tools, not standalone player grades. Command Center labels model-derived metrics and keeps them behind plain-English explanations."
+    },
+    {
+      "question": "How do I watch?",
+      "action": "#media",
+      "answer": "The next game is Sat, Aug 29, 5:00 PM CDT (Nashville time) and the loaded TV listing is NFL Network / WKRN-TV News 2 (regional). Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
+    }
+  ],
+  "teamTimeVerified": [
+    "Who is next?",
+    "How do I watch?"
+  ],
+  "fantasyHandoff": {
+    "actionHeight": 46,
+    "href": "#fantasy",
+    "text": "FANTASY HANDOFFEvidence workspaceUse Fantasy Decision Center for this one.WHY IT MATTERSStart/sit and waiver choices depend on league context. Command Center will carry this question into the fantasy workspace and compare loaded evidence without inventing a point projection or guarantee.Scoring presetPPRSleeper leagueNot connectedSaved fantasy players2SOURCE + CONTEXTFantasy CommandDevice-local scoring, roster selections and read-only Sleeper context when connectedNo projection generatedOpen Decision Center \u2192",
+    "title": "Use Fantasy Decision Center for this one."
+  },
+  "fantasyCarried": {
+    "hash": "#fantasy",
+    "selected": [
+      "Decision Smoke A \u00b7 WR \u00b7 TEN",
+      "Decision Smoke B \u00b7 RB \u00b7 IND"
+    ],
+    "values": [
+      "manual:0",
+      "manual:1"
+    ],
+    "verdict": "Evidence leans Decision Smoke A, but this is not a point projection or guarantee."
+  },
+  "unsupportedRefused": true,
+  "mobileTargets": {
+    "askButton": 44,
+    "input": 44,
+    "quick": [
+      {
+        "h": 44,
+        "label": "What changed?"
+      },
+      {
+        "h": 44,
+        "label": "Who is next?"
+      },
+      {
+        "h": 44,
+        "label": "Injuries"
+      },
+      {
+        "h": 44,
+        "label": "Watch"
+      },
+      {
+        "h": 44,
+        "label": "Cam Ward"
+      },
+      {
+        "h": 44,
+        "label": "Explain EPA"
+      }
+    ],
+    "viewport": 375,
+    "width": 357
+  },
+  "mobileFantasyHandoff": {
+    "actionHeight": 46,
+    "left": 24,
+    "overflow": false,
+    "right": 351,
+    "viewport": 375
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.19,
+  "testedAt": "2026-08-29T01:07:19Z"
+}```
+
+## Change Intelligence browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "detectedBeforeReview": 137,
+  "categories": [
+    "Roster",
+    "Transaction",
+    "Depth chart"
+  ],
+  "favoritePriority": "Added to loaded roster",
+  "rosterFilterVisible": 95,
+  "clearedAfterReview": true,
+  "mobileTargets": {
+    "filters": [
+      {
+        "h": 44,
+        "label": "All"
+      },
+      {
+        "h": 44,
+        "label": "Roster \u00b7 95"
+      },
+      {
+        "h": 44,
+        "label": "Transaction \u00b7 29"
+      },
+      {
+        "h": 44,
+        "label": "Depth chart \u00b7 13"
+      }
+    ],
+    "review": 44,
+    "viewport": 375,
+    "width": 359.28125
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.75,
+  "testedAt": "2026-08-29T01:07:22Z"
+}```
+
+## Runtime / 365 Mode browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "desktop": {
+    "phase": "preseason",
+    "cards": 4,
+    "runtimeVersion": "1.10.0",
+    "teamTimeZone": "America/Chicago",
+    "teamTimeLabel": "Nashville time",
+    "routeCycle": true,
+    "singlePanel": true,
+    "cacheUrls": [
+      "/api/data",
+      "/api/fan-intel",
+      "/api/social-pulse",
+      "/api/tickets"
+    ],
+    "panel": {
+      "cards": 4,
+      "display": "block",
+      "height": 406.296875,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL Network / WKRN-TV News 2 (regional)WHAT CHANGED?13 depth changes loadedWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.ROSTERroster-moveWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "refresh": {
+      "cache": [
+        {
+          "expiresAt": 1787965674444,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1787965644444,
+          "url": "/api/data"
+        },
+        {
+          "expiresAt": 1787965674428,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1787965644428,
+          "url": "/api/fan-intel"
+        }
+      ],
+      "epoch": 1,
+      "last": {
+        "at": "2026-08-29T01:07:24.326Z",
+        "epoch": 1,
+        "reason": "scoreboard-control",
+        "urls": null
+      }
+    },
+    "refreshedPanel": {
+      "cards": 4,
+      "display": "block",
+      "height": 406.296875,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL Network / WKRN-TV News 2 (regional)WHAT CHANGED?13 depth changes loadedWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.ROSTERroster-moveWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "returnPanel": {
+      "cards": 4,
+      "display": "block",
+      "height": 406.296875,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL Network / WKRN-TV News 2 (regional)WHAT CHANGED?13 depth changes loadedWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.ROSTERroster-moveWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    }
+  },
+  "mobile": {
+    "layout": {
+      "dock": {
+        "display": "grid",
+        "h": 72,
+        "w": 465,
+        "x": 10,
+        "y": 621
+      },
+      "dockTargets": [
+        {
+          "h": 58,
+          "label": "Home",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Roster",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Game",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Search",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "More",
+          "w": 89.8125
+        }
+      ],
+      "menu": {
+        "display": "grid",
+        "h": 46,
+        "w": 46,
+        "x": 10,
+        "y": 8
+      },
+      "overflow": false,
+      "panelHeight": 823.859375,
+      "panelWidth": 461,
+      "reviewHeight": 48,
+      "targets": [
+        {
+          "h": 124.4375,
+          "label": "NEXT GAME",
+          "w": 427
+        },
+        {
+          "h": 145.3125,
+          "label": "WHAT CHANGED?",
+          "w": 427
+        },
+        {
+          "h": 145.3125,
+          "label": "ROSTER",
+          "w": 427
+        },
+        {
+          "h": 112,
+          "label": "AVAILABILITY",
+          "w": 427
+        }
+      ],
+      "viewport": 500
+    },
+    "panelState": {
+      "cards": 4,
+      "display": "block",
+      "height": 823.859375,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL Network / WKRN-TV News 2 (regional)WHAT CHANGED?13 depth changes loadedWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.ROSTERroster-moveWaived/injured LB Dominique Hampton; signed free agent LB Dyontae Johnson; waived S Sanoussi Kane from injured reserve.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 461
+    },
+    "sheet": {
+      "bottom": 611,
+      "dockTop": 621,
+      "height": 504.71875,
+      "links": 15,
+      "top": 106.28125
+    },
+    "smartSearch": {
+      "height": 110,
+      "left": 10,
+      "right": 475,
+      "rows": 1,
+      "targets": [
+        58
+      ],
+      "width": 465
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 3.56
+}```
+
+## Data freshness browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "desktop": {
+    "detail": "Roster 2 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
+    "overflow": false,
+    "rect": {
+      "bottom": 1312.375,
+      "height": 155.765625,
+      "left": 915.328125,
+      "right": 1216.984375,
+      "top": 1156.609375,
+      "width": 301.65625
+    },
+    "state": "stale",
+    "strong": "Roster snapshot needs review",
+    "text": "DATA FRESHNESSRoster snapshot needs reviewRoster 2 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
+    "title": "The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.",
+    "viewport": {
+      "height": 757,
+      "width": 1280
+    }
+  },
+  "mobile": {
+    "detail": "Roster 2 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
+    "overflow": false,
+    "rect": {
+      "bottom": 2356.453125,
+      "height": 117.1875,
+      "left": 9,
+      "right": 366,
+      "top": 2239.265625,
+      "width": 357
+    },
+    "state": "stale",
+    "strong": "Roster snapshot needs review",
+    "text": "DATA FRESHNESSRoster snapshot needs reviewRoster 2 days ago \u00b7 Moves 4 days ago \u00b7 Intel 4 days agoSee sources \u2192",
+    "title": "The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.",
+    "viewport": {
+      "height": 701,
+      "width": 390
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 1.63,
+  "testedAt": "2026-08-29T01:07:28Z"
+}```
+
+## Account / Guest browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "browserWarnings": [],
+  "guest": {
+    "accountGuest": true,
+    "route": "#home",
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "mobileShell": {
+    "dock": {
+      "h": 72,
+      "top": 621,
+      "w": 465
+    },
+    "more": {
+      "bottom": 686,
+      "h": 58,
+      "top": 628,
+      "w": 89.8125
+    },
+    "runtime": "1.10.0",
+    "sidebarHidden": "true",
+    "sidebarInert": true
+  },
+  "sheet": {
+    "bottom": 611,
+    "dockTop": 621,
+    "top": 106.28125
+  },
+  "accountEntry": {
+    "bottom": 290.53125,
+    "h": 44,
+    "parent": "sidebar",
+    "top": 246.53125,
+    "visibleBottom": 611,
+    "visibleTop": 106.28125,
+    "w": 390
+  },
+  "panel": {
+    "bottom": 701,
+    "h": 602.859375,
+    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordLog inContinue as guestGUEST DATAThese settings exist only on this device.Export this deviceImport backupReset this deviceReset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.",
+    "vh": 701,
+    "w": 485
+  },
+  "portabilityTools": {
+    "exportHeight": 50,
+    "exportLabel": "Export this device",
+    "guest": true,
+    "importHeight": 50,
+    "importLabel": "Import backup",
+    "resetHeight": 50,
+    "resetLabel": "Reset this device"
+  },
+  "importPreview": {
+    "applyHeight": 46,
+    "favorite": null,
+    "pending": {
+      "accountEmail": "",
+      "exportedAt": "2026-08-22T12:00:00Z",
+      "keys": [
+        "titans:v15MyTitans"
+      ],
+      "preferences": {
+        "titans:v15MyTitans": {
+          "favorite": "Browser Smoke"
+        }
+      },
+      "scope": "guest-device"
+    },
+    "text": "READY TO RESTORE1 setting groupAug 22, 2026, 12:00 PM \u00b7 guest-deviceNothing has changed yet. Applying restores only recognized Titans preferences from this file.Apply imported settingsCancel"
+  },
+  "resetArmed": {
+    "guest": true,
+    "hash": "#home",
+    "hint": "Tap Confirm reset again within 6 seconds.",
+    "label": "Confirm reset"
+  },
+  "authOutage": {
+    "guest": true,
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "roster": {
+    "route": "#roster",
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 updated 2 days agoRo"
+  },
+  "durationSeconds": 2.03
+}```
+
+## Advanced analytics browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "seasonContext": {
+    "bannerRole": "note",
+    "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "bannerVisible": true,
+    "dataSeason": "2025",
+    "heading": "2025 advanced analytics baseline",
+    "requestedSeason": "2026",
+    "seasonFallback": "true"
+  },
+  "mobileSeasonContext": {
+    "fallback": "true",
+    "text": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "visible": true
+  },
+  "metricCount": 4,
+  "metricValues": [
+    {
+      "detail": "#30 of 32",
+      "label": "Offensive EPA / play",
+      "value": "-0.148"
+    },
+    {
+      "detail": "#28 of 32",
+      "label": "Defensive EPA / play allowed",
+      "value": "+0.104"
+    },
+    {
+      "detail": "#11 of 32",
+      "label": "Pace",
+      "value": "28.9 sec/play"
+    },
+    {
+      "detail": "Latest loaded week: 18",
+      "label": "Rest days",
+      "value": "7 days"
+    }
+  ],
+  "situationFields": [
+    "Down & distance",
+    "Field position",
+    "Formation",
+    "Personnel",
+    "Score diff",
+    "TEN EPA",
+    "Time remaining"
+  ],
+  "initialPlayCards": 60,
+  "offenseFilteredPlayCards": 39,
+  "mobileMetricCount": 4,
+  "browserWarnings": [],
+  "durationSeconds": 1.99,
+  "testedAt": "2026-08-29T01:07:33Z"
+}```
+
+## Player headshot browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans-command-center.alecjordanprice.workers.dev",
+  "rosterCards": 95,
+  "rosterDecoratedHeadshots": 80,
+  "rosterLoadedHeadshots": 6,
+  "statsPlayerRows": 97,
+  "statsDecoratedHeadshots": 81,
+  "statsLoadedHeadshots": 8,
+  "mobileLoadedHeadshots": 20,
+  "richPlayer": "Austin Schlottmann",
+  "richPlayerHeadshotLoaded": true,
+  "browserWarnings": [],
+  "durationSeconds": 3.46,
+  "testedAt": "2026-08-29T01:07:36Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
