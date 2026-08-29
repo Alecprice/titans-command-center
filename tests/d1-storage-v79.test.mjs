@@ -57,11 +57,37 @@ test('D1 API snapshots round-trip normalized payloads',async()=>{
   assert.deepEqual(row.payload,{ok:true,roster:[1,2,3]});
 });
 
+test('D1 snapshot expiry uses SQLite datetime normalization for ISO timestamps',()=>{
+  const source=fs.readFileSync(new URL('../src/d1-store.mjs',import.meta.url),'utf8');
+  assert.match(source,/datetime\(expires_at\)>CURRENT_TIMESTAMP/);
+});
+
 test('account preferences prefer D1 when the binding exists',()=>{
   const source=fs.readFileSync(new URL('../src/account-api.mjs',import.meta.url),'utf8');
   assert.match(source,/import \{getD1Preferences,hasD1,putD1Preferences\} from '\.\/d1-store\.mjs'/);
   assert.match(source,/const useD1=hasD1\(env\)/);
   assert.match(source,/storage:useD1\?'cloudflare-d1':'neon'/);
+});
+
+test('bootstrap API uses D1 before Neon and retains an expired snapshot for outage fallback',()=>{
+  const worker=fs.readFileSync(new URL('../cloudflare/worker.mjs',import.meta.url),'utf8');
+  const dataBlock=worker.match(/async function nativeData\([\s\S]*?\n\}/)?.[0]||'';
+  assert.match(dataBlock,/const snapshot=await readD1Bootstrap\(env\)/);
+  assert.match(dataBlock,/data=await getBootstrapData\(env\)/);
+  assert.ok(dataBlock.indexOf('readD1Bootstrap(env)')<dataBlock.indexOf('getBootstrapData(env)'));
+  assert.match(dataBlock,/readD1Bootstrap\(env,\{allowExpired:true/);
+  assert.match(dataBlock,/writeD1Bootstrap\(env,payload,\{source:'neon-bootstrap'\}\)/);
+});
+
+test('near-live scoreboard is centrally refreshed every three minutes only after D1 is bound',()=>{
+  const worker=fs.readFileSync(new URL('../cloudflare/worker.mjs',import.meta.url),'utf8');
+  const config=fs.readFileSync(new URL('../wrangler.jsonc',import.meta.url),'utf8');
+  assert.match(config,/"\*\/3 \* \* \* \*"/);
+  assert.match(worker,/const NEAR_LIVE_CRON='\*\/3 \* \* \* \*'/);
+  assert.match(worker,/async function runNearLiveScheduled\(env\)/);
+  assert.match(worker,/if\(!hasD1\(env\)\)return \{ok:true,skipped:true/);
+  assert.match(worker,/putD1Snapshot\(env,SCOREBOARD_SNAPSHOT_KEY/);
+  assert.match(worker,/nativeScoreboard\(request,env\)/);
 });
 
 test('D1 migration creates portable preferences and durable API snapshots',()=>{
