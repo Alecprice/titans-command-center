@@ -4,13 +4,38 @@ const base=String(process.env.WORKER_URL||process.env.PRODUCTION_URL||'https://t
 const started=Date.now();
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const finite=value=>value!=null&&Number.isFinite(Number(value));
+const headers={'User-Agent':'TitansCommandCenter-AdvancedAnalyticsAudit/0.9','Cache-Control':'no-cache, no-store','Accept':'application/json'};
 
 try{
-  const response=await fetch(`${base}/api/advanced-analytics?season=2026&team=TEN&audit=${Date.now()}`,{
-    headers:{'User-Agent':'TitansCommandCenter-AdvancedAnalyticsAudit/0.8','Cache-Control':'no-cache','Accept':'application/json'},
-    signal:AbortSignal.timeout(15000)
-  });
-  const data=await response.json();
+  const [healthResponse,response]=await Promise.all([
+    fetch(`${base}/api/health`,{headers,signal:AbortSignal.timeout(15000)}),
+    fetch(`${base}/api/advanced-analytics?season=2026&team=TEN&audit=${Date.now()}`,{headers,signal:AbortSignal.timeout(15000)})
+  ]);
+  const [health,data]=await Promise.all([healthResponse.json(),response.json()]);
+  assert(healthResponse.status===200,`Health API returned ${healthResponse.status}`);
+  const healthStatus=String(health?.status||'');
+  assert(healthStatus==='healthy'||healthStatus==='degraded',`Unexpected health status ${healthStatus||'missing'}`);
+
+  let report={};
+  try{report=JSON.parse(fs.readFileSync('/tmp/cloudflare-smoke.json','utf8'))}catch{}
+
+  if(healthStatus==='degraded'){
+    assert(health?.database?.configured===true,'Degraded analytics check lost the configured database signal');
+    assert(health?.database?.ok===false,'Degraded analytics check must preserve the failed database signal');
+    assert(response.status===500,`Degraded analytics API returned unexpected ${response.status}`);
+    assert(data?.ok===false,'Degraded analytics response unexpectedly claims ok=true');
+    assert(data?.error==='Advanced analytics query failed',`Unexpected degraded analytics error: ${data?.error||'missing'}`);
+    report.analyticsStatus=response.status;
+    report.analyticsMode='database-unavailable';
+    report.analyticsHealthStatus=healthStatus;
+    report.analyticsDatabaseAvailable=false;
+    report.responseMs={...(report.responseMs||{}),analytics:Date.now()-started};
+    fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify(report,null,2));
+    console.log(JSON.stringify({ok:true,base,mode:'database-unavailable',healthStatus,responseStatus:response.status,responseMs:Date.now()-started},null,2));
+    process.exit(0);
+  }
+
+  assert(health?.database?.ok===true,'Healthy analytics check requires a healthy database');
   assert(response.status===200,`Advanced analytics API returned ${response.status}`);
   assert(data?.ok===true,'Advanced analytics API did not return ok=true');
   assert(data?.team==='TEN',`Advanced analytics returned unexpected team ${data?.team||'unknown'}`);
@@ -38,9 +63,10 @@ try{
   assert(/Pro-Football-Reference/i.test(sourceLabels),'Pro-Football-Reference is missing from advanced analytics cross-check provenance');
   assert(/Kaggle/i.test(sourceLabels),'Kaggle review policy is missing from advanced analytics provenance');
 
-  let report={};
-  try{report=JSON.parse(fs.readFileSync('/tmp/cloudflare-smoke.json','utf8'))}catch{}
   report.analyticsStatus=response.status;
+  report.analyticsMode='live-database';
+  report.analyticsHealthStatus=healthStatus;
+  report.analyticsDatabaseAvailable=true;
   report.analyticsDataSeason=Number(data.dataSeason);
   report.analyticsSeasonFallback=Boolean(data.seasonFallback);
   report.analyticsWarehousePlays=Number(data.coverage.plays||0);
@@ -53,7 +79,7 @@ try{
   report.analyticsLatestRestDays=Number(data.summary.latestRestDays);
   report.responseMs={...(report.responseMs||{}),analytics:Date.now()-started};
   fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify(report,null,2));
-  console.log(JSON.stringify({ok:true,base,dataSeason:data.dataSeason,seasonFallback:data.seasonFallback,warehousePlays:data.coverage.plays,recentPlays:data.recentPlays.length,personnelRows:data.personnel.length,responseMs:Date.now()-started},null,2));
+  console.log(JSON.stringify({ok:true,base,mode:'live-database',dataSeason:data.dataSeason,seasonFallback:data.seasonFallback,warehousePlays:data.coverage.plays,recentPlays:data.recentPlays.length,personnelRows:data.personnel.length,responseMs:Date.now()-started},null,2));
 }catch(error){
   const message=error instanceof Error?error.message:String(error);
   let report={};
