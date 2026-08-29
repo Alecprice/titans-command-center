@@ -10,7 +10,7 @@ const quality=read('.github/workflows/quality.yml');
 test('browser smokes use raw Python strings where embedded JavaScript contains regex escapes',()=>{
   assert.match(runtime,/execute_script\(r"""[\s\S]*?replace\(\/\\s\+\/g,' '\)/);
   const rawAnalytics=[...analytics.matchAll(/execute_script\(r"""[\s\S]*?replace\(\/\\s\+\/g,' '\)/g)];
-  assert.equal(rawAnalytics.length,2,'both analytics season-context scripts should use raw Python strings');
+  assert.equal(rawAnalytics.length,4,'all analytics regex-bearing execute_script blocks should use raw Python strings');
 });
 
 test('quality gate promotes Python SyntaxWarning to a CI failure',()=>{
