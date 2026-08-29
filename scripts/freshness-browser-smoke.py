@@ -28,7 +28,7 @@ def prepare_returning_user(driver):
 
 
 def read_card(driver):
-    return driver.execute_script("""
+    return driver.execute_script(r"""
       const card=[...document.querySelectorAll('.v10-command-card')]
         .find(x=>x.querySelector('small')?.textContent?.trim()==='DATA FRESHNESS');
       if(!card)return null;
