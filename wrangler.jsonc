@@ -3,8 +3,12 @@
   "name": "titans-command-center",
   "main": "cloudflare/worker.mjs",
   "compatibility_date": "2026-08-19",
-  "compatibility_flags": ["nodejs_compat"],
-  "placement": {"mode": "smart"},
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "placement": {
+    "mode": "smart"
+  },
   "secrets": {
     "required": ["DATABASE_URL"]
   },
@@ -15,9 +19,20 @@
     "run_worker_first": ["/api/*"]
   },
   "triggers": {
-    "crons": ["*/3 * * * *", "15 10 * * *"]
+    "crons": [
+      "*/3 * * * *",
+      "15 10 * * *"
+    ]
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "TITANS_DB",
+      "database_name": "titans-command-center",
+      "database_id": "1d17912f-45f1-4c3d-8aa9-54f677a37aea",
+      "migrations_dir": "db/d1/migrations"
+    }
+  ]
 }
