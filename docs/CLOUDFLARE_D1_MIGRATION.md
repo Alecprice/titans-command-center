@@ -6,20 +6,26 @@ Move Titans Command Center persistence away from Neon so frequent refreshes do n
 
 ## Rollout plan
 
-### Phase 1 — D1 foundation (this branch)
+### Phase 1 — D1 foundation and shared snapshots
 
-- Add `TITANS_DB` D1 storage adapter.
+- Add the `TITANS_DB` D1 storage adapter.
 - Move signed-in preference reads/writes to D1 whenever the binding exists.
-- Add durable `api_snapshots` storage for the upcoming bootstrap/fan-intel cutover.
+- Add durable `api_snapshots` storage.
+- Serve `/api/data` from the shared D1 snapshot before attempting another Neon bootstrap read.
+- Seed D1 from a successful Neon bootstrap when Neon is available.
+- If Neon is unavailable, serve the last D1 snapshot; if no snapshot exists yet, use the audited bundled fallback and seed that into D1.
+- Refresh the ESPN scoreboard centrally every three minutes into D1 instead of having every browser act as an independent poller.
+- Keep the existing daily source-audit job for slower-changing sources.
 - Keep Neon preference storage as a temporary fallback until D1 is bound.
 - Keep Neon Auth temporarily so authentication and persistence are not replaced in one release.
 
-### Phase 2 — read path cutover
+### Phase 2 — remaining read-path cutover
 
-- Materialize `/api/data`, fan intelligence, player and analytics responses into D1.
-- Refresh those snapshots centrally from scheduled Worker jobs instead of allowing every browser/device to trigger database work.
-- Use Cloudflare Cache in front of D1.
+- Materialize fan intelligence, player and analytics responses into D1.
+- Move normalized roster, transaction, source and historical data into D1-native tables where row-level querying is more useful than a shared snapshot.
+- Continue using Cloudflare Cache in front of D1.
 - Remove large/unused Neon reads from the request path.
+- Reduce daily Neon jobs as each source receives a D1-native ingestion path.
 
 ### Phase 3 — authentication cutover
 
@@ -37,6 +43,7 @@ The repository includes a manual GitHub Actions workflow named **Titans D1 Boots
 3. Apply `db/d1/migrations` remotely.
 4. Run the complete repository quality gate.
 5. Commit only the generated `wrangler.jsonc` binding back to the branch that ran the workflow.
+6. Allow the normal production workflow to deploy that tested binding commit.
 
 The Cloudflare token must include D1 read/write permission in addition to the Worker deployment permissions already used by the production workflow.
 
@@ -56,7 +63,7 @@ npm run check
 
 D1 Free currently allows 5 million rows read per day, 100,000 rows written per day, up to 500 MB per individual database, and 5 GB total storage across the account. D1 data reads do not have separate egress charges.
 
-The application should therefore use **central refresh + cached snapshots**, not per-user 1-minute database polling. The intended pattern is:
+The application therefore uses **central refresh + cached snapshots**, not per-user 1-minute database polling. The intended pattern is:
 
 ```text
 external sources
@@ -72,8 +79,8 @@ Cloudflare Cache
 web + mobile clients
 ```
 
-During game windows, selected upstream checks can run every 1–3 minutes. Slow-moving roster, transaction, source-audit and historical data should run less frequently.
+The first near-live job updates the public ESPN scoreboard snapshot every three minutes. That is about 480 D1 upserts per day, leaving substantial free-tier headroom. Slow-moving roster, transaction, source-audit and historical data remain on slower cadences until their D1-native ingestion paths are added.
 
 ## Rollback
 
-Phase 1 is reversible. If `TITANS_DB` is not bound, account preferences automatically continue using the existing Neon storage path. No production read path is forced onto D1 until the later snapshot cutover is explicitly merged.
+Phase 1 remains reversible. If `TITANS_DB` is not bound, account preferences automatically continue using the existing Neon storage path, `/api/data` continues through the existing Neon/audited fallback logic, and the three-minute near-live job exits without polling. Removing the D1 binding therefore returns the application to the pre-D1 persistence behavior without deleting the D1 database.
