@@ -1,10 +1,12 @@
 import {getSql} from './db.mjs';
+import {apiSnapshotKey,readApiSnapshot,writeApiSnapshot} from './d1-api-snapshot.mjs';
 
 const num=value=>value==null?null:Number(value);
 const integer=value=>value==null?null:Number.parseInt(value,10);
 const queryOf=req=>req?.query||{};
 const cleanTeam=value=>/^[A-Z]{2,3}$/.test(String(value||'').toUpperCase())?String(value).toUpperCase():'TEN';
 const cleanSeason=value=>{const n=Number(value);return Number.isInteger(n)&&n>=1999&&n<=2100?n:2026};
+const ANALYTICS_SNAPSHOT_TTL_SECONDS=3600;
 
 function methodOnly(req,res){
   if(req.method==='GET')return false;
@@ -30,8 +32,16 @@ export async function advancedAnalyticsRoute(req,res,env=process.env){
   if(methodOnly(req,res))return;
   res.setHeader('Cache-Control','public, s-maxage=300, stale-while-revalidate=900');
   const requestedSeason=cleanSeason(queryOf(req).season),team=cleanTeam(queryOf(req).team);
+  const snapshotKey=apiSnapshotKey('advanced-analytics:v1',{season:requestedSeason,team});
+  const freshSnapshot=await readApiSnapshot(env,snapshotKey);
+  if(freshSnapshot)return res.status(200).json(freshSnapshot);
+
   const sql=await getSql(env);
-  if(!sql)return res.status(503).json({ok:false,configured:false,error:'Database not configured'});
+  if(!sql){
+    const staleSnapshot=await readApiSnapshot(env,snapshotKey,{allowExpired:true,reason:'Live analytics warehouse unavailable'});
+    if(staleSnapshot)return res.status(200).json(staleSnapshot);
+    return res.status(503).json({ok:false,configured:false,error:'Database not configured'});
+  }
   try{
     const [available]=await sql`
       select max(twm.season)::int season
@@ -48,10 +58,12 @@ export async function advancedAnalyticsRoute(req,res,env=process.env){
              (select value from schema_meta where key='analytics_last_ingest_at') analytics_last_ingest_at`;
 
     if(!dataSeason){
-      return res.status(200).json({
+      const payload={
         ok:true,status:'awaiting-nflreadpy-ingest',requestedSeason,dataSeason:null,team,seasonFallback:false,coverage,
         summary:null,weeks:[],league:[],recentPlays:[],byDown:[],personnel:[],sources:sources(),fetchedAt:new Date().toISOString()
-      });
+      };
+      await writeApiSnapshot(env,snapshotKey,payload,{source:'neon-advanced-analytics',ttlSeconds:ANALYTICS_SNAPSHOT_TTL_SECONDS});
+      return res.status(200).json(payload);
     }
 
     const [summaryRows,weekRows,leagueRows,playRows,downRows,personnelRows]=await Promise.all([
@@ -164,12 +176,16 @@ export async function advancedAnalyticsRoute(req,res,env=process.env){
     const byDown=downRows.map(r=>({down:integer(r.down),offensePlays:integer(r.offense_plays),offensiveEpaPerPlay:num(r.offense_epa),defensePlays:integer(r.defense_plays),defensiveEpaPerPlayAllowed:num(r.defense_epa_allowed)}));
     const personnel=personnelRows.map(r=>({side:r.side,package:r.package,plays:integer(r.plays),epaPerPlay:num(r.epa)}));
 
-    return res.status(200).json({
+    const payload={
       ok:true,status:'available',requestedSeason,dataSeason,team,seasonFallback:dataSeason!==requestedSeason,coverage,summary,weeks,league,recentPlays,byDown,personnel,
       sources:sources(),fetchedAt:new Date().toISOString()
-    });
+    };
+    await writeApiSnapshot(env,snapshotKey,payload,{source:'neon-advanced-analytics',ttlSeconds:ANALYTICS_SNAPSHOT_TTL_SECONDS});
+    return res.status(200).json(payload);
   }catch(error){
     console.error('[advancedAnalyticsRoute]',error);
+    const staleSnapshot=await readApiSnapshot(env,snapshotKey,{allowExpired:true,reason:'Live analytics warehouse unavailable'});
+    if(staleSnapshot)return res.status(200).json(staleSnapshot);
     res.setHeader('Cache-Control','no-store');
     return res.status(200).json({
       ok:false,available:false,status:'database-unavailable',configured:true,requestedSeason,dataSeason:null,team,seasonFallback:false,
