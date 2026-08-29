@@ -55,7 +55,7 @@ function unavailableFanIntel(env,reason='Live fan intelligence warehouse unavail
 }
 function guestSessionUnavailable(){return jsonResponse({ok:true,user:null,session:null,guest:true,available:false,code:'ACCOUNT_SERVICE_UNAVAILABLE'},200,{'Cache-Control':'no-store'});}
 function accountInfrastructureFailure(status){return status===402||status===429||status>=500;}
-function accountServiceUnavailable(){return jsonResponse({ok:false,error:'Account service is temporarily unavailable. You can keep using Titans Command Center as a guest, and settings already saved on this device are safe.',code:'ACCOUNT_SERVICE_UNAVAILABLE',localOnly:true},500,{'Cache-Control':'no-store'});}
+function accountServiceUnavailable(status=503){return jsonResponse({ok:false,error:'Account service is temporarily unavailable. You can keep using Titans Command Center as a guest, and settings already saved on this device are safe.',code:'ACCOUNT_SERVICE_UNAVAILABLE',localOnly:true},status,{'Cache-Control':'no-store'});}
 async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
 async function nativeData(request,env){
   if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});
@@ -107,7 +107,7 @@ async function resilientAccountAuth(request,subpath){
   const response=await accountAuthProxy(request,subpath);
   if(!accountInfrastructureFailure(response.status))return response;
   try{await response.body?.cancel();}catch{}
-  return subpath==='get-session'?guestSessionUnavailable():accountServiceUnavailable();
+  return subpath==='get-session'?guestSessionUnavailable():accountServiceUnavailable(response.status);
 }
 async function resilientFanIntel(request,env,ctx){
   const response=await cachedAdapterData(request,'fan-intel',fanIntelRoute,env,ctx);
