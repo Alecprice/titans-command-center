@@ -1,8 +1,11 @@
 import {getSql} from './db.mjs';
+import {apiSnapshotKey,readApiSnapshot,writeApiSnapshot} from './d1-api-snapshot.mjs';
 
 const iso=value=>value?new Date(value).toISOString():null;
 const num=value=>value==null?null:Number(value);
 const text=value=>String(value??'').trim();
+const FAN_INTEL_SNAPSHOT_KEY=apiSnapshotKey('fan-intel:v1',{season:2026});
+const FAN_INTEL_SNAPSHOT_TTL_SECONDS=600;
 
 function methodOnly(req,res){
   res.setHeader('Allow','GET');
@@ -48,8 +51,16 @@ function depthChanges(currentRows,previousRows){
 export async function fanIntelRoute(req,res,env=process.env){
   if(methodOnly(req,res))return;
   res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=300');
+
+  const freshSnapshot=await readApiSnapshot(env,FAN_INTEL_SNAPSHOT_KEY);
+  if(freshSnapshot)return res.status(200).json(freshSnapshot);
+
   const sql=await getSql(env);
-  if(!sql)return res.status(503).json({ok:false,configured:false,error:'Database not configured'});
+  if(!sql){
+    const staleSnapshot=await readApiSnapshot(env,FAN_INTEL_SNAPSHOT_KEY,{allowExpired:true,reason:'Live fan intelligence warehouse unavailable'});
+    if(staleSnapshot)return res.status(200).json(staleSnapshot);
+    return res.status(503).json({ok:false,configured:false,error:'Database not configured'});
+  }
 
   try{
     const [standingsRows,injuryRows,depthRows,contractRows,opponentRows,driveRows,playRows,teamMetricRows,statRows]=await Promise.all([
@@ -163,13 +174,17 @@ export async function fanIntelRoute(req,res,env=process.env){
     const teamMetrics=teamMetricRows.map(row=>({gameId:String(row.game_id),week:row.week,kickoff:iso(row.kickoff),metrics:row.metrics||{},calculatedAt:iso(row.calculated_at)}));
     const playerStats=statRows.map(row=>({playerId:String(row.player_id),name:row.full_name,position:row.position||'',statGroup:row.stat_group,stats:row.stats||{},week:row.week,kickoff:iso(row.kickoff),capturedAt:iso(row.captured_at)}));
 
-    return res.status(200).json({
+    const payload={
       ok:true,season:2026,standings,injuries,depthChart,contracts,opponent,gameDay:{drives,plays,teamMetrics},playerStats,
       availability:{standings:Boolean(standings.length),injuries:Boolean(injuries.length),depthChanges:Boolean(depthChart.changes.length),contracts:Boolean(contracts.length),opponent:Boolean(opponent),drives:Boolean(drives.length),plays:Boolean(plays.length),playerStats:Boolean(playerStats.length)},
       fetchedAt:new Date().toISOString()
-    });
+    };
+    await writeApiSnapshot(env,FAN_INTEL_SNAPSHOT_KEY,payload,{source:'neon-fan-intel',ttlSeconds:FAN_INTEL_SNAPSHOT_TTL_SECONDS});
+    return res.status(200).json(payload);
   }catch(error){
     console.error('[fan-intel-api]',error);
+    const staleSnapshot=await readApiSnapshot(env,FAN_INTEL_SNAPSHOT_KEY,{allowExpired:true,reason:'Live fan intelligence warehouse unavailable'});
+    if(staleSnapshot)return res.status(200).json(staleSnapshot);
     return res.status(500).json({ok:false,error:'Fan intelligence query failed'});
   }
 }
