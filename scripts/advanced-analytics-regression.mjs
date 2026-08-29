@@ -22,9 +22,15 @@ try{
   if(healthStatus==='degraded'){
     assert(health?.database?.configured===true,'Degraded analytics check lost the configured database signal');
     assert(health?.database?.ok===false,'Degraded analytics check must preserve the failed database signal');
-    assert(response.status===500,`Degraded analytics API returned unexpected ${response.status}`);
+    assert(response.status===200,`Degraded analytics API returned unexpected ${response.status}`);
     assert(data?.ok===false,'Degraded analytics response unexpectedly claims ok=true');
+    assert(data?.available===false,'Degraded analytics response unexpectedly claims available=true');
+    assert(data?.status==='database-unavailable',`Unexpected degraded analytics status: ${data?.status||'missing'}`);
     assert(data?.error==='Advanced analytics query failed',`Unexpected degraded analytics error: ${data?.error||'missing'}`);
+    assert(data?.summary===null,'Degraded analytics response must not fabricate a summary');
+    assert(Array.isArray(data?.weeks)&&data.weeks.length===0,'Degraded analytics response must not fabricate weekly rows');
+    assert(Array.isArray(data?.recentPlays)&&data.recentPlays.length===0,'Degraded analytics response must not fabricate play rows');
+    assert(String(response.headers.get('cache-control')||'').toLowerCase().includes('no-store'),'Degraded analytics response must not be cached');
     report.analyticsStatus=response.status;
     report.analyticsMode='database-unavailable';
     report.analyticsHealthStatus=healthStatus;
