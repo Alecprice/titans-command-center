@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `9662d8d62f2498c79b26e1cfeeeb355325c1d67b`
+- Source commit: `dcf806b709a36ca29fd31282ddbb37f7594cf7a7`
 - Quality gate: failure
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -22,44 +22,44 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: existing deployment remains unchanged
-- Recorded: 2026-08-29T21:37:44Z
+- Recorded: 2026-08-29T21:38:03Z
 
 ## Quality gate failure context
 
 ```text
 
 --- tail ---
-✔ ticket purchase URLs fail closed to the official SeatGeek Titans page (0.195755ms)
-✔ Ticket Center explains comparison scope instead of inventing individual seat listings (9.964151ms)
-✔ Ticket Center is first-class, searchable, PWA packaged, and in responsive production coverage (3.232874ms)
-✔ Home has a prominent Ticket Finder entry without changing the five-action mobile dock (1.433021ms)
-✔ transaction calendar dates preserve the supplied date instead of browser-local rollover (22.551016ms)
-✔ transaction feed refresh timestamp is explicitly Nashville time (0.268314ms)
-✔ transaction calendar formatter keeps invalid and missing dates safe (0.191749ms)
-✔ fan, player, team-room, source-activity and responsive assets are loaded (2.307702ms)
-✔ service worker keeps API responses out of cache and versions current shell (0.327392ms)
-✔ core router degrades malformed dates and render failures instead of trapping navigation (0.333291ms)
-✔ shared feed time helpers never expose NaN labels (0.193641ms)
-✔ fan-facing base pages prefer live/backup language over storage implementation jargon (0.35922ms)
-✔ roster team-room switcher has plain button semantics, keyboard cycling and safe source links (0.386201ms)
-✔ rich player pages use the server player endpoint (0.437068ms)
-✔ fan status UI uses reader-friendly coverage language instead of implementation jargon (0.255084ms)
-✔ source activity distinguishes checked rows from new rows in fan-readable language (0.415716ms)
-✔ v0.6 database adapter uses current live schema columns (0.409807ms)
-✔ visual archive uses audited metadata instead of ambiguous legacy aliases (0.255665ms)
-✔ responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint (1.223161ms)
-✔ visual source registry includes official, specialist and Wikipedia cross-checks (1.177671ms)
-✔ active visual catalog never uses quarantined legacy aliases (0.444098ms)
-✔ representative and composite art cannot masquerade as exact official logos (1.641249ms)
-✔ 2018 is treated as a uniform and wordmark change, not a new primary logo (0.377848ms)
-✔ Tennessee Oilers transition preserves alternate-logo nuance (0.329666ms)
-✔ current Shield receives exact current-brand treatment (0.203125ms)
-✔ external workflow actions are pinned to immutable commit SHAs (2.390927ms)
-✔ Node-powered release workflows explicitly use Node 24 without package-manager caching (0.410788ms)
-✔ security-sensitive workflows retain least-privilege repository permissions (0.403528ms)
-✔ read-only workflow checkouts do not persist repository credentials (0.328414ms)
-✔ Cloudflare status writer syncs to current main before committing its generated report (0.233641ms)
-✔ critical workflow dependencies stay on the reviewed pinned releases (0.387934ms)
+✔ ticket purchase URLs fail closed to the official SeatGeek Titans page (0.29957ms)
+✔ Ticket Center explains comparison scope instead of inventing individual seat listings (11.594749ms)
+✔ Ticket Center is first-class, searchable, PWA packaged, and in responsive production coverage (3.257159ms)
+✔ Home has a prominent Ticket Finder entry without changing the five-action mobile dock (2.227492ms)
+✔ transaction calendar dates preserve the supplied date instead of browser-local rollover (16.705064ms)
+✔ transaction feed refresh timestamp is explicitly Nashville time (0.218539ms)
+✔ transaction calendar formatter keeps invalid and missing dates safe (0.241983ms)
+✔ fan, player, team-room, source-activity and responsive assets are loaded (3.908682ms)
+✔ service worker keeps API responses out of cache and versions current shell (0.374149ms)
+✔ core router degrades malformed dates and render failures instead of trapping navigation (0.507569ms)
+✔ shared feed time helpers never expose NaN labels (0.26175ms)
+✔ fan-facing base pages prefer live/backup language over storage implementation jargon (0.444943ms)
+✔ roster team-room switcher has plain button semantics, keyboard cycling and safe source links (0.600613ms)
+✔ rich player pages use the server player endpoint (0.668199ms)
+✔ fan status UI uses reader-friendly coverage language instead of implementation jargon (0.256339ms)
+✔ source activity distinguishes checked rows from new rows in fan-readable language (0.759465ms)
+✔ v0.6 database adapter uses current live schema columns (0.47071ms)
+✔ visual archive uses audited metadata instead of ambiguous legacy aliases (0.264665ms)
+✔ responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint (1.725346ms)
+✔ visual source registry includes official, specialist and Wikipedia cross-checks (1.209071ms)
+✔ active visual catalog never uses quarantined legacy aliases (0.552924ms)
+✔ representative and composite art cannot masquerade as exact official logos (5.164577ms)
+✔ 2018 is treated as a uniform and wordmark change, not a new primary logo (0.331731ms)
+✔ Tennessee Oilers transition preserves alternate-logo nuance (0.323244ms)
+✔ current Shield receives exact current-brand treatment (0.203731ms)
+✔ external workflow actions are pinned to immutable commit SHAs (2.435944ms)
+✔ Node-powered release workflows explicitly use Node 24 without package-manager caching (0.413233ms)
+✔ security-sensitive workflows retain least-privilege repository permissions (0.434272ms)
+✔ read-only workflow checkouts do not persist repository credentials (0.317103ms)
+✔ Cloudflare status writer syncs to current main before committing its generated report (0.269734ms)
+✔ critical workflow dependencies stay on the reviewed pinned releases (0.384158ms)
 ℹ tests 667
 ℹ suites 0
 ℹ pass 667
@@ -67,7 +67,7 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 3553.020593
+ℹ duration_ms 3708.105488
 
 > titans-command-center@1.0.0 audit:content
 > node scripts/content-audit.mjs
