@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
 
 const source=fs.readFileSync(new URL('../player-intelligence-v16.js',import.meta.url),'utf8');
 const deployWorkflow=fs.readFileSync(new URL('../.github/workflows/cloudflare-deploy.yml',import.meta.url),'utf8');
@@ -20,7 +21,7 @@ test('Player Intelligence loads the verified preseason feed only as a missing-wa
 });
 
 test('preseason fallback keeps source and season context explicit',()=>{
-  assert.match(source,/2026 Preseason · official fallback/);
+  assert.match(source,/\$\{context\.season\|\|2026\} Preseason · official fallback/);
   assert.match(source,/They are not regular-season totals\./);
   assert.match(source,/Official fallback/);
   assert.match(source,/verified official preseason rows/i);
@@ -55,6 +56,10 @@ test('post-deploy fallback gate checks the exact successful Cloudflare revision 
   assert.match(fallbackWorkflow,/last\.get\('commit'\)==expected/);
   assert.match(fallbackWorkflow,/python scripts\/player-preseason-fallback-browser-smoke\.py/);
   assert.match(fallbackWorkflow,/persist-credentials: false/);
+});
+
+test('new production browser smoke compiles with SyntaxWarning promoted to failure',()=>{
+  assert.doesNotThrow(()=>execFileSync('python',['-W','error::SyntaxWarning','-m','py_compile','scripts/player-preseason-fallback-browser-smoke.py'],{stdio:'pipe'}));
 });
 
 test('live fallback smoke is conditional on the real warehouse state and fail-closed when fallback is required',()=>{
