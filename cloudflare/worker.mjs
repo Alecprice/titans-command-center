@@ -1,5 +1,6 @@
 import apiHandler from '../api/index.js';
 import {databaseHealth,getBootstrapData,getSql} from '../src/db.mjs';
+import {d1Health,getD1Snapshot,hasD1,putD1Snapshot} from '../src/d1-store.mjs';
 import {getAuditedTeamContext} from '../src/team-context.mjs';
 import {team as fallbackTeam,games as fallbackGames,roster as fallbackRoster,feed as fallbackFeed,sources as fallbackSources} from '../src/data.mjs';
 import {preseasonStatsRoute} from '../src/preseason-api.mjs';
@@ -18,6 +19,11 @@ const APP_VERSION='1.0.0';
 const SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
 const BOOTSTRAP_CACHE_CONTROL='public, s-maxage=900, stale-while-revalidate=21600';
 const QUERY_CACHE_CONTROL='public, s-maxage=900, stale-while-revalidate=21600';
+const BOOTSTRAP_SNAPSHOT_KEY='bootstrap:v1';
+const BOOTSTRAP_SNAPSHOT_TTL_SECONDS=900;
+const SCOREBOARD_SNAPSHOT_KEY='scoreboard:v1';
+const SCOREBOARD_SNAPSHOT_TTL_SECONDS=240;
+const NEAR_LIVE_CRON='*/3 * * * *';
 
 function requestHeaders(headers){const out={};for(const [key,value] of headers.entries())out[key.toLowerCase()]=value;return out;}
 function requestQuery(url,route){const query={route};for(const [key,value] of url.searchParams.entries()){if(key==='route')continue;const current=query[key];if(current===undefined)query[key]=value;else if(Array.isArray(current))current.push(value);else query[key]=[current,value];}return query;}
@@ -61,15 +67,73 @@ function unavailableFanIntel(env,reason='Live fan intelligence warehouse unavail
 function guestSessionUnavailable(){return jsonResponse({ok:true,user:null,session:null,guest:true,available:false,code:'ACCOUNT_SERVICE_UNAVAILABLE'},200,{'Cache-Control':'no-store'});}
 function accountInfrastructureFailure(status){return status===402||status===429||status>=500;}
 function accountServiceUnavailable(status=503){return jsonResponse({ok:false,error:'Account service is temporarily unavailable. You can keep using Titans Command Center as a guest, and settings already saved on this device are safe.',code:'ACCOUNT_SERVICE_UNAVAILABLE',localOnly:true},status,{'Cache-Control':'no-store'});}
-async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
+function d1BootstrapPayload(row,{stale=false,reason=''}={}){
+  const payload=row?.payload;
+  if(!payload||typeof payload!=='object'||payload.ok!==true)return null;
+  const originalMode=payload.mode||'live-database';
+  return {
+    ...payload,
+    mode:stale?'audited-fallback':originalMode,
+    databaseAvailable:stale?false:payload.databaseAvailable,
+    storage:'cloudflare-d1',
+    fallback:stale?{...(payload.fallback||{}),active:true,reason:reason||'Live source unavailable; serving last D1 snapshot.',d1Snapshot:true}:payload.fallback,
+    snapshot:{key:row.cache_key||BOOTSTRAP_SNAPSHOT_KEY,source:row.source||'unknown',fetchedAt:row.fetched_at||payload.fetchedAt||null,expiresAt:row.expires_at||null,stale:Boolean(stale),originalMode,reason:reason||null}
+  };
+}
+async function readD1Bootstrap(env,{allowExpired=false,reason=''}={}){
+  if(!hasD1(env))return null;
+  try{const row=await getD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY,{allowExpired});return d1BootstrapPayload(row,{stale:allowExpired,reason});}
+  catch(error){console.warn('[d1-bootstrap-read]',error);return null;}
+}
+async function writeD1Bootstrap(env,payload,{source='neon-bootstrap',ttlSeconds=BOOTSTRAP_SNAPSHOT_TTL_SECONDS}={}){
+  if(!hasD1(env)||!payload?.ok)return false;
+  try{await putD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY,payload,{source,ttlSeconds});return true;}
+  catch(error){console.warn('[d1-bootstrap-write]',error);return false;}
+}
+function scoreboardSnapshotPayload(row,{stale=false}={}){
+  const payload=row?.payload;
+  if(!payload||typeof payload!=='object'||payload.ok!==true)return null;
+  return {...payload,storage:'cloudflare-d1',snapshot:{key:row.cache_key||SCOREBOARD_SNAPSHOT_KEY,source:row.source||'espn-scoreboard',fetchedAt:row.fetched_at||payload.fetchedAt||null,expiresAt:row.expires_at||null,stale:Boolean(stale)}};
+}
+async function readD1Scoreboard(env,{allowExpired=false}={}){
+  if(!hasD1(env))return null;
+  try{const row=await getD1Snapshot(env,SCOREBOARD_SNAPSHOT_KEY,{allowExpired});return scoreboardSnapshotPayload(row,{stale:allowExpired});}
+  catch(error){console.warn('[d1-scoreboard-read]',error);return null;}
+}
+async function fetchScoreboardUpstream(env,{persist=true}={}){
+  const upstream=await fetch(SCOREBOARD_URL,{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`},signal:AbortSignal.timeout(4500)});
+  if(!upstream.ok)throw new Error(`ESPN ${upstream.status}`);
+  const result={ok:true,provider:'ESPN',unofficial:true,available:true,fetchedAt:new Date().toISOString(),payload:await upstream.json(),storage:'espn-live'};
+  if(persist&&hasD1(env)){
+    try{await putD1Snapshot(env,SCOREBOARD_SNAPSHOT_KEY,result,{source:'espn-scoreboard',ttlSeconds:SCOREBOARD_SNAPSHOT_TTL_SECONDS});}
+    catch(error){console.warn('[d1-scoreboard-write]',error);}
+  }
+  return result;
+}
+async function nativeHealth(request,env){
+  if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});
+  const [db,d1]=await Promise.all([databaseHealth(env),d1Health(env)]);
+  return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,storage:{primary:hasD1(env)?'cloudflare-d1':'neon',d1},providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true,d1Snapshot:hasD1(env)}},200,{'Cache-Control':'no-store'});
+}
 async function nativeData(request,env){
   if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});
   const headers={'Cache-Control':BOOTSTRAP_CACHE_CONTROL};
-  if(!env?.DATABASE_URL)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);
-  let data;
-  try{data=await getBootstrapData(env);}catch(error){console.error('[native-data-bootstrap]',error);data={configured:true,ok:false,error:'Database query failed'};}
-  if(!data?.ok){const fallback=auditedBootstrapFallback(data?.error||'Live database query failed');return jsonResponse({...fallback,teamContext:await getAuditedTeamContext(null)},200,headers);}
-  const sql=await getSql(env);let teamContext;try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}return jsonResponse({...data,mode:'live-database',databaseAvailable:true,teamContext},200,headers);
+  const snapshot=await readD1Bootstrap(env);
+  if(snapshot)return jsonResponse(snapshot,200,headers);
+  let data={configured:Boolean(env?.DATABASE_URL),ok:false,error:env?.DATABASE_URL?'Database query failed':'DATABASE_URL is not configured'};
+  if(env?.DATABASE_URL){try{data=await getBootstrapData(env);}catch(error){console.error('[native-data-bootstrap]',error);}}
+  if(data?.ok){
+    const sql=await getSql(env);let teamContext;
+    try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}
+    const payload={...data,mode:'live-database',databaseAvailable:true,storage:'neon',teamContext};
+    await writeD1Bootstrap(env,payload,{source:'neon-bootstrap'});
+    return jsonResponse(payload,200,headers);
+  }
+  const staleSnapshot=await readD1Bootstrap(env,{allowExpired:true,reason:data?.error||'Live database unavailable'});
+  if(staleSnapshot)return jsonResponse(staleSnapshot,200,headers);
+  const fallback={...auditedBootstrapFallback(data?.error||'Live database unavailable'),teamContext:await getAuditedTeamContext(null),storage:'bundled-audited-data'};
+  await writeD1Bootstrap(env,fallback,{source:'audited-fallback'});
+  return jsonResponse(fallback,200,headers);
 }
 async function cachedNativeData(request,env,ctx){
   if(request.method!=='GET')return withEdgeCacheStatus(await nativeData(request,env),'BYPASS');
@@ -78,13 +142,22 @@ async function cachedNativeData(request,env,ctx){
   const key=apiCacheKey(request),hit=await cache.match(key);
   if(hit)return withEdgeCacheStatus(hit,'HIT');
   const fresh=await nativeData(request,env);
-  if(fresh.ok){
-    const write=cache.put(key,fresh.clone()).catch(error=>console.warn('[data-edge-cache]',error));
-    if(ctx?.waitUntil)ctx.waitUntil(write);else await write;
-  }
+  if(fresh.ok){const write=cache.put(key,fresh.clone()).catch(error=>console.warn('[data-edge-cache]',error));if(ctx?.waitUntil)ctx.waitUntil(write);else await write;}
   return withEdgeCacheStatus(fresh,'MISS');
 }
-async function nativeScoreboard(request){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const headers={'Cache-Control':'public, s-maxage=15, stale-while-revalidate=30'};try{const upstream=await fetch(SCOREBOARD_URL,{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`},signal:AbortSignal.timeout(4500)});if(!upstream.ok)throw new Error(`ESPN ${upstream.status}`);return jsonResponse({ok:true,provider:'ESPN',unofficial:true,available:true,fetchedAt:new Date().toISOString(),payload:await upstream.json()},200,headers);}catch(error){console.error('[cloudflare-scoreboard]',error);return jsonResponse({ok:false,provider:'ESPN',unofficial:true,available:false,error:'Live scoreboard provider unavailable',fetchedAt:new Date().toISOString(),payload:{events:[]}},200,headers);}}
+async function nativeScoreboard(request,env){
+  if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});
+  const headers={'Cache-Control':'public, s-maxage=60, stale-while-revalidate=180'};
+  const snapshot=await readD1Scoreboard(env);
+  if(snapshot)return jsonResponse(snapshot,200,headers);
+  try{return jsonResponse(await fetchScoreboardUpstream(env),200,headers);}
+  catch(error){
+    console.error('[cloudflare-scoreboard]',error);
+    const stale=await readD1Scoreboard(env,{allowExpired:true});
+    if(stale)return jsonResponse(stale,200,headers);
+    return jsonResponse({ok:false,provider:'ESPN',unofficial:true,available:false,error:'Live scoreboard provider unavailable',fetchedAt:new Date().toISOString(),payload:{events:[]}},200,headers);
+  }
+}
 async function adapterRoute(request,route,handler,env){const req=vercelRequest(request,route);const res=vercelResponse();await handler(req,res.api,env);return res.result();}
 async function cachedMarketData(request,env,ctx){
   const url=new URL(request.url);
@@ -139,7 +212,7 @@ async function runApi(request,env,ctx){
   try{
     if(route==='health')return await nativeHealth(request,env);
     if(route==='data')return await cachedNativeData(request,env,ctx);
-    if(route==='espn-scoreboard')return await nativeScoreboard(request);
+    if(route==='espn-scoreboard')return await nativeScoreboard(request,env);
     if(route.startsWith('account/auth/'))return await resilientAccountAuth(request,route.slice('account/auth/'.length));
     if(route==='account/preferences')return await accountPreferencesRoute(request,env);
     if(route==='player')return await cachedQueryAdapterData(request,route,playerProfileRoute,env,ctx,['id']);
@@ -154,5 +227,11 @@ async function runApi(request,env,ctx){
   }catch(error){console.error('[cloudflare-api-adapter]',route,error);return jsonResponse({ok:false,error:'API request failed'},500);}
 }
 async function executeScheduledJob(env,job,run){const started=new Date();let result;try{result={job,...(await run())};}catch(error){console.error('[cloudflare-cron]',job,error);result={job,ok:false,error:'Sync job failed'};}const stored=await recordSyncRun(env,job,result,started);return {...result,auditStored:Boolean(stored.stored)};}
-async function runScheduled(env){const jobs=[['official-audit',()=>syncTitansOfficialAudit(env)],['espn',()=>syncEspn(env)],['nflverse-roster',()=>syncNflverseRoster(env,2026)],['nflverse-stats',()=>syncNflverseStats(env,2026)],['nws-weather',()=>syncNwsNextHomeGame(env)],['bluesky',()=>syncBluesky(env,'Tennessee Titans',30)],['odds',()=>env.PROPLINE_API_KEY||env.ODDS_API_IO_KEY?syncFreeOdds(env):Promise.resolve({ok:true,skipped:true,source:'titans-cc',error:'No free odds API key configured'})]];const results=await Promise.all(jobs.map(([job,run])=>executeScheduledJob(env,job,run)));const succeeded=results.filter(r=>r?.ok&&!r?.skipped).length;const failed=results.filter(r=>!r?.ok&&!r?.skipped).length;console.log('[cloudflare-cron]',{succeeded,failed,results:results.map(r=>({job:r.job,ok:r.ok,skipped:Boolean(r.skipped),auditStored:Boolean(r.auditStored)}))});}
-export default {async fetch(request,env,ctx){const pathname=new URL(request.url).pathname;if(pathname.startsWith(API_PREFIX))return runApi(request,env,ctx);return env.ASSETS.fetch(request);},async scheduled(_controller,env,ctx){ctx.waitUntil(runScheduled(env));}};
+async function runNearLiveScheduled(env){
+  if(!hasD1(env))return {ok:true,skipped:true,reason:'D1 binding not configured'};
+  try{const result=await fetchScoreboardUpstream(env,{persist:true});console.log('[cloudflare-near-live]',{ok:true,provider:result.provider,fetchedAt:result.fetchedAt});return result;}
+  catch(error){console.error('[cloudflare-near-live]',error);return {ok:false,error:'Near-live scoreboard refresh failed'};}
+}
+async function runDailyScheduled(env){const jobs=[['official-audit',()=>syncTitansOfficialAudit(env)],['espn',()=>syncEspn(env)],['nflverse-roster',()=>syncNflverseRoster(env,2026)],['nflverse-stats',()=>syncNflverseStats(env,2026)],['nws-weather',()=>syncNwsNextHomeGame(env)],['bluesky',()=>syncBluesky(env,'Tennessee Titans',30)],['odds',()=>env.PROPLINE_API_KEY||env.ODDS_API_IO_KEY?syncFreeOdds(env):Promise.resolve({ok:true,skipped:true,source:'titans-cc',error:'No free odds API key configured'})]];const results=await Promise.all(jobs.map(([job,run])=>executeScheduledJob(env,job,run)));const succeeded=results.filter(r=>r?.ok&&!r?.skipped).length;const failed=results.filter(r=>!r?.ok&&!r?.skipped).length;console.log('[cloudflare-cron]',{succeeded,failed,results:results.map(r=>({job:r.job,ok:r.ok,skipped:Boolean(r.skipped),auditStored:Boolean(r.auditStored)}))});return {ok:failed===0,succeeded,failed};}
+async function runScheduled(env,cron=''){return cron===NEAR_LIVE_CRON?runNearLiveScheduled(env):runDailyScheduled(env);}
+export default {async fetch(request,env,ctx){const pathname=new URL(request.url).pathname;if(pathname.startsWith(API_PREFIX))return runApi(request,env,ctx);return env.ASSETS.fetch(request);},async scheduled(controller,env,ctx){ctx.waitUntil(runScheduled(env,controller?.cron||''));}};
