@@ -5,6 +5,7 @@ import {team as fallbackTeam,games as fallbackGames,roster as fallbackRoster,fee
 import {preseasonStatsRoute} from '../src/preseason-api.mjs';
 import {marketDataRoute} from '../src/market-api.mjs';
 import {advancedAnalyticsRoute} from '../src/advanced-analytics-api.mjs';
+import {playerProfileRoute} from '../src/player-api.mjs';
 import {fanIntelRoute} from '../src/fan-intel-api.mjs';
 import {ticketsRoute} from '../src/tickets-api.mjs';
 import {xSocialRoute} from '../src/x-social-api.mjs';
@@ -141,7 +142,7 @@ async function runApi(request,env,ctx){
     if(route==='espn-scoreboard')return await nativeScoreboard(request);
     if(route.startsWith('account/auth/'))return await resilientAccountAuth(request,route.slice('account/auth/'.length));
     if(route==='account/preferences')return await accountPreferencesRoute(request,env);
-    if(route==='player')return await cachedQueryAdapterData(request,route,apiHandler,env,ctx,['id']);
+    if(route==='player')return await cachedQueryAdapterData(request,route,playerProfileRoute,env,ctx,['id']);
     if(route==='preseason-stats')return await adapterRoute(request,route,preseasonStatsRoute,env);
     if(route==='market-data')return await cachedMarketData(request,env,ctx);
     if(route==='advanced-analytics')return await cachedQueryAdapterData(request,route,advancedAnalyticsRoute,env,ctx,['season','team']);
