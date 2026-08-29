@@ -20,6 +20,9 @@ def no_overflow(driver,label):
     state=driver.execute_script("return {w:document.documentElement.clientWidth,s:document.documentElement.scrollWidth}")
     if state['s']>state['w']+3: raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
+def valid_player_route(href):
+    return '#player?id=' in href or '#player?name=' in href
+
 def install_cutdown_aria_trace(driver):
     return driver.execute_script(r"""
       if(window.__cutdownAriaTraceInstalled)return true;
@@ -30,13 +33,8 @@ def install_cutdown_aria_trace(driver):
       Element.prototype.setAttribute=function(name,value){
         if(name==='aria-pressed'&&this.matches?.('[data-team-room-view="cutdown"]')){
           window.__cutdownAriaTrace.push({
-            kind:'setAttribute',
-            value:String(value),
-            hash:location.hash,
-            connected:Boolean(this.isConnected),
-            sameButton:this===window.__cutdownTraceButton,
-            time:Math.round(performance.now()*100)/100,
-            stack:String(new Error('cutdown aria write').stack||'').split('\n').slice(1,12)
+            kind:'setAttribute',value:String(value),hash:location.hash,connected:Boolean(this.isConnected),sameButton:this===window.__cutdownTraceButton,
+            time:Math.round(performance.now()*100)/100,stack:String(new Error('cutdown aria write').stack||'').split('\n').slice(1,12)
           });
         }
         return originalSetAttribute.call(this,name,value);
@@ -45,13 +43,8 @@ def install_cutdown_aria_trace(driver):
       Element.prototype.removeAttribute=function(name){
         if(name==='aria-pressed'&&this.matches?.('[data-team-room-view="cutdown"]')){
           window.__cutdownAriaTrace.push({
-            kind:'removeAttribute',
-            value:null,
-            hash:location.hash,
-            connected:Boolean(this.isConnected),
-            sameButton:this===window.__cutdownTraceButton,
-            time:Math.round(performance.now()*100)/100,
-            stack:String(new Error('cutdown aria remove').stack||'').split('\n').slice(1,12)
+            kind:'removeAttribute',value:null,hash:location.hash,connected:Boolean(this.isConnected),sameButton:this===window.__cutdownTraceButton,
+            time:Math.round(performance.now()*100)/100,stack:String(new Error('cutdown aria remove').stack||'').split('\n').slice(1,12)
           });
         }
         return originalRemoveAttribute.call(this,name);
@@ -61,15 +54,7 @@ def install_cutdown_aria_trace(driver):
           if(record.type!=='childList')continue;
           const current=document.querySelector('[data-team-room-view="cutdown"]');
           if(current&&current!==window.__cutdownTraceButton){
-            window.__cutdownAriaTrace.push({
-              kind:'button-replaced',
-              value:current.getAttribute('aria-pressed'),
-              hash:location.hash,
-              connected:Boolean(current.isConnected),
-              sameButton:false,
-              time:Math.round(performance.now()*100)/100,
-              stack:[]
-            });
+            window.__cutdownAriaTrace.push({kind:'button-replaced',value:current.getAttribute('aria-pressed'),hash:location.hash,connected:Boolean(current.isConnected),sameButton:false,time:Math.round(performance.now()*100)/100,stack:[]});
             window.__cutdownTraceButton=current;
           }
         }
@@ -91,20 +76,12 @@ def activate_cutdown_view(driver,timeout=8):
           button=document.querySelector('[data-team-room-view="cutdown"]');
           panel=document.querySelector('[data-panel="cutdown"]');
           root=panel?.querySelector('[data-cutdown-command]');
-          return {
-            exists:Boolean(button&&panel&&root),
-            selected:button?.getAttribute('aria-pressed')==='true',
-            visible:Boolean(panel&&!panel.hidden),
-            buttonConnected:Boolean(button?.isConnected),
-            panelConnected:Boolean(panel?.isConnected),
-            sameButton:Boolean(button&&button===window.__cutdownTraceButton)
-          };
+          return {exists:Boolean(button&&panel&&root),selected:button?.getAttribute('aria-pressed')==='true',visible:Boolean(panel&&!panel.hidden),buttonConnected:Boolean(button?.isConnected),panelConnected:Boolean(panel?.isConnected),sameButton:Boolean(button&&button===window.__cutdownTraceButton)};
         """)
         if last.get('exists') and last.get('selected') and last.get('visible') and last.get('buttonConnected') and last.get('panelConnected'):
             stable+=1
             if stable>=3:return last
-        else:
-            stable=0
+        else: stable=0
         time.sleep(.1)
     raise TimeoutError(f'Cutdown view did not settle after roster refresh: {last}')
 
@@ -117,21 +94,13 @@ def activate_player_tab(driver,tab,timeout=8):
           let tab=document.querySelector(`[data-v16-player-tab="${arguments[0]}"]`),pane=document.querySelector(`[data-v16-pane="${arguments[0]}"]`);
           if(!tab||!pane)return {exists:false,selected:false,visible:false};
           if(tab.getAttribute('aria-selected')!=='true'||pane.hidden)tab.click();
-          tab=document.querySelector(`[data-v16-player-tab="${arguments[0]}"]`);
-          pane=document.querySelector(`[data-v16-pane="${arguments[0]}"]`);
-          return {
-            exists:Boolean(tab&&pane),
-            selected:tab?.getAttribute('aria-selected')==='true',
-            visible:Boolean(pane&&!pane.hidden),
-            tabConnected:Boolean(tab?.isConnected),
-            paneConnected:Boolean(pane?.isConnected)
-          };
+          tab=document.querySelector(`[data-v16-player-tab="${arguments[0]}"]`);pane=document.querySelector(`[data-v16-pane="${arguments[0]}"]`);
+          return {exists:Boolean(tab&&pane),selected:tab?.getAttribute('aria-selected')==='true',visible:Boolean(pane&&!pane.hidden),tabConnected:Boolean(tab?.isConnected),paneConnected:Boolean(pane?.isConnected)};
         """,tab)
         if last.get('exists') and last.get('selected') and last.get('visible') and last.get('tabConnected') and last.get('paneConnected'):
             stable+=1
             if stable>=3:return last
-        else:
-            stable=0
+        else: stable=0
         time.sleep(.1)
     raise TimeoutError(f'Player tab did not settle after DOM refresh: {tab} {last}')
 
@@ -154,30 +123,22 @@ try:
     stage='player:find'
     driver.get(f'{BASE}/#roster')
     wait_for(driver,"document.querySelectorAll('.player-card').length > 20")
-    # The first paint can be the audited fallback roster. Those cards intentionally
-    # do not have database UUIDs, so wait for /api/data hydration before resolving
-    # a real player route instead of mistaking #roster for the final state.
-    wait_for(driver,"document.querySelector('.player-card[href*=\"#player?id=\"]')",timeout=18)
+    # The first paint may be audited fallback or live DB data. Wait for the roster route layer
+    # to expose either a real UUID route or the explicit audited-name Player Intelligence route.
+    wait_for(driver,"document.querySelector('.player-card[href*=\"#player?id=\"],.player-card[href*=\"#player?name=\"]')",timeout=18)
     player_href=driver.execute_script("""
-      const cards=[...document.querySelectorAll('.player-card[href*="#player?id="]')];
-      return cards.find(x=>x.querySelector('h3')?.textContent?.includes('Cam Ward'))?.getAttribute('href')
-        || cards[0]?.getAttribute('href')
-        || '';
+      const cards=[...document.querySelectorAll('.player-card[href*="#player?id="],.player-card[href*="#player?name="]')];
+      return cards.find(x=>x.querySelector('h3')?.textContent?.includes('Cam Ward'))?.getAttribute('href') || cards[0]?.getAttribute('href') || '';
     """)
-    if not player_href or '#player?id=' not in player_href: raise RuntimeError(f'Could not resolve hydrated player route: {player_href}')
+    if not player_href or not valid_player_route(player_href): raise RuntimeError(f'Could not resolve routable player route: {player_href}')
+    player_route_mode='database-uuid' if '#player?id=' in player_href else 'audited-name'
 
     stage='roster:stability'
     wait_for(driver,"document.querySelectorAll('.official-injury-state').length === 1",timeout=10)
     roster_state=driver.execute_script("""
-      return {
-        injuryBanners:document.querySelectorAll('.official-injury-state').length,
-        switchers:document.querySelectorAll('.team-room-switcher').length,
-        cutdownButtons:document.querySelectorAll('[data-team-room-view="cutdown"]').length,
-        cutdownPanels:document.querySelectorAll('[data-panel="cutdown"]').length
-      };
+      return {injuryBanners:document.querySelectorAll('.official-injury-state').length,switchers:document.querySelectorAll('.team-room-switcher').length,cutdownButtons:document.querySelectorAll('[data-team-room-view="cutdown"]').length,cutdownPanels:document.querySelectorAll('[data-panel="cutdown"]').length};
     """)
-    if roster_state['injuryBanners']!=1 or roster_state['switchers']!=1 or roster_state['cutdownButtons']!=1 or roster_state['cutdownPanels']!=1:
-        raise RuntimeError(f'Roster enhancement duplicated or missing: {roster_state}')
+    if roster_state['injuryBanners']!=1 or roster_state['switchers']!=1 or roster_state['cutdownButtons']!=1 or roster_state['cutdownPanels']!=1: raise RuntimeError(f'Roster enhancement duplicated or missing: {roster_state}')
 
     stage='cutdown:desktop'
     wait_for(driver,"document.querySelector('[data-team-room-view=\"cutdown\"]') && document.querySelector('[data-panel=\"cutdown\"]')",timeout=10)
@@ -185,71 +146,36 @@ try:
     cutdown_settle=activate_cutdown_view(driver)
     no_overflow(driver,'cutdown desktop')
     cutdown=driver.execute_script("""
-      const root=document.querySelector('[data-cutdown-command]');
-      const links=[...root.querySelectorAll('a')];
-      return {
-        text:(root?.innerText||'').slice(0,2600),
-        activePressed:document.querySelector('[data-team-room-view="cutdown"]')?.getAttribute('aria-pressed')||'',
-        settled:Boolean(arguments[0]?.selected&&arguments[0]?.visible),
-        nflSource:links.some(x=>x.href.includes('operations.nfl.com/calendar-events/nfl-important-dates')),
-        titansMoves:links.some(x=>x.href.includes('tennesseetitans.com/team/transactions')),
-        limitText:(root?.innerText||'').includes('Final active limit') && (root?.innerText||'').includes('53'),
-        disclaimer:(root?.innerText||'').includes('not the same thing as “cuts required.”'),
-        my53:Boolean(root?.querySelector('[data-my53]')),
-        my53Players:root?.querySelectorAll('[data-my53-player]').length||0
-      };
+      const root=document.querySelector('[data-cutdown-command]');const links=[...root.querySelectorAll('a')];
+      return {text:(root?.innerText||'').slice(0,2600),activePressed:document.querySelector('[data-team-room-view="cutdown"]')?.getAttribute('aria-pressed')||'',settled:Boolean(arguments[0]?.selected&&arguments[0]?.visible),nflSource:links.some(x=>x.href.includes('operations.nfl.com/calendar-events/nfl-important-dates')),titansMoves:links.some(x=>x.href.includes('tennesseetitans.com/team/transactions')),limitText:(root?.innerText||'').includes('Final active limit') && (root?.innerText||'').includes('53'),disclaimer:(root?.innerText||'').includes('not the same thing as “cuts required.”'),my53:Boolean(root?.querySelector('[data-my53]')),my53Players:root?.querySelectorAll('[data-my53-player]').length||0};
     """,cutdown_settle)
-    if not cutdown['settled'] or cutdown['activePressed']!='true' or not cutdown['nflSource'] or not cutdown['titansMoves'] or not cutdown['limitText'] or not cutdown['disclaimer']:
-        raise RuntimeError(f'Cutdown Command contract failed: {cutdown}')
-    if not cutdown['my53'] or cutdown['my53Players']<50:
-        raise RuntimeError(f'My 53 roster builder missing or incomplete: {cutdown}')
+    if not cutdown['settled'] or cutdown['activePressed']!='true' or not cutdown['nflSource'] or not cutdown['titansMoves'] or not cutdown['limitText'] or not cutdown['disclaimer']: raise RuntimeError(f'Cutdown Command contract failed: {cutdown}')
+    if not cutdown['my53'] or cutdown['my53Players']<50: raise RuntimeError(f'My 53 roster builder missing or incomplete: {cutdown}')
 
     stage='my53:interaction'
     driver.execute_script("document.querySelector('[data-my53-clear]')?.click()")
     wait_for(driver,"document.querySelector('[data-my53-count]')?.textContent?.trim()==='0 / 53'",timeout=5)
-    my53_before=driver.execute_script("""
-      const first=document.querySelector('[data-my53-player]');
-      return {count:document.querySelector('[data-my53-count]')?.textContent?.trim()||'',key:first?.dataset.my53Player||'',pressed:first?.getAttribute('aria-pressed')||''};
-    """)
+    my53_before=driver.execute_script("""const first=document.querySelector('[data-my53-player]');return {count:document.querySelector('[data-my53-count]')?.textContent?.trim()||'',key:first?.dataset.my53Player||'',pressed:first?.getAttribute('aria-pressed')||''};""")
     driver.execute_script("document.querySelector('[data-my53-player]')?.click()")
     wait_for(driver,"document.querySelector('[data-my53-count]')?.textContent?.trim()==='1 / 53' && document.querySelector('[data-my53-player]')?.getAttribute('aria-pressed')==='true'",timeout=5)
-    my53_added=driver.execute_script("""
-      let stored=[];try{stored=JSON.parse(localStorage.getItem('titans:my53:v1')||'[]')}catch{}
-      const first=document.querySelector('[data-my53-player]');
-      return {count:document.querySelector('[data-my53-count]')?.textContent?.trim()||'',pressed:first?.getAttribute('aria-pressed')||'',stored:Array.isArray(stored)?stored.length:-1,note:document.querySelector('[data-my53-note]')?.textContent?.trim()||''};
-    """)
-    if my53_added['count']!='1 / 53' or my53_added['pressed']!='true' or my53_added['stored']!=1:
-        raise RuntimeError(f'My 53 add/persist failed: {my53_added}')
+    my53_added=driver.execute_script("""let stored=[];try{stored=JSON.parse(localStorage.getItem('titans:my53:v1')||'[]')}catch{} const first=document.querySelector('[data-my53-player]');return {count:document.querySelector('[data-my53-count]')?.textContent?.trim()||'',pressed:first?.getAttribute('aria-pressed')||'',stored:Array.isArray(stored)?stored.length:-1,note:document.querySelector('[data-my53-note]')?.textContent?.trim()||''};""")
+    if my53_added['count']!='1 / 53' or my53_added['pressed']!='true' or my53_added['stored']!=1: raise RuntimeError(f'My 53 add/persist failed: {my53_added}')
     driver.execute_script("document.querySelector('[data-my53-player][aria-pressed=\"true\"]')?.click()")
     wait_for(driver,"document.querySelector('[data-my53-count]')?.textContent?.trim()==='0 / 53'",timeout=5)
-    my53_removed=driver.execute_script("""
-      let stored=[];try{stored=JSON.parse(localStorage.getItem('titans:my53:v1')||'[]')}catch{}
-      return {count:document.querySelector('[data-my53-count]')?.textContent?.trim()||'',stored:Array.isArray(stored)?stored.length:-1,note:document.querySelector('[data-my53-note]')?.textContent?.trim()||''};
-    """)
-    if my53_removed['count']!='0 / 53' or my53_removed['stored']!=0:
-        raise RuntimeError(f'My 53 remove/persist failed: {my53_removed}')
+    my53_removed=driver.execute_script("""let stored=[];try{stored=JSON.parse(localStorage.getItem('titans:my53:v1')||'[]')}catch{} return {count:document.querySelector('[data-my53-count]')?.textContent?.trim()||'',stored:Array.isArray(stored)?stored.length:-1,note:document.querySelector('[data-my53-note]')?.textContent?.trim()||''};""")
+    if my53_removed['count']!='0 / 53' or my53_removed['stored']!=0: raise RuntimeError(f'My 53 remove/persist failed: {my53_removed}')
 
     stage='cutdown:mobile'
     driver.set_window_size(390,844)
     activate_cutdown_view(driver)
     no_overflow(driver,'cutdown 390px')
     cutdown_mobile=driver.execute_script("""
-      const root=document.querySelector('[data-cutdown-command]');
-      const my53=root?.querySelector('[data-my53]');
-      const my53Targets=[...my53.querySelectorAll('button')].slice(0,8).map(x=>({label:x.textContent.trim().slice(0,80),h:x.getBoundingClientRect().height}));
-      return {
-        viewport:document.documentElement.clientWidth,
-        links:[...root.querySelectorAll('a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height})),
-        my53Targets,
-        rootWidth:root.getBoundingClientRect().width
-      };
+      const root=document.querySelector('[data-cutdown-command]');const my53=root?.querySelector('[data-my53]');const my53Targets=[...my53.querySelectorAll('button')].slice(0,8).map(x=>({label:x.textContent.trim().slice(0,80),h:x.getBoundingClientRect().height}));
+      return {viewport:document.documentElement.clientWidth,links:[...root.querySelectorAll('a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height})),my53Targets,rootWidth:root.getBoundingClientRect().width};
     """)
-    if not cutdown_mobile['links'] or any(x['h']<48 for x in cutdown_mobile['links']):
-        raise RuntimeError(f'Cutdown mobile targets invalid: {cutdown_mobile}')
-    if not cutdown_mobile['my53Targets'] or any(x['h']<48 for x in cutdown_mobile['my53Targets']):
-        raise RuntimeError(f'My 53 mobile targets invalid: {cutdown_mobile}')
-    if cutdown_mobile['rootWidth']>cutdown_mobile['viewport']+3:
-        raise RuntimeError(f'Cutdown mobile root overflow: {cutdown_mobile}')
+    if not cutdown_mobile['links'] or any(x['h']<48 for x in cutdown_mobile['links']): raise RuntimeError(f'Cutdown mobile targets invalid: {cutdown_mobile}')
+    if not cutdown_mobile['my53Targets'] or any(x['h']<48 for x in cutdown_mobile['my53Targets']): raise RuntimeError(f'My 53 mobile targets invalid: {cutdown_mobile}')
+    if cutdown_mobile['rootWidth']>cutdown_mobile['viewport']+3: raise RuntimeError(f'Cutdown mobile root overflow: {cutdown_mobile}')
     driver.set_window_size(1440,1000)
 
     stage='player:desktop'
@@ -275,14 +201,7 @@ try:
     stage='player:mobile'
     driver.set_window_size(390,844)
     no_overflow(driver,'player 390px')
-    mobile_player=driver.execute_script("""
-      return {
-        tabs:[...document.querySelectorAll('[data-v16-player-tab]')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height})),
-        favorite:document.querySelector('[data-v16-favorite]')?.getBoundingClientRect().height||0,
-        root:Boolean(document.querySelector('.v16-player-intel')),
-        headshot:Boolean(document.querySelector('.player-rich-hero .has-headshot img'))
-      }
-    """)
+    mobile_player=driver.execute_script("""return {tabs:[...document.querySelectorAll('[data-v16-player-tab]')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height})),favorite:document.querySelector('[data-v16-favorite]')?.getBoundingClientRect().height||0,root:Boolean(document.querySelector('.v16-player-intel')),headshot:Boolean(document.querySelector('.player-rich-hero .has-headshot img'))};""")
     if len(mobile_player['tabs'])!=5 or any(x['h']<44 for x in mobile_player['tabs']): raise RuntimeError(f'Player mobile tab targets invalid: {mobile_player}')
     if mobile_player['favorite']<44 or not mobile_player['root']: raise RuntimeError(f'Player mobile shell invalid: {mobile_player}')
 
@@ -292,39 +211,23 @@ try:
     wait_for(driver,"document.querySelector('.v16-gameday') && ['pregame','live','postgame'].includes(document.querySelector('.v16-gameday')?.dataset.phase)",timeout=18)
     no_overflow(driver,'gameday desktop')
     gameday_phase=driver.execute_script("return document.querySelector('.v16-gameday')?.dataset.phase||''")
-    if gameday_phase=='pregame':
-        wait_for(driver,"document.querySelector('.v22-today-brief[data-game-id]')",timeout=10)
+    if gameday_phase=='pregame': wait_for(driver,"document.querySelector('.v22-today-brief[data-game-id]')",timeout=10)
     game=driver.execute_script("""
       const root=document.querySelector('.v16-gameday');
-      return {
-        phase:root?.dataset.phase||'',
-        tune:Boolean(root?.querySelector('a[href="#media"]')),
-        text:(root?.innerText||'').slice(0,1800),
-        fakeLive:Boolean(root?.querySelector('[data-fake-live]')),
-        fastPass:Boolean(root?.querySelector('.v22-today-brief[data-game-id]')),
-        fastPassId:root?.querySelector('.v22-today-brief')?.dataset.gameId||'',
-        fastPassTune:Boolean(root?.querySelector('.v22-today-brief a[href="#media"]')),
-        fastPassOfficial:[...root.querySelectorAll('.v22-today-brief a')].some(x=>x.href.includes('tennesseetitans.com/schedule')),
-        fastPassText:(root?.querySelector('.v22-today-brief')?.innerText||'').slice(0,900)
-      };
+      return {phase:root?.dataset.phase||'',tune:Boolean(root?.querySelector('a[href="#media"]')),text:(root?.innerText||'').slice(0,1800),fakeLive:Boolean(root?.querySelector('[data-fake-live]')),fastPass:Boolean(root?.querySelector('.v22-today-brief[data-game-id]')),fastPassId:root?.querySelector('.v22-today-brief')?.dataset.gameId||'',fastPassTune:Boolean(root?.querySelector('.v22-today-brief a[href="#media"]')),fastPassOfficial:[...root.querySelectorAll('.v22-today-brief a')].some(x=>x.href.includes('tennesseetitans.com/schedule')),fastPassText:(root?.querySelector('.v22-today-brief')?.innerText||'').slice(0,900)};
     """)
     if not game['tune'] or game['fakeLive']: raise RuntimeError(f'Game Day source/tune contract failed: {game}')
-    if game['phase']=='pregame' and (not game['fastPass'] or not game['fastPassId'] or not game['fastPassTune'] or not game['fastPassOfficial']):
-        raise RuntimeError(f'Next-game fast pass missing or incomplete during pregame: {game}')
+    if game['phase']=='pregame' and (not game['fastPass'] or not game['fastPassId'] or not game['fastPassTune'] or not game['fastPassOfficial']): raise RuntimeError(f'Next-game fast pass missing or incomplete during pregame: {game}')
 
     stage='gameday:mobile'
     driver.set_window_size(390,844)
     no_overflow(driver,'gameday 390px')
     mobile_game=driver.execute_script("""
-      const root=document.querySelector('.v16-gameday');
-      const links=[...root.querySelectorAll('a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height}));
-      const fastPassLinks=[...root.querySelectorAll('.v22-today-actions a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height}));
-      return {phase:root.dataset.phase,links,fastPassLinks,rootWidth:root.getBoundingClientRect().width,viewport:document.documentElement.clientWidth};
+      const root=document.querySelector('.v16-gameday');const links=[...root.querySelectorAll('a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height}));const fastPassLinks=[...root.querySelectorAll('.v22-today-actions a')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height}));return {phase:root.dataset.phase,links,fastPassLinks,rootWidth:root.getBoundingClientRect().width,viewport:document.documentElement.clientWidth};
     """)
     media_links=[x for x in mobile_game['links'] if 'watch' in x['label'].lower() or 'tune' in x['label'].lower()]
     if media_links and any(x['h']<44 for x in media_links): raise RuntimeError(f'Game Day mobile media target too small: {mobile_game}')
-    if mobile_game['phase']=='pregame' and (not mobile_game['fastPassLinks'] or any(x['h']<48 for x in mobile_game['fastPassLinks'])):
-        raise RuntimeError(f'Next-game fast pass mobile targets invalid: {mobile_game}')
+    if mobile_game['phase']=='pregame' and (not mobile_game['fastPassLinks'] or any(x['h']<48 for x in mobile_game['fastPassLinks'])): raise RuntimeError(f'Next-game fast pass mobile targets invalid: {mobile_game}')
 
     stage='console'
     warnings=[]
@@ -333,18 +236,7 @@ try:
     severe=[x for x in warnings if x.get('level')=='SEVERE']
     if severe: raise RuntimeError(f'v1.6 browser console has severe errors: {severe[:4]}')
 
-    result={
-      'ok':True,'base':BASE,'playerRoute':player_href,'playerRouteHydrated':True,'playerTabs':tabs,'favoriteToggle':[before,after,restored],
-      'playerMobileTargets':mobile_player['tabs'],'playerHeadshotLoaded':mobile_player['headshot'],
-      'rosterEnhancementState':roster_state,
-      'cutdownCommand':True,'cutdownCommandText':cutdown['text'],'cutdownMobileTargets':cutdown_mobile['links'],
-      'my53Interaction':{'before':my53_before,'added':my53_added,'removed':my53_removed},'my53MobileTargets':cutdown_mobile['my53Targets'],
-      'gameDayPhase':game['phase'],'gameDayTuneLink':game['tune'],'gameDayMobileViewport':mobile_game['viewport'],
-      'gameDayFastPass':game['fastPass'],'gameDayFastPassGameId':game['fastPassId'],'gameDayFastPassText':game['fastPassText'],
-      'gameDayFastPassMobileTargets':mobile_game['fastPassLinks'],
-      'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),
-      'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
-    }
+    result={'ok':True,'base':BASE,'playerRoute':player_href,'playerRouteHydrated':True,'playerRouteMode':player_route_mode,'playerTabs':tabs,'favoriteToggle':[before,after,restored],'playerMobileTargets':mobile_player['tabs'],'playerHeadshotLoaded':mobile_player['headshot'],'rosterEnhancementState':roster_state,'cutdownCommand':True,'cutdownCommandText':cutdown['text'],'cutdownMobileTargets':cutdown_mobile['links'],'my53Interaction':{'before':my53_before,'added':my53_added,'removed':my53_removed},'my53MobileTargets':cutdown_mobile['my53Targets'],'gameDayPhase':game['phase'],'gameDayTuneLink':game['tune'],'gameDayMobileViewport':mobile_game['viewport'],'gameDayFastPass':game['fastPass'],'gameDayFastPassGameId':game['fastPassId'],'gameDayFastPassText':game['fastPassText'],'gameDayFastPassMobileTargets':mobile_game['fastPassLinks'],'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     write_report(result);print(json.dumps(result,indent=2))
 except Exception as exc:
     result={'ok':False,'base':BASE,'stage':stage,'error':f'{type(exc).__name__}: {exc}','durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
