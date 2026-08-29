@@ -16,15 +16,22 @@ ROUTES=[
     ('intel','feed'),('legacy','legacy'),('sources','sources'),('fan-hub','fan'),
     ('listen-watch','media'),('command-intel','command'),
 ]
+ROUTE_READY_SELECTORS={
+    'fantasy':'#app[data-fantasy-command="ready"]',
+}
 
 
-def wait_ready(driver,timeout=12):
-    WebDriverWait(driver,timeout,poll_frequency=.1).until(
-        lambda d:d.execute_script("return document.readyState==='complete' && Boolean(document.querySelector('#app'))")
-    )
-    WebDriverWait(driver,timeout,poll_frequency=.1).until(
-        lambda d:d.execute_script("return Boolean(document.querySelector('.page-head h1') || document.querySelector('.fan-hero'))")
-    )
+def wait_ready(driver,route_name,route_hash,timeout=12):
+    expected=f'#{route_hash}'
+    selector=ROUTE_READY_SELECTORS.get(route_name,'')
+    def ready(d):
+        return d.execute_script("""
+          const expected=arguments[0],selector=arguments[1];
+          if(document.readyState!=='complete'||!document.querySelector('#app')||location.hash!==expected)return false;
+          if(selector)return Boolean(document.querySelector(selector));
+          return Boolean(document.querySelector('.page-head h1')||document.querySelector('.fan-hero')||document.querySelector('[data-ticket-center]'));
+        """,expected,selector)
+    WebDriverWait(driver,timeout,poll_frequency=.1).until(ready)
     time.sleep(.25)
 
 
@@ -37,20 +44,33 @@ def audit_page(driver):
       const channel=v=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)};
       const luminance=rgb=>.2126*channel(rgb.r)+.7152*channel(rgb.g)+.0722*channel(rgb.b);
       const ratio=(a,b)=>{const l1=luminance(a),l2=luminance(b);return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05)};
+      const composite=(fg,bg)=>{
+        const a=fg.a+bg.a*(1-fg.a);
+        if(a<=0)return {r:0,g:0,b:0,a:0};
+        return {
+          r:(fg.r*fg.a+bg.r*bg.a*(1-fg.a))/a,
+          g:(fg.g*fg.a+bg.g*bg.a*(1-fg.a))/a,
+          b:(fg.b*fg.a+bg.b*bg.a*(1-fg.a))/a,
+          a
+        };
+      };
       const visible=el=>{
         const s=getComputedStyle(el),r=el.getBoundingClientRect();
         return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1;
       };
       const effectiveBackground=el=>{
         let node=el;
+        const layers=[];
         while(node&&node.nodeType===1){
           const s=getComputedStyle(node);
           if(s.backgroundImage&&s.backgroundImage!=='none') return null;
           const bg=parseRgb(s.backgroundColor);
-          if(bg&&bg.a>=.98) return bg;
+          if(bg&&bg.a>0)layers.push(bg);
           node=node.parentElement;
         }
-        return {r:255,g:255,b:255,a:1};
+        let result={r:255,g:255,b:255,a:1};
+        for(let i=layers.length-1;i>=0;i--)result=composite(layers[i],result);
+        return result;
       };
       const candidates=[...document.querySelectorAll('#app h1,#app h2,#app h3,#app h4,#app p,#app li,#app small,#app span,#app a,#app button,#app label,#app strong,#app em')]
         .filter(visible)
@@ -71,7 +91,7 @@ def audit_page(driver):
             text:(el.textContent||'').replace(/\s+/g,' ').trim().slice(0,100),
             tag:el.tagName.toLowerCase(),className:String(el.className||'').slice(0,100),
             ratio:Number(cr.toFixed(2)),required,size:Number(size.toFixed(1)),weight,
-            color:s.color,background:`rgb(${bg.r}, ${bg.g}, ${bg.b})`
+            color:s.color,background:`rgb(${Math.round(bg.r)}, ${Math.round(bg.g)}, ${Math.round(bg.b)})`
           });
         }
       }
@@ -90,14 +110,16 @@ options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
 driver=None
 rows=[]
 started=time.time()
+current={'viewport':None,'route':None,'hash':None}
 try:
     driver=webdriver.Chrome(options=options)
     driver.set_page_load_timeout(25)
     for viewport,width,height in VIEWPORTS:
         driver.set_window_size(width,height)
         for route,route_hash in ROUTES:
+            current={'viewport':viewport,'route':route,'hash':route_hash}
             driver.get(f'{BASE}/#{route_hash}')
-            wait_ready(driver)
+            wait_ready(driver,route,route_hash)
             audit=audit_page(driver)
             rows.append({'viewport':viewport,'route':route,**audit})
     severe=[row for row in driver.get_log('browser') if row.get('level')=='SEVERE' and 'favicon' not in row.get('message','').lower()]
@@ -115,7 +137,7 @@ try:
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
     print(json.dumps({k:v for k,v in payload.items() if k not in ('rows','samples')},indent=2))
 except Exception as exc:
-    payload={'ok':False,'base':BASE,'error':f'{type(exc).__name__}: {exc}','rows':rows,'durationSeconds':round(time.time()-started,2)}
+    payload={'ok':False,'base':BASE,'stage':current,'error':f'{type(exc).__name__}: {exc}','rows':rows,'durationSeconds':round(time.time()-started,2)}
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
     print(json.dumps(payload,indent=2))
     raise
