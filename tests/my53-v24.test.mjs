@@ -41,22 +41,46 @@ test('My 53 is interactive and accessible',()=>{
   assert.match(js,/data-my53-clear/);
 });
 
+test('My 53 review tools search filter and review the current local board',()=>{
+  for(const contract of ['data-my53-search','data-my53-position','data-my53-selected','data-my53-visible','data-my53-units'])assert.match(js,new RegExp(contract));
+  assert.match(js,/placeholder="Search name or number…"/);
+  assert.match(js,/All positions/);
+  assert.match(js,/Selected only/);
+  assert.match(js,/button\.hidden=!show/);
+  assert.match(js,/selectedControl\.setAttribute\('aria-pressed',String\(next\)\)/);
+  assert.match(js,/\$\{shown\} shown · \$\{selection\.size\} selected/);
+  assert.match(js,/my53UnitShape\(roster,selection\)/);
+});
+
+test('My 53 share output is derived from selected loaded roster facts and labeled fan-made',()=>{
+  assert.match(js,/function my53ShareText\(roster,selection\)/);
+  assert.match(js,/selection\.has\(playerKey\(player\)\)/);
+  assert.match(js,/My Titans 53 · fan roster board/);
+  assert.match(js,/Fan-made roster exercise · not an official Titans projection\./);
+  assert.match(js,/navigator\.share\(\{title:'My Titans 53',text\}\)/);
+  assert.match(js,/navigator\.clipboard\?\.writeText/);
+  assert.match(js,/data-my53-share disabled/);
+});
+
 test('My 53 remains mobile and touch safe',()=>{
   assert.match(css,/\.my53-player\{min-height:58px/);
   assert.match(css,/@media\(max-width:720px\)/);
-  assert.match(css,/\.my53-count button\{min-height:48px!important\}/);
   assert.match(css,/\.my53-list\{grid-template-columns:1fr;max-height:520px/);
   assert.match(css,/\.my53-player\{min-height:52px/);
+  assert.match(css,/\.my53-tools-actions\{display:grid;grid-template-columns:1fr 1fr\}/);
 });
 
-test('My 53 clear action outspecifies the injected global 44px mobile floor',()=>{
+test('My 53 controls outspecify the injected global 44px mobile floor',()=>{
   assert.match(accessibility,/#app button,[\s\S]*min-height:44px!important/);
   const mobileBlock=css.slice(css.indexOf('@media(max-width:720px)'));
   assert.match(mobileBlock,/#app \.my53-count button\[data-my53-clear\]\{min-height:48px!important\}/);
+  assert.match(mobileBlock,/#app \.my53-tools input\[data-my53-search\],#app \.my53-tools select\[data-my53-position\],#app \.my53-tools-actions button\{min-height:48px!important\}/);
 });
 
-test('My 53 re-wires after Cutdown refresh without another observer',()=>{
+test('My 53 re-wires tools after Cutdown refresh without another observer',()=>{
   assert.match(js,/wireMy53\(panel,snapshot\(\)\.roster\)/);
   assert.match(js,/panel\.innerHTML=rosterPanel\(\)/);
+  assert.match(js,/search\?\.addEventListener\('input',refreshTools\)/);
+  assert.match(js,/positionFilter\?\.addEventListener\('change',refreshTools\)/);
   assert.doesNotMatch(js,/new MutationObserver/);
 });
