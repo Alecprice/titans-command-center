@@ -44,7 +44,15 @@ function auditedBootstrapFallback(reason='Live database unavailable'){
   };
 }
 async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
-async function nativeData(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});const headers={'Cache-Control':'public, s-maxage=60, stale-while-revalidate=300'};const data=await getBootstrapData(env);if(!data.configured)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);if(!data.ok){const fallback=auditedBootstrapFallback(data.error||'Live database query failed');return jsonResponse({...fallback,teamContext:await getAuditedTeamContext(null)},200,headers);}const sql=await getSql(env);let teamContext;try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}return jsonResponse({...data,mode:'live-database',databaseAvailable:true,teamContext},200,headers);}
+async function nativeData(request,env){
+  if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});
+  const headers={'Cache-Control':'public, s-maxage=60, stale-while-revalidate=300'};
+  if(!env?.DATABASE_URL)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);
+  let data;
+  try{data=await getBootstrapData(env);}catch(error){console.error('[native-data-bootstrap]',error);data={configured:true,ok:false,error:'Database query failed'};}
+  if(!data?.ok){const fallback=auditedBootstrapFallback(data?.error||'Live database query failed');return jsonResponse({...fallback,teamContext:await getAuditedTeamContext(null)},200,headers);}
+  const sql=await getSql(env);let teamContext;try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}return jsonResponse({...data,mode:'live-database',databaseAvailable:true,teamContext},200,headers);
+}
 async function cachedNativeData(request,env,ctx){
   const url=new URL(request.url);
   if(request.method!=='GET'||url.searchParams.size)return withEdgeCacheStatus(await nativeData(request,env),'BYPASS');
