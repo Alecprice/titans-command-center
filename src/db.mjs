@@ -69,13 +69,14 @@ export async function getBootstrapData(env = process.env) {
           where g.season=2026 and (ht.abbreviation='TEN' or at.abbreviation='TEN')
           order by case when g.kickoff is null then 1 else 0 end,g.kickoff,g.week`,
       sql`with latest as (
-            select rs.*,row_number() over(partition by rs.player_id order by rs.captured_at desc,rs.id desc) rn
+            select rs.id,rs.player_id,rs.position,rs.jersey_number,rs.unit,rs.roster_status,rs.experience,rs.captured_at,
+                   row_number() over(partition by rs.player_id order by rs.captured_at desc,rs.id desc) rn
             from roster_snapshots rs
             join teams t on t.id=rs.team_id
             where t.abbreviation='TEN'
           )
           select p.id,p.full_name,coalesce(l.position,p.position) position,l.jersey_number,l.unit,
-                 l.roster_status status,l.experience,l.raw_payload,l.captured_at
+                 l.roster_status status,l.experience,l.captured_at
           from latest l
           join players p on p.id=l.player_id
           where l.rn=1 and p.active=true
@@ -116,7 +117,9 @@ export async function getBootstrapData(env = process.env) {
           order by w.observed_at desc
           limit 12`,
       sql`with ranked as (
-            select mo.*,s.name source_name,
+            select mo.id,mo.game_id,mo.provider_event_id,mo.provider_odd_id,mo.market_category,mo.market_name,
+                   mo.stat_id,mo.entity_name,mo.player_id,mo.period_id,mo.bet_type,mo.side,mo.book,mo.line,mo.price,
+                   mo.is_live,mo.is_alt,mo.captured_at,s.name source_name,
                    row_number() over(
                      partition by mo.source_id,mo.provider_event_id,mo.provider_odd_id,coalesce(mo.book_id,mo.book)
                      order by mo.captured_at desc,mo.id desc
@@ -125,9 +128,12 @@ export async function getBootstrapData(env = process.env) {
             join sources s on s.id=mo.source_id
             where mo.available=true
           )
-          select * from ranked where rn=1 order by captured_at desc limit 160`,
+          select id,game_id,provider_event_id,provider_odd_id,market_category,market_name,stat_id,entity_name,player_id,
+                 period_id,bet_type,side,book,line,price,is_live,is_alt,captured_at,source_name
+          from ranked where rn=1 order by captured_at desc limit 160`,
       sql`with ranked as (
-            select fs.*,s.name source_name,
+            select fs.id,fs.market_type,fs.market_name,fs.participant_type,fs.participant_name,fs.player_id,fs.book,
+                   fs.line,fs.price,fs.captured_at,s.name source_name,
                    row_number() over(
                      partition by fs.source_id,coalesce(fs.provider_market_id,''),fs.market_type,fs.participant_name,coalesce(fs.book_id,fs.book)
                      order by fs.captured_at desc,fs.id desc
@@ -136,7 +142,8 @@ export async function getBootstrapData(env = process.env) {
             join sources s on s.id=fs.source_id
             where fs.available=true and fs.season=2026
           )
-          select * from ranked where rn=1 order by captured_at desc limit 100`
+          select id,market_type,market_name,participant_type,participant_name,player_id,book,line,price,captured_at,source_name
+          from ranked where rn=1 order by captured_at desc limit 100`
     ]);
 
     const meta = Object.fromEntries(metaRows.map(r => [r.key,r.value]));
@@ -317,7 +324,7 @@ export async function getPlayerProfile(playerId, env = process.env) {
   try {
     const [players,rosterRows,statRows,injuryRows,propRows] = await Promise.all([
       sql`select id,full_name,first_name,last_name,position,college,active,metadata from players where id=${playerId}::uuid limit 1`,
-      sql`select rs.jersey_number,rs.position,rs.unit,rs.roster_status,rs.experience,rs.captured_at,rs.raw_payload
+      sql`select rs.jersey_number,rs.position,rs.unit,rs.roster_status,rs.experience,rs.captured_at
           from roster_snapshots rs where rs.player_id=${playerId}::uuid order by rs.captured_at desc,rs.id desc limit 1`,
       sql`select pgs.id,pgs.stat_group,pgs.stats,pgs.captured_at,g.week,g.season_type,g.kickoff,
                  ht.abbreviation home_abbr,at.abbreviation away_abbr
@@ -332,13 +339,16 @@ export async function getPlayerProfile(playerId, env = process.env) {
           from injury_reports where player_id=${playerId}::uuid
           order by report_date desc nulls last,captured_at desc limit 30`,
       sql`with ranked as (
-            select mo.*,s.name source_name,row_number() over(
-              partition by mo.source_id,mo.provider_event_id,mo.provider_odd_id,coalesce(mo.book_id,mo.book)
-              order by mo.captured_at desc,mo.id desc
-            ) rn
+            select mo.id,mo.market_name,mo.market_category,mo.side,mo.book,mo.line,mo.price,mo.captured_at,s.name source_name,
+                   row_number() over(
+                     partition by mo.source_id,mo.provider_event_id,mo.provider_odd_id,coalesce(mo.book_id,mo.book)
+                     order by mo.captured_at desc,mo.id desc
+                   ) rn
             from market_odds mo join sources s on s.id=mo.source_id
             where mo.player_id=${playerId}::uuid and mo.available=true
-          ) select * from ranked where rn=1 order by captured_at desc limit 50`
+          )
+          select id,market_name,market_category,side,book,line,price,captured_at,source_name
+          from ranked where rn=1 order by captured_at desc limit 50`
     ]);
     if (!players.length) return { configured:true, ok:false, error:'Player not found' };
     const p=players[0],r=rosterRows[0]||{};

@@ -15,6 +15,7 @@ import {syncTitansOfficialAudit,syncBluesky,syncEspn,syncNflverseRoster,syncNflv
 const API_PREFIX='/api/';
 const APP_VERSION='1.0.0';
 const SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
+const BOOTSTRAP_CACHE_CONTROL='public, s-maxage=900, stale-while-revalidate=21600';
 
 function requestHeaders(headers){const out={};for(const [key,value] of headers.entries())out[key.toLowerCase()]=value;return out;}
 function requestQuery(url,route){const query={route};for(const [key,value] of url.searchParams.entries()){if(key==='route')continue;const current=query[key];if(current===undefined)query[key]=value;else if(Array.isArray(current))current.push(value);else query[key]=[current,value];}return query;}
@@ -53,10 +54,12 @@ function unavailableFanIntel(env,reason='Live fan intelligence warehouse unavail
   };
 }
 function guestSessionUnavailable(){return jsonResponse({ok:true,user:null,session:null,guest:true,available:false,code:'ACCOUNT_SERVICE_UNAVAILABLE'},200,{'Cache-Control':'no-store'});}
+function accountInfrastructureFailure(status){return status===402||status===429||status>=500;}
+function accountServiceUnavailable(status=503){return jsonResponse({ok:false,error:'Account service is temporarily unavailable. You can keep using Titans Command Center as a guest, and settings already saved on this device are safe.',code:'ACCOUNT_SERVICE_UNAVAILABLE',localOnly:true},status,{'Cache-Control':'no-store'});}
 async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
 async function nativeData(request,env){
   if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});
-  const headers={'Cache-Control':'public, s-maxage=60, stale-while-revalidate=300'};
+  const headers={'Cache-Control':BOOTSTRAP_CACHE_CONTROL};
   if(!env?.DATABASE_URL)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);
   let data;
   try{data=await getBootstrapData(env);}catch(error){console.error('[native-data-bootstrap]',error);data={configured:true,ok:false,error:'Database query failed'};}
@@ -64,8 +67,7 @@ async function nativeData(request,env){
   const sql=await getSql(env);let teamContext;try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}return jsonResponse({...data,mode:'live-database',databaseAvailable:true,teamContext},200,headers);
 }
 async function cachedNativeData(request,env,ctx){
-  const url=new URL(request.url);
-  if(request.method!=='GET'||url.searchParams.size)return withEdgeCacheStatus(await nativeData(request,env),'BYPASS');
+  if(request.method!=='GET')return withEdgeCacheStatus(await nativeData(request,env),'BYPASS');
   const cache=globalThis.caches?.default;
   if(!cache)return withEdgeCacheStatus(await nativeData(request,env),'UNAVAILABLE');
   const key=apiCacheKey(request),hit=await cache.match(key);
@@ -103,9 +105,9 @@ async function cachedAdapterData(request,route,handler,env,ctx){
 }
 async function resilientAccountAuth(request,subpath){
   const response=await accountAuthProxy(request,subpath);
-  if(subpath!=='get-session'||response.status<500)return response;
+  if(!accountInfrastructureFailure(response.status))return response;
   try{await response.body?.cancel();}catch{}
-  return guestSessionUnavailable();
+  return subpath==='get-session'?guestSessionUnavailable():accountServiceUnavailable(response.status);
 }
 async function resilientFanIntel(request,env,ctx){
   const response=await cachedAdapterData(request,'fan-intel',fanIntelRoute,env,ctx);
