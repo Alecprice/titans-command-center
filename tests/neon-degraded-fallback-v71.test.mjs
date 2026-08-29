@@ -11,8 +11,11 @@ test('Data API keeps Neon health visible while serving a labeled audited fallbac
   assert.match(worker,/mode:'audited-fallback'/);
   assert.match(worker,/databaseAvailable:false/);
   assert.match(worker,/fallback:\{active:true/);
-  assert.match(worker,/if\(!data\.ok\)\{const fallback=auditedBootstrapFallback/);
+  assert.match(worker,/if\(!env\?\.DATABASE_URL\)return jsonResponse\(\{ok:false,configured:false,error:'DATABASE_URL is not configured'\},503/);
+  assert.match(worker,/try\{data=await getBootstrapData\(env\);\}catch\(error\)/);
+  assert.match(worker,/if\(!data\?\.ok\)\{const fallback=auditedBootstrapFallback/);
   assert.match(worker,/getAuditedTeamContext\(null\)/);
+  assert.doesNotMatch(worker,/if\(!data\.configured\)return jsonResponse/);
   assert.doesNotMatch(worker,/if\(!data\.ok\)return jsonResponse\(data,503/);
   assert.match(worker,/status:db\.ok\?'healthy':'degraded'/);
   assert.match(worker,/'Cache-Control':'no-store'/);
