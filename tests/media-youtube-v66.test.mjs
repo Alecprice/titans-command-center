@@ -51,12 +51,15 @@ test('Worker exposes cached server-side media API and never sends the key to the
 test('IFrame API loads only after explicit Play interaction and handles revoked embed permission',()=>{
   assert.match(frontend,/data-youtube-play/);
   assert.match(frontend,/async function play\(button\)/);
-  assert.match(frontend,/loadIframeApi\(\)/);
+  assert.match(frontend,/function loadIframeApi\(\)/);
   assert.match(frontend,/https:\/\/www\.youtube\.com\/iframe_api/);
+  assert.match(frontend,/document\.head\.appendChild\(script\)/);
+  assert.equal((frontend.match(/loadIframeApi\(\)/g)||[]).length,2,'IFrame loader should have one definition and one call site');
+  assert.match(frontend,/async function play\(button\)[\s\S]*const YT=await loadIframeApi\(\)/);
+  assert.doesNotMatch(frontend,/^\s*loadIframeApi\(\);/m);
   assert.match(frontend,/autoplay:0/);
   assert.match(frontend,/onReady:event=>event\.target\.playVideo\(\)/);
   assert.match(frontend,/onError:event=>fallbackPlayer/);
-  assert.doesNotMatch(frontend,/document\.head\.appendChild\(script\).*mount\(\)/s);
 });
 
 test('media shell and CSP explicitly allow only the YouTube resources needed for embeds',()=>{
@@ -64,7 +67,9 @@ test('media shell and CSP explicitly allow only the YouTube resources needed for
   assert.match(html,/media-youtube-v66\.js/);
   assert.match(headers,/script-src[^\n]*https:\/\/www\.youtube\.com[^\n]*https:\/\/s\.ytimg\.com/);
   assert.match(headers,/img-src[^\n]*https:\/\/i\.ytimg\.com/);
-  assert.match(headers,/frame-src[^\n]*https:\/\/www\.youtube\.com/);
+  assert.match(headers,/connect-src 'self' https:\/\/api\.sleeper\.app;/);
+  assert.match(headers,/frame-src https:\/\/www\.youtube\.com https:\/\/www\.youtube-nocookie\.com;/);
+  assert.match(headers,/frame-ancestors 'none'/);
   assert.match(css,/min-height:44px/);
 });
 
