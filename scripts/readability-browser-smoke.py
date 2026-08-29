@@ -19,6 +19,7 @@ ROUTES=[
 ROUTE_READY_SELECTORS={
     'fantasy':'#app[data-fantasy-command="ready"]',
 }
+MIN_AUDITED_TEXT=5
 
 
 def wait_ready(driver,route_name,route_hash,timeout=12):
@@ -59,13 +60,20 @@ def audit_page(driver):
         return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>1&&r.height>1;
       };
       const effectiveBackground=el=>{
-        let node=el;
+        let node=el,coverage=0;
         const layers=[];
         while(node&&node.nodeType===1){
           const s=getComputedStyle(node);
-          if(s.backgroundImage&&s.backgroundImage!=='none') return null;
+          if(s.backgroundImage&&s.backgroundImage!=='none'){
+            if(coverage>=.999)break;
+            return null;
+          }
           const bg=parseRgb(s.backgroundColor);
-          if(bg&&bg.a>0)layers.push(bg);
+          if(bg&&bg.a>0){
+            layers.push(bg);
+            coverage=1-(1-coverage)*(1-bg.a);
+            if(coverage>=.999)break;
+          }
           node=node.parentElement;
         }
         let result={r:255,g:255,b:255,a:1};
@@ -121,6 +129,8 @@ try:
             driver.get(f'{BASE}/#{route_hash}')
             wait_ready(driver,route,route_hash)
             audit=audit_page(driver)
+            if audit['audited']<MIN_AUDITED_TEXT:
+                raise RuntimeError(f'{viewport}:{route}: contrast audit only checked {audit["audited"]} text elements; skipped {audit["skippedComplexBackground"]}')
             rows.append({'viewport':viewport,'route':route,**audit})
     severe=[row for row in driver.get_log('browser') if row.get('level')=='SEVERE' and 'favicon' not in row.get('message','').lower()]
     if severe:
