@@ -69,16 +69,89 @@
     }
     return [...counts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
   }
+  function my53UnitShape(roster,selection){
+    const counts=new Map();
+    for(const player of roster){
+      if(!selection.has(playerKey(player)))continue;
+      const unit=String(player.unit||'Other').trim()||'Other';
+      counts.set(unit,(counts.get(unit)||0)+1);
+    }
+    return [...counts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  }
+  function my53ShareText(roster,selection){
+    const selected=rows(roster)
+      .filter(player=>selection.has(playerKey(player)))
+      .sort((a,b)=>String(a.unit||'Other').localeCompare(String(b.unit||'Other'))||String(a.position||'').localeCompare(String(b.position||''))||String(a.name||'').localeCompare(String(b.name||'')));
+    const grouped=new Map();
+    for(const player of selected){
+      const unit=String(player.unit||'Other').trim()||'Other';
+      if(!grouped.has(unit))grouped.set(unit,[]);
+      grouped.get(unit).push(player);
+    }
+    const lines=['My Titans 53 · fan roster board',`${selected.length} of ${FINAL_LIMIT} selected`,''];
+    for(const [unit,players] of grouped){
+      lines.push(unit.toUpperCase());
+      for(const player of players)lines.push(`• ${player.number?`#${player.number} `:''}${player.name} · ${player.position||'Position not listed'}`);
+      lines.push('');
+    }
+    lines.push('Fan-made roster exercise · not an official Titans projection.');
+    return lines.join('\n').trim();
+  }
+  async function copyMy53Text(text){
+    try{
+      if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);return true;}
+    }catch{}
+    try{
+      const area=document.createElement('textarea');
+      area.value=text;
+      area.setAttribute('readonly','');
+      area.style.position='fixed';
+      area.style.opacity='0';
+      document.body.appendChild(area);
+      area.select();
+      const copied=document.execCommand?.('copy')===true;
+      area.remove();
+      return copied;
+    }catch{return false;}
+  }
+  async function shareMy53(roster,selection,note){
+    if(!selection.size)return;
+    const text=my53ShareText(roster,selection);
+    if(typeof navigator.share==='function'){
+      try{
+        await navigator.share({title:'My Titans 53',text});
+        if(note)note.textContent='My 53 shared. Your picks still stay on this device.';
+        return;
+      }catch(error){
+        if(error?.name==='AbortError'){if(note)note.textContent='Share canceled. Your My 53 is unchanged.';return;}
+      }
+    }
+    const copied=await copyMy53Text(text);
+    if(note)note.textContent=copied?'My 53 copied to your clipboard.':'This browser could not share or copy My 53.';
+  }
   function my53Markup(roster){
     const active=rows(roster).filter(p=>String(p.status||'').toLowerCase()==='active');
+    const positions=[...new Set(active.map(player=>String(player.position||'Other').trim()||'Other'))].sort((a,b)=>a.localeCompare(b));
     return `<section class="my53-builder" data-my53>
       <div class="my53-head">
         <div><small>MY 53 · FAN BOARD</small><h3>Build your own Titans 53</h3><p>Your picks stay on this device. This is a fan roster exercise—not an official roster projection or report.</p></div>
         <div class="my53-count"><strong data-my53-count>0 / 53</strong><button type="button" data-my53-clear>Clear picks</button></div>
       </div>
       <div class="my53-shape" data-my53-shape aria-live="polite"></div>
+      <div class="my53-tools" data-my53-tools>
+        <div class="my53-tools-row">
+          <label><span>Find player</span><input type="search" data-my53-search placeholder="Search name or number…" autocomplete="off"></label>
+          <label><span>Position</span><select data-my53-position><option value="all">All positions</option>${positions.map(position=>`<option value="${esc(position)}">${esc(position)}</option>`).join('')}</select></label>
+        </div>
+        <div class="my53-tools-actions">
+          <button type="button" data-my53-selected aria-pressed="false">Selected only</button>
+          <button type="button" data-my53-share disabled>Share / Copy My 53</button>
+          <span data-my53-visible aria-live="polite"></span>
+        </div>
+        <div class="my53-unit-shape" data-my53-units aria-live="polite"></div>
+      </div>
       <div class="my53-list" role="group" aria-label="Choose players for My 53">
-        ${active.map(player=>`<button type="button" class="my53-player" data-my53-player="${esc(playerKey(player))}" aria-pressed="false"><span class="my53-number">#${esc(player.number||'—')}</span><span><b>${esc(player.name)}</b><small>${esc(player.position||'')} · ${esc(player.unit||'')}</small></span><i aria-hidden="true">+</i></button>`).join('')}
+        ${active.map(player=>`<button type="button" class="my53-player" data-my53-player="${esc(playerKey(player))}" data-my53-name="${esc(player.name)}" data-my53-number="${esc(player.number||'')}" data-my53-position="${esc(player.position||'Other')}" data-my53-unit="${esc(player.unit||'Other')}" aria-pressed="false"><span class="my53-number">#${esc(player.number||'—')}</span><span><b>${esc(player.name)}</b><small>${esc(player.position||'')} · ${esc(player.unit||'')}</small></span><i aria-hidden="true">+</i></button>`).join('')}
       </div>
       <p class="my53-note" data-my53-note>Pick up to 53 loaded active players. No selection changes the official roster or synced account settings.</p>
     </section>`;
@@ -90,8 +163,33 @@
     const count=root.querySelector('[data-my53-count]');
     const shape=root.querySelector('[data-my53-shape]');
     const note=root.querySelector('[data-my53-note]');
+    const search=root.querySelector('[data-my53-search]');
+    const positionFilter=root.querySelector('[data-my53-position]');
+    const selectedToggle=root.querySelector('[data-my53-selected]');
+    const share=root.querySelector('[data-my53-share]');
+    const visible=root.querySelector('[data-my53-visible]');
+    const units=root.querySelector('[data-my53-units]');
     const buttons=[...root.querySelectorAll('[data-my53-player]')];
 
+    const refreshTools=()=>{
+      const query=String(search?.value||'').trim().toLowerCase();
+      const position=String(positionFilter?.value||'all');
+      const selectedOnly=selectedToggle?.getAttribute('aria-pressed')==='true';
+      let shown=0;
+      for(const button of buttons){
+        const on=selection.has(button.dataset.my53Player);
+        const haystack=`${button.dataset.my53Name||''} ${button.dataset.my53Number||''}`.toLowerCase();
+        const show=(!query||haystack.includes(query))&&(position==='all'||button.dataset.my53Position===position)&&(!selectedOnly||on);
+        button.hidden=!show;
+        if(show)shown+=1;
+      }
+      if(visible)visible.textContent=`${shown} shown · ${selection.size} selected`;
+      if(share)share.disabled=selection.size===0;
+      const unitShape=my53UnitShape(roster,selection);
+      if(units)units.innerHTML=unitShape.length
+        ?unitShape.map(([unit,total])=>`<span><b>${esc(total)}</b> ${esc(unit)}</span>`).join('')
+        :'<span>Select players to see unit composition.</span>';
+    };
     const paint=message=>{
       for(const button of buttons){
         const on=selection.has(button.dataset.my53Player);
@@ -105,9 +203,24 @@
         ?positions.map(([position,total])=>`<span><b>${esc(total)}</b> ${esc(position)}</span>`).join('')
         :'<span>No fan picks yet.</span>';
       if(note&&message)note.textContent=message;
+      refreshTools();
     };
 
+    search?.addEventListener('input',refreshTools);
+    positionFilter?.addEventListener('change',refreshTools);
     root.addEventListener('click',event=>{
+      const selectedControl=event.target.closest('[data-my53-selected]');
+      if(selectedControl){
+        const next=selectedControl.getAttribute('aria-pressed')!=='true';
+        selectedControl.setAttribute('aria-pressed',String(next));
+        selectedControl.classList.toggle('active',next);
+        refreshTools();
+        return;
+      }
+      if(event.target.closest('[data-my53-share]')){
+        void shareMy53(roster,selection,note);
+        return;
+      }
       const button=event.target.closest('[data-my53-player]');
       if(button){
         const key=button.dataset.my53Player;
