@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + production regression failure**
-- Source commit: `f7a35a94131da69d81cb6eeb8f1a63a2574ae3f2`
+- Source commit: `ce82b815afcd2ece1c42996cd286dc781dabcb8d`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -22,13 +22,13 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-29T04:24:15Z
+- Recorded: 2026-08-29T04:27:55Z
 
 ## Production regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "rootStatus": 200,
   "securityHeaders": {
@@ -79,18 +79,50 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "f7a35a94131da69d81cb6eeb8f1a63a2574ae3f2",
-    "builtAt": "2026-08-29T04:23:44.220Z"
+    "commit": "ce82b815afcd2ece1c42996cd286dc781dabcb8d",
+    "builtAt": "2026-08-29T04:27:26.860Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 3,
   "responseMs": {
     "root": 34,
-    "health": 185,
-    "data": 219,
-    "stats": 261,
-    "market": 7359
+    "health": 246,
+    "data": 134,
+    "stats": 404,
+    "market": 617
   },
-  "testedAt": "2026-08-29T04:24:14.461Z"
+  "testedAt": "2026-08-29T04:27:54.553Z",
+  "healthTruth": {
+    "ok": true,
+    "mode": "audited-fallback",
+    "status": 200,
+    "healthStatus": "degraded",
+    "contentAudit": null,
+    "databaseContentAudit": null,
+    "fallbackContentAudit": "2026-08-27",
+    "databaseAvailable": false,
+    "responseMs": 317,
+    "testedAt": "2026-08-29T04:27:54.905Z"
+  },
+  "marketEdgeCache": {
+    "ok": true,
+    "base": "https://titans-command-center.alecjordanprice.workers.dev",
+    "initialStatus": "HIT",
+    "finalStatus": "HIT",
+    "attempts": 1,
+    "coldOrInitialMs": 347,
+    "warmHitMs": 347,
+    "rows": 962,
+    "sequence": [
+      {
+        "status": "HIT",
+        "durationMs": 347,
+        "rows": 962
+      }
+    ],
+    "testedAt": "2026-08-29T04:27:55.284Z"
+  },
+  "analyticsError": "Advanced analytics API returned 500",
+  "analyticsTestedAt": "2026-08-29T04:27:55.540Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
