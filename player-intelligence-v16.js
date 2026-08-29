@@ -3,7 +3,7 @@
 
   const app=document.querySelector('#app');
   const PROFILE_KEY='titans:v15MyTitans';
-  let serial=0,fanPromise=null,dataPromise=null;
+  let serial=0,fanPromise=null,dataPromise=null,preseasonPromise=null;
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const playerId=()=>new URLSearchParams(location.hash.split('?')[1]||'').get('id')||'';
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -15,6 +15,8 @@
   const slug=value=>String(value??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const human=value=>String(value??'').replace(/[_-]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
   const number=value=>Number.isFinite(Number(value))?Number(value):null;
+  const day=value=>String(value||'').slice(0,10);
+  const weekLabel=row=>String(row?.week||'—').toUpperCase().startsWith('P')?String(row.week):`Week ${row?.week??'—'}`;
 
   async function fanIntel(){
     if(!fanPromise)fanPromise=fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
@@ -24,6 +26,58 @@
   async function siteData(){
     if(!dataPromise)dataPromise=fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
     return dataPromise;
+  }
+
+  async function preseasonData(){
+    if(!preseasonPromise)preseasonPromise=fetch('/api/preseason-stats',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+    return preseasonPromise;
+  }
+
+  const statName=label=>({
+    'YDS':'yards','TD':'touchdowns','INT':'interceptions','ATT':'attempts','REC':'receptions','TAR':'targets','LG':'long',
+    'TKL':'solo_tackles','AST':'assisted_tackles','COMB':'total_tackles','SACK':'sacks','SACK YDS':'sack_yards','TFL':'tackles_for_loss',
+    'QH':'qb_hits','PD':'passes_defensed','INT YDS':'interception_yards','FF':'forced_fumbles','FR':'fumble_recoveries','PTS':'points',
+    'AVG':'average','NET':'net_average','IN20':'inside_20','FG LG':'field_goal_long','FC':'fair_catches'
+  })[String(label||'').toUpperCase()]||String(label||'stat').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+
+  function preseasonStatsObject(row){
+    const group=String(row?.category||'stats').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'stats',values={};
+    for(const item of arr(row?.fields)){
+      const label=String(item?.label||'').toUpperCase(),raw=String(item?.value??'').trim();
+      if(label==='CMP/ATT'){
+        const match=raw.match(/^(\d+)\s*\/\s*(\d+)$/);if(match){values.completions=Number(match[1]);values.attempts=Number(match[2]);}
+        continue;
+      }
+      if(label==='FG'||label==='XP'){
+        const match=raw.match(/^(\d+)\s*\/\s*(\d+)$/);if(match){const prefix=label==='FG'?'field_goals':'extra_points';values[`${prefix}_made`]=Number(match[1]);values[`${prefix}_attempted`]=Number(match[2]);}
+        continue;
+      }
+      const key=statName(label),numeric=number(raw);if(key)values[key]=numeric==null?raw:numeric;
+    }
+    return {[group]:values};
+  }
+
+  function preseasonMatchup(row,preseason){
+    const game=arr(preseason?.preseasonSchedule).find(item=>day(item?.date)===day(row?.date))||arr(preseason?.coverage?.games).find(item=>day(item?.date)===day(row?.date))||{};
+    const name=String(game.name||row?.eventName||''),opponent=String(game.opponentAbbr||'');
+    if(/^TEN\s+vs\s+/i.test(name))return {week:game.week||'',homeAbbr:'TEN',awayAbbr:opponent||name.replace(/^TEN\s+vs\s+/i,'').trim()};
+    if(/^TEN\s+@\s+/i.test(name))return {week:game.week||'',homeAbbr:opponent||name.replace(/^TEN\s+@\s+/i,'').trim(),awayAbbr:'TEN'};
+    if(/^\S+\s+@\s+TEN$/i.test(name))return {week:game.week||'',homeAbbr:'TEN',awayAbbr:name.split('@')[0].trim()};
+    return {week:game.week||'',homeAbbr:'',awayAbbr:''};
+  }
+
+  function applyPreseasonFallback(profile,preseason){
+    if(!profile?.ok||arr(profile.stats).length||!preseason?.ok)return profile;
+    const player=profile.player||{},candidates=[...arr(preseason.players),...arr(preseason.otherParticipants)];
+    const match=candidates.find(item=>String(item?.id||'')&&String(item.id)===String(player.id||''))||candidates.find(item=>slug(item?.name)===slug(player.name));
+    const sourceRows=arr(match?.stats);if(!sourceRows.length)return profile;
+    const season=Number(preseason.season||2026),stats=sourceRows.map((row,index)=>{const game=preseasonMatchup(row,preseason);return {
+      id:`official-preseason:${row.eventId||day(row.date)||'game'}:${index}`,
+      statGroup:row.category||'Stats',stats:preseasonStatsObject(row),capturedAt:preseason.fetchedAt||null,
+      week:game.week||String(row.eventId||'').replace(/^p/i,'P'),season,seasonType:'preseason',kickoff:row.date||null,
+      homeAbbr:game.homeAbbr,awayAbbr:game.awayAbbr,source:row.source||preseason.statsSource||'Official preseason source',sourceUrl:row.sourceUrl||'',fallback:true
+    }}).sort((a,b)=>Date.parse(b.kickoff||0)-Date.parse(a.kickoff||0));
+    return {...profile,stats,statContext:{mode:'official-preseason-fallback',season,seasonType:'preseason',source:preseason.statsSource||'Official audited preseason sources',coverage:`${preseason.coverage?.completedGamesWithPlayerStats??'—'} of ${preseason.coverage?.completedGames??'—'} completed preseason games with player detail`}};
   }
 
   function flattenStats(row){
@@ -57,7 +111,7 @@
   }
 
   function trendMetric(rows,key){
-    return rows.slice().reverse().map(row=>({label:`W${row.week??'—'}`,value:flattenStats(row)[key],date:row.kickoff})).filter(x=>x.value!=null).slice(-8);
+    return rows.slice().reverse().map(row=>({label:String(row.week||'—'),value:flattenStats(row)[key],date:row.kickoff})).filter(x=>x.value!=null).slice(-8);
   }
 
   function spark(values){
@@ -88,13 +142,14 @@
     const injury=arr(data.injuries)[0];if(injury)rows.push(['Injury report',injury.reportStatus||injury.practiceStatus||injury.primaryInjury||'Updated',injury.reportDate?calendarDate(injury.reportDate):teamDate(injury.capturedAt)]);
     const depth=arr(fan?.depthChart?.changes).find(x=>String(x.playerId||'')===String(player.id||'')||slug(x.name)===slug(name));if(depth)rows.push(['Depth chart',`${depth.type||'changed'} · ${depth.from??'—'} → ${depth.to??'—'}`,fan?.depthChart?.capturedAt?teamDate(fan.depthChart.capturedAt):'Current snapshot']);
     const mentions=arr(fan?.playerStats).filter(x=>String(x.playerId||'')===String(player.id||'')).slice(0,2);if(mentions.length)rows.push(['Production',`${mentions.length} recent player-stat row${mentions.length===1?'':'s'} loaded`,'Game data']);
+    if(data?.statContext?.mode==='official-preseason-fallback'&&arr(data.stats).length)rows.push(['Preseason production',`${arr(data.stats).length} verified official stat row${arr(data.stats).length===1?'':'s'} loaded`,`${data.statContext.season||2026} preseason · fallback for missing warehouse rows`]);
     if(!rows.length)rows.push(['No detected change','Roster profile is stable in the currently loaded datasets.','Current load']);
     return rows;
   }
 
   function gameLog(rows){
     if(!rows.length)return'<div class="v16-empty"><strong>No player-game rows loaded.</strong><span>This is an ingest gap, not a zero-stat claim.</span></div>';
-    return `<div class="v16-game-log">${rows.slice(0,12).map(row=>{const metrics=metricSummary(row);return `<article><div class="v16-game-id"><small>${esc(row.season?`${row.season} · `:'')}Week ${esc(row.week??'—')}</small><strong>${esc(row.homeAbbr||'')} vs ${esc(row.awayAbbr||'')}</strong><span>${esc(teamDate(row.kickoff))}</span></div><div class="v16-log-stats">${metrics.length?metrics.map(metric=>`<div><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong></div>`).join(''):'<span>No numeric fields in this stat row.</span>'}</div></article>`}).join('')}</div>`;
+    return `<div class="v16-game-log">${rows.slice(0,12).map(row=>{const metrics=metricSummary(row),meta=[row.season,human(row.seasonType||''),weekLabel(row)].filter(Boolean).join(' · ');return `<article><div class="v16-game-id"><small>${esc(meta)}</small><strong>${esc(row.homeAbbr||'')} vs ${esc(row.awayAbbr||'')}</strong><span>${esc(teamDate(row.kickoff))}${row.fallback?' · Official fallback':''}</span></div><div class="v16-log-stats">${metrics.length?metrics.map(metric=>`<div><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong></div>`).join(''):'<span>No numeric fields in this stat row.</span>'}</div></article>`}).join('')}</div>`;
   }
 
   function trends(rows){
@@ -120,17 +175,19 @@
 
   function renderLayer(data,fan,site){
     const root=document.querySelector('.player-profile-rich');if(!root||root.querySelector('.v16-player-intel'))return;
-    const player=data.player||{},rows=arr(data.stats),status=latestStatus(data,fan),last=lastGame(rows),quick=metricSummary(last),changes=whatChanged(data,fan),profile=getJson(PROFILE_KEY,{}),favorite=profile.favorite===player.name;
+    const player=data.player||{},rows=arr(data.stats),context=data.statContext||{},isPreseasonFallback=context.mode==='official-preseason-fallback',status=latestStatus(data,fan),last=lastGame(rows),quick=metricSummary(last),changes=whatChanged(data,fan),profile=getJson(PROFILE_KEY,{}),favorite=profile.favorite===player.name;
+    const contextLabel=isPreseasonFallback?`${context.season||2026} Preseason · official fallback`:'';
     const layer=document.createElement('section');layer.className='v16-player-intel';layer.innerHTML=`
       <section class="v16-player-command">
         <header><div><small>PLAYER COMMAND CENTER</small><h2>${esc(player.name||'Titans player')}</h2><p>Quick answer first. Game logs, trends and deeper football context stay one tap away.</p></div><button type="button" data-v16-favorite aria-pressed="${favorite}">${favorite?'★ Favorite':'☆ Make favorite'}</button></header>
-        <div class="v16-quick-grid"><article><small>${esc(status.label)}</small><strong>${esc(status.value)}</strong><span>${esc(status.copy)}</span></article><article><small>Last loaded game</small><strong>${esc(last?`Week ${last.week??'—'}`:'Awaiting stats')}</strong><span>${esc(last?teamDate(last.kickoff):'No game-stat row loaded')}</span></article>${quick.slice(0,2).map(metric=>`<article><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong><span>Latest loaded game</span></article>`).join('')}</div>
+        ${isPreseasonFallback?`<p class="v16-note"><strong>${esc(contextLabel)}</strong> · ${esc(context.source||'Verified Titans/NFL preseason sources')}. ${esc(context.coverage||'')}</p>`:''}
+        <div class="v16-quick-grid"><article><small>${esc(status.label)}</small><strong>${esc(status.value)}</strong><span>${esc(status.copy)}</span></article><article><small>Last loaded game</small><strong>${esc(last?weekLabel(last):'Awaiting stats')}</strong><span>${esc(last?teamDate(last.kickoff):'No game-stat row loaded')}${last?.fallback?' · 2026 preseason':''}</span></article>${quick.slice(0,2).map(metric=>`<article><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong><span>${esc(contextLabel||'Latest loaded game')}</span></article>`).join('')}</div>
       </section>
       <section class="v16-player-changed"><header><div><small>WHAT CHANGED?</small><h3>Latest player movement</h3></div><span>Verified loaded data only</span></header>${changes.map(change=>`<article><small>${esc(change[0])}</small><strong>${esc(change[1])}</strong><span>${esc(change[2])}</span></article>`).join('')}</section>
       <div class="v16-player-tabs" role="tablist" aria-label="Player intelligence sections"><button class="active" type="button" data-v16-player-tab="overview" aria-selected="true">Overview</button><button type="button" data-v16-player-tab="games" aria-selected="false">Game Log</button><button type="button" data-v16-player-tab="trends" aria-selected="false">Trends</button><button type="button" data-v16-player-tab="career" aria-selected="false">Career + Contract</button><button type="button" data-v16-player-tab="timeline" aria-selected="false">Timeline</button></div>
-      <section class="v16-player-pane" data-v16-pane="overview"><div class="v16-grid two"><article class="v16-panel"><small>SEASON SNAPSHOT</small><h3>What the loaded numbers say</h3>${quick.length?`<div class="v16-snapshot">${quick.map(metric=>`<div><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong></div>`).join('')}</div>`:'<div class="v16-empty"><strong>Season production is awaiting ingest.</strong><span>No zeroes are invented.</span></div>'}</article><article class="v16-panel"><small>ROLE + AVAILABILITY</small><h3>${esc(status.value)}</h3><p>${esc(status.copy)}</p><a href="#command">Open Change Engine →</a></article></div></section>
-      <section class="v16-player-pane" data-v16-pane="games" hidden><header><div><small>GAME LOG</small><h3>Loaded player-game production</h3></div><span>${rows.length} rows</span></header>${gameLog(rows)}</section>
-      <section class="v16-player-pane" data-v16-pane="trends" hidden><header><div><small>TRENDS</small><h3>Recent direction, not a hot-take grade</h3></div><span>Last ${Math.min(8,rows.length)} loaded rows</span></header>${trends(rows)}<p class="v16-note">Trend charts visualize fields already stored in the player-game warehouse. They do not infer film grades.</p></section>
+      <section class="v16-player-pane" data-v16-pane="overview"><div class="v16-grid two"><article class="v16-panel"><small>SEASON SNAPSHOT</small><h3>${esc(isPreseasonFallback?'2026 preseason production':'What the loaded numbers say')}</h3>${quick.length?`<div class="v16-snapshot">${quick.map(metric=>`<div><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong></div>`).join('')}</div>`:'<div class="v16-empty"><strong>Season production is awaiting ingest.</strong><span>No zeroes are invented.</span></div>'}${isPreseasonFallback?`<p class="v16-note">These are verified preseason rows used because no player-game warehouse rows are currently loaded for this player. They are not regular-season totals.</p>`:''}</article><article class="v16-panel"><small>ROLE + AVAILABILITY</small><h3>${esc(status.value)}</h3><p>${esc(status.copy)}</p><a href="#command">Open Change Engine →</a></article></div></section>
+      <section class="v16-player-pane" data-v16-pane="games" hidden><header><div><small>GAME LOG</small><h3>Loaded player-game production</h3></div><span>${rows.length} rows${isPreseasonFallback?' · 2026 preseason':''}</span></header>${gameLog(rows)}</section>
+      <section class="v16-player-pane" data-v16-pane="trends" hidden><header><div><small>TRENDS</small><h3>Recent direction, not a hot-take grade</h3></div><span>Last ${Math.min(8,rows.length)} loaded rows</span></header>${trends(rows)}<p class="v16-note">${isPreseasonFallback?'Trend charts use only the verified official preseason rows shown above; missing categories remain missing.':'Trend charts visualize fields already stored in the player-game warehouse. They do not infer film grades.'}</p></section>
       <section class="v16-player-pane" data-v16-pane="career" hidden><div class="v16-grid two"><article class="v16-panel"><small>CAREER COVERAGE</small><h3>${esc(player.experience?`${player.experience} year${String(player.experience)==='1'?'':'s'} experience`:'Experience not loaded')}</h3><p>${esc(player.college?`${player.college} · `:'')}The game log can include any seasons currently backfilled for this player. A complete career archive is not claimed until historical ingestion is complete.</p></article><article class="v16-panel"><small>CONTRACT</small><h3>Current loaded contract context</h3>${contractCard(data,fan)}</article></div></section>
       <section class="v16-player-pane" data-v16-pane="timeline" hidden><header><div><small>PLAYER TIMELINE</small><h3>Game, injury and roster evidence</h3></div><a href="#command">Open full knowledge graph →</a></header>${newsAndMoves(data,fan,site)}</section>`;
     root.append(layer);
@@ -147,13 +204,14 @@
     const id=playerId();if(!/^[0-9a-f-]{36}$/i.test(id))return;
     const current=++serial;
     try{
-      const [profile,fan,site]=await Promise.all([
+      const [profile,fan,site,preseason]=await Promise.all([
         fetch(`/api/player?id=${encodeURIComponent(id)}`,{cache:'no-store'}).then(r=>r.ok?r.json():null),
         fanIntel(),
-        siteData()
+        siteData(),
+        preseasonData()
       ]);
       if(current!==serial||route()!=='player'||playerId()!==id||!profile?.ok)return;
-      renderLayer(profile,fan?.ok?fan:{},site?.ok?site:{});
+      renderLayer(applyPreseasonFallback(profile,preseason),fan?.ok?fan:{},site?.ok?site:{});
     }catch{}
   }
 
