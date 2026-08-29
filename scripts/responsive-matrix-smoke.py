@@ -119,8 +119,9 @@ def dimensions(driver):
     """)
 
 def assert_layout(state,label,mode):
-    if state['scrollWidth']>state['clientWidth']+3 or state['bodyScrollWidth']>state['clientWidth']+3:
-        raise RuntimeError(f'{label}: horizontal overflow {state}')
+    widest=max(state['scrollWidth'],state['bodyScrollWidth'])
+    if widest>state['innerWidth']+3:
+        raise RuntimeError(f'{label}: horizontal overflow by {widest-state["innerWidth"]:.1f}px {state}')
     if state['appWidth']<=0 or state['topbarWidth']<=0 or state['appTextLength']<=0:
         raise RuntimeError(f'{label}: primary shell/content is empty {state}')
     if mode=='mobile':
@@ -157,7 +158,7 @@ try:
             assert_layout(state,label,mode)
             rows.append({
                 'viewport':name,'width':width,'height':height,'mode':mode,'route':route_name,'hash':route_hash,
-                'scrollWidth':state['scrollWidth'],'clientWidth':state['clientWidth'],'mobileNav':state['mobileNav'],
+                'innerWidth':state['innerWidth'],'scrollWidth':state['scrollWidth'],'bodyScrollWidth':state['bodyScrollWidth'],'clientWidth':state['clientWidth'],'mobileNav':state['mobileNav'],
                 'suspiciousTiny':state['suspiciousTiny'],
                 'smallControls':state['smallControls'] if mode=='mobile' else [],
             })
