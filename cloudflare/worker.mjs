@@ -43,6 +43,16 @@ function auditedBootstrapFallback(reason='Live database unavailable'){
     fetchedAt:new Date().toISOString()
   };
 }
+function unavailableFanIntel(env,reason='Live fan intelligence warehouse unavailable'){
+  return {
+    ok:true,available:false,configured:Boolean(env?.DATABASE_URL),mode:'database-unavailable',season:2026,
+    standings:[],injuries:[],depthChart:{capturedAt:null,previousCapturedAt:null,changes:[]},contracts:[],opponent:null,
+    gameDay:{drives:[],plays:[],teamMetrics:[]},playerStats:[],
+    availability:{standings:false,injuries:false,depthChanges:false,contracts:false,opponent:false,drives:false,plays:false,playerStats:false},
+    diagnostics:[reason],fetchedAt:new Date().toISOString()
+  };
+}
+function guestSessionUnavailable(){return jsonResponse({ok:true,user:null,session:null,guest:true,available:false,code:'ACCOUNT_SERVICE_UNAVAILABLE'},200,{'Cache-Control':'no-store'});}
 async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
 async function nativeData(request,env){
   if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});
@@ -91,18 +101,30 @@ async function cachedAdapterData(request,route,handler,env,ctx){
   if(fresh.ok){const write=cache.put(key,fresh.clone()).catch(error=>console.warn(`[${route}-edge-cache]`,error));if(ctx?.waitUntil)ctx.waitUntil(write);else await write;}
   return withEdgeCacheStatus(fresh,'MISS');
 }
+async function resilientAccountAuth(request,subpath){
+  const response=await accountAuthProxy(request,subpath);
+  if(subpath!=='get-session'||response.status<500)return response;
+  try{await response.body?.cancel();}catch{}
+  return guestSessionUnavailable();
+}
+async function resilientFanIntel(request,env,ctx){
+  const response=await cachedAdapterData(request,'fan-intel',fanIntelRoute,env,ctx);
+  if(response.status<500)return response;
+  try{await response.body?.cancel();}catch{}
+  return withEdgeCacheStatus(jsonResponse(unavailableFanIntel(env),200,{'Cache-Control':'no-store'}),'BYPASS');
+}
 async function runApi(request,env,ctx){
   const url=new URL(request.url);const route=url.pathname.slice(API_PREFIX.length).replace(/^\/+|\/+$/g,'');if(!route)return jsonResponse({ok:false,error:'API route required'},404);
   try{
     if(route==='health')return await nativeHealth(request,env);
     if(route==='data')return await cachedNativeData(request,env,ctx);
     if(route==='espn-scoreboard')return await nativeScoreboard(request);
-    if(route.startsWith('account/auth/'))return await accountAuthProxy(request,route.slice('account/auth/'.length));
+    if(route.startsWith('account/auth/'))return await resilientAccountAuth(request,route.slice('account/auth/'.length));
     if(route==='account/preferences')return await accountPreferencesRoute(request,env);
     if(route==='preseason-stats')return await adapterRoute(request,route,preseasonStatsRoute,env);
     if(route==='market-data')return await cachedMarketData(request,env,ctx);
     if(route==='advanced-analytics')return await adapterRoute(request,route,advancedAnalyticsRoute,env);
-    if(route==='fan-intel')return await cachedAdapterData(request,route,fanIntelRoute,env,ctx);
+    if(route==='fan-intel')return await resilientFanIntel(request,env,ctx);
     if(route==='tickets')return await cachedAdapterData(request,route,ticketsRoute,env,ctx);
     if(route==='social-pulse')return await cachedAdapterData(request,route,xSocialRoute,env,ctx);
     if(route==='media-videos')return await cachedAdapterData(request,route,youtubeMediaRoute,env,ctx);
