@@ -27,7 +27,7 @@ test('media center uses authorized providers and never proxies or hotlinks live 
   assert.doesNotMatch(js,/\/api\/(?:radio|audio|stream|video)-proxy/);
 });
 
-test('104.5 launches current official player and Titans game audio',()=>{
+test('104.5 launches current official player and Titans game audio without opening live-media frames',()=>{
   const js=read('media-center-v14.js'),headers=read('_headers');
   assert.match(js,/https:\/\/www\.1045thezone\.com\/player\/\?playerID=3234/);
   assert.match(js,/https:\/\/www\.tennesseetitans\.com\/broadcast\/titans-radio\/live-game-day-audio/);
@@ -35,7 +35,9 @@ test('104.5 launches current official player and Titans game audio',()=>{
   assert.match(js,/Open 104\.5/);
   assert.match(headers,/media-src 'self'/);
   assert.doesNotMatch(headers,/playerservices\.streamtheworld/);
-  assert.match(headers,/frame-src 'none'/);
+  assert.match(headers,/frame-src https:\/\/www\.youtube\.com https:\/\/www\.youtube-nocookie\.com;/);
+  assert.match(headers,/frame-ancestors 'none'/);
+  assert.doesNotMatch(headers,/frame-src[^;]*(?:1045thezone|tennesseetitans|streamtheworld|nfl\.com)/i);
 });
 
 test('watch router covers core U.S. NFL distribution paths',()=>{
