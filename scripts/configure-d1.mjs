@@ -18,6 +18,16 @@ function listDatabases(){
 
 function databaseId(row){return String(row?.uuid||row?.id||row?.database_id||'').trim();}
 
+function serializeConfig(config){
+  return JSON.stringify(config,null,2)
+    .replace(`"required": [
+      "DATABASE_URL"
+    ]`,'"required": ["DATABASE_URL"]')
+    .replace(`"run_worker_first": [
+      "/api/*"
+    ]`,'"run_worker_first": ["/api/*"]');
+}
+
 if(!fs.existsSync(CONFIG))throw new Error(`${CONFIG} not found. Run this command from the repository root.`);
 
 const database=listDatabases().find(row=>String(row?.name||'')===DATABASE_NAME);
@@ -37,7 +47,7 @@ config.d1_databases=[
   ...existing.filter(entry=>entry?.binding!==BINDING&&entry?.database_name!==DATABASE_NAME),
   {binding:BINDING,database_name:DATABASE_NAME,database_id:id,migrations_dir:MIGRATIONS_DIR}
 ];
-fs.writeFileSync(CONFIG,`${JSON.stringify(config,null,2)}\n`);
+fs.writeFileSync(CONFIG,`${serializeConfig(config)}\n`);
 
 console.log(`Configured ${BINDING} -> ${DATABASE_NAME} (${id}).`);
 console.log('Applying D1 migrations...');
