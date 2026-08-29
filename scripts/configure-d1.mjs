@@ -41,5 +41,5 @@ fs.writeFileSync(CONFIG,`${JSON.stringify(config,null,2)}\n`);
 
 console.log(`Configured ${BINDING} -> ${DATABASE_NAME} (${id}).`);
 console.log('Applying D1 migrations...');
-wrangler(['d1','migrations','apply',DATABASE_NAME,'--remote','--yes'],{stdio:'inherit'});
+wrangler(['d1','migrations','apply',DATABASE_NAME,'--remote'],{stdio:'inherit'});
 console.log('D1 configuration complete. Run npm run check before deploying.');

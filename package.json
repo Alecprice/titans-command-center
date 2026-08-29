@@ -14,7 +14,7 @@
     "build:cloudflare":"node scripts/build-cloudflare.mjs",
     "verify:cloudflare":"node scripts/check-cloudflare-build.mjs",
     "d1:configure":"node scripts/configure-d1.mjs",
-    "d1:migrate":"npx wrangler@4 d1 migrations apply titans-command-center --remote --yes",
+    "d1:migrate":"npx wrangler@4 d1 migrations apply titans-command-center --remote",
     "deploy:cloudflare":"npm run build:cloudflare && npx wrangler@4 deploy",
     "check":"npm test && npm run audit:content && npm run secret-scan && npm run syntax-check && npm run build:cloudflare && npm run verify:cloudflare"
   },
