@@ -43,9 +43,14 @@ test('My 53 is interactive and accessible',()=>{
 test('My 53 remains mobile and touch safe',()=>{
   assert.match(css,/\.my53-player\{min-height:58px/);
   assert.match(css,/@media\(max-width:720px\)/);
-  assert.match(css,/\.my53-count button\{min-height:48px/);
+  assert.match(css,/\.my53-count button\{min-height:48px!important\}/);
   assert.match(css,/\.my53-list\{grid-template-columns:1fr;max-height:520px/);
   assert.match(css,/\.my53-player\{min-height:52px/);
+});
+
+test('My 53 mobile clear action cannot be reduced by the global 44px floor',()=>{
+  const mobileBlock=css.slice(css.indexOf('@media(max-width:720px)'));
+  assert.match(mobileBlock,/\.my53-count button\{min-height:48px!important\}/);
 });
 
 test('My 53 re-wires after Cutdown refresh without another observer',()=>{
