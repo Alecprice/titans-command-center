@@ -1,5 +1,6 @@
 import apiHandler from '../api/index.js';
 import {databaseHealth,getBootstrapData,getSql} from '../src/db.mjs';
+import {d1Health,getD1Snapshot,hasD1,putD1Snapshot} from '../src/d1-store.mjs';
 import {getAuditedTeamContext} from '../src/team-context.mjs';
 import {team as fallbackTeam,games as fallbackGames,roster as fallbackRoster,feed as fallbackFeed,sources as fallbackSources} from '../src/data.mjs';
 import {preseasonStatsRoute} from '../src/preseason-api.mjs';
@@ -18,13 +19,15 @@ const APP_VERSION='1.0.0';
 const SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
 const BOOTSTRAP_CACHE_CONTROL='public, s-maxage=900, stale-while-revalidate=21600';
 const QUERY_CACHE_CONTROL='public, s-maxage=900, stale-while-revalidate=21600';
+const BOOTSTRAP_SNAPSHOT_KEY='bootstrap:v1';
+const BOOTSTRAP_SNAPSHOT_TTL_SECONDS=900;
 
 function requestHeaders(headers){const out={};for(const [key,value] of headers.entries())out[key.toLowerCase()]=value;return out;}
 function requestQuery(url,route){const query={route};for(const [key,value] of url.searchParams.entries()){if(key==='route')continue;const current=query[key];if(current===undefined)query[key]=value;else if(Array.isArray(current))current.push(value);else query[key]=[current,value];}return query;}
 function vercelRequest(request,route){const url=new URL(request.url);return {method:request.method,headers:requestHeaders(request.headers),query:requestQuery(url,route),url:`${url.pathname}${url.search}`};}
 function vercelResponse(){
   let statusCode=200,response=null;const headers=new Headers();
-  const api={setHeader(name,value){if(Array.isArray(value)){headers.delete(name);for(const item of value)headers.append(name,String(item));}else headers.set(name,String(value));return api;},getHeader(name){return headers.get(name)},status(code){statusCode=Number(code)||200;return api},json(payload){if(!headers.has('Content-Type'))headers.set('Content-Type','application/json; charset=utf-8');response=new Response(JSON.stringify(payload),{status:statusCode,headers});return response;},send(payload=''){const body=typeof payload==='string'||payload instanceof ArrayBuffer?payload:JSON.stringify(payload);response=new Response(body,{status:statusCode,headers});return response;},end(payload=''){response=new Response(payload,{status:statusCode,headers});return response;}};
+  const api={setHeader(name,value){if(Array.isArray(value)){headers.delete(name);for(const item of value)headers.append(name,String(value));}else headers.set(name,String(value));return api;},getHeader(name){return headers.get(name)},status(code){statusCode=Number(code)||200;return api},json(payload){if(!headers.has('Content-Type'))headers.set('Content-Type','application/json; charset=utf-8');response=new Response(JSON.stringify(payload),{status:statusCode,headers});return response;},send(payload=''){const body=typeof payload==='string'||payload instanceof ArrayBuffer?payload:JSON.stringify(payload);response=new Response(body,{status:statusCode,headers});return response;},end(payload=''){response=new Response(payload,{status:statusCode,headers});return response;}};
   return {api,result:()=>response||new Response(null,{status:statusCode,headers})};
 }
 function jsonResponse(payload,status=200,headers={}){return new Response(JSON.stringify(payload),{status,headers:{'Content-Type':'application/json; charset=utf-8',...headers}});}
@@ -61,15 +64,63 @@ function unavailableFanIntel(env,reason='Live fan intelligence warehouse unavail
 function guestSessionUnavailable(){return jsonResponse({ok:true,user:null,session:null,guest:true,available:false,code:'ACCOUNT_SERVICE_UNAVAILABLE'},200,{'Cache-Control':'no-store'});}
 function accountInfrastructureFailure(status){return status===402||status===429||status>=500;}
 function accountServiceUnavailable(status=503){return jsonResponse({ok:false,error:'Account service is temporarily unavailable. You can keep using Titans Command Center as a guest, and settings already saved on this device are safe.',code:'ACCOUNT_SERVICE_UNAVAILABLE',localOnly:true},status,{'Cache-Control':'no-store'});}
-async function nativeHealth(request,env){if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});const db=await databaseHealth(env);return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true}},200,{'Cache-Control':'no-store'});}
+function d1SnapshotPayload(row,{stale=false,reason=''}={}){
+  const payload=row?.payload;
+  if(!payload||typeof payload!=='object'||payload.ok!==true)return null;
+  const originalMode=payload.mode||'live-database';
+  return {
+    ...payload,
+    mode:'d1-snapshot',
+    databaseAvailable:stale?false:null,
+    storage:'cloudflare-d1',
+    snapshot:{
+      key:row.cache_key||BOOTSTRAP_SNAPSHOT_KEY,
+      source:row.source||'unknown',
+      fetchedAt:row.fetched_at||payload.fetchedAt||null,
+      expiresAt:row.expires_at||null,
+      stale:Boolean(stale),
+      originalMode,
+      reason:reason||null
+    }
+  };
+}
+async function readD1Bootstrap(env,{allowExpired=false,reason=''}={}){
+  if(!hasD1(env))return null;
+  try{
+    const row=await getD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY,{allowExpired});
+    return d1SnapshotPayload(row,{stale:allowExpired,reason});
+  }catch(error){console.warn('[d1-bootstrap-read]',error);return null;}
+}
+async function writeD1Bootstrap(env,payload,{source='neon-bootstrap',ttlSeconds=BOOTSTRAP_SNAPSHOT_TTL_SECONDS}={}){
+  if(!hasD1(env)||!payload?.ok)return false;
+  try{await putD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY,payload,{source,ttlSeconds});return true;}catch(error){console.warn('[d1-bootstrap-write]',error);return false;}
+}
+async function nativeHealth(request,env){
+  if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});
+  const [db,d1]=await Promise.all([databaseHealth(env),d1Health(env)]);
+  return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,storage:{primary:hasD1(env)?'cloudflare-d1':'neon',d1},providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true,d1Snapshot:hasD1(env)}},200,{'Cache-Control':'no-store'});
+}
 async function nativeData(request,env){
   if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});
   const headers={'Cache-Control':BOOTSTRAP_CACHE_CONTROL};
-  if(!env?.DATABASE_URL)return jsonResponse({ok:false,configured:false,error:'DATABASE_URL is not configured'},503,headers);
-  let data;
-  try{data=await getBootstrapData(env);}catch(error){console.error('[native-data-bootstrap]',error);data={configured:true,ok:false,error:'Database query failed'};}
-  if(!data?.ok){const fallback=auditedBootstrapFallback(data?.error||'Live database query failed');return jsonResponse({...fallback,teamContext:await getAuditedTeamContext(null)},200,headers);}
-  const sql=await getSql(env);let teamContext;try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}return jsonResponse({...data,mode:'live-database',databaseAvailable:true,teamContext},200,headers);
+  const snapshot=await readD1Bootstrap(env);
+  if(snapshot)return jsonResponse(snapshot,200,headers);
+  let data={configured:Boolean(env?.DATABASE_URL),ok:false,error:env?.DATABASE_URL?'Database query failed':'DATABASE_URL is not configured'};
+  if(env?.DATABASE_URL){
+    try{data=await getBootstrapData(env);}catch(error){console.error('[native-data-bootstrap]',error);}
+  }
+  if(data?.ok){
+    const sql=await getSql(env);let teamContext;
+    try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}
+    const payload={...data,mode:'live-database',databaseAvailable:true,storage:'neon',teamContext};
+    await writeD1Bootstrap(env,payload,{source:'neon-bootstrap'});
+    return jsonResponse(payload,200,headers);
+  }
+  const staleSnapshot=await readD1Bootstrap(env,{allowExpired:true,reason:data?.error||'Live database unavailable'});
+  if(staleSnapshot)return jsonResponse(staleSnapshot,200,headers);
+  const fallback={...auditedBootstrapFallback(data?.error||'Live database unavailable'),teamContext:await getAuditedTeamContext(null),storage:'bundled-audited-data'};
+  await writeD1Bootstrap(env,fallback,{source:'audited-fallback',ttlSeconds:BOOTSTRAP_SNAPSHOT_TTL_SECONDS});
+  return jsonResponse(fallback,200,headers);
 }
 async function cachedNativeData(request,env,ctx){
   if(request.method!=='GET')return withEdgeCacheStatus(await nativeData(request,env),'BYPASS');
