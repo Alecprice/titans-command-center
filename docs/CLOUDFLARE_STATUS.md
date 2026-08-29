@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `0115706f7219a677855ed6da1d78435f778ba68a`
+- Source commit: `238fbc5b41a04cdb842734c74446408e30764100`
 - Quality gate: success
 - Cloudflare credentials available: true
 - DATABASE_URL GitHub secret supplied: true
@@ -22,7 +22,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-29T21:58:50Z
+- Recorded: 2026-08-29T22:18:45Z
 
 ## Production regression
 
@@ -74,24 +74,24 @@
   "completedPreseasonGamesWithPlayerStats": 2,
   "completedPreseasonGamesMissingPlayerStats": 0,
   "marketStatus": 200,
-  "marketRows": 1129,
+  "marketRows": 1200,
   "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "0115706f7219a677855ed6da1d78435f778ba68a",
-    "builtAt": "2026-08-29T21:57:21.321Z"
+    "commit": "238fbc5b41a04cdb842734c74446408e30764100",
+    "builtAt": "2026-08-29T22:17:12.005Z"
   },
-  "deploymentPropagationAttempts": 10,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 21,
-    "health": 410,
-    "data": 21,
-    "stats": 288,
-    "market": 852,
-    "analytics": 483
+    "root": 31,
+    "health": 540,
+    "data": 548,
+    "stats": 237,
+    "market": 4773,
+    "analytics": 366
   },
-  "testedAt": "2026-08-29T21:58:00.181Z",
+  "testedAt": "2026-08-29T22:17:42.424Z",
   "healthTruth": {
     "ok": true,
     "mode": "audited-fallback",
@@ -102,7 +102,7 @@
     "fallbackContentAudit": "2026-08-27",
     "databaseAvailable": false,
     "responseMs": 357,
-    "testedAt": "2026-08-29T21:58:00.574Z"
+    "testedAt": "2026-08-29T22:17:42.823Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -110,17 +110,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 152,
-    "warmHitMs": 152,
-    "rows": 1129,
+    "coldOrInitialMs": 592,
+    "warmHitMs": 592,
+    "rows": 1200,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 152,
-        "rows": 1129
+        "durationMs": 592,
+        "rows": 1200
       }
     ],
-    "testedAt": "2026-08-29T21:58:00.760Z"
+    "testedAt": "2026-08-29T22:17:43.449Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "database-unavailable",
@@ -173,8 +173,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 111,
-  "testedAt": "2026-08-29T21:58:01.442Z"
+  "durationMs": 155,
+  "testedAt": "2026-08-29T22:17:44.043Z"
 }```
 
 ## Browser navigation regression
@@ -220,11 +220,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 81,
-  "longTasksOver250ms": 0,
+  "maxLongTaskMs": 272,
+  "longTasksOver250ms": 1,
   "browserWarnings": [],
-  "durationSeconds": 8.3,
-  "testedAt": "2026-08-29T21:58:13Z"
+  "durationSeconds": 17.78,
+  "testedAt": "2026-08-29T22:18:06Z"
 }```
 
 ## Listen Watch browser regression
@@ -278,11 +278,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788040695886
+      "timestamp": 1788041888853
     }
   ],
-  "durationSeconds": 2.8,
-  "testedAt": "2026-08-29T21:58:16Z"
+  "durationSeconds": 2.88,
+  "testedAt": "2026-08-29T22:18:09Z"
 }```
 
 ## Market Pulse browser regression
@@ -296,9 +296,9 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 174,
-        "total": 1129,
-        "renderedRows": 174
+        "shown": 166,
+        "total": 1200,
+        "renderedRows": 166
       },
       "summary": {
         "controls": [
@@ -336,7 +336,7 @@
             "pressed": "false",
             "tag": "BUTTON",
             "value": "",
-            "width": 189.671875
+            "width": 196.90625
           }
         ],
         "empty": "",
@@ -346,18 +346,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 174 of 1129 rows",
-        "resultTotal": 1129,
-        "rowCount": 174,
+        "result": "Showing 166 of 1200 rows",
+        "resultTotal": 1200,
+        "rowCount": 166,
         "rowSample": [
-          "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine-1.5Price+102Implied49.5%",
-          "Chicago Bears at Tennessee Titans Spread \u00b7 1xBet \u2197SideChicago BearsLine-2.5Price-115Implied53.5%",
-          "Chicago Bears at Tennessee Titans Spread \u00b7 FanDuel \u2197SideChicago BearsLine-1.5Price-105Implied51.2%"
+          "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine-8.5Price-115Implied53.5%",
+          "Chicago Bears at Tennessee Titans Spread \u00b7 MyBookie.ag \u2197SideChicago BearsLine-7.5Price-105Implied51.2%",
+          "Chicago Bears at Tennessee Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine-6.5Price-129Implied56.3%"
         ],
         "scrollWidth": 1265,
-        "shown": 174,
+        "shown": 166,
         "title": "Live Titans market board",
-        "total": 1129,
+        "total": 1200,
         "viewport": 1265
       }
     },
@@ -366,36 +366,36 @@
         "available": true,
         "options": 3,
         "selectedValue": "159453",
-        "before": "Showing 174 of 1129 rows",
-        "after": "Showing 102 of 1129 rows"
+        "before": "Showing 166 of 1200 rows",
+        "after": "Showing 94 of 1200 rows"
       },
       "book": {
         "available": true,
-        "options": 17,
+        "options": 16,
         "selectedValue": "onexbet",
-        "before": "Showing 174 of 1129 rows",
-        "after": "Showing 6 of 1129 rows"
+        "before": "Showing 166 of 1200 rows",
+        "after": "Showing 6 of 1200 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Showing 174 of 1129 rows",
-        "after": "Showing 174 of 1129 rows"
+        "before": "Showing 166 of 1200 rows",
+        "after": "Showing 166 of 1200 rows"
       }
     },
     "alternateLines": {
       "available": true,
-      "beforeRows": 174,
-      "afterRows": 1129
+      "beforeRows": 166,
+      "afterRows": 1200
     },
     "refresh": {
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 1129,
-        "total": 1129,
-        "renderedRows": 1129
+        "shown": 1200,
+        "total": 1200,
+        "renderedRows": 1200
       },
       "summary": {
         "controls": [
@@ -433,7 +433,7 @@
             "pressed": "true",
             "tag": "BUTTON",
             "value": "",
-            "width": 183.171875
+            "width": 190.40625
           }
         ],
         "empty": "",
@@ -443,18 +443,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 1129 of 1129 rows",
-        "resultTotal": 1129,
-        "rowCount": 1129,
+        "result": "Showing 1200 of 1200 rows",
+        "resultTotal": 1200,
+        "rowCount": 1200,
         "rowSample": [
-          "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine-1.5Price+102Implied49.5%",
-          "Chicago Bears at Tennessee Titans Spread \u00b7 1xBet \u2197SideChicago BearsLine-2.5Price-115Implied53.5%",
-          "Chicago Bears at Tennessee Titans Spread \u00b7 FanDuel \u2197SideChicago BearsLine-1.5Price-105Implied51.2%"
+          "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine-8.5Price-115Implied53.5%",
+          "Chicago Bears at Tennessee Titans Spread \u00b7 MyBookie.ag \u2197SideChicago BearsLine-7.5Price-105Implied51.2%",
+          "Chicago Bears at Tennessee Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine-6.5Price-129Implied56.3%"
         ],
         "scrollWidth": 1265,
-        "shown": 1129,
+        "shown": 1200,
         "title": "Live Titans market board",
-        "total": 1129,
+        "total": 1200,
         "viewport": 1265
       }
     }
@@ -463,9 +463,9 @@
     "state": {
       "quality": "Live",
       "provider": "PropLine",
-      "shown": 1129,
-      "total": 1129,
-      "renderedRows": 1129
+      "shown": 1200,
+      "total": 1200,
+      "renderedRows": 1200
     },
     "summary": {
       "controls": [
@@ -513,18 +513,18 @@
       "quality": "Live",
       "referenceNotice": "",
       "refreshHeight": 44,
-      "result": "Showing 1129 of 1129 rows",
-      "resultTotal": 1129,
-      "rowCount": 1129,
+      "result": "Showing 1200 of 1200 rows",
+      "resultTotal": 1200,
+      "rowCount": 1200,
       "rowSample": [
-        "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine-1.5Price+102Implied49.5%",
-        "Chicago Bears at Tennessee Titans Spread \u00b7 1xBet \u2197SideChicago BearsLine-2.5Price-115Implied53.5%",
-        "Chicago Bears at Tennessee Titans Spread \u00b7 FanDuel \u2197SideChicago BearsLine-1.5Price-105Implied51.2%"
+        "Chicago Bears at Tennessee Titans Spread \u00b7 DraftKings \u2197SideCHI BearsLine-8.5Price-115Implied53.5%",
+        "Chicago Bears at Tennessee Titans Spread \u00b7 MyBookie.ag \u2197SideChicago BearsLine-7.5Price-105Implied51.2%",
+        "Chicago Bears at Tennessee Titans Spread \u00b7 BetRivers \u2197SideChicago BearsLine-6.5Price-129Implied56.3%"
       ],
       "scrollWidth": 375,
-      "shown": 1129,
+      "shown": 1200,
       "title": "Live Titans market board",
-      "total": 1129,
+      "total": 1200,
       "viewport": 375
     },
     "rowGeometry": [
@@ -555,8 +555,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 7.0,
-  "testedAt": "2026-08-29T21:58:23Z"
+  "durationSeconds": 7.04,
+  "testedAt": "2026-08-29T22:18:16Z"
 }```
 
 ## Command Intelligence browser regression
@@ -614,8 +614,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.04,
-  "testedAt": "2026-08-29T21:58:25Z"
+  "durationSeconds": 2.34,
+  "testedAt": "2026-08-29T22:18:19Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -669,7 +669,7 @@
     "switchers": 1
   },
   "cutdownCommand": true,
-  "cutdownCommandText": "53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n1d 0h\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.\n\n2026-08-24\n\nThe Titans announced the move Aug. 24. This newer official transaction controls over any roster page that has not yet reflected the same-day move.\n\n2026-08-21\n\nOn Aug. 21, Tennessee signed DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, placed DB Nazeeh Johnson on Reserve/Injured, and later waived LB Sean Brown from injured reserve with an injury settlement.\n\n2026-08-19\n\nTennessee's official Aug. 19 transaction log lists RB D'Ernest Johnson signed and RB Dominic Richardson waived.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\nFIND PLAYER\nPOSITION\nAll positions\nC\nCB\nDB\nDE\nDL\nDT\nG\nK\nLB\nLS\nP\nQB\nRB\nS\nT\nTE\nWR\nSelected only\nShare / Copy My 53\n91 shown \u00b7 0 selected\nSelect players to see unit composition.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+\n#8\nWill Levis\nQB \u00b7 Offense\n+\n#21\nD'Ernest Johnson\nRB \u00b7 Offense\n+\n#36\nJulius Chestnut\nRB \u00b7 Offense\n+\n#31\nKalel Mullings\nRB \u00b7 Offense\n+\n#35\nMichael Carter\nRB \u00b7 Offense\n+\n#32\nNicholas Singleton\nRB \u00b7 Offense\n+\n#20\nTony Pollard\nRB \u00b7 Offense\n+\n#2\nTyjae Spears\nRB \u00b7 Offense\n+\n#69\nAamil Wagner\nT \u00b7 Offense\n+\n#76\nAustin Deculus\nT \u00b7 Offense\n+\n#78\nBrandon Crenshaw-Dickson\nT \u00b7 Offense\n+\n#75\nDan Moore Jr.\nT \u00b7 Offense\n+\n#55\nJC Latham\nT \u00b7 Offense\n+\n#62\nRasheed Miller\nT \u00b7 Offense\n+\n#72\nZachary Thomas\nT \u00b7 Offense\n+\n#82\nDaniel Bellinger\nTE \u00b7 Offense\n+\n#88\nDavid Martin-Robinson\nTE \u00b7 Offe",
+  "cutdownCommandText": "53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n23h 41m\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.\n\n2026-08-24\n\nThe Titans announced the move Aug. 24. This newer official transaction controls over any roster page that has not yet reflected the same-day move.\n\n2026-08-21\n\nOn Aug. 21, Tennessee signed DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, placed DB Nazeeh Johnson on Reserve/Injured, and later waived LB Sean Brown from injured reserve with an injury settlement.\n\n2026-08-19\n\nTennessee's official Aug. 19 transaction log lists RB D'Ernest Johnson signed and RB Dominic Richardson waived.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\nFIND PLAYER\nPOSITION\nAll positions\nC\nCB\nDB\nDE\nDL\nDT\nG\nK\nLB\nLS\nP\nQB\nRB\nS\nT\nTE\nWR\nSelected only\nShare / Copy My 53\n91 shown \u00b7 0 selected\nSelect players to see unit composition.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+\n#8\nWill Levis\nQB \u00b7 Offense\n+\n#21\nD'Ernest Johnson\nRB \u00b7 Offense\n+\n#36\nJulius Chestnut\nRB \u00b7 Offense\n+\n#31\nKalel Mullings\nRB \u00b7 Offense\n+\n#35\nMichael Carter\nRB \u00b7 Offense\n+\n#32\nNicholas Singleton\nRB \u00b7 Offense\n+\n#20\nTony Pollard\nRB \u00b7 Offense\n+\n#2\nTyjae Spears\nRB \u00b7 Offense\n+\n#69\nAamil Wagner\nT \u00b7 Offense\n+\n#76\nAustin Deculus\nT \u00b7 Offense\n+\n#78\nBrandon Crenshaw-Dickson\nT \u00b7 Offense\n+\n#75\nDan Moore Jr.\nT \u00b7 Offense\n+\n#55\nJC Latham\nT \u00b7 Offense\n+\n#62\nRasheed Miller\nT \u00b7 Offense\n+\n#72\nZachary Thomas\nT \u00b7 Offense\n+\n#82\nDaniel Bellinger\nTE \u00b7 Offense\n+\n#88\nDavid Martin-Robinson\nTE \u00b7 Of",
   "cutdownMobileTargets": [
     {
       "h": 48,
@@ -744,8 +744,8 @@
   "gameDayTuneLink": true,
   "gameDayMobileViewport": 375,
   "gameDayFastPass": true,
-  "gameDayFastPassGameId": "pre3",
-  "gameDayFastPassText": "GAME DAY IN NASHVILLE\nChicago Bears at Titans\nPRESEASON 3\nWHEN\nSat, Aug 29, 5:00 PM CDT \u00b7 1m\nWATCH / LISTEN\nNFL Network / WKRN-TV News 2 (regional) \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
+  "gameDayFastPassGameId": "wk1",
+  "gameDayFastPassText": "NEXT GAME FAST PASS\nNew York Jets at Titans\nWEEK 1\nWHEN\nSun, Sep 13, 12:00 PM CDT \u00b7 14d 18h\nWATCH / LISTEN\nCBS \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
   "gameDayFastPassMobileTargets": [
     {
       "h": 48,
@@ -761,8 +761,8 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 4.77,
-  "testedAt": "2026-08-29T21:58:31Z"
+  "durationSeconds": 4.85,
+  "testedAt": "2026-08-29T22:18:24Z"
 }```
 
 ## Ask Titans browser regression
@@ -775,10 +775,10 @@
     {
       "question": "Who is next?",
       "action": "#live",
-      "answer": "Tennessee is next scheduled to host Chicago Bears on Sat, Aug 29, 5:00 PM CDT (Nashville time).",
+      "answer": "Tennessee is next scheduled to host New York Jets on Sun, Sep 13, 12:00 PM CDT (Nashville time).",
       "facts": 4,
       "sources": 1,
-      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. NFL Network / WKRN-TV News 2 (regional) is the listed network."
+      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. CBS is the listed network."
     },
     {
       "question": "Cam Ward",
@@ -799,7 +799,7 @@
     {
       "question": "How do I watch?",
       "action": "#media",
-      "answer": "The next game is Sat, Aug 29, 5:00 PM CDT (Nashville time) and the loaded TV listing is NFL Network / WKRN-TV News 2 (regional). Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
+      "answer": "The next game is Sun, Sep 13, 12:00 PM CDT (Nashville time) and the loaded TV listing is CBS. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
       "facts": 2,
       "sources": 1,
       "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
@@ -868,8 +868,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 2.13,
-  "testedAt": "2026-08-29T21:58:33Z"
+  "durationSeconds": 2.2,
+  "testedAt": "2026-08-29T22:18:26Z"
 }```
 
 ## Change Intelligence browser regression
@@ -906,8 +906,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.43,
-  "testedAt": "2026-08-29T21:58:36Z"
+  "durationSeconds": 2.68,
+  "testedAt": "2026-08-29T22:18:29Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -935,7 +935,7 @@
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL Network / WKRN-TV News 2 (regional)WHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSWHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -943,23 +943,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1788040748042,
+          "expiresAt": 1788041941861,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788040718042,
+          "updatedAt": 1788041911861,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1788040748075,
+          "expiresAt": 1788041942016,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788040718075,
+          "updatedAt": 1788041912016,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-29T21:58:37.943Z",
+        "at": "2026-08-29T22:18:31.737Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -970,7 +970,7 @@
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL Network / WKRN-TV News 2 (regional)WHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSWHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -980,7 +980,7 @@
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL Network / WKRN-TV News 2 (regional)WHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSWHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -1030,12 +1030,12 @@
         "y": 8
       },
       "overflow": false,
-      "panelHeight": 865.609375,
+      "panelHeight": 853.171875,
       "panelWidth": 461,
       "reviewHeight": 48,
       "targets": [
         {
-          "h": 124.4375,
+          "h": 112,
           "label": "NEXT GAME",
           "w": 427
         },
@@ -1060,9 +1060,9 @@
     "panelState": {
       "cards": 4,
       "display": "block",
-      "height": 865.609375,
+      "height": 853.171875,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs Chicago BearsSat, Aug 29, 5:00 PM CDT \u00b7 NFL Network / WKRN-TV News 2 (regional)WHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSWHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 461
@@ -1086,7 +1086,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.53
+  "durationSeconds": 4.02
 }```
 
 ## Data freshness browser regression
@@ -1099,11 +1099,11 @@
     "detail": "Roster verified Aug 27 \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
     "overflow": false,
     "rect": {
-      "bottom": 1312.375,
+      "bottom": 1045.5,
       "height": 155.765625,
       "left": 915.328125,
       "right": 1216.984375,
-      "top": 1156.609375,
+      "top": 889.734375,
       "width": 301.65625
     },
     "state": "fallback",
@@ -1119,11 +1119,11 @@
     "detail": "Roster verified Aug 27 \u00b7 Moves 4 days ago \u00b7 Intel 4 days ago",
     "overflow": false,
     "rect": {
-      "bottom": 2356.453125,
+      "bottom": 1746.671875,
       "height": 117.1875,
       "left": 9,
       "right": 366,
-      "top": 2239.265625,
+      "top": 1629.484375,
       "width": 357
     },
     "state": "fallback",
@@ -1136,8 +1136,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 1.57,
-  "testedAt": "2026-08-29T21:58:42Z"
+  "durationSeconds": 1.87,
+  "testedAt": "2026-08-29T22:18:36Z"
 }```
 
 ## Account / Guest browser regression
@@ -1228,9 +1228,9 @@
   },
   "roster": {
     "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknownRos"
   },
-  "durationSeconds": 1.87
+  "durationSeconds": 1.95
 }```
 
 ## Advanced analytics browser regression
@@ -1255,8 +1255,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 1.71,
-  "testedAt": "2026-08-29T21:58:46Z"
+  "durationSeconds": 1.92,
+  "testedAt": "2026-08-29T22:18:40Z"
 }```
 
 ## Player headshot browser regression
@@ -1267,16 +1267,16 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "rosterCards": 95,
   "rosterDecoratedHeadshots": 80,
-  "rosterLoadedHeadshots": 39,
+  "rosterLoadedHeadshots": 47,
   "statsPlayerRows": 97,
   "statsDecoratedHeadshots": 81,
-  "statsLoadedHeadshots": 7,
-  "mobileLoadedHeadshots": 19,
+  "statsLoadedHeadshots": 47,
+  "mobileLoadedHeadshots": 47,
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.09,
-  "testedAt": "2026-08-29T21:58:49Z"
+  "durationSeconds": 3.3,
+  "testedAt": "2026-08-29T22:18:44Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
