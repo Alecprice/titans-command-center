@@ -31,7 +31,7 @@ test('home freshness reflects capture age instead of API reachability',()=>{
 
 test('audited fallback freshness uses its verified audit date instead of epoch coercion',()=>{
   const js=read('freshness-truth-v20.js');
-  assert.match(js,/if\(value==null\|\|value===' '\.trim\(\)\)return null|if\(value==null\|\|value==='\'\)return null/);
+  assert.match(js,/if\(value==null\|\|value===''\)return null/);
   assert.match(js,/data\?\.mode==='audited-fallback'/);
   assert.match(js,/data\?\.fallback\?\.active===true/);
   assert.match(js,/data\?\.fallback\?\.auditedAt/);
