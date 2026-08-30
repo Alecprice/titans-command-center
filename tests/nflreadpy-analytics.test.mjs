@@ -103,6 +103,17 @@ test('analytics workflow publishes directly to the existing D1 database without 
   assert.doesNotMatch(workflow,/DATABASE_URL|psycopg|Verify warehouse rows|Require database secret/);
 });
 
+test('D1 publish strips only the unsupported manual transaction wrapper before Wrangler execution',()=>{
+  const workflow=read('.github/workflows/nflreadpy-ingest.yml');
+  assert.match(workflow,/wrapper_statements = \{'BEGIN TRANSACTION;', 'COMMIT;'\}/);
+  assert.match(workflow,/cleaned_lines = \[line for line in original_sql\.splitlines\(\) if line\.strip\(\)\.upper\(\) not in wrapper_statements\]/);
+  assert.match(workflow,/unsupported manual transaction statement/);
+  assert.match(workflow,/INSERT INTO api_snapshots/);
+  assert.match(workflow,/ON CONFLICT\(cache_key\) DO UPDATE/);
+  assert.match(workflow,/re\.fullmatch\(r'advanced-analytics:v1:season=\\d\{4\}:team=TEN', target\)/);
+  assert.match(workflow,/d1SqlBytes/);
+});
+
 test('Cloudflare and browser shell route advanced analytics without exposing server code',()=>{
   const worker=read('cloudflare/worker.mjs'),html=read('index.html'),sw=read('sw.js');
   assert.match(worker,/advancedAnalyticsRoute/);
