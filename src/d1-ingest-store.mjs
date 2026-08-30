@@ -1,6 +1,7 @@
-import {getD1Snapshot,hasD1,putD1Snapshot} from './d1-store.mjs';
+import {getD1Snapshot,hasD1,pruneExpiredD1Snapshots,putD1Snapshot} from './d1-store.mjs';
 
 const BOOTSTRAP_SNAPSHOT_KEY='bootstrap:v1';
+const SYNC_AUDIT_PREFIX='sync-run:v1:';
 const SYNC_AUDIT_TTL_SECONDS=90*24*60*60;
 const text=value=>String(value??'').trim();
 const iso=value=>{
@@ -33,12 +34,12 @@ function matchingGames(games=[],final={}){
 }
 
 export function d1SyncAuditKey(job,startedAt=new Date()){
-  return `sync-run:v1:${iso(startedAt)}:${safeJob(job)}`;
+  return `${SYNC_AUDIT_PREFIX}${iso(startedAt)}:${safeJob(job)}`;
 }
 
 export async function recordD1SyncRun(env,job,{sourceSlug='titans-cc',status='failed',result={},startedAt=new Date(),metadata={}}={}){
   if(!hasD1(env))return {stored:false};
-  const started=iso(startedAt),finished=new Date().toISOString(),key=d1SyncAuditKey(job,started);
+  const normalizedJob=safeJob(job),started=iso(startedAt),finished=new Date().toISOString(),key=d1SyncAuditKey(normalizedJob,started);
   const payload={
     id:key,
     source:sourceSlug,
@@ -53,7 +54,18 @@ export async function recordD1SyncRun(env,job,{sourceSlug='titans-cc',status='fa
     metadata
   };
   await putD1Snapshot(env,key,payload,{source:'cloudflare-d1-sync-audit',fetchedAt:finished,ttlSeconds:SYNC_AUDIT_TTL_SECONDS});
-  return {stored:true,status,source:sourceSlug,storage:'cloudflare-d1',key};
+
+  let pruned=0;
+  if(normalizedJob==='official-audit'){
+    try{
+      const cleanup=await pruneExpiredD1Snapshots(env,{prefix:SYNC_AUDIT_PREFIX,limit:100});
+      pruned=cleanup.deleted;
+    }catch(error){
+      console.warn('[d1-sync-audit-prune]',error);
+    }
+  }
+
+  return {stored:true,status,source:sourceSlug,storage:'cloudflare-d1',key,pruned};
 }
 
 export async function reconcileD1FinalTitansScores(env,finals=[]){
