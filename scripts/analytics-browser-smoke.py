@@ -25,12 +25,27 @@ def assert_no_horizontal_overflow(driver, label):
         raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
 
-def read_health():
-    req = Request(f'{BASE}/api/health', headers={'User-Agent': 'TitansCommandCenter-AnalyticsBrowserAudit/1.0', 'Cache-Control': 'no-cache'})
+def read_json(path, label):
+    req = Request(
+        f'{BASE}{path}',
+        headers={
+            'User-Agent': 'TitansCommandCenter-AnalyticsBrowserAudit/1.1',
+            'Cache-Control': 'no-cache, no-store',
+            'Accept': 'application/json',
+        },
+    )
     with urlopen(req, timeout=10) as response:
         if response.status != 200:
-            raise RuntimeError(f'Health API returned {response.status}')
+            raise RuntimeError(f'{label} API returned {response.status}')
         return json.loads(response.read().decode('utf-8'))
+
+
+def read_health():
+    return read_json('/api/health', 'Health')
+
+
+def read_analytics():
+    return read_json(f'/api/advanced-analytics?season=2026&team=TEN&audit={int(time.time() * 1000)}', 'Advanced analytics')
 
 
 def browser_warnings(driver):
@@ -58,7 +73,24 @@ try:
     if health_status not in ('healthy', 'degraded'):
         raise RuntimeError(f'Unexpected health status: {health_status or "missing"}')
     if health_status == 'degraded' and health.get('database', {}).get('ok') is not False:
-        raise RuntimeError(f'Degraded health lost failed database signal: {health}')
+        raise RuntimeError(f'Degraded health lost failed legacy database signal: {health}')
+
+    stage = 'analytics-api'
+    analytics = read_analytics()
+    analytics_available = analytics.get('ok') is True and analytics.get('status') == 'available'
+    if analytics_available:
+        if analytics.get('storage') != 'cloudflare-d1':
+            raise RuntimeError(f'Available analytics is not D1-backed: {analytics.get("storage") or "missing"}')
+        snapshot = analytics.get('snapshot') or {}
+        if snapshot.get('source') != 'nflreadpy-d1-snapshot':
+            raise RuntimeError(f'Available analytics snapshot source is invalid: {snapshot.get("source") or "missing"}')
+    elif not (
+        analytics.get('ok') is False
+        and analytics.get('available') is False
+        and analytics.get('status') == 'database-unavailable'
+        and analytics.get('summary') is None
+    ):
+        raise RuntimeError(f'Analytics API returned neither a D1 snapshot nor an explicit unavailable state: {analytics}')
 
     stage = 'launch-chrome'
     driver = webdriver.Chrome(options=options)
@@ -70,7 +102,7 @@ try:
     wait_for(driver, "document.readyState === 'complete' && location.hash === '#stats'")
     wait_for(driver, "document.querySelector('.preseason-stats-hub')", timeout=15)
 
-    if health_status == 'degraded':
+    if not analytics_available:
         stage = 'desktop:degraded-analytics'
         wait_for(driver, "document.querySelector('.advanced-analytics-hub .ah-error')", timeout=15)
         degraded = driver.execute_script(r"""
@@ -118,6 +150,7 @@ try:
             'base': BASE,
             'mode': 'database-unavailable',
             'healthStatus': health_status,
+            'analyticsStorage': None,
             'desktop': degraded,
             'mobile': mobile,
             'browserWarnings': console[:20],
@@ -160,6 +193,9 @@ try:
                 raise RuntimeError(f'Analytics fallback heading is ambiguous: {season_context}')
         elif season_context['bannerVisible']:
             raise RuntimeError(f'Historical fallback banner shown for current-season analytics: {season_context}')
+
+        if str(analytics.get('requestedSeason')) != season_context['requestedSeason'] or str(analytics.get('dataSeason')) != season_context['dataSeason']:
+            raise RuntimeError(f'Browser season context does not match D1 API: api={analytics.get("requestedSeason")}/{analytics.get("dataSeason")}, ui={season_context}')
 
         stage = 'desktop:metric-values'
         metrics = driver.execute_script("""
@@ -223,11 +259,16 @@ try:
         if severe:
             raise RuntimeError(f'Advanced Stats Lab browser console has severe errors: {severe[:3]}')
 
+        snapshot = analytics.get('snapshot') or {}
+        mode = 'cloudflare-d1-stale' if snapshot.get('stale') else 'cloudflare-d1'
         result = {
             'ok': True,
             'base': BASE,
-            'mode': 'live-database',
+            'mode': mode,
             'healthStatus': health_status,
+            'analyticsStorage': analytics.get('storage'),
+            'analyticsSnapshotSource': snapshot.get('source'),
+            'analyticsSnapshotStale': bool(snapshot.get('stale')),
             'seasonContext': season_context,
             'mobileSeasonContext': mobile_season_banner,
             'metricCount': len(metrics),

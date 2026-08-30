@@ -29,6 +29,22 @@ test('nflreadpy analytics builder emits compact D1 API snapshots instead of a ra
   assert.match(requirements,/polars/);
 });
 
+test('nflverse team-code adapter canonicalizes provider aliases before analytics calculations',()=>{
+  const adapter=read('scripts/nflreadpy_d1_entrypoint.py');
+  assert.match(adapter,/"LA": "LAR"/);
+  assert.match(adapter,/"STL": "LAR"/);
+  assert.match(adapter,/"SD": "LAC"/);
+  assert.match(adapter,/"OAK": "LV"/);
+  assert.match(adapter,/"JAC": "JAX"/);
+  assert.match(adapter,/"WSH": "WAS"/);
+  assert.match(adapter,/pl\.col\(column\)/);
+  assert.match(adapter,/\.replace\(TEAM_ALIASES\)/);
+  assert.match(adapter,/\("home_team", "away_team"\)/);
+  assert.match(adapter,/\("team",\)/);
+  assert.match(adapter,/\("posteam", "defteam", "home_team", "away_team"\)/);
+  assert.match(adapter,/ingest\.main\(\)/);
+});
+
 test('Python D1 analytics keys match the shared Worker snapshot contract',()=>{
   const py=read('scripts/ingest_nflreadpy.py');
   const snapshots=read('src/d1-api-snapshot.mjs');
@@ -94,7 +110,10 @@ test('analytics workflow publishes directly to the existing D1 database without 
   assert.match(workflow,/CLOUDFLARE_ACCOUNT_ID: \$\{\{ secrets\.CLOUDFLARE_ACCOUNT_ID \}\}/);
   assert.match(workflow,/D1_DATABASE: titans-command-center/);
   assert.match(workflow,/node-version: '24'/);
-  assert.match(workflow,/python scripts\/ingest_nflreadpy\.py/);
+  assert.match(workflow,/python scripts\/nflreadpy_d1_entrypoint\.py/);
+  assert.match(workflow,/scripts\/nflreadpy_d1_entrypoint\.py/);
+  assert.match(workflow,/available != snapshots/);
+  assert.match(workflow,/Expected every generated analytics snapshot to be available/);
   assert.match(workflow,/npx --yes wrangler@4 d1 execute "\$D1_DATABASE" --remote --file "\$NFLREADPY_SQL_OUT"/);
   assert.match(workflow,/Verify Tennessee analytics snapshot in D1/);
   assert.match(workflow,/nflreadpy-d1-snapshot/);
@@ -125,7 +144,7 @@ test('Cloudflare and browser shell route advanced analytics without exposing ser
   assert.match(sw,/\/analytics-hub\.js/);
 });
 
-test('production gate validates analytics API data and the real Stats Lab browser panel',()=>{
+test('production gate validates D1 analytics API data and the real Stats Lab browser panel',()=>{
   const workflow=read('.github/workflows/cloudflare-deploy.yml');
   const production=read('scripts/advanced-analytics-regression.mjs');
   const browser=read('scripts/analytics-browser-smoke.py');
@@ -134,8 +153,11 @@ test('production gate validates analytics API data and the real Stats Lab browse
   assert.match(workflow,/ANALYTICS_BROWSER_OUTCOME/);
   assert.match(workflow,/Advanced analytics browser regression/);
   assert.match(production,/\/api\/advanced-analytics\?season=2026&team=TEN/);
+  assert.match(production,/cloudflare-d1/);
+  assert.match(production,/nflreadpy-d1-snapshot/);
   assert.match(production,/Offensive EPA\/play is missing/);
   assert.match(production,/No recent play contains a personnel package/);
+  assert.match(browser,/def read_analytics\(\):/);
   assert.match(browser,/advanced-analytics-hub \.ah-metrics/);
   assert.match(browser,/Down & distance/);
   assert.match(browser,/Field position/);

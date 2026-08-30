@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/ingest_nflreadpy.py'
+      - 'scripts/nflreadpy_d1_entrypoint.py'
       - 'requirements-analytics.txt'
       - 'src/d1-api-snapshot.mjs'
       - '.github/workflows/nflreadpy-ingest.yml'
@@ -80,7 +81,7 @@ jobs:
           fi
 
       - name: Build nflverse analytics snapshots
-        run: python scripts/ingest_nflreadpy.py
+        run: python scripts/nflreadpy_d1_entrypoint.py
 
       - name: Validate generated snapshot bundle
         id: summary
@@ -92,10 +93,14 @@ jobs:
 
           summary = json.loads(Path(os.environ['NFLREADPY_SUMMARY_OUT']).read_text())
           sql_path = Path(os.environ['NFLREADPY_SQL_OUT'])
-          if not summary.get('ok') or summary.get('availableSnapshots', 0) < 1:
+          snapshots = int(summary.get('snapshots') or 0)
+          available = int(summary.get('availableSnapshots') or 0)
+          if not summary.get('ok') or available < 1:
               raise SystemExit('nflreadpy did not build an available analytics snapshot')
           if summary.get('teams') != 32:
               raise SystemExit(f"Expected 32 NFL teams, got {summary.get('teams')}")
+          if snapshots < 1 or available != snapshots:
+              raise SystemExit(f'Expected every generated analytics snapshot to be available; available={available}, snapshots={snapshots}')
           if not sql_path.exists() or sql_path.stat().st_size < 1000:
               raise SystemExit('Generated D1 snapshot SQL is missing or unexpectedly small')
 
@@ -119,9 +124,9 @@ jobs:
           if not re.fullmatch(r'advanced-analytics:v1:season=\d{4}:team=TEN', target):
               raise SystemExit(f'Unexpected Tennessee snapshot key: {target!r}')
           print(json.dumps({
-              'snapshots': summary.get('snapshots'),
-              'availableSnapshots': summary.get('availableSnapshots'),
-              'unavailableSnapshots': max(0, int(summary.get('snapshots') or 0) - int(summary.get('availableSnapshots') or 0)),
+              'snapshots': snapshots,
+              'availableSnapshots': available,
+              'unavailableSnapshots': snapshots - available,
               'targetKey': target,
               'expiresAt': summary.get('expiresAt'),
               'coverage': summary.get('coverage'),

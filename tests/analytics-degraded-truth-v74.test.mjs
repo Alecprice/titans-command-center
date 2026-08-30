@@ -6,23 +6,25 @@ const regression=fs.readFileSync(new URL('../scripts/advanced-analytics-regressi
 const browser=fs.readFileSync(new URL('../scripts/analytics-browser-smoke.py',import.meta.url),'utf8');
 const api=fs.readFileSync(new URL('../src/advanced-analytics-api.mjs',import.meta.url),'utf8');
 
-test('advanced analytics production audit stays strict when Neon is healthy',()=>{
+test('advanced analytics production audit treats a verified D1 snapshot as authoritative even when legacy health is degraded',()=>{
   assert.match(regression,/healthStatus==='healthy'\|\|healthStatus==='degraded'/);
-  assert.match(regression,/Healthy analytics check requires a healthy database/);
+  assert.match(regression,/const analyticsAvailable=response\.status===200&&data\?\.ok===true&&data\?\.status==='available'/);
+  assert.match(regression,/data\?\.storage==='cloudflare-d1'/);
+  assert.match(regression,/data\.snapshot\.source==='nflreadpy-d1-snapshot'/);
   assert.match(regression,/Advanced analytics warehouse coverage is too small/);
   assert.match(regression,/No recent play contains down\/distance/);
-  assert.match(regression,/analyticsMode='live-database'/);
+  assert.match(regression,/analyticsMode=snapshotStale\?'cloudflare-d1-stale':'cloudflare-d1'/);
+  assert.doesNotMatch(regression,/Healthy analytics check requires a healthy database/);
 });
 
-test('advanced analytics outage is explicit quiet and accepted only alongside proven Neon degradation',()=>{
-  assert.match(regression,/if\(healthStatus==='degraded'\)/);
-  assert.match(regression,/Degraded analytics check must preserve the failed database signal/);
-  assert.match(regression,/response\.status===200/);
+test('advanced analytics outage remains explicit quiet non-cacheable and does not fabricate metrics',()=>{
+  assert.match(regression,/if\(!analyticsAvailable\)/);
+  assert.match(regression,/Unavailable analytics response unexpectedly claims ok=true/);
   assert.match(regression,/data\?\.available===false/);
   assert.match(regression,/data\?\.status==='database-unavailable'/);
   assert.match(regression,/data\?\.error==='Advanced analytics query failed'/);
-  assert.match(regression,/Degraded analytics response must not fabricate a summary/);
-  assert.match(regression,/Degraded analytics response must not be cached/);
+  assert.match(regression,/Unavailable analytics response must not fabricate a summary/);
+  assert.match(regression,/Unavailable analytics response must not be cached/);
   assert.match(regression,/analyticsMode='database-unavailable'/);
   assert.doesNotMatch(regression,/if\(response\.status===500\)process\.exit\(0\)/);
 });
@@ -35,13 +37,17 @@ test('analytics API turns database query failure into non-cacheable unavailable 
   assert.match(api,/error:'Advanced analytics query failed'/);
 });
 
-test('browser smoke keeps core Stats Lab usable and shows retry instead of fake warehouse metrics',()=>{
-  assert.match(browser,/if health_status == 'degraded':/);
+test('browser smoke follows actual analytics availability instead of global legacy health',()=>{
+  assert.match(browser,/def read_analytics\(\):/);
+  assert.match(browser,/analytics_available = analytics\.get\('ok'\) is True and analytics\.get\('status'\) == 'available'/);
+  assert.match(browser,/analytics\.get\('storage'\) != 'cloudflare-d1'/);
+  assert.match(browser,/snapshot\.get\('source'\) != 'nflreadpy-d1-snapshot'/);
+  assert.match(browser,/if not analytics_available:/);
   assert.match(browser,/advanced-analytics-hub \.ah-error/);
   assert.match(browser,/Advanced analytics could not load\./);
   assert.match(browser,/Advanced analytics query failed/);
   assert.match(browser,/retryHeight.*44/);
   assert.match(browser,/metricCount.*0/);
   assert.match(browser,/coreStats/);
-  assert.match(browser,/mode': 'database-unavailable'/);
+  assert.match(browser,/mode = 'cloudflare-d1-stale' if snapshot\.get\('stale'\) else 'cloudflare-d1'/);
 });
