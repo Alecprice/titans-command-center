@@ -2,20 +2,35 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
-const script=read('scripts/ensure-account-preferences.mjs');
-const workflow=read('.github/workflows/account-storage.yml');
+const root=new URL('../',import.meta.url);
+const read=path=>fs.readFileSync(new URL(path,root),'utf8');
+const exists=path=>fs.existsSync(new URL(path,root));
 
-test('account preference provisioning stays idempotent and verifies the production table',()=>{
-  assert.match(script,/create table if not exists fan_user_preferences/);
-  assert.match(script,/create index if not exists fan_user_preferences_updated_at_idx/);
-  assert.match(script,/to_regclass\('public\.fan_user_preferences'\)/);
-  assert.match(script,/Account preference storage ready/);
+test('account preference storage is provisioned by the Cloudflare D1 migration',()=>{
+  const migration=read('db/d1/migrations/0001_core.sql');
+  const account=read('src/account-api.mjs');
+  assert.match(migration,/CREATE TABLE IF NOT EXISTS fan_user_preferences/i);
+  assert.match(migration,/user_id TEXT PRIMARY KEY/i);
+  assert.match(migration,/preferences TEXT NOT NULL DEFAULT '\{\}'/i);
+  assert.match(migration,/schema_version INTEGER NOT NULL DEFAULT 1/i);
+  assert.match(migration,/fan_user_preferences_updated_idx/i);
+  assert.match(account,/hasD1\(env\)/);
+  assert.match(account,/getD1Preferences/);
+  assert.match(account,/putD1Preferences/);
 });
 
-test('account storage workflow uses the existing database secret without exposing credentials',()=>{
-  assert.match(workflow,/DATABASE_URL: \$\{\{ secrets\.DATABASE_URL \}\}/);
-  assert.match(workflow,/node scripts\/ensure-account-preferences\.mjs/);
-  assert.match(workflow,/permissions:\n  contents: read/);
-  assert.doesNotMatch(workflow,/Password1|titans77fna/i);
+test('retired Neon account preference provisioning cannot return to active automation',()=>{
+  assert.equal(exists('.github/workflows/account-storage.yml'),false);
+  assert.equal(exists('scripts/ensure-account-preferences.mjs'),false);
+  const deploy=read('.github/workflows/cloudflare-deploy.yml');
+  const wrangler=read('wrangler.jsonc');
+  assert.doesNotMatch(deploy,/DATABASE_URL/);
+  assert.doesNotMatch(wrangler,/DATABASE_URL/);
+});
+
+test('nflreadpy warehouse maintenance remains isolated until its dedicated D1 migration',()=>{
+  const analyticsWorkflow=read('.github/workflows/nflreadpy-ingest.yml');
+  assert.match(analyticsWorkflow,/DATABASE_URL: \$\{\{ secrets\.DATABASE_URL \}\}/);
+  assert.match(analyticsWorkflow,/python scripts\/ingest_nflreadpy\.py/);
+  assert.doesNotMatch(analyticsWorkflow,/fan_user_preferences/);
 });
