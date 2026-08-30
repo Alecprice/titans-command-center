@@ -16,7 +16,8 @@ test('Cloudflare Worker serves static assets and runs only API paths through com
   assert.match(config,/"not_found_handling"\s*:\s*"single-page-application"/);
   assert.match(config,/"run_worker_first"\s*:\s*\["\/api\/\*"\]/);
   assert.match(config,/"15 10 \* \* \*"/);
-  assert.match(config,/"required"\s*:\s*\["DATABASE_URL"\]/);
+  assert.doesNotMatch(config,/DATABASE_URL/);
+  assert.match(config,/"binding"\s*:\s*"TITANS_DB"/);
 });
 
 test('Cloudflare adapter uses native Worker env and execution context for core API routes and trusted scheduler',()=>{
