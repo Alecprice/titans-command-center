@@ -1,4 +1,4 @@
-name: nflreadpy Analytics Ingest
+name: nflreadpy Analytics D1 Snapshots
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
     paths:
       - 'scripts/ingest_nflreadpy.py'
       - 'requirements-analytics.txt'
-      - 'db/migrations/010_nflreadpy_analytics.sql'
+      - 'src/d1-api-snapshot.mjs'
       - '.github/workflows/nflreadpy-ingest.yml'
   schedule:
     - cron: '25 11 * * *'
   workflow_dispatch:
     inputs:
       seasons:
-        description: 'Comma-separated NFL seasons to ingest (example: 2024,2025)'
+        description: 'Comma-separated NFL seasons to publish (example: 2025,2026)'
         required: false
         type: string
 
@@ -29,7 +29,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      D1_DATABASE: titans-command-center
+      NFLREADPY_SQL_OUT: /tmp/nflreadpy-d1.sql
+      NFLREADPY_SUMMARY_OUT: /tmp/nflreadpy-d1-summary.json
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -42,6 +46,12 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
           cache-dependency-path: requirements-analytics.txt
+
+      - name: Use Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
 
       - name: Install analytics dependencies
         run: python -m pip install --disable-pip-version-check -r requirements-analytics.txt
@@ -61,34 +71,87 @@ jobs:
           echo "NFLREADPY_SEASONS=$seasons" >> "$GITHUB_ENV"
           echo "Analytics seasons: $seasons"
 
-      - name: Require database secret
+      - name: Require D1 deployment credentials
         shell: bash
         run: |
-          if [[ -z "$DATABASE_URL" ]]; then
-            echo 'DATABASE_URL GitHub Actions secret is required.' >&2
+          if [[ -z "$CLOUDFLARE_API_TOKEN" || -z "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo 'Cloudflare GitHub Actions credentials are required to publish analytics snapshots.' >&2
             exit 1
           fi
 
-      - name: Ingest nflverse analytics
+      - name: Build nflverse analytics snapshots
         run: python scripts/ingest_nflreadpy.py
 
-      - name: Verify warehouse rows
+      - name: Validate generated snapshot bundle
+        id: summary
         shell: bash
         run: |
           python - <<'PY'
           import json, os
-          import psycopg
-          with psycopg.connect(os.environ['DATABASE_URL']) as conn, conn.cursor() as cur:
-              cur.execute("""
-                select
-                  (select count(*) from plays)::int,
-                  (select count(*) from plays where epa is not null)::int,
-                  (select count(*) from plays where offense_personnel is not null or defense_personnel is not null)::int,
-                  (select count(*) from team_week_metrics)::int,
-                  (select max(season) from team_week_metrics where coalesce(offensive_plays,0)>0)::int
-              """)
-              plays, epa, personnel, metrics, max_season = cur.fetchone()
-          print(json.dumps({'plays':plays,'epaPlays':epa,'personnelPlays':personnel,'teamWeekMetrics':metrics,'maxDataSeason':max_season}))
-          if plays < 1 or epa < 1 or metrics < 1:
-              raise SystemExit('nflreadpy ingest did not populate the required analytics rows')
+          from pathlib import Path
+
+          summary = json.loads(Path(os.environ['NFLREADPY_SUMMARY_OUT']).read_text())
+          sql_path = Path(os.environ['NFLREADPY_SQL_OUT'])
+          if not summary.get('ok') or summary.get('availableSnapshots', 0) < 1:
+              raise SystemExit('nflreadpy did not build an available analytics snapshot')
+          if summary.get('teams') != 32:
+              raise SystemExit(f"Expected 32 NFL teams, got {summary.get('teams')}")
+          if not sql_path.exists() or sql_path.stat().st_size < 1000:
+              raise SystemExit('Generated D1 snapshot SQL is missing or unexpectedly small')
+          ten_keys = summary.get('tennesseeKeys') or []
+          if not ten_keys:
+              raise SystemExit('No Tennessee analytics snapshot key was generated')
+          target = ten_keys[-1]
+          print(json.dumps({
+              'snapshots': summary.get('snapshots'),
+              'availableSnapshots': summary.get('availableSnapshots'),
+              'targetKey': target,
+              'expiresAt': summary.get('expiresAt'),
+              'coverage': summary.get('coverage'),
+          }, indent=2))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"ten_key={target}\n")
+          PY
+
+      - name: Publish analytics snapshots to D1
+        run: npx --yes wrangler@4 d1 execute "$D1_DATABASE" --remote --file "$NFLREADPY_SQL_OUT"
+
+      - name: Verify Tennessee analytics snapshot in D1
+        shell: bash
+        env:
+          TEN_KEY: ${{ steps.summary.outputs.ten_key }}
+        run: |
+          npx --yes wrangler@4 d1 execute "$D1_DATABASE" --remote --json --command \
+            "SELECT cache_key,source,json_extract(payload,'$.status') AS status,json_extract(payload,'$.dataSeason') AS data_season,json_extract(payload,'$.summary.offensiveEpaPerPlay') AS offensive_epa,json_array_length(payload,'$.recentPlays') AS recent_plays,json_array_length(payload,'$.byDown') AS down_splits,json_array_length(payload,'$.personnel') AS personnel_splits FROM api_snapshots WHERE cache_key='$TEN_KEY' LIMIT 1;" \
+            > /tmp/nflreadpy-d1-verify.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path('/tmp/nflreadpy-d1-verify.json').read_text())
+          blocks = data if isinstance(data, list) else [data]
+          rows = []
+          for block in blocks:
+              if not isinstance(block, dict):
+                  continue
+              result = block.get('results')
+              if isinstance(result, list):
+                  rows.extend(result)
+              nested = block.get('result')
+              if isinstance(nested, list):
+                  rows.extend(nested)
+              elif isinstance(nested, dict) and isinstance(nested.get('results'), list):
+                  rows.extend(nested['results'])
+          if len(rows) != 1:
+              raise SystemExit(f'Expected exactly one D1 verification row, got {len(rows)}')
+          row = rows[0]
+          print(json.dumps(row, indent=2))
+          if row.get('source') != 'nflreadpy-d1-snapshot':
+              raise SystemExit('D1 analytics snapshot source is incorrect')
+          if row.get('status') != 'available':
+              raise SystemExit(f"D1 analytics snapshot is not available: {row.get('status')}")
+          if row.get('data_season') is None or row.get('offensive_epa') is None:
+              raise SystemExit('D1 analytics snapshot is missing its data season or EPA summary')
+          if int(row.get('recent_plays') or 0) < 1 or int(row.get('down_splits') or 0) < 1:
+              raise SystemExit('D1 analytics snapshot is missing situation detail')
           PY

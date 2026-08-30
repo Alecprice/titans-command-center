@@ -4,36 +4,57 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('nflreadpy migration stores requested situation and team metrics',()=>{
-  const sql=read('db/migrations/010_nflreadpy_analytics.sql');
-  for(const column of ['yardline_100','score_differential','game_seconds_remaining','offense_personnel','defense_personnel','offense_formation','defenders_in_box','no_huddle'])assert.match(sql,new RegExp(column));
-  for(const metric of ['offensive_epa_per_play','defensive_epa_per_play_allowed','pace_seconds_per_play','rest_days','raw_team_stats'])assert.match(sql,new RegExp(metric));
-  assert.match(sql,/create table if not exists team_week_metrics/i);
-  assert.match(sql,/kaggle-nfl[\s\S]*false/i);
-  assert.match(sql,/nfl-savant/);
-  assert.match(sql,/pro-football-reference/);
-});
-
-test('Python analytics ingest uses nflreadpy as the primary nflverse client',()=>{
+test('nflreadpy analytics builder emits compact D1 API snapshots instead of a raw Postgres warehouse',()=>{
   const py=read('scripts/ingest_nflreadpy.py');
+  const requirements=read('requirements-analytics.txt');
   assert.match(py,/import nflreadpy as nfl/);
   assert.match(py,/nfl\.load_pbp/);
   assert.match(py,/nfl\.load_team_stats/);
   assert.match(py,/nfl\.load_schedules/);
   assert.match(py,/nfl\.load_participation/);
-  assert.match(py,/home_rest/);
-  assert.match(py,/away_rest/);
-  assert.match(py,/score_differential/);
-  assert.match(py,/game_seconds_remaining/);
-  assert.match(py,/offense_personnel/);
-  assert.match(py,/defense_personnel/);
-  assert.match(py,/offense_formation/);
-  assert.match(py,/get_current_season\(roster=True\)/);
-  assert.match(py,/set\(offense_epa\) \| set\(defense_epa\) \| set\(team_stats\)/);
-  assert.doesNotMatch(py,/postgres(?:ql)?:\/\//i);
+  assert.match(py,/SNAPSHOT_SCOPE = "advanced-analytics:v1"/);
+  assert.match(py,/SNAPSHOT_SOURCE = "nflreadpy-d1-snapshot"/);
+  assert.match(py,/SNAPSHOT_TTL_HOURS = 36/);
+  assert.match(py,/INSERT INTO api_snapshots/);
+  assert.match(py,/BEGIN TRANSACTION/);
+  assert.match(py,/ON CONFLICT\(cache_key\) DO UPDATE/);
+  assert.match(py,/recentPlays/);
+  assert.match(py,/byDown/);
+  assert.match(py,/personnel/);
+  assert.match(py,/rows\[:80\]/);
+  assert.doesNotMatch(py,/psycopg|Jsonb|DATABASE_URL/);
+  assert.doesNotMatch(py,/raw_payload|stage_nflverse_plays|insert into plays|insert into team_week_metrics/i);
+  assert.doesNotMatch(requirements,/psycopg/i);
+  assert.match(requirements,/nflreadpy==0\.1\.5/);
+  assert.match(requirements,/polars/);
 });
 
-test('advanced analytics API exposes EPA pace rest and play situations safely',()=>{
+test('Python D1 analytics keys match the shared Worker snapshot contract',()=>{
+  const py=read('scripts/ingest_nflreadpy.py');
+  const snapshots=read('src/d1-api-snapshot.mjs');
+  const api=read('src/advanced-analytics-api.mjs');
+  assert.match(py,/return f"\{SNAPSHOT_SCOPE\}:season=\{requested_season\}:team=\{team\}"/);
+  assert.match(snapshots,/parts\.push\(`\$\{text\(key\)\.toLowerCase\(\)\}=\$\{encodeURIComponent\(normalized\)\}`\)/);
+  assert.match(api,/apiSnapshotKey\('advanced-analytics:v1',\{season:requestedSeason,team\}\)/);
+  assert.match(py,/teams = sorted\(TEAM_NAMES\)/);
+  assert.match(py,/TEAM_NAMES/);
+});
+
+test('analytics snapshot builder preserves season fallback and situation metrics',()=>{
+  const py=read('scripts/ingest_nflreadpy.py');
+  for(const token of [
+    'offensiveEpaPerPlay','defensiveEpaPerPlayAllowed','paceSecondsPerPlay','latestRestDays',
+    'scoreDifferential','gameSecondsRemaining','offensePersonnel','defensePersonnel',
+    'offenseFormation','defendersInBox','noHuddle','seasonFallback'
+  ])assert.match(py,new RegExp(token));
+  assert.match(py,/load_seasons = sorted\(set\(requested_seasons \+ \[max\(requested_seasons\) - 1\]\)\)/);
+  assert.match(py,/data_season != requested_season/);
+  assert.match(py,/row\.get\("season_type"\) == "regular"/);
+  assert.match(py,/home_rest/);
+  assert.match(py,/away_rest/);
+});
+
+test('advanced analytics API still exposes EPA pace rest and play situations safely',()=>{
   const api=read('src/advanced-analytics-api.mjs');
   assert.match(api,/offensiveEpaPerPlay/);
   assert.match(api,/defensiveEpaPerPlayAllowed/);
@@ -44,11 +65,11 @@ test('advanced analytics API exposes EPA pace rest and play situations safely',(
   assert.match(api,/offensePersonnel/);
   assert.match(api,/defensePersonnel/);
   assert.match(api,/offenseFormation/);
-  assert.match(api,/coalesce\(twm\.offensive_plays,0\)>0/);
   assert.match(api,/seasonFallback/);
+  assert.match(api,/readApiSnapshot\(env,snapshotKey\)/);
 });
 
-test('Stats Lab advanced analytics UI has requested situation explorer and route guards',()=>{
+test('Stats Lab advanced analytics UI keeps the requested situation explorer and route guards',()=>{
   const js=read('analytics-hub.js'),css=read('analytics-hub.css');
   assert.match(js,/Offensive EPA \/ play/);
   assert.match(js,/Defensive EPA \/ play allowed/);
@@ -66,14 +87,20 @@ test('Stats Lab advanced analytics UI has requested situation explorer and route
   assert.match(css,/@media\(max-width:390px\)/);
 });
 
-test('analytics workflow is secret-safe and scheduled',()=>{
+test('analytics workflow publishes directly to the existing D1 database without DATABASE_URL',()=>{
   const workflow=read('.github/workflows/nflreadpy-ingest.yml');
   assert.match(workflow,/cron: '25 11 \* \* \*'/);
-  assert.match(workflow,/DATABASE_URL: \$\{\{ secrets\.DATABASE_URL \}\}/);
+  assert.match(workflow,/CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
+  assert.match(workflow,/CLOUDFLARE_ACCOUNT_ID: \$\{\{ secrets\.CLOUDFLARE_ACCOUNT_ID \}\}/);
+  assert.match(workflow,/D1_DATABASE: titans-command-center/);
+  assert.match(workflow,/node-version: '24'/);
   assert.match(workflow,/python scripts\/ingest_nflreadpy\.py/);
-  assert.match(workflow,/requirements-analytics\.txt/);
+  assert.match(workflow,/npx --yes wrangler@4 d1 execute "\$D1_DATABASE" --remote --file "\$NFLREADPY_SQL_OUT"/);
+  assert.match(workflow,/Verify Tennessee analytics snapshot in D1/);
+  assert.match(workflow,/nflreadpy-d1-snapshot/);
   assert.match(workflow,/seasons="2026"/);
   assert.match(workflow,/seasons="2025,2026"/);
+  assert.doesNotMatch(workflow,/DATABASE_URL|psycopg|Verify warehouse rows|Require database secret/);
 });
 
 test('Cloudflare and browser shell route advanced analytics without exposing server code',()=>{
