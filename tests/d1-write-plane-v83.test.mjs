@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {getD1Snapshot,putD1Snapshot} from '../src/d1-store.mjs';
+import {getD1Snapshot,pruneExpiredD1Snapshots,putD1Snapshot} from '../src/d1-store.mjs';
 import {d1SyncAuditKey,reconcileD1FinalTitansScores} from '../src/d1-ingest-store.mjs';
 import {recordSyncRun} from '../src/ingest.mjs';
 
@@ -20,8 +20,18 @@ class FakeD1{
             if(query.includes('insert into api_snapshots')){
               const [key,payload,source,fetchedAt,expiresAt]=args;
               db.snapshots.set(String(key),{cache_key:key,payload,source,fetched_at:fetchedAt,expires_at:expiresAt,updated_at:new Date().toISOString()});
+              return {success:true,meta:{changes:1}};
             }
-            return {success:true};
+            if(query.includes('delete from api_snapshots')&&query.includes('datetime(expires_at)<=current_timestamp')){
+              const [rawPrefix,_pattern,limit]=args;
+              const expired=[...db.snapshots.values()]
+                .filter(row=>row.expires_at&&Date.parse(row.expires_at)<=Date.now()&&(!rawPrefix||String(row.cache_key).startsWith(String(rawPrefix))))
+                .sort((a,b)=>Date.parse(a.expires_at)-Date.parse(b.expires_at))
+                .slice(0,Number(limit)||0);
+              for(const row of expired)db.snapshots.delete(String(row.cache_key));
+              return {success:true,meta:{changes:expired.length}};
+            }
+            return {success:true,meta:{changes:0}};
           }
         };
       }
@@ -47,6 +57,32 @@ test('scheduled sync audit writes use D1 with no DATABASE_URL',async()=>{
   assert.equal(row.payload.status,'success');
   assert.equal(row.payload.recordsSeen,4);
   assert.equal(row.payload.recordsWritten,1);
+});
+
+test('expired D1 pruning is prefix-scoped and bounded',async()=>{
+  const env={TITANS_DB:new FakeD1()};
+  const old='2020-01-01T00:00:00.000Z';
+  await putD1Snapshot(env,'sync-run:v1:old-a',{ok:true},{fetchedAt:old,ttlSeconds:1});
+  await putD1Snapshot(env,'sync-run:v1:old-b',{ok:true},{fetchedAt:old,ttlSeconds:1});
+  await putD1Snapshot(env,'bootstrap:v1',{ok:true},{fetchedAt:old,ttlSeconds:1});
+  const cleanup=await pruneExpiredD1Snapshots(env,{prefix:'sync-run:v1:',limit:1});
+  assert.equal(cleanup.deleted,1);
+  assert.equal(env.TITANS_DB.snapshots.has('bootstrap:v1'),true);
+  const syncRows=[...env.TITANS_DB.snapshots.keys()].filter(key=>key.startsWith('sync-run:v1:'));
+  assert.equal(syncRows.length,1);
+});
+
+test('official audit performs one opportunistic cleanup of expired sync records',async()=>{
+  const env={TITANS_DB:new FakeD1()};
+  const old='2020-01-01T00:00:00.000Z';
+  await putD1Snapshot(env,'sync-run:v1:expired',{ok:true},{fetchedAt:old,ttlSeconds:1});
+  await putD1Snapshot(env,'scoreboard:v1',{ok:true},{fetchedAt:old,ttlSeconds:1});
+  const stored=await recordSyncRun(env,'official-audit',{ok:true,source:'titans',recordsSeen:4,recordsWritten:0},new Date('2026-08-29T22:00:00.000Z'));
+  assert.equal(stored.stored,true);
+  assert.equal(stored.pruned,1);
+  assert.equal(env.TITANS_DB.snapshots.has('sync-run:v1:expired'),false);
+  assert.equal(env.TITANS_DB.snapshots.has('scoreboard:v1'),true);
+  assert.equal(env.TITANS_DB.snapshots.has(stored.key),true);
 });
 
 test('D1 final-score reconciliation patches one unambiguous pending Titans game',async()=>{
