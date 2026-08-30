@@ -9,9 +9,6 @@
   "placement": {
     "mode": "smart"
   },
-  "secrets": {
-    "required": ["DATABASE_URL"]
-  },
   "vars": {
     "NEON_WAREHOUSE_DISABLED": "true"
   },

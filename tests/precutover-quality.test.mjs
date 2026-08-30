@@ -96,9 +96,10 @@ test('manifest uses dark launch colors and prioritizes core fan shortcuts',()=>{
   assert.ok(manifest.shortcuts.some(item=>item.url==='/#stats'));
 });
 
-test('Cloudflare deployment requires Neon and exposes only API paths to Worker compute',()=>{
+test('Cloudflare deployment requires D1 and exposes only API paths to Worker compute',()=>{
   const config=read('wrangler.jsonc');
-  assert.match(config,/"required"\s*:\s*\["DATABASE_URL"\]/);
+  assert.doesNotMatch(config,/DATABASE_URL/);
+  assert.match(config,/"binding"\s*:\s*"TITANS_DB"/);
   assert.match(config,/"run_worker_first"\s*:\s*\["\/api\/\*"\]/);
   assert.match(config,/"observability"\s*:\s*\{\s*"enabled"\s*:\s*true/);
 });

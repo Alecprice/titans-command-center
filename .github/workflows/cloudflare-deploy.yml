@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
       SEATGEEK_AID: ${{ secrets.SEATGEEK_AID }}
@@ -55,20 +54,18 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]] && echo "cloudflare=true" >> "$GITHUB_OUTPUT" || echo "cloudflare=false" >> "$GITHUB_OUTPUT"
-          [[ -n "$DATABASE_URL" ]] && echo "database=true" >> "$GITHUB_OUTPUT" || echo "database=false" >> "$GITHUB_OUTPUT"
           [[ -n "$YOUTUBE_API_KEY" ]] && echo "youtube=true" >> "$GITHUB_OUTPUT" || echo "youtube=false" >> "$GITHUB_OUTPUT"
           [[ -n "$SEATGEEK_CLIENT_ID" ]] && echo "seatgeek=true" >> "$GITHUB_OUTPUT" || echo "seatgeek=false" >> "$GITHUB_OUTPUT"
           [[ -n "$TICKETMASTER_API_KEY" ]] && echo "ticketmaster=true" >> "$GITHUB_OUTPUT" || echo "ticketmaster=false" >> "$GITHUB_OUTPUT"
           [[ -n "$STUBHUB_CLIENT_ID" && -n "$STUBHUB_CLIENT_SECRET" ]] && echo "stubhub=true" >> "$GITHUB_OUTPUT" || echo "stubhub=false" >> "$GITHUB_OUTPUT"
 
       - name: Build Worker secret bundle
-        if: steps.quality.outcome == 'success' && steps.creds.outputs.cloudflare == 'true' && steps.creds.outputs.database == 'true'
+        if: steps.quality.outcome == 'success' && steps.creds.outputs.cloudflare == 'true'
         shell: bash
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
           const keys = [
-            'DATABASE_URL',
             'YOUTUBE_API_KEY',
             'SEATGEEK_CLIENT_ID',
             'SEATGEEK_AID',
@@ -81,14 +78,13 @@ jobs:
             const value = String(process.env[key] || '').trim();
             if (value) secrets[key] = value;
           }
-          if (!secrets.DATABASE_URL) throw new Error('DATABASE_URL is required for production deployment');
           fs.writeFileSync('/tmp/titans-worker-secrets.json', JSON.stringify(secrets), {mode: 0o600});
-          console.log(`Prepared ${Object.keys(secrets).length} Worker secret binding(s) without printing values.`);
+          console.log(`Prepared ${Object.keys(secrets).length} optional Worker secret binding(s) without printing values.`);
           NODE
 
       - name: Deploy to Cloudflare
         id: deploy
-        if: steps.quality.outcome == 'success' && steps.creds.outputs.cloudflare == 'true' && steps.creds.outputs.database == 'true'
+        if: steps.quality.outcome == 'success' && steps.creds.outputs.cloudflare == 'true'
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -198,7 +194,6 @@ jobs:
         env:
           QUALITY_OUTCOME: ${{ steps.quality.outcome }}
           CLOUDFLARE_READY: ${{ steps.creds.outputs.cloudflare }}
-          DATABASE_READY: ${{ steps.creds.outputs.database }}
           YOUTUBE_READY: ${{ steps.creds.outputs.youtube }}
           SEATGEEK_READY: ${{ steps.creds.outputs.seatgeek }}
           TICKETMASTER_READY: ${{ steps.creds.outputs.ticketmaster }}
@@ -221,7 +216,6 @@ jobs:
         run: |
           if [[ "$QUALITY_OUTCOME" != "success" ]]; then STATUS='quality gate failed before Cloudflare deploy';
           elif [[ "$CLOUDFLARE_READY" != "true" ]]; then STATUS='Cloudflare credentials unavailable to workflow';
-          elif [[ "$DATABASE_READY" != "true" ]]; then STATUS='DATABASE_URL GitHub secret missing';
           elif [[ "$DEPLOY_OUTCOME" != "success" ]]; then STATUS='Cloudflare deploy failed';
           elif [[ "$SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}";
           elif [[ "$BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + browser navigation regression ${BROWSER_OUTCOME:-not-run}";
@@ -250,7 +244,7 @@ jobs:
             echo "- Source commit: \`$GITHUB_SHA\`"
             echo "- Quality gate: ${QUALITY_OUTCOME:-unknown}"
             echo "- Cloudflare credentials available: ${CLOUDFLARE_READY:-unknown}"
-            echo "- DATABASE_URL GitHub secret supplied: ${DATABASE_READY:-unknown}"
+            echo '- Neon warehouse deployment secret required: false (D1 primary)'
             echo "- YouTube Data API configured: ${YOUTUBE_READY:-false}"
             echo "- Ticket providers configured: SeatGeek=${SEATGEEK_READY:-false}, Ticketmaster=${TICKETMASTER_READY:-false}, StubHub=${STUBHUB_READY:-false}"
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
