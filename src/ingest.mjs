@@ -1,6 +1,8 @@
 import crypto from 'node:crypto';
 import { fetchFreeOdds } from './odds.mjs';
 import { getSql } from './db.mjs';
+import { hasD1 } from './d1-store.mjs';
+import { recordD1SyncRun,reconcileD1FinalTitansScores } from './d1-ingest-store.mjs';
 
 const APP_VERSION='1.0.0';
 const secretDigest=value=>crypto.createHash('sha256').update(String(value??''),'utf8').digest();
@@ -16,12 +18,13 @@ export function classifySyncResult(result={}){return result.skipped?'skipped':re
 function sourceSlug(result={}){const raw=String(result.source||result.provider||'titans-cc').toLowerCase();if(raw.includes('prop'))return 'propline';if(raw.includes('odds-api'))return 'odds-api-io';if(raw.includes('espn'))return 'espn';if(raw.includes('blue'))return 'bluesky';if(raw.includes('nflverse'))return 'nflverse';if(raw.includes('nws'))return 'nws';if(raw.includes('titan'))return 'titans';return 'titans-cc';}
 export async function recordSyncRun(env=process.env,job,result={},startedAt=new Date()){
   try{
+    const slug=sourceSlug(result),status=classifySyncResult(result),metadata={note:result.note||'',provider:result.provider||null,skipped:Boolean(result.skipped),checks:Array.isArray(result.checks)?result.checks.map(c=>({slug:c.slug,ok:Boolean(c.ok),bytes:Number(c.bytes||0),url:c.url||''})):[],diagnostics:Array.isArray(result.diagnostics)?result.diagnostics.slice(0,8):[],finalsSeen:Number(result.finalsSeen||0)};
+    if(hasD1(env))return await recordD1SyncRun(env,job,{sourceSlug:slug,status,result,startedAt,metadata});
     const sql=await getSql(env);if(!sql)return {stored:false};
-    const slug=sourceSlug(result),[source]=await sql`select id from sources where slug=${slug} limit 1`;if(!source)return {stored:false};
-    const status=classifySyncResult(result),metadata={note:result.note||'',provider:result.provider||null,skipped:Boolean(result.skipped),checks:Array.isArray(result.checks)?result.checks.map(c=>({slug:c.slug,ok:Boolean(c.ok),bytes:Number(c.bytes||0),url:c.url||''})):[],diagnostics:Array.isArray(result.diagnostics)?result.diagnostics.slice(0,8):[],finalsSeen:Number(result.finalsSeen||0)};
+    const [source]=await sql`select id from sources where slug=${slug} limit 1`;if(!source)return {stored:false};
     const meta=JSON.stringify(metadata),error=result.error?String(result.error).slice(0,500):null;
     await sql`insert into sync_runs(source_id,job_type,status,started_at,finished_at,records_seen,records_written,error_message,metadata) values(${source.id},${job},${status},${startedAt},now(),${Number(result.recordsSeen||0)},${Number(result.recordsWritten||0)},${error},${meta}::jsonb)`;
-    return {stored:true,status,source:slug};
+    return {stored:true,status,source:slug,storage:'neon'};
   }catch(error){console.error('[recordSyncRun]',job,error);return {stored:false};}
 }
 export async function syncTitansOfficialAudit(){const checks=[{slug:'roster',url:'https://www.tennesseetitans.com/team/players-roster/',marker:/Titans Roster|Player\s*\|\s*#/i},{slug:'transactions',url:'https://www.tennesseetitans.com/team/transactions/',marker:/TRANSACTIONS|Titans Transactions/i},{slug:'schedule',url:'https://www.tennesseetitans.com/schedule/',marker:/2026 Schedule|WEEK 18|Titans 2026 Schedule/i},{slug:'depth-chart',url:'https://www.tennesseetitans.com/team/depth-chart',marker:/DEPTH CHART|Depth Chart/i}];const results=await Promise.all(checks.map(async check=>{try{const body=await text(check.url,{headers:{'User-Agent':`TitansCommandCenter/${APP_VERSION}`}});return {slug:check.slug,ok:check.marker.test(body),bytes:body.length,url:check.url};}catch{return {slug:check.slug,ok:false,bytes:0,url:check.url,error:'Official source unavailable'};}})),healthy=results.filter(x=>x.ok).length;return {ok:healthy===results.length,source:'titans',recordsSeen:results.length,recordsWritten:0,checks:results,note:'Official-source reachability/marker audit only; no HTML data is persisted by this job.'};}
@@ -44,6 +47,15 @@ export function extractFinalTitansScores(data={}){
   return out;
 }
 async function reconcileFinalTitansScores(env,finals=[]){
+  if(hasD1(env)){
+    try{
+      const result=await reconcileD1FinalTitansScores(env,finals);
+      return {recordsWritten:Number(result.recordsWritten||0),diagnostics:result.diagnostics||[]};
+    }catch(error){
+      console.error('[reconcileD1FinalTitansScores]',error);
+      return {recordsWritten:0,diagnostics:[{status:'d1-write-failed'}]};
+    }
+  }
   const sql=await getSql(env);if(!sql)return {recordsWritten:0,diagnostics:[{status:'database-unavailable'}]};
   let recordsWritten=0;const diagnostics=[];
   for(const final of finals.slice(0,3)){
