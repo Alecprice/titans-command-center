@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {d1AuthoritativeHealth,neonWarehouseDisabled,productionDataEnv} from '../cloudflare/production-worker.mjs';
+import {d1AuthoritativeHealth,d1WarehouseFallback,neonWarehouseDisabled,productionDataEnv} from '../cloudflare/production-worker.mjs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
@@ -83,6 +83,21 @@ test('D1 health degrades when the primary snapshot is not fresh even if the bind
   assert.equal(body.database.configured,true);
   assert.equal(body.database.ok,false);
   assert.equal(body.database.snapshotFresh,false);
+});
+
+test('Advanced Analytics degrades to an explicit 200 state with no warehouse secret',async()=>{
+  const env={NEON_WAREHOUSE_DISABLED:'true'};
+  const response=await d1WarehouseFallback(new Request('https://example.test/api/advanced-analytics?season=2026&team=TEN'),env,{});
+  const body=await response.json();
+  assert.equal(response.status,200);
+  assert.equal(body.ok,false);
+  assert.equal(body.available,false);
+  assert.equal(body.status,'database-unavailable');
+  assert.equal(body.error,'Advanced analytics query failed');
+  assert.equal(body.summary,null);
+  assert.deepEqual(body.weeks,[]);
+  assert.deepEqual(body.recentPlays,[]);
+  assert.match(response.headers.get('cache-control')||'',/no-store/i);
 });
 
 test('wrangler routes production through D1 without requiring a Neon warehouse secret',()=>{
