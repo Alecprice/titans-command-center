@@ -28,9 +28,17 @@ test('retired Neon account preference provisioning cannot return to active autom
   assert.doesNotMatch(wrangler,/DATABASE_URL/);
 });
 
-test('nflreadpy warehouse maintenance remains isolated until its dedicated D1 migration',()=>{
+test('nflreadpy maintenance now publishes analytics snapshots directly to D1',()=>{
   const analyticsWorkflow=read('.github/workflows/nflreadpy-ingest.yml');
-  assert.match(analyticsWorkflow,/DATABASE_URL: \$\{\{ secrets\.DATABASE_URL \}\}/);
+  const analyticsScript=read('scripts/ingest_nflreadpy.py');
+  const requirements=read('requirements-analytics.txt');
+  assert.match(analyticsWorkflow,/CLOUDFLARE_API_TOKEN: \$\{\{ secrets\.CLOUDFLARE_API_TOKEN \}\}/);
+  assert.match(analyticsWorkflow,/D1_DATABASE: titans-command-center/);
   assert.match(analyticsWorkflow,/python scripts\/ingest_nflreadpy\.py/);
+  assert.match(analyticsWorkflow,/wrangler@4 d1 execute/);
+  assert.match(analyticsScript,/INSERT INTO api_snapshots/);
+  assert.doesNotMatch(analyticsWorkflow,/DATABASE_URL/);
+  assert.doesNotMatch(analyticsScript,/DATABASE_URL|psycopg/);
+  assert.doesNotMatch(requirements,/psycopg/i);
   assert.doesNotMatch(analyticsWorkflow,/fan_user_preferences/);
 });
