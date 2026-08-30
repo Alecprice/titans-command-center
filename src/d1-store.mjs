@@ -82,3 +82,24 @@ export async function deleteD1Snapshot(env,key){
   await env.TITANS_DB.prepare('delete from api_snapshots where cache_key=?').bind(String(key)).run();
   return true;
 }
+
+export async function pruneExpiredD1Snapshots(env,{prefix='',limit=100}={}){
+  if(!hasD1(env))return {deleted:0,prefix:String(prefix||''),limit:0};
+  const rawPrefix=String(prefix||'');
+  const escapedPrefix=rawPrefix.replace(/[\\%_]/g,'\\$&');
+  const boundedLimit=Math.min(500,Math.max(1,Math.trunc(Number(limit)||100)));
+  const result=await env.TITANS_DB.prepare(`
+    delete from api_snapshots
+    where cache_key in (
+      select cache_key
+      from api_snapshots
+      where expires_at is not null
+        and datetime(expires_at)<=CURRENT_TIMESTAMP
+        and (?='' or cache_key like ? escape '\\')
+      order by datetime(expires_at) asc
+      limit ?
+    )
+  `).bind(rawPrefix,`${escapedPrefix}%`,boundedLimit).run();
+  const deleted=Number(result?.meta?.changes??result?.changes??0);
+  return {deleted:Number.isFinite(deleted)?deleted:0,prefix:rawPrefix,limit:boundedLimit};
+}
