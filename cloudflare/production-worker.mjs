@@ -66,9 +66,44 @@ export async function d1AuthoritativeHealth(request,env,ctx){
   return new Response(JSON.stringify(responseBody),{status:200,headers});
 }
 
+export async function d1WarehouseFallback(request,env,ctx){
+  const response=await worker.fetch(request,productionDataEnv(env),ctx);
+  if(!neonWarehouseDisabled(env)||new URL(request.url).pathname!=='/api/advanced-analytics'||response.status!==503)return response;
+  let body={};
+  try{body=await response.clone().json();}catch{}
+  if(body?.error!=='Database not configured')return response;
+
+  const url=new URL(request.url);
+  const requestedSeason=Number.parseInt(url.searchParams.get('season')||'2026',10);
+  const team=String(url.searchParams.get('team')||'TEN').toUpperCase();
+  const payload={
+    ok:false,
+    available:false,
+    status:'database-unavailable',
+    configured:false,
+    requestedSeason:Number.isInteger(requestedSeason)?requestedSeason:2026,
+    dataSeason:null,
+    team:/^[A-Z]{2,3}$/.test(team)?team:'TEN',
+    seasonFallback:false,
+    coverage:null,
+    summary:null,
+    weeks:[],
+    league:[],
+    recentPlays:[],
+    byDown:[],
+    personnel:[],
+    sources:[],
+    error:'Advanced analytics query failed',
+    fetchedAt:new Date().toISOString()
+  };
+  return new Response(JSON.stringify(payload),{status:200,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});
+}
+
 export default {
   fetch(request,env,ctx){
-    if(neonWarehouseDisabled(env)&&new URL(request.url).pathname==='/api/health')return d1AuthoritativeHealth(request,env,ctx);
+    const pathname=new URL(request.url).pathname;
+    if(neonWarehouseDisabled(env)&&pathname==='/api/health')return d1AuthoritativeHealth(request,env,ctx);
+    if(neonWarehouseDisabled(env)&&pathname==='/api/advanced-analytics')return d1WarehouseFallback(request,env,ctx);
     return worker.fetch(request,productionDataEnv(env),ctx);
   },
   scheduled(controller,env,ctx){
