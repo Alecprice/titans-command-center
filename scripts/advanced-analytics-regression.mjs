@@ -4,7 +4,7 @@ const base=String(process.env.WORKER_URL||process.env.PRODUCTION_URL||'https://t
 const started=Date.now();
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const finite=value=>value!=null&&Number.isFinite(Number(value));
-const headers={'User-Agent':'TitansCommandCenter-AdvancedAnalyticsAudit/0.9','Cache-Control':'no-cache, no-store','Accept':'application/json'};
+const headers={'User-Agent':'TitansCommandCenter-AdvancedAnalyticsAudit/1.0','Cache-Control':'no-cache, no-store','Accept':'application/json'};
 
 try{
   const [healthResponse,response]=await Promise.all([
@@ -15,35 +15,41 @@ try{
   assert(healthResponse.status===200,`Health API returned ${healthResponse.status}`);
   const healthStatus=String(health?.status||'');
   assert(healthStatus==='healthy'||healthStatus==='degraded',`Unexpected health status ${healthStatus||'missing'}`);
+  if(healthStatus==='degraded'){
+    assert(health?.database?.configured===true,'Degraded app health lost the configured legacy database signal');
+    assert(health?.database?.ok===false,'Degraded app health must preserve the failed legacy database signal');
+  }
 
   let report={};
   try{report=JSON.parse(fs.readFileSync('/tmp/cloudflare-smoke.json','utf8'))}catch{}
 
-  if(healthStatus==='degraded'){
-    assert(health?.database?.configured===true,'Degraded analytics check lost the configured database signal');
-    assert(health?.database?.ok===false,'Degraded analytics check must preserve the failed database signal');
-    assert(response.status===200,`Degraded analytics API returned unexpected ${response.status}`);
-    assert(data?.ok===false,'Degraded analytics response unexpectedly claims ok=true');
-    assert(data?.available===false,'Degraded analytics response unexpectedly claims available=true');
-    assert(data?.status==='database-unavailable',`Unexpected degraded analytics status: ${data?.status||'missing'}`);
-    assert(data?.error==='Advanced analytics query failed',`Unexpected degraded analytics error: ${data?.error||'missing'}`);
-    assert(data?.summary===null,'Degraded analytics response must not fabricate a summary');
-    assert(Array.isArray(data?.weeks)&&data.weeks.length===0,'Degraded analytics response must not fabricate weekly rows');
-    assert(Array.isArray(data?.recentPlays)&&data.recentPlays.length===0,'Degraded analytics response must not fabricate play rows');
-    assert(String(response.headers.get('cache-control')||'').toLowerCase().includes('no-store'),'Degraded analytics response must not be cached');
+  const analyticsAvailable=response.status===200&&data?.ok===true&&data?.status==='available';
+  if(!analyticsAvailable){
+    assert(response.status===200,`Unavailable analytics API returned unexpected ${response.status}`);
+    assert(data?.ok===false,'Unavailable analytics response unexpectedly claims ok=true');
+    assert(data?.available===false,'Unavailable analytics response unexpectedly claims available=true');
+    assert(data?.status==='database-unavailable',`Unexpected unavailable analytics status: ${data?.status||'missing'}`);
+    assert(data?.error==='Advanced analytics query failed',`Unexpected unavailable analytics error: ${data?.error||'missing'}`);
+    assert(data?.summary===null,'Unavailable analytics response must not fabricate a summary');
+    assert(Array.isArray(data?.weeks)&&data.weeks.length===0,'Unavailable analytics response must not fabricate weekly rows');
+    assert(Array.isArray(data?.recentPlays)&&data.recentPlays.length===0,'Unavailable analytics response must not fabricate play rows');
+    assert(Array.isArray(data?.byDown)&&data.byDown.length===0,'Unavailable analytics response must not fabricate down splits');
+    assert(Array.isArray(data?.personnel)&&data.personnel.length===0,'Unavailable analytics response must not fabricate personnel splits');
+    assert(String(response.headers.get('cache-control')||'').toLowerCase().includes('no-store'),'Unavailable analytics response must not be cached');
     report.analyticsStatus=response.status;
     report.analyticsMode='database-unavailable';
     report.analyticsHealthStatus=healthStatus;
     report.analyticsDatabaseAvailable=false;
+    report.analyticsStorage=null;
     report.responseMs={...(report.responseMs||{}),analytics:Date.now()-started};
     fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify(report,null,2));
     console.log(JSON.stringify({ok:true,base,mode:'database-unavailable',healthStatus,responseStatus:response.status,responseMs:Date.now()-started},null,2));
     process.exit(0);
   }
 
-  assert(health?.database?.ok===true,'Healthy analytics check requires a healthy database');
+  assert(data?.storage==='cloudflare-d1',`Available analytics must come from Cloudflare D1, got ${data?.storage||'missing'}`);
+  assert(data?.snapshot&&data.snapshot.source==='nflreadpy-d1-snapshot',`Available analytics snapshot source is invalid: ${data?.snapshot?.source||'missing'}`);
   assert(response.status===200,`Advanced analytics API returned ${response.status}`);
-  assert(data?.ok===true,'Advanced analytics API did not return ok=true');
   assert(data?.team==='TEN',`Advanced analytics returned unexpected team ${data?.team||'unknown'}`);
   assert(Number(data?.requestedSeason)===2026,'Advanced analytics did not preserve the requested 2026 season');
   assert(Number.isInteger(Number(data?.dataSeason))&&Number(data.dataSeason)>=1999&&Number(data.dataSeason)<=2026,`Advanced analytics data season is invalid: ${data?.dataSeason}`);
@@ -69,10 +75,15 @@ try{
   assert(/Pro-Football-Reference/i.test(sourceLabels),'Pro-Football-Reference is missing from advanced analytics cross-check provenance');
   assert(/Kaggle/i.test(sourceLabels),'Kaggle review policy is missing from advanced analytics provenance');
 
+  const snapshotStale=Boolean(data?.snapshot?.stale);
+  const analyticsMode=snapshotStale?'cloudflare-d1-stale':'cloudflare-d1';
   report.analyticsStatus=response.status;
-  report.analyticsMode='live-database';
+  report.analyticsMode=analyticsMode;
   report.analyticsHealthStatus=healthStatus;
   report.analyticsDatabaseAvailable=true;
+  report.analyticsStorage=data.storage;
+  report.analyticsSnapshotSource=data.snapshot.source;
+  report.analyticsSnapshotStale=snapshotStale;
   report.analyticsDataSeason=Number(data.dataSeason);
   report.analyticsSeasonFallback=Boolean(data.seasonFallback);
   report.analyticsWarehousePlays=Number(data.coverage.plays||0);
@@ -85,7 +96,7 @@ try{
   report.analyticsLatestRestDays=Number(data.summary.latestRestDays);
   report.responseMs={...(report.responseMs||{}),analytics:Date.now()-started};
   fs.writeFileSync('/tmp/cloudflare-smoke.json',JSON.stringify(report,null,2));
-  console.log(JSON.stringify({ok:true,base,mode:'live-database',dataSeason:data.dataSeason,seasonFallback:data.seasonFallback,warehousePlays:data.coverage.plays,recentPlays:data.recentPlays.length,personnelRows:data.personnel.length,responseMs:Date.now()-started},null,2));
+  console.log(JSON.stringify({ok:true,base,mode:analyticsMode,healthStatus,dataSeason:data.dataSeason,seasonFallback:data.seasonFallback,storage:data.storage,snapshotSource:data.snapshot.source,snapshotStale,warehousePlays:data.coverage.plays,recentPlays:data.recentPlays.length,personnelRows:data.personnel.length,responseMs:Date.now()-started},null,2));
 }catch(error){
   const message=error instanceof Error?error.message:String(error);
   let report={};
