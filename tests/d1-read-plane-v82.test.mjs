@@ -82,6 +82,36 @@ test('Advanced Analytics serves a dimensioned D1 snapshot without DATABASE_URL',
   assert.equal(result.payload.summary.offenseRank,1);
 });
 
+test('Advanced Analytics serves its last D1 snapshot when the fresh materialization expires',async()=>{
+  const env={TITANS_DB:new FakeD1()};
+  const key=apiSnapshotKey('advanced-analytics:v1',{season:2026,team:'TEN'});
+  await seed(env,key,{ok:true,status:'available',requestedSeason:2026,dataSeason:2025,team:'TEN',seasonFallback:true,summary:{offenseRank:19}});
+  env.TITANS_DB.expire(key);
+  const harness=responseHarness();
+  await advancedAnalyticsRoute({method:'GET',query:{season:'2026',team:'TEN'}},harness.res,env);
+  const result=harness.result();
+  assert.equal(result.statusCode,200);
+  assert.equal(result.payload.storage,'cloudflare-d1');
+  assert.equal(result.payload.snapshot.stale,true);
+  assert.match(result.payload.snapshot.reason,/Fresh analytics snapshot unavailable/);
+  assert.equal(result.payload.dataSeason,2025);
+});
+
+test('Advanced Analytics returns an explicit no-fake-metrics state when D1 has no snapshot',async()=>{
+  const env={TITANS_DB:new FakeD1()};
+  const harness=responseHarness();
+  await advancedAnalyticsRoute({method:'GET',query:{season:'2026',team:'TEN'}},harness.res,env);
+  const result=harness.result();
+  assert.equal(result.statusCode,200);
+  assert.equal(result.payload.ok,false);
+  assert.equal(result.payload.available,false);
+  assert.equal(result.payload.status,'database-unavailable');
+  assert.equal(result.payload.configured,true);
+  assert.equal(result.payload.summary,null);
+  assert.deepEqual(result.payload.recentPlays,[]);
+  assert.match(result.headers.get('cache-control')||'',/no-store/i);
+});
+
 test('Player Profile serves its player-specific D1 snapshot without DATABASE_URL',async()=>{
   const env={TITANS_DB:new FakeD1()};
   const id='11111111-1111-4111-8111-111111111111';
@@ -113,17 +143,15 @@ test('expired D1 snapshots are withheld normally and available for outage fallba
   assert.equal(result.payload.standings[0].team,'Stale Titans');
 });
 
-test('read-plane routes persist only successful warehouse payloads and preserve bounded TTLs',()=>{
+test('remaining Neon-backed read planes persist only successful payloads while Analytics is D1-only',()=>{
   const fan=fs.readFileSync(new URL('../src/fan-intel-api.mjs',import.meta.url),'utf8');
   const analytics=fs.readFileSync(new URL('../src/advanced-analytics-api.mjs',import.meta.url),'utf8');
   const player=fs.readFileSync(new URL('../src/player-api.mjs',import.meta.url),'utf8');
   assert.match(fan,/FAN_INTEL_SNAPSHOT_TTL_SECONDS=600/);
   assert.match(fan,/writeApiSnapshot\(env,FAN_INTEL_SNAPSHOT_KEY,payload/);
-  assert.match(analytics,/ANALYTICS_SNAPSHOT_TTL_SECONDS=3600/);
-  assert.match(analytics,/writeApiSnapshot\(env,snapshotKey,payload/);
   assert.match(player,/PLAYER_SNAPSHOT_TTL_SECONDS=21600/);
   assert.match(player,/if\(data\.ok\)[\s\S]*writeApiSnapshot\(env,snapshotKey,data/);
-  const analyticsCatch=analytics.match(/catch\(error\)\{[\s\S]*?error:'Advanced analytics query failed'[\s\S]*?\n  \}/)?.[0]||'';
-  assert.ok(analyticsCatch);
-  assert.doesNotMatch(analyticsCatch,/writeApiSnapshot/);
+  assert.match(analytics,/readApiSnapshot\(env,snapshotKey\)/);
+  assert.match(analytics,/allowExpired:true/);
+  assert.doesNotMatch(analytics,/getSql|writeApiSnapshot|DATABASE_URL|team_week_metrics|\bfrom plays\b|neon-advanced-analytics/i);
 });
