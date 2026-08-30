@@ -6,7 +6,11 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('Cloudflare Worker serves static assets and runs only API paths through compute',()=>{
   const config=read('wrangler.jsonc');
-  assert.match(config,/"main"\s*:\s*"cloudflare\/worker\.mjs"/);
+  const boundary=read('cloudflare/production-worker.mjs');
+  assert.match(config,/"main"\s*:\s*"cloudflare\/production-worker\.mjs"/);
+  assert.match(config,/"NEON_WAREHOUSE_DISABLED"\s*:\s*"true"/);
+  assert.match(boundary,/import worker from '\.\/worker\.mjs'/);
+  assert.match(boundary,/productionDataEnv\(env\)/);
   assert.match(config,/"nodejs_compat"/);
   assert.match(config,/"directory"\s*:\s*"\.\/dist"/);
   assert.match(config,/"not_found_handling"\s*:\s*"single-page-application"/);
