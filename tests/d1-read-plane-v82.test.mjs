@@ -85,23 +85,15 @@ test('Fan Intel serves its last D1 snapshot when fresh materialization is unavai
   assert.equal(result.payload.standings[0].team,'Stale Titans');
 });
 
-test('Fan Intel returns an explicit empty no-store state when D1 has no snapshot',async()=>{
+test('Fan Intel signals a non-cacheable internal outage when D1 has no snapshot',async()=>{
   const env={TITANS_DB:new FakeD1()};
   const harness=responseHarness();
   await fanIntelRoute({method:'GET',query:{}},harness.res,env);
   const result=harness.result();
-  assert.equal(result.statusCode,200);
-  assert.equal(result.payload.ok,true);
-  assert.equal(result.payload.available,false);
+  assert.equal(result.statusCode,503);
+  assert.equal(result.payload.ok,false);
   assert.equal(result.payload.configured,false);
-  assert.equal(result.payload.mode,'database-unavailable');
-  assert.deepEqual(result.payload.standings,[]);
-  assert.deepEqual(result.payload.injuries,[]);
-  assert.deepEqual(result.payload.contracts,[]);
-  assert.equal(result.payload.opponent,null);
-  assert.deepEqual(result.payload.gameDay,{drives:[],plays:[],teamMetrics:[]});
-  assert.deepEqual(result.payload.playerStats,[]);
-  assert.ok(Object.values(result.payload.availability).every(value=>value===false));
+  assert.match(result.payload.error,/snapshot unavailable/i);
   assert.match(result.headers.get('cache-control')||'',/no-store/i);
 });
 
