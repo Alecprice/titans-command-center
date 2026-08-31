@@ -59,6 +59,15 @@ test('scheduled sync audit writes use D1 with no DATABASE_URL',async()=>{
   assert.equal(row.payload.recordsWritten,1);
 });
 
+test('scheduled sync audit fails closed when D1 is unavailable',async()=>{
+  const stored=await recordSyncRun({},'espn',{ok:true,source:'espn',recordsSeen:4,recordsWritten:0},new Date('2026-08-29T22:00:00.000Z'));
+  assert.equal(stored.stored,false);
+  assert.equal(stored.status,'success');
+  assert.equal(stored.source,'espn');
+  assert.equal(stored.storage,null);
+  assert.equal(stored.reason,'d1-unavailable');
+});
+
 test('expired D1 pruning is prefix-scoped and bounded',async()=>{
   const env={TITANS_DB:new FakeD1()};
   const old='2020-01-01T00:00:00.000Z';
@@ -124,12 +133,13 @@ test('D1 final-score reconciliation fails closed on a conflicting final',async()
   assert.equal(row.payload.games[0].opponentScore,20);
 });
 
-test('production scheduled write path is D1-first and retains Neon only as no-binding fallback',()=>{
+test('production scheduled write path is D1-only and cannot fall back to Neon',()=>{
   const source=fs.readFileSync(new URL('../src/ingest.mjs',import.meta.url),'utf8');
   const record=source.match(/export async function recordSyncRun\([\s\S]*?\n\}/)?.[0]||'';
   const reconcile=source.match(/async function reconcileFinalTitansScores\([\s\S]*?\n\}/)?.[0]||'';
-  assert.match(record,/if\(hasD1\(env\)\)return await recordD1SyncRun/);
-  assert.ok(record.indexOf('hasD1(env)')<record.indexOf('getSql(env)'));
-  assert.match(reconcile,/if\(hasD1\(env\)\)/);
-  assert.ok(reconcile.indexOf('hasD1(env)')<reconcile.indexOf('getSql(env)'));
+  assert.doesNotMatch(source,/from '\.\/db\.mjs'|getSql\(|storage:'neon'/);
+  assert.match(record,/if\(!hasD1\(env\)\)return \{stored:false,status,source:slug,storage:null,reason:'d1-unavailable'\}/);
+  assert.match(record,/return await recordD1SyncRun/);
+  assert.match(reconcile,/if\(!hasD1\(env\)\)return \{recordsWritten:0,diagnostics:\[\{status:'d1-unavailable'\}\]\}/);
+  assert.match(reconcile,/reconcileD1FinalTitansScores\(env,finals\)/);
 });
