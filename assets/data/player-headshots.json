@@ -2,15 +2,25 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-08-30T15:28:33.359075+00:00",
-  "rosterRows": 91,
-  "headshotCount": 88,
-  "coveragePct": 96.7,
-  "omittedCount": 3,
+  "generatedAt": "2026-08-31T18:09:01.918664+00:00",
+  "rosterRows": 103,
+  "headshotCount": 99,
+  "coveragePct": 96.1,
+  "omittedCount": 4,
   "omissionReasons": {
-    "no-approved-headshot-url": 3
+    "no-approved-headshot-url": 4
   },
   "omittedPlayers": [
+    {
+      "name": "Corey Mayfield Jr.",
+      "normalizedName": "coreymayfield",
+      "number": "13",
+      "position": "DB",
+      "status": "ACT",
+      "gsisId": "00-0038453",
+      "espnId": "4362987",
+      "reason": "no-approved-headshot-url"
+    },
     {
       "name": "Keydrain Calligan",
       "normalizedName": "keydraincalligan",
@@ -53,7 +63,7 @@
       "status": "ACT",
       "gsisId": "00-0038121",
       "espnId": "4369835",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/n5x6q4v3rj8lrkiiva0h",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/avogci7ghtzxoxdcdtnx",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -65,7 +75,7 @@
       "status": "ACT",
       "gsisId": "00-0035632",
       "espnId": "4036134",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/u9zrvmlfnvzmgttdcsn6",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/h2jriwibpvmgdc33zsjc",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -90,6 +100,18 @@
       "gsisId": "00-0037758",
       "espnId": "4429607",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/dk8b5dpa5fflut1j4ynl",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Derrick Canteen",
+      "normalizedName": "derrickcanteen",
+      "number": "42",
+      "position": "DB",
+      "status": "ACT",
+      "gsisId": "00-0040659",
+      "espnId": "4429366",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/vfpxchkywc1vt3yeom9q",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -122,7 +144,7 @@
       "normalizedName": "jeadynlukus",
       "number": "35",
       "position": "DB",
-      "status": "ACT",
+      "status": "CUT",
       "gsisId": "00-0040915",
       "espnId": "4685444",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/nivxlr5fcwpic7j8uuu6",
@@ -149,7 +171,7 @@
       "status": "ACT",
       "gsisId": "00-0038043",
       "espnId": "4917635",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/gpyxftvkpvbwrc7srrgt",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/w2nwt08uxz0owmctdyfu",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -161,7 +183,7 @@
       "status": "ACT",
       "gsisId": "00-0038703",
       "espnId": "4585317",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/folwn5nqummgddg3li5y",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ophgu4atah9skksi1kws",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -185,7 +207,19 @@
       "status": "ACT",
       "gsisId": "00-0040201",
       "espnId": "4570469",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/hvjye0qefdut1vzbcgkh",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/xwb7yigex1r2dne7yelm",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Mario Goodrich",
+      "normalizedName": "mariogoodrich",
+      "number": "35",
+      "position": "DB",
+      "status": "ACT",
+      "gsisId": "00-0037136",
+      "espnId": "4360318",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/uap7tsrlmrnvb8ptf02n",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -197,7 +231,19 @@
       "status": "ACT",
       "gsisId": "00-0040020",
       "espnId": "4695280",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/km9fm82gypzf94hhrajh",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/dxjhrwbtwvdqfqc3kecf",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Nazeeh Johnson",
+      "normalizedName": "nazeehjohnson",
+      "number": "36",
+      "position": "DB",
+      "status": "RES",
+      "gsisId": "00-0037198",
+      "espnId": "4043625",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/illwkijgasazqecvkgd0",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -206,7 +252,7 @@
       "normalizedName": "sanoussikane",
       "number": "42",
       "position": "DB",
-      "status": "ACT",
+      "status": "CUT",
       "gsisId": "00-0039235",
       "espnId": "4430118",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/uj78zgtqjemh0ftylsjd",
@@ -221,7 +267,7 @@
       "status": "ACT",
       "gsisId": "00-0037155",
       "espnId": "4240532",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/lajc14lel9fjm8p6flnc",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/bhgovss7uhkszgbrfxd6",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -234,18 +280,6 @@
       "gsisId": "00-0039332",
       "espnId": "4700676",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/rqjhomavdixcd1tqcge5",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Cam Horsley",
-      "normalizedName": "camhorsley",
-      "number": "68",
-      "position": "DL",
-      "status": "ACT",
-      "gsisId": "00-0040517",
-      "espnId": "4431147",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ft6sw44uwc9nysur2h1d",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -269,7 +303,7 @@
       "status": "ACT",
       "gsisId": "00-0036855",
       "espnId": "4242292",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/nqyyjsk3zyn0t7lttprh",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/gurqlivegjoarvj6f3e4",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -293,7 +327,19 @@
       "status": "ACT",
       "gsisId": "00-0034163",
       "espnId": "3138764",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ngm7muyzhk9xv2ofafke",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/iq7og8epwftb1wl8aghd",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Jalyn Holmes",
+      "normalizedName": "jalynholmes",
+      "number": "97",
+      "position": "DL",
+      "status": "ACT",
+      "gsisId": "00-0034264",
+      "espnId": "3121414",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/hostnk8byovbecbtdea7",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -305,7 +351,7 @@
       "status": "ACT",
       "gsisId": "00-0035643",
       "espnId": "4035369",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/gi2z8wipg8w9vnxwbav0",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/lt545qfibz7n9jlqyqov",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -317,7 +363,7 @@
       "status": "ACT",
       "gsisId": "00-0034805",
       "espnId": "3120464",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/uddpcfoopacmfjcovnvi",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ixfyxejxsfgffbgd7in2",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -329,19 +375,31 @@
       "status": "ACT",
       "gsisId": "00-0036266",
       "espnId": "4039052",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/vkl6igrusm0srrkge1d9",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/zimdvramufcajq5c3noc",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
-      "name": "Keldric Faulk",
-      "normalizedName": "keldricfaulk",
-      "number": "15",
+      "name": "Khalen Saunders",
+      "normalizedName": "khalensaunders",
+      "number": "59",
       "position": "DL",
       "status": "ACT",
-      "gsisId": "00-0041508",
-      "espnId": "4870707",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/yn8hrjyo5q5kcmriamnb",
+      "gsisId": "00-0035656",
+      "espnId": "3121634",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ory67tgth5h9zjiriihh",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Laki Tasi",
+      "normalizedName": "lakitasi",
+      "number": "68",
+      "position": "DL",
+      "status": "E14",
+      "gsisId": "00-0040762",
+      "espnId": "5278710",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/pyfigo2gax99vjgmcyhs",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -353,7 +411,7 @@
       "status": "ACT",
       "gsisId": "00-0036682",
       "espnId": "4259547",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/bic0n2ocrdgl57ygp8lj",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/dnbfwozdcnftk7agxywc",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -365,7 +423,19 @@
       "status": "ACT",
       "gsisId": "00-0033870",
       "espnId": "3117258",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/pk5ozcdcbehjnw3txvu8",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/zgn4b0p7ezoqdqpto9lb",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Tanoh Kpassagnon",
+      "normalizedName": "tanohkpassagnon",
+      "number": "58",
+      "position": "DL",
+      "status": "ACT",
+      "gsisId": "00-0033902",
+      "espnId": "2982313",
+      "headshotUrl": "https://static.www.nfl.com/image/private/f_auto,q_auto/league/ilr1bs7qesfq7fryeetc",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -377,7 +447,19 @@
       "status": "ACT",
       "gsisId": "00-0037585",
       "espnId": "4045701",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/tgtw0t2gjcsejvro76ts",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/vuyddfbh4sapogzrxyqv",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Truman Jones",
+      "normalizedName": "trumanjones",
+      "number": "56",
+      "position": "DL",
+      "status": "ACT",
+      "gsisId": "00-0038514",
+      "espnId": "4367828",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/zhhugc4ahcrbbpbsufqr",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -389,12 +471,12 @@
       "status": "ACT",
       "gsisId": "00-0035192",
       "espnId": "3124084",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/xokfs27mtqrbb0y47ahn",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/qyugyvvddildncveryob",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
-      "name": "Anthony Hill",
+      "name": "Anthony Hill Jr.",
       "normalizedName": "anthonyhill",
       "number": "53",
       "position": "LB",
@@ -413,7 +495,7 @@
       "status": "ACT",
       "gsisId": "00-0039858",
       "espnId": "4429834",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/v3hwfmdmrsjinn4f8o2y",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/y5zs5kaw54mz5cyajpbw",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -425,7 +507,19 @@
       "status": "ACT",
       "gsisId": "00-0035672",
       "espnId": "3926229",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/wbbjzgrgoi4nbgyqmjcs",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/gdsui5swyoiuqadewwob",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Dominique Hampton",
+      "normalizedName": "dominiquehampton",
+      "number": "40",
+      "position": "LB",
+      "status": "RES",
+      "gsisId": "00-0039381",
+      "espnId": "4361094",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/tcxzdfx8ra5fdotljqtz",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -437,7 +531,19 @@
       "status": "ACT",
       "gsisId": "00-0040503",
       "espnId": "4573318",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ms9jnxwaub6b68urkzna",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/mf8ks1kejyk3ccakvs5f",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Dyontae Johnson",
+      "normalizedName": "dyontaejohnson",
+      "number": "45",
+      "position": "LB",
+      "status": "ACT",
+      "gsisId": "00-0038479",
+      "espnId": "4362280",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/evfpo59fjpb65grbfu0t",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -458,10 +564,10 @@
       "normalizedName": "jaylenharrell",
       "number": "92",
       "position": "LB",
-      "status": "ACT",
+      "status": "RES",
       "gsisId": "00-0039436",
       "espnId": "4429058",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/bchqpne0r2pz0plq34pv",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/tlijnhz6kshuwcnjha1m",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -473,7 +579,19 @@
       "status": "ACT",
       "gsisId": "00-0037663",
       "espnId": "4567962",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/kihqeivcgubenrrjopew",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jj3gmudznyutylbkkqbu",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Keldric Faulk",
+      "normalizedName": "keldricfaulk",
+      "number": "15",
+      "position": "LB",
+      "status": "ACT",
+      "gsisId": "00-0041508",
+      "espnId": "4870707",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/yn8hrjyo5q5kcmriamnb",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -490,6 +608,18 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
+      "name": "Milo Eifler",
+      "normalizedName": "miloeifler",
+      "number": "45",
+      "position": "LB",
+      "status": "RES",
+      "gsisId": "00-0036511",
+      "espnId": "4371940",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/rfmdcyim9q0prw56mzgw",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
       "name": "Mohamoud Diabate",
       "normalizedName": "mohamouddiabate",
       "number": "44",
@@ -497,7 +627,7 @@
       "status": "ACT",
       "gsisId": "00-0038711",
       "espnId": "4567403",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/clvmbgcxk6mw8gqdzyxa",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/to8prswizs9iqvpqqbay",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -509,7 +639,19 @@
       "status": "ACT",
       "gsisId": "00-0040752",
       "espnId": "4876057",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/xux3tjanbookjm0wmalz",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/koxindt0qvandhu8otrf",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Reid Carrico",
+      "normalizedName": "reidcarrico",
+      "number": "47",
+      "position": "LB",
+      "status": "ACT",
+      "gsisId": "00-0041492",
+      "espnId": "4432673",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ws33qmb09cnf4tyuvj4s",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -518,22 +660,10 @@
       "normalizedName": "seanbrown",
       "number": "48",
       "position": "LB",
-      "status": "ACT",
+      "status": "CUT",
       "gsisId": "00-0040913",
       "espnId": "4684139",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/cnstjjviw7qjnoiyf862",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Truman Jones",
-      "normalizedName": "trumanjones",
-      "number": "56",
-      "position": "LB",
-      "status": "ACT",
-      "gsisId": "00-0038514",
-      "espnId": "4367828",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/v3uhdutctvcx4c6pbpgu",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -545,7 +675,7 @@
       "status": "ACT",
       "gsisId": "00-0027557",
       "espnId": "13848",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/lqdswjw8fzenqmc06zbe",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/iqsbwgh7v6yyabnz8m2a",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -562,6 +692,18 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
+      "name": "Andre James",
+      "normalizedName": "andrejames",
+      "number": "61",
+      "position": "OL",
+      "status": "ACT",
+      "gsisId": "00-0035127",
+      "espnId": "3932244",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/cliagitqwyz5snrphj2c",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
       "name": "Austin Deculus",
       "normalizedName": "austindeculus",
       "number": "76",
@@ -569,7 +711,7 @@
       "status": "ACT",
       "gsisId": "00-0037302",
       "espnId": "4242229",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/mfiu08h46jezawozpma8",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/da3gpuvmzfoc7tnn5nut",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -581,7 +723,7 @@
       "status": "ACT",
       "gsisId": "00-0034112",
       "espnId": "4038544",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/oyncfcyyfflsqesj6xei",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/afwyxpln2lcv4uhf1mvd",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -593,7 +735,7 @@
       "status": "ACT",
       "gsisId": "00-0040512",
       "espnId": "4426987",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jxccvn2ucwos2vz3xdqj",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/hggljfh39iorav9j5mpw",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -605,7 +747,7 @@
       "status": "ACT",
       "gsisId": "00-0038095",
       "espnId": "4040950",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ez7oydk1ozqz8cw50y91",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/o5wcq92vpoiqddixdbyb",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -629,7 +771,7 @@
       "status": "ACT",
       "gsisId": "00-0040557",
       "espnId": "4879480",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/fmb5zsd9gtgntzdusfzw",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/dv8tuwzq6fptydjywws3",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -653,7 +795,7 @@
       "status": "ACT",
       "gsisId": "00-0040079",
       "espnId": "4431252",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ugcarobhj84xcupluwzq",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/yvxpchw3k1rzu0jq5575",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -665,7 +807,7 @@
       "status": "ACT",
       "gsisId": "00-0039731",
       "espnId": "4431437",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/w7zgtcktgcxgkbc7zdti",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/smrxlm1rtszojndj3wvu",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -677,7 +819,7 @@
       "status": "ACT",
       "gsisId": "00-0040190",
       "espnId": "4876319",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/wjbjl93rdrufhvpdh5gk",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/fqex24qmlgvs3yrcyzza",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -701,7 +843,7 @@
       "status": "ACT",
       "gsisId": "00-0039034",
       "espnId": "4429100",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/c4arvhcrnxg0y3vkzgp7",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jprsrsbaerno6elsex52",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -718,26 +860,14 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
-      "name": "Ryan Hayes",
-      "normalizedName": "ryanhayes",
+      "name": "Zach Thomas",
+      "normalizedName": "zachthomas",
       "number": "72",
       "position": "OL",
       "status": "ACT",
-      "gsisId": "00-0039042",
-      "espnId": "4372091",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/sr2hlmb4brxxem6ncu0z",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Trey Hill",
-      "normalizedName": "treyhill",
-      "number": "61",
-      "position": "OL",
-      "status": "ACT",
-      "gsisId": "00-0036856",
-      "espnId": "4361787",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ngdiunmyoawxtwz3tu7a",
+      "gsisId": "00-0037618",
+      "espnId": "4036834",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/b6vrvm3sbykrka1mr9jp",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -749,7 +879,7 @@
       "status": "ACT",
       "gsisId": "00-0035889",
       "espnId": "3915398",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ct2iphnvz4vl1tdy5wym",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/zwolwrghzfucwck0bwld",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -761,7 +891,7 @@
       "status": "ACT",
       "gsisId": "00-0040676",
       "espnId": "4688380",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/viadutkbvligsopnd2qn",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/l7switu6stlwd2irm8yo",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -773,7 +903,7 @@
       "status": "ACT",
       "gsisId": "00-0038550",
       "espnId": "4240858",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/bdky2q0tndjhtrgo2fgt",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jq92ol8hm5n7byqhpcps",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -785,7 +915,7 @@
       "status": "ACT",
       "gsisId": "00-0033869",
       "espnId": "3039707",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/fw9ec0v5pn3sorobytpb",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/yxs7ix2pmcfv5k1qn1sk",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -797,7 +927,19 @@
       "status": "ACT",
       "gsisId": "00-0039152",
       "espnId": "4361418",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/n7usvaleeuqvwomo68kf",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/npovrxpll0gqlkptsn6r",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "D'Ernest Johnson",
+      "normalizedName": "dernestjohnson",
+      "number": "21",
+      "position": "RB",
+      "status": "ACT",
+      "gsisId": "00-0035628",
+      "espnId": "3139602",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/gbe2eojaxid4n3pmo0rj",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -809,7 +951,7 @@
       "status": "ACT",
       "gsisId": "00-0037594",
       "espnId": "4367567",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/glst6wabuuvbrssmidng",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/bkhv6hpjogvs5b31wwrs",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -821,7 +963,7 @@
       "status": "ACT",
       "gsisId": "00-0040205",
       "espnId": "4429121",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jaymtuoljhnetzekrgqx",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jv2phcl7aihai00wkqgb",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -833,7 +975,7 @@
       "status": "ACT",
       "gsisId": "00-0036924",
       "espnId": "4240657",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/e1y7zhd7w3xbthodfa3m",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/cwqrxzouk4gkhfziyqre",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -857,7 +999,7 @@
       "status": "ACT",
       "gsisId": "00-0035261",
       "espnId": "3916148",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/dvpdczetkdhrqpm8izmd",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/mb2xdrqiys6ktlcuah2n",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -869,7 +1011,7 @@
       "status": "ACT",
       "gsisId": "00-0039032",
       "espnId": "4428557",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/fc7vhbtw80einad9hsfu",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/pkly3nkohty1tuijtwty",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -881,7 +1023,7 @@
       "status": "ACT",
       "gsisId": "00-0038115",
       "espnId": "4361516",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/hu3gywcwp2rlsefvawh1",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/nvabdu88h2cvroeygabo",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -893,7 +1035,7 @@
       "status": "ACT",
       "gsisId": "00-0039648",
       "espnId": "4360978",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/yaqmqzscsglgylchv7ez",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/imh2h5q6jmoqno5xlpwm",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -905,7 +1047,7 @@
       "status": "ACT",
       "gsisId": "00-0040584",
       "espnId": "4686728",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/lcyqbbnrzgtbnirz8knj",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/hewm6ztgka7xkbl6ybvb",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -914,7 +1056,7 @@
       "normalizedName": "jarenkanak",
       "number": "81",
       "position": "TE",
-      "status": "ACT",
+      "status": "RES",
       "gsisId": "00-0040901",
       "espnId": "4877034",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/nbrbfq68ghrvt2dsieej",
@@ -929,7 +1071,7 @@
       "status": "ACT",
       "gsisId": "00-0039023",
       "espnId": "4362570",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/feksqyxw1ihqcto45plk",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/cshaunf0zeexbjo7ofiv",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -953,7 +1095,7 @@
       "status": "ACT",
       "gsisId": "00-0039650",
       "espnId": "4362617",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/w8z5zvas0nli3yekxw7w",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/bdsenkkodb8gbdvtivvr",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -965,7 +1107,7 @@
       "status": "ACT",
       "gsisId": "00-0034837",
       "espnId": "3925357",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/l96rlegwqz7qfakbdtlp",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/zrv8bjm7zdtboyka2jvr",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -989,7 +1131,7 @@
       "status": "ACT",
       "gsisId": "00-0040705",
       "espnId": "4431268",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/njdduv9jx7c8vlrll8ex",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/cbcpv4931dqmgsu3anvo",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -1001,7 +1143,7 @@
       "status": "ACT",
       "gsisId": "00-0040445",
       "espnId": "4565172",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/qbww2dnr9cegartl95wq",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ztcixuqc2mihticrwnvc",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -1013,7 +1155,7 @@
       "status": "ACT",
       "gsisId": "00-0040170",
       "espnId": "4883647",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/aekfvt5nyl69emvxr2yj",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jjmscqt6v4ecasveugoh",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -1037,7 +1179,7 @@
       "status": "ACT",
       "gsisId": "00-0036345",
       "espnId": "3916566",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ol316js270dkzhgkclrq",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ytgf9lftpnc3hqg81vhj",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -1049,7 +1191,7 @@
       "status": "ACT",
       "gsisId": "00-0037055",
       "espnId": "4247812",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/zy0zbm17y7btaqiquhjz",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/mbesuisbtobyu5hozclc",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -1061,7 +1203,7 @@
       "status": "ACT",
       "gsisId": "00-0036176",
       "espnId": "4057082",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/hbslm9pimpxgoeti32jf",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/fnp9cl8jpe0mrkysfh4r",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -1097,7 +1239,7 @@
       "status": "ACT",
       "gsisId": "00-0040522",
       "espnId": "4431353",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ig4zstror8jyd9s9igfd",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/w4onu90fxjmlkmkchcg1",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     }
