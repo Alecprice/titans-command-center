@@ -18,6 +18,11 @@ for(const [name,source] of [['responsive',responsive],['readability',readability
     assert.match(source,/'fan-hub':'#app \.v13-hero ~ #v13-view \.v13-section'/);
     assert.match(source,/\('fan-hub','fan'\)/);
   });
+
+  test(`${name} audit waits for the asynchronously rendered Listen Watch media page`,()=>{
+    assert.match(source,/'listen-watch':'#app \.media-page'/);
+    assert.match(source,/\('listen-watch','media'\)/);
+  });
 }
 
 test('readability audit alpha-composites translucent ancestor backgrounds before WCAG contrast math',()=>{
