@@ -1,42 +1,44 @@
 # Free-tier deployment strategy
 
-Titans Command Center is intentionally designed to remain usable on no-card/free infrastructure.
+Titans Command Center is intentionally designed to remain usable on no-card/free infrastructure where practical.
 
-## Vercel Hobby build-rate rule
+## Current production strategy
 
-Vercel documents a Hobby rate limit of 32 builds per rolling 3600-second window. Vercel also documents that each Vercel Function is classed as a build for this limit. A project with many separate files under `/api` can therefore consume several build slots from one Git deployment.
+- GitHub `main` is the release source.
+- GitHub Actions runs the complete quality gate before production deployment.
+- Cloudflare Worker + Static Assets hosts the app and API.
+- Cloudflare D1 is the production data authority.
+- Cloudflare cache and materialized D1 snapshots keep request-time work bounded.
+- Optional provider integrations remain optional; loss of a provider must not break the core app or create fabricated data.
 
-## Project response
+## D1 usage model
 
-Starting with v0.6.3:
+The application avoids per-user high-frequency database polling. Shared scheduled jobs and materializers write bounded snapshots that are reused across clients.
 
-- All public/admin API paths route through one `api/index.js` serverless gateway.
-- Existing URLs remain stable via `vercel.json` rewrites.
-- Local development routes through that same gateway in `server.mjs`.
-- Releases are batched into one atomic Git commit rather than many small `main` commits.
-- GitHub Actions runs `npm run check` on `main` and pull requests.
-- API/auth responses remain excluded from the PWA service-worker cache.
+Examples:
+
+- near-live scoreboard refresh is centralized;
+- Advanced Analytics is precomputed by the nflreadpy workflow and published as compact D1 snapshots;
+- bootstrap/Fan Intel/Player reads use materialized D1 records and explicit stale/audited behavior;
+- sync audit and final-score reconciliation writes are bounded and D1-only.
+
+Raw full-season play-by-play is not copied into D1 just to serve request-time analytics when compact derived payloads are sufficient.
 
 ## Release workflow
 
-1. Stage related code changes without moving `main` repeatedly.
-2. Run/verify the quality gate.
-3. Move `main` once for the completed release.
-4. Let GitHub → Vercel create one production deployment.
-5. Verify `/api/health`, `/api/data`, a player profile, and one method/auth guard.
-6. If Vercel reports `build-rate-limit`, do not upgrade or add a card. Wait for the rolling Hobby window to reset, then trigger one deployment only.
+1. Stage related changes on a branch.
+2. Run/verify the repository Quality Gate.
+3. Merge one contained green PR to `main`.
+4. Let GitHub Actions deploy the exact merge SHA to Cloudflare.
+5. Require the production API audit and all browser gates to pass.
+6. Treat `docs/CLOUDFLARE_STATUS.md` as the generated release record.
 
-## API routes preserved
+## Credentials
 
-- `/api/health`
-- `/api/data`
-- `/api/player`
-- `/api/analytics`
-- `/api/odds`
-- `/api/bluesky-search`
-- `/api/espn-scoreboard`
-- `/api/provider-health`
-- `/api/sync`
-- `/api/cron-refresh`
+Core production deployment requires the Cloudflare API token/account ID already configured in GitHub Actions. Optional provider keys are server-only. No Postgres `DATABASE_URL` is required or supported by the production runtime.
 
-The gateway refactor is infrastructure-only: callers should not need to change URLs.
+## Legacy Vercel context
+
+Earlier versions optimized around Vercel Hobby build-rate constraints and routed API URLs through a single `api/index.js` gateway. That history explains the remaining `vercel.json`/gateway compatibility files, but Vercel is no longer the production release path.
+
+The public API URLs remain stable even though Cloudflare now owns the live routes.

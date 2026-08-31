@@ -1,27 +1,35 @@
-# Deployment — v0.5.2
+# Deployment — Cloudflare production
 
-The application is ready for Vercel or another Node/serverless host. Core operation remains free-only and does not require a credit card.
+Titans Command Center production is deployed from GitHub `main` to Cloudflare Worker + Static Assets with Cloudflare D1 persistence.
 
-## Required server-only variables
+## Required deployment configuration
 
-- `DATABASE_URL`
-- `PROPLINE_API_KEY`
-- `ODDS_API_IO_KEY`
-- `INGEST_SECRET`
-- `CRON_SECRET`
+GitHub Actions requires:
 
-Optional tuning variables are documented in `.env.example`. Never prefix secrets with `NEXT_PUBLIC_`, never place them in browser JavaScript, and never commit `.env` files.
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+The Worker requires the checked-in `TITANS_DB` D1 binding. Feature-specific media/market credentials are optional and are only supplied when those integrations are configured.
+
+`DATABASE_URL` is not a current deployment variable. The former Neon/Postgres warehouse runtime has been retired.
 
 ## Verification sequence
 
 1. Run `npm run check`.
-2. Deploy with the server-only variables above.
-3. Open `/api/health` and confirm the database is healthy and both free odds providers are configured.
-4. Call protected `/api/provider-health` with `Authorization: Bearer $INGEST_SECRET` to make a minimal server-side request to both free odds feeds. No key values are returned.
-5. Open canonical `/api/odds`. Query parameters are intentionally rejected to protect the free daily quota. Use the protected `POST /api/sync?job=odds` job for a deep two-provider/period-market snapshot.
-6. Verify the PWA in a mobile viewport and install/offline behavior.
-7. Confirm `GET /api/sync` returns 405, unauthorized `POST /api/sync` returns 401, an authorized POST works, and the Vercel cron bearer secret is accepted.
+2. Build/deploy through the normal Cloudflare workflow or an authorized `npm run deploy:cloudflare` run.
+3. Confirm deployed `build-meta.json` matches the source Git SHA.
+4. Confirm `/api/health` reports Cloudflare D1 and truthful snapshot freshness.
+5. Confirm `/api/data`, `/api/preseason-stats`, Player, Fan Intel and Advanced Analytics use their D1/audited contracts without warehouse fallback.
+6. Run the browser release gates for navigation, Listen/Watch, Market Pulse, Command Intelligence, Player/Game Day, Ask Titans, Change Intelligence, 365 Mode, freshness, Account/Guest, analytics and headshots.
+7. Confirm PWA/service-worker packaging, mobile interaction floors and security headers.
+8. Confirm the generated `docs/CLOUDFLARE_STATUS.md` records a fully successful release.
 
-## Current external blocker
+## Authentication
 
-The connected Vercel session was rejected with HTTP 403 for both preview and production deployment creation before a build existed. The audit confirmed the connector could see only the `Tower Defense2` team and `eifs-quotes` project, while the ChatGPT-side Vercel permission was already set to allow all actions. This points to Vercel OAuth/account/team scope or team role, not an application route. See `VERCEL_403.md`.
+Neon Auth remains temporarily behind the narrow same-origin account auth proxy. This is not a database requirement: account preferences use D1 and an auth outage must not restore or require Postgres.
+
+## Legacy hosts
+
+Old Vercel configuration may remain in the repository for historical compatibility/reference, but it is not the production release authority. Cloudflare deployment status and exact-SHA browser gates decide whether a release is healthy.
+
+See `docs/CLOUDFLARE_DEPLOY.md` for the operational runbook and `docs/CLOUDFLARE_D1_MIGRATION.md` for the completed data-cutover record.

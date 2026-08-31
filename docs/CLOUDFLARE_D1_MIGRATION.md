@@ -1,86 +1,98 @@
 # Cloudflare D1 migration
 
-## Goal
+## Status
 
-Move Titans Command Center persistence away from Neon so frequent refreshes do not consume an external Postgres data-transfer quota. Cloudflare D1 is the primary target because the production Worker already runs on Cloudflare and D1 has no data-transfer/egress charge for data read from D1.
+**Production data cutover is complete.** Titans Command Center now runs its production data plane on Cloudflare D1 through the `TITANS_DB` binding.
 
-## Rollout plan
+The staged migration removed the former request-time and scheduled-write dependence on Neon Postgres, then deleted the Neon warehouse runtime adapter and `@neondatabase/serverless` package after production verification.
 
-### Phase 1 — D1 foundation and shared snapshots
-
-- Add the `TITANS_DB` D1 storage adapter.
-- Move signed-in preference reads/writes to D1 whenever the binding exists.
-- Add durable `api_snapshots` storage.
-- Serve `/api/data` from the shared D1 snapshot before attempting another Neon bootstrap read.
-- Seed D1 from a successful Neon bootstrap when Neon is available.
-- If Neon is unavailable, serve the last D1 snapshot; if no snapshot exists yet, use the audited bundled fallback and seed that into D1.
-- Refresh the ESPN scoreboard centrally every three minutes into D1 instead of having every browser act as an independent poller.
-- Keep the existing daily source-audit job for slower-changing sources.
-- Keep Neon preference storage as a temporary fallback until D1 is bound.
-- Keep Neon Auth temporarily so authentication and persistence are not replaced in one release.
-
-### Phase 2 — remaining read-path cutover
-
-- Materialize fan intelligence, player and analytics responses into D1.
-- Move normalized roster, transaction, source and historical data into D1-native tables where row-level querying is more useful than a shared snapshot.
-- Continue using Cloudflare Cache in front of D1.
-- Remove large/unused Neon reads from the request path.
-- Reduce daily Neon jobs as each source receives a D1-native ingestion path.
-
-### Phase 3 — authentication cutover
-
-- Replace Neon Auth with Better Auth backed by D1.
-- Preserve the existing frontend account endpoint contract (`get-session`, `sign-in/email`, `sign-up/email`, `sign-out`).
-- Migrate or intentionally reset existing development accounts after confirming the desired account migration policy.
-- Remove `DATABASE_URL` and `@neondatabase/serverless` only after all production routes are D1-backed.
-
-## One-time D1 bootstrap
-
-The repository includes a manual GitHub Actions workflow named **Titans D1 Bootstrap**. It uses the existing `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets to:
-
-1. Find or create a D1 database named `titans-command-center` in eastern North America.
-2. Configure the Worker binding as `TITANS_DB`.
-3. Apply `db/d1/migrations` remotely.
-4. Run the complete repository quality gate.
-5. Commit only the generated `wrangler.jsonc` binding back to the branch that ran the workflow.
-6. Allow the normal production workflow to deploy that tested binding commit.
-
-The Cloudflare token must include D1 read/write permission in addition to the Worker deployment permissions already used by the production workflow.
-
-## Local alternative
-
-If the workflow token cannot create D1, run:
-
-```bash
-npx wrangler@4 d1 create titans-command-center --location enam
-npm run d1:configure
-npm run check
-```
-
-`npm run d1:configure` discovers the database UUID from Cloudflare, updates `wrangler.jsonc`, and applies the D1 migrations. It never prints Cloudflare tokens or database credentials.
-
-## Free-tier budget
-
-D1 Free currently allows 5 million rows read per day, 100,000 rows written per day, up to 500 MB per individual database, and 5 GB total storage across the account. D1 data reads do not have separate egress charges.
-
-The application therefore uses **central refresh + cached snapshots**, not per-user 1-minute database polling. The intended pattern is:
+## Current production data plane
 
 ```text
-external sources
-      ↓
-Cloudflare scheduled Worker
-      ↓
-normalize / compare / write changes
-      ↓
-Cloudflare D1
-      ↓
-Cloudflare Cache
-      ↓
-web + mobile clients
+GitHub main
+    ↓
+GitHub Actions quality + release gates
+    ↓
+Cloudflare Worker + Static Assets
+    ↓
+Cloudflare D1 (TITANS_DB)
 ```
 
-The first near-live job updates the public ESPN scoreboard snapshot every three minutes. That is about 480 D1 upserts per day, leaving substantial free-tier headroom. Slow-moving roster, transaction, source-audit and historical data remain on slower cadences until their D1-native ingestion paths are added.
+D1 currently owns:
 
-## Rollback
+- `bootstrap:v1` and other API snapshots;
+- signed-in `fan_user_preferences`;
+- Fan Intel materialized snapshots;
+- Player Profile materialized snapshots;
+- Advanced Analytics nflreadpy materialized snapshots;
+- scheduled source-audit records;
+- bounded final-score reconciliation writes.
 
-Phase 1 remains reversible. If `TITANS_DB` is not bound, account preferences automatically continue using the existing Neon storage path, `/api/data` continues through the existing Neon/audited fallback logic, and the three-minute near-live job exits without polling. Removing the D1 binding therefore returns the application to the pre-D1 persistence behavior without deleting the D1 database.
+Public APIs use fresh D1, documented stale-D1 behavior where allowed, or explicit audited/unavailable states. They do not open a Postgres connection as a fallback.
+
+## Current schema
+
+The portable production schema lives under:
+
+```text
+db/d1/migrations/
+```
+
+Apply it remotely with:
+
+```bash
+npm run d1:migrate
+```
+
+The configured production database is named `titans-command-center` and is bound to the Worker as `TITANS_DB` in `wrangler.jsonc`.
+
+`db/schema.sql`, `db/seed.sql`, and `db/migrations/` are retired Postgres migration history until their separate archival/removal pass is complete. They are not executed by the Cloudflare deployment.
+
+## Analytics materialization
+
+Advanced Analytics is built outside the request path:
+
+```text
+nflreadpy + Polars
+      ↓
+compact API snapshot builder
+      ↓
+D1 api_snapshots
+      ↓
+Cloudflare Worker
+      ↓
+Stats Lab
+```
+
+The workflow requires complete snapshot coverage before publishing so a partial league bundle cannot replace the last good D1 state. nflverse provider team codes are normalized at the provider boundary before calculations.
+
+## Bootstrap and resilience
+
+`/api/data` uses the D1 bootstrap snapshot first. If a usable snapshot is unavailable, the API may serve the repository's dated audited fallback where that contract explicitly allows it. Health remains D1-authoritative and does not call a warehouse fallback.
+
+Fan Intel, Player Profile, and Advanced Analytics similarly own their D1 snapshot/fallback behavior directly. Missing data never authorizes invented metrics or facts.
+
+## Authentication remains a separate phase
+
+Neon Auth still provides the managed authentication HTTP service behind `/api/account/auth/*`. This is intentionally separate from the retired Neon Postgres warehouse:
+
+- account preference persistence is already D1-only;
+- `DATABASE_URL` is not required for authentication;
+- `@neondatabase/serverless` is not present;
+- auth migration can be handled later without reopening a second production database path.
+
+A future phase may replace Neon Auth with Better Auth + D1 while preserving the current frontend endpoint contract.
+
+## Deployment secrets
+
+The Cloudflare deployment requires the Cloudflare API token/account ID. Optional media/market integrations may have their own server-only credentials. The deployment workflow does **not** require or upload `DATABASE_URL`.
+
+## Free-tier operating model
+
+The application uses central scheduled refreshes, materialized snapshots, and Cloudflare cache rather than per-user database polling. This keeps request-time database work bounded and avoids copying raw play-by-play data into D1 when compact derived snapshots are sufficient.
+
+## Rollback policy
+
+The old Postgres rollback path has been intentionally retired. Production must not regain warehouse access by toggling an environment flag or restoring `DATABASE_URL`.
+
+If a D1-backed feature fails, the supported recovery path is to repair the D1 binding/data/materializer or use the explicit audited/unavailable behavior already defined by that API—not to reconnect the retired warehouse.
