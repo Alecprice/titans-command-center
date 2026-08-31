@@ -70,6 +70,41 @@ test('Fan Intel serves a fresh D1 snapshot without DATABASE_URL',async()=>{
   assert.equal(result.payload.standings[0].team,'Titans');
 });
 
+test('Fan Intel serves its last D1 snapshot when fresh materialization is unavailable',async()=>{
+  const env={TITANS_DB:new FakeD1()};
+  const key=apiSnapshotKey('fan-intel:v1',{season:2026});
+  await seed(env,key,{ok:true,season:2026,standings:[{team:'Stale Titans'}]});
+  env.TITANS_DB.expire(key);
+  const harness=responseHarness();
+  await fanIntelRoute({method:'GET',query:{}},harness.res,env);
+  const result=harness.result();
+  assert.equal(result.statusCode,200);
+  assert.equal(result.payload.storage,'cloudflare-d1');
+  assert.equal(result.payload.snapshot.stale,true);
+  assert.match(result.payload.snapshot.reason,/Fresh fan intelligence snapshot unavailable/);
+  assert.equal(result.payload.standings[0].team,'Stale Titans');
+});
+
+test('Fan Intel returns an explicit empty no-store state when D1 has no snapshot',async()=>{
+  const env={TITANS_DB:new FakeD1()};
+  const harness=responseHarness();
+  await fanIntelRoute({method:'GET',query:{}},harness.res,env);
+  const result=harness.result();
+  assert.equal(result.statusCode,200);
+  assert.equal(result.payload.ok,true);
+  assert.equal(result.payload.available,false);
+  assert.equal(result.payload.configured,false);
+  assert.equal(result.payload.mode,'database-unavailable');
+  assert.deepEqual(result.payload.standings,[]);
+  assert.deepEqual(result.payload.injuries,[]);
+  assert.deepEqual(result.payload.contracts,[]);
+  assert.equal(result.payload.opponent,null);
+  assert.deepEqual(result.payload.gameDay,{drives:[],plays:[],teamMetrics:[]});
+  assert.deepEqual(result.payload.playerStats,[]);
+  assert.ok(Object.values(result.payload.availability).every(value=>value===false));
+  assert.match(result.headers.get('cache-control')||'',/no-store/i);
+});
+
 test('Advanced Analytics serves a dimensioned D1 snapshot without DATABASE_URL',async()=>{
   const env={TITANS_DB:new FakeD1()};
   const key=apiSnapshotKey('advanced-analytics:v1',{season:2026,team:'TEN'});
@@ -125,30 +160,24 @@ test('Player Profile serves its player-specific D1 snapshot without DATABASE_URL
   assert.equal(result.payload.player.name,'Snapshot Player');
 });
 
-test('expired D1 snapshots are withheld normally and available for outage fallback',async()=>{
+test('expired D1 snapshots are withheld normally and available for explicit fallback reads',async()=>{
   const env={TITANS_DB:new FakeD1()};
   const key=apiSnapshotKey('fan-intel:v1',{season:2026});
   await seed(env,key,{ok:true,season:2026,standings:[{team:'Stale Titans'}]});
   env.TITANS_DB.expire(key);
   assert.equal(await readApiSnapshot(env,key),null);
-  const stale=await readApiSnapshot(env,key,{allowExpired:true,reason:'warehouse unavailable'});
+  const stale=await readApiSnapshot(env,key,{allowExpired:true,reason:'materialization unavailable'});
   assert.equal(stale.snapshot.stale,true);
-  assert.equal(stale.snapshot.reason,'warehouse unavailable');
-
-  const harness=responseHarness();
-  await fanIntelRoute({method:'GET',query:{}},harness.res,env);
-  const result=harness.result();
-  assert.equal(result.statusCode,200);
-  assert.equal(result.payload.snapshot.stale,true);
-  assert.equal(result.payload.standings[0].team,'Stale Titans');
+  assert.equal(stale.snapshot.reason,'materialization unavailable');
 });
 
-test('remaining Neon-backed read planes persist only successful payloads while Analytics is D1-only',()=>{
+test('Fan Intel and Analytics are D1-only while Player retains the remaining warehouse fallback',()=>{
   const fan=fs.readFileSync(new URL('../src/fan-intel-api.mjs',import.meta.url),'utf8');
   const analytics=fs.readFileSync(new URL('../src/advanced-analytics-api.mjs',import.meta.url),'utf8');
   const player=fs.readFileSync(new URL('../src/player-api.mjs',import.meta.url),'utf8');
-  assert.match(fan,/FAN_INTEL_SNAPSHOT_TTL_SECONDS=600/);
-  assert.match(fan,/writeApiSnapshot\(env,FAN_INTEL_SNAPSHOT_KEY,payload/);
+  assert.match(fan,/readApiSnapshot\(env,FAN_INTEL_SNAPSHOT_KEY\)/);
+  assert.match(fan,/allowExpired:true/);
+  assert.doesNotMatch(fan,/getSql|writeApiSnapshot|DATABASE_URL|standings_snapshots|injury_reports|depth_chart_snapshots|\bcontracts\b[\s\S]*sql|player_game_stats|neon-fan-intel/i);
   assert.match(player,/PLAYER_SNAPSHOT_TTL_SECONDS=21600/);
   assert.match(player,/if\(data\.ok\)[\s\S]*writeApiSnapshot\(env,snapshotKey,data/);
   assert.match(analytics,/readApiSnapshot\(env,snapshotKey\)/);
