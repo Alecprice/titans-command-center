@@ -36,7 +36,7 @@ test('Neon documentation is historical and keeps auth separate from retired Post
   const precutover=read('docs/PRECUTOVER.md');
   assert.match(neon,/^# Retired Neon warehouse/m);
   assert.match(neon,/Neon Auth is separate/i);
-  assert.match(neon,/not part of the Titans Command Center production data runtime/i);
+  assert.match(neon,/not\*\* part of the Titans Command Center production data runtime/i);
   assert.match(deployment,/Cloudflare D1 persistence/i);
   assert.match(deployment,/DATABASE_URL.*not a current deployment variable/i);
   assert.match(precutover,/Historical migration record/i);
