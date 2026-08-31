@@ -36,6 +36,7 @@ import('./fantasy-decision-center-v3.js').catch(()=>{});
   const state={data:null,open:false,index:-1,items:[],query:'',loading:null};
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const norm=value=>String(value??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const playerHref=p=>p?.id?`#player?id=${encodeURIComponent(p.id)}`:p?.name?`#player?name=${encodeURIComponent(p.name)}`:'#roster';
 
   const panel=document.createElement('div');
   panel.className='v111-search-panel';
@@ -68,7 +69,7 @@ import('./fantasy-decision-center-v3.js').catch(()=>{});
     for(const [href,label,terms] of quick){const s=score(q,`${label} ${terms}`);if(q&&s>0)rows.push({kind:'QUICK ANSWER',label,detail:'Open Ask Titans / related center',href,score:s+1});}
     for(const p of Array.isArray(state.data?.roster)?state.data.roster:[]){
       const label=p.name||'Player',detail=[p.position,p.number?`#${p.number}`:'',p.status||p.tag||''].filter(Boolean).join(' · '),s=score(q,`${label} ${detail} ${p.unit||''}`);
-      if(q&&s>0)rows.push({kind:'PLAYER',label,detail,href:p.id?`#player?id=${encodeURIComponent(p.id)}`:'#roster',score:s+3});
+      if(q&&s>0)rows.push({kind:'PLAYER',label,detail,href:playerHref(p),score:s+3});
     }
     return rows.sort((a,b)=>b.score-a.score||a.label.localeCompare(b.label)).slice(0,8);
   }
