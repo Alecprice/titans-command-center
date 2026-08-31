@@ -22,9 +22,9 @@ Authentication may be migrated to Better Auth + D1 in a later, separate phase.
 
 ## Historical Postgres artifacts
 
-The repository still contains `db/schema.sql`, `db/seed.sql`, and files under `db/migrations/` as migration history. They document the former normalized warehouse and are **not** current production migrations. Current portable schema changes belong under `db/d1/migrations/`.
+The former Postgres schema, seed, and migration files were removed from the active working tree after the D1-only runtime was proven in production. Their historical contents remain available in Git history for archaeology or migration review; they are not shipped as current schema instructions.
 
-Do not run the legacy Postgres migrations as part of Cloudflare deployment and do not use them as evidence that Neon is still the production database.
+Current portable schema changes belong only under `db/d1/migrations/`. Do not recreate `db/schema.sql`, `db/seed.sql`, or `db/migrations/` as an application rollback path.
 
 ## Historical architecture
 

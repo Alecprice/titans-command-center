@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
+
+const root=new URL('../',import.meta.url);
+const read=p=>fs.readFileSync(new URL(p,root),'utf8');
+const exists=p=>fs.existsSync(new URL(p,root));
 
 test('D1 account preference migration matches the API persistence contract',()=>{
   const migration=read('db/d1/migrations/0001_core.sql');
@@ -19,21 +22,24 @@ test('D1 account preference migration matches the API persistence contract',()=>
   assert.match(store,/on conflict\(user_id\) do update/i);
 });
 
-test('legacy Neon account preference migration is not automatically executed by deploy',()=>{
-  const migration=read('db/migrations/20260822_fan_user_preferences.sql');
-  const rollback=read('db/migrations/20260822_fan_user_preferences.rollback.sql');
+test('retired Neon account preference SQL is absent from the active schema tree',()=>{
+  for(const path of [
+    'db/migrations/20260822_fan_user_preferences.sql',
+    'db/migrations/20260822_fan_user_preferences.rollback.sql',
+    'db/schema.sql',
+    'db/seed.sql'
+  ])assert.equal(exists(path),false,`${path} must stay retired`);
   const deploy=read('.github/workflows/cloudflare-deploy.yml');
   const pkg=read('package.json');
-  assert.match(migration,/deployment does not execute it automatically/i);
-  assert.match(rollback,/Never run automatically/i);
-  assert.doesNotMatch(deploy,/20260822_fan_user_preferences\.sql/);
-  assert.doesNotMatch(pkg,/20260822_fan_user_preferences\.sql/);
+  assert.doesNotMatch(deploy,/db\/migrations|20260822_fan_user_preferences\.sql|DATABASE_URL/);
+  assert.doesNotMatch(pkg,/db\/migrations|20260822_fan_user_preferences\.sql|DATABASE_URL/);
 });
 
-test('legacy rollback is explicit and destructive rather than hidden in app runtime',()=>{
-  const rollback=read('db/migrations/20260822_fan_user_preferences.rollback.sql');
+test('application runtime never owns destructive legacy schema rollback',()=>{
   const worker=read('cloudflare/worker.mjs');
-  assert.match(rollback,/drop table if exists fan_user_preferences/);
-  assert.doesNotMatch(worker,/drop table/i);
-  assert.doesNotMatch(worker,/alter table/i);
+  const api=read('src/account-api.mjs');
+  for(const source of [worker,api]){
+    assert.doesNotMatch(source,/drop table/i);
+    assert.doesNotMatch(source,/alter table/i);
+  }
 });
