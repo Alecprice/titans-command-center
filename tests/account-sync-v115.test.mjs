@@ -34,13 +34,14 @@ test('remote account preferences refresh the live shell only when a changed name
   assert.match(sync,/const merged=\{\.\.\.local,\.\.\.remotePreferences\}/);
 });
 
-test('account preference storage capability is explicit and local-safe when the migration is absent',()=>{
+test('account preference storage capability is explicit and local-safe when the D1 migration is absent',()=>{
   const api=read('src/account-api.mjs');
   const sync=read('account-sync-v112.js');
   const ui=read('account-v112.js');
   const css=read('account-v112.css');
   assert.match(api,/function preferenceStorageNotReady\(error\)/);
-  assert.match(api,/code==='42P01'/);
+  assert.match(api,/message\.includes\('no such table'\)/);
+  assert.doesNotMatch(api,/42P01|::jsonb|getSql\(/);
   assert.match(api,/PREFERENCE_STORAGE_NOT_READY/);
   assert.match(api,/localOnly:true/);
   assert.match(api,/PREFERENCE_SYNC_UNAVAILABLE/);

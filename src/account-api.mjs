@@ -1,4 +1,3 @@
-import {getSql} from './db.mjs';
 import {getD1Preferences,hasD1,putD1Preferences} from './d1-store.mjs';
 
 const AUTH_ORIGIN='https://ep-cold-moon-a6z7a2ag.neonauth.us-west-2.aws.neon.tech/neondb/auth';
@@ -138,9 +137,8 @@ function sanitizePreferences(input){
 }
 
 function preferenceStorageNotReady(error){
-  const code=String(error?.code||'').toUpperCase();
   const message=String(error?.message||'').toLowerCase();
-  return code==='42P01'||message.includes('no such table')||(message.includes('fan_user_preferences')&&message.includes('does not exist'));
+  return message.includes('no such table')||(message.includes('fan_user_preferences')&&message.includes('does not exist'));
 }
 
 function preferenceFailure(error){
@@ -154,15 +152,11 @@ export async function accountPreferencesRoute(request,env){
   const session=await authSession(request);
   const user=session?.user||null;
   if(!user?.id)return json({ok:false,error:'Authentication required'},401);
-  const useD1=hasD1(env);
-  const sql=useD1?null:await getSql(env);
-  if(!useD1&&!sql)return json({ok:false,error:'Database unavailable',code:'DATABASE_UNAVAILABLE',localOnly:true},503);
+  if(!hasD1(env))return json({ok:false,error:'Database unavailable',code:'DATABASE_UNAVAILABLE',localOnly:true},503);
   try{
     if(request.method==='GET'){
-      const row=useD1
-        ?await getD1Preferences(env,String(user.id))
-        :(await sql`select preferences,schema_version,updated_at from fan_user_preferences where user_id=${String(user.id)} limit 1`)[0];
-      return json({ok:true,storage:useD1?'cloudflare-d1':'neon',preferences:sanitizePreferences(row?.preferences||{}),schemaVersion:Number(row?.schema_version||1),updatedAt:row?.updated_at||null});
+      const row=await getD1Preferences(env,String(user.id));
+      return json({ok:true,storage:'cloudflare-d1',preferences:sanitizePreferences(row?.preferences||{}),schemaVersion:Number(row?.schema_version||1),updatedAt:row?.updated_at||null});
     }
     const limited=await limitedBody(request,MAX_PREFERENCE_BODY_BYTES);
     if(!limited.ok)return json({ok:false,error:limited.error},limited.status);
@@ -171,18 +165,8 @@ export async function accountPreferencesRoute(request,env){
     const preferences=sanitizePreferences(body?.preferences);
     const encoded=JSON.stringify(preferences);
     if(encoded.length>24000)return json({ok:false,error:'Preferences too large'},413);
-    let row;
-    if(useD1){
-      row=await putD1Preferences(env,String(user.id),preferences,1);
-    }else{
-      [row]=await sql`
-        insert into fan_user_preferences(user_id,preferences,schema_version,updated_at)
-        values(${String(user.id)},${encoded}::jsonb,1,now())
-        on conflict(user_id) do update set preferences=excluded.preferences,schema_version=excluded.schema_version,updated_at=now()
-        returning updated_at
-      `;
-    }
-    return json({ok:true,storage:useD1?'cloudflare-d1':'neon',preferences,updatedAt:row?.updated_at||null});
+    const row=await putD1Preferences(env,String(user.id),preferences,1);
+    return json({ok:true,storage:'cloudflare-d1',preferences,updatedAt:row?.updated_at||null});
   }catch(error){
     console.error('[account-preferences]',error);
     return preferenceFailure(error);

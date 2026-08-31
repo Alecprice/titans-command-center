@@ -4,14 +4,15 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const worker=read('cloudflare/worker.mjs');
-const db=read('src/db.mjs');
+const analytics=read('src/advanced-analytics-api.mjs');
+const player=read('src/player-api.mjs');
+const pkg=JSON.parse(read('package.json'));
 
-test('TENX bootstrap and player queries do not transfer raw provider payloads',()=>{
-  assert.doesNotMatch(db,/raw_payload/);
-  assert.doesNotMatch(db,/select\s+mo\.\*/i);
-  assert.doesNotMatch(db,/select\s+fs\.\*/i);
-  assert.match(db,/select mo\.id,mo\.game_id,mo\.provider_event_id/);
-  assert.match(db,/select fs\.id,fs\.market_type,fs\.market_name/);
+test('TENX runtime keeps analytics and player reads materialized and warehouse-free',()=>{
+  assert.equal(pkg.dependencies?.['@neondatabase/serverless'],undefined);
+  assert.doesNotMatch(worker,/raw_payload|DATABASE_URL|getSql\(|@neondatabase\/serverless/);
+  assert.match(analytics,/readApiSnapshot/);
+  assert.match(player,/readApiSnapshot/);
 });
 
 test('account infrastructure failures never expose provider quota or billing text',()=>{
