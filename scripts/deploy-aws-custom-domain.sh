@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOMAIN="${DOMAIN:-titans-command-center.alecjprice.com}"
+DOMAIN="${DOMAIN:-titans.alecjprice.com}"
 ZONE="${ZONE:-alecjprice.com}"
 ORIGIN="${ORIGIN:-titans-command-center.alecjordanprice.workers.dev}"
 STACK="${STACK:-titans-command-center-domain}"

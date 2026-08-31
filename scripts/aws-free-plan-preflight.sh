@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOMAIN="${DOMAIN:-titans-command-center.alecjprice.com}"
+DOMAIN="${DOMAIN:-titans.alecjprice.com}"
 ZONE="${ZONE:-alecjprice.com}"
 STACK="${STACK:-titans-command-center-domain}"
 REGION="us-east-1"
@@ -81,6 +81,7 @@ PREFLIGHT COMPLETE — NO AWS RESOURCES WERE CHANGED.
 Next step is performed in the CloudFront console, not by the pay-as-you-go
 CloudFormation helper:
   - Create a standard distribution for a single website/app.
+  - Use titans.alecjprice.com as the public hostname.
   - Select the CloudFront Free flat-rate plan ($0/month).
   - If AWS says the account is ineligible for the Free flat-rate plan, STOP.
   - Do not choose Pro, Business, Premium, or pay-as-you-go.

@@ -16,7 +16,7 @@ Parameters:
       the CloudFront $0/month flat-rate Free plan created/subscribed in the AWS console.
   DomainName:
     Type: String
-    Default: titans-command-center.alecjprice.com
+    Default: titans.alecjprice.com
     Description: Public hostname for Titans Command Center.
   HostedZoneId:
     Type: AWS::Route53::HostedZone::Id
