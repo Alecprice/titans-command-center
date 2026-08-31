@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `1b9a3b881e7c8df81c71f439f77fb522f64ba189`
+- Source commit: `e0afbd2933e849d2c21c849c26e5cbbba0b72b0b`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Neon warehouse deployment secret required: false (D1 primary)
@@ -22,7 +22,7 @@
 - Advanced analytics browser regression: success
 - Player headshot browser regression: success
 - Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-30T20:31:53Z
+- Recorded: 2026-08-31T11:34:01Z
 
 ## Production regression
 
@@ -79,19 +79,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "1b9a3b881e7c8df81c71f439f77fb522f64ba189",
-    "builtAt": "2026-08-30T20:29:43.763Z"
+    "commit": "e0afbd2933e849d2c21c849c26e5cbbba0b72b0b",
+    "builtAt": "2026-08-31T11:32:45.867Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 34,
-    "health": 320,
-    "data": 332,
-    "stats": 307,
-    "market": 1162,
-    "analytics": 392
+    "root": 28,
+    "health": 541,
+    "data": 203,
+    "stats": 95,
+    "market": 4078,
+    "analytics": 412
   },
-  "testedAt": "2026-08-30T20:30:53.409Z",
+  "testedAt": "2026-08-31T11:33:11.006Z",
   "healthTruth": {
     "ok": true,
     "mode": "audited-fallback",
@@ -101,8 +101,8 @@
     "databaseContentAudit": null,
     "fallbackContentAudit": "2026-08-27",
     "databaseAvailable": false,
-    "responseMs": 460,
-    "testedAt": "2026-08-30T20:30:53.908Z"
+    "responseMs": 381,
+    "testedAt": "2026-08-31T11:33:11.424Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -110,17 +110,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 354,
-    "warmHitMs": 354,
+    "coldOrInitialMs": 127,
+    "warmHitMs": 127,
     "rows": 608,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 354,
+        "durationMs": 127,
         "rows": 608
       }
     ],
-    "testedAt": "2026-08-30T20:30:54.292Z"
+    "testedAt": "2026-08-31T11:33:11.584Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -186,8 +186,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 183,
-  "testedAt": "2026-08-30T20:30:54.941Z"
+  "durationMs": 172,
+  "testedAt": "2026-08-31T11:33:12.270Z"
 }```
 
 ## Browser navigation regression
@@ -233,11 +233,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 115,
+  "maxLongTaskMs": 70,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 16.52,
-  "testedAt": "2026-08-30T20:31:16Z"
+  "durationSeconds": 8.19,
+  "testedAt": "2026-08-31T11:33:25Z"
 }```
 
 ## Listen Watch browser regression
@@ -289,13 +289,13 @@
   "browserWarnings": [
     {
       "level": "WARNING",
-      "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
+      "message": "https://www.youtube.com/s/player/6567edc1/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788121879660
+      "timestamp": 1788176007560
     }
   ],
-  "durationSeconds": 3.16,
-  "testedAt": "2026-08-30T20:31:20Z"
+  "durationSeconds": 2.7,
+  "testedAt": "2026-08-31T11:33:28Z"
 }```
 
 ## Market Pulse browser regression
@@ -309,9 +309,9 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 80,
+        "shown": 78,
         "total": 608,
-        "renderedRows": 80
+        "renderedRows": 78
       },
       "summary": {
         "controls": [
@@ -359,16 +359,16 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 80 of 608 rows",
+        "result": "Showing 78 of 608 rows",
         "resultTotal": 608,
-        "rowCount": 80,
+        "rowCount": 78,
         "rowSample": [
           "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine2Price+100Implied50.0%",
           "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine2.5Price-110Implied52.4%",
           "New York Jets at Tennessee Titans Spread \u00b7 BetRivers \u2197SideNew York JetsLine2.5Price-108Implied51.9%"
         ],
         "scrollWidth": 1265,
-        "shown": 80,
+        "shown": 78,
         "title": "Live Titans market board",
         "total": 608,
         "viewport": 1265
@@ -379,27 +379,27 @@
         "available": true,
         "options": 3,
         "selectedValue": "25077",
-        "before": "Showing 80 of 608 rows",
-        "after": "Showing 72 of 608 rows"
+        "before": "Showing 78 of 608 rows",
+        "after": "Showing 70 of 608 rows"
       },
       "book": {
         "available": true,
-        "options": 13,
+        "options": 12,
         "selectedValue": "betonlineag",
-        "before": "Showing 80 of 608 rows",
+        "before": "Showing 78 of 608 rows",
         "after": "Showing 6 of 608 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Showing 80 of 608 rows",
-        "after": "Showing 80 of 608 rows"
+        "before": "Showing 78 of 608 rows",
+        "after": "Showing 78 of 608 rows"
       }
     },
     "alternateLines": {
       "available": true,
-      "beforeRows": 80,
+      "beforeRows": 78,
       "afterRows": 608
     },
     "refresh": {
@@ -568,8 +568,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 6.47,
-  "testedAt": "2026-08-30T20:31:26Z"
+  "durationSeconds": 5.91,
+  "testedAt": "2026-08-31T11:33:34Z"
 }```
 
 ## Command Intelligence browser regression
@@ -627,8 +627,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.24,
-  "testedAt": "2026-08-30T20:31:29Z"
+  "durationSeconds": 1.97,
+  "testedAt": "2026-08-31T11:33:36Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -682,7 +682,7 @@
     "switchers": 1
   },
   "cutdownCommand": true,
-  "cutdownCommandText": "53-MAN CUTDOWN COMMAND\nFinal roster clock\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nTIME REMAINING\n1h 28m\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.\n\n2026-08-24\n\nThe Titans announced the move Aug. 24. This newer official transaction controls over any roster page that has not yet reflected the same-day move.\n\n2026-08-21\n\nOn Aug. 21, Tennessee signed DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, placed DB Nazeeh Johnson on Reserve/Injured, and later waived LB Sean Brown from injured reserve with an injury settlement.\n\n2026-08-19\n\nTennessee's official Aug. 19 transaction log lists RB D'Ernest Johnson signed and RB Dominic Richardson waived.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\nFIND PLAYER\nPOSITION\nAll positions\nC\nCB\nDB\nDE\nDL\nDT\nG\nK\nLB\nLS\nP\nQB\nRB\nS\nT\nTE\nWR\nSelected only\nShare / Copy My 53\n91 shown \u00b7 0 selected\nSelect players to see unit composition.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+\n#8\nWill Levis\nQB \u00b7 Offense\n+\n#21\nD'Ernest Johnson\nRB \u00b7 Offense\n+\n#36\nJulius Chestnut\nRB \u00b7 Offense\n+\n#31\nKalel Mullings\nRB \u00b7 Offense\n+\n#35\nMichael Carter\nRB \u00b7 Offense\n+\n#32\nNicholas Singleton\nRB \u00b7 Offense\n+\n#20\nTony Pollard\nRB \u00b7 Offense\n+\n#2\nTyjae Spears\nRB \u00b7 Offense\n+\n#69\nAamil Wagner\nT \u00b7 Offense\n+\n#76\nAustin Deculus\nT \u00b7 Offense\n+\n#78\nBrandon Crenshaw-Dickson\nT \u00b7 Offense\n+\n#75\nDan Moore Jr.\nT \u00b7 Offense\n+\n#55\nJC Latham\nT \u00b7 Offense\n+\n#62\nRasheed Miller\nT \u00b7 Offense\n+\n#72\nZachary Thomas\nT \u00b7 Offense\n+\n#82\nDaniel Bellinger\nTE \u00b7 Offense\n+\n#88\nDavid Martin-Robinson\nTE \u00b7 Off",
+  "cutdownCommandText": "53-MAN CUTDOWN COMMAND\nDeadline tracker\n\nFacts from the loaded Titans roster and transaction feed. This does not rank bubble players or predict cuts.\n\nLEAGUE DEADLINE\nDeadline reached\nSun, Aug 30, 6:00 PM EDT\nLoaded roster\n95\nAll current rows\nActive rows\n91\nLoaded status = Active\nReserve / other\n4\nNot counted as active rows here\nFinal active limit\n53\n38 loaded active rows above 53\nPOSITION SHAPE\nActive rows by position\nFull roster \u2192\n13\nWR\n9\nCB\n9\nLB\n8\nDE\n7\nRB\n7\nT\n6\nDT\n6\nG\n6\nS\n5\nTE\n4\nQB\n3\nC\n3\nDL\n2\nDB\n1\nK\n1\nLS\n1\nP\nMOVEMENT WIRE\nLatest loaded transactions\nAll moves \u2192\n2026-08-25\n\nTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.\n\n2026-08-24\n\nThe Titans announced the move Aug. 24. This newer official transaction controls over any roster page that has not yet reflected the same-day move.\n\n2026-08-21\n\nOn Aug. 21, Tennessee signed DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, placed DB Nazeeh Johnson on Reserve/Injured, and later waived LB Sean Brown from injured reserve with an injury settlement.\n\n2026-08-19\n\nTennessee's official Aug. 19 transaction log lists RB D'Ernest Johnson signed and RB Dominic Richardson waived.\n\nMY 53 \u00b7 FAN BOARD\nBuild your own Titans 53\n\nYour picks stay on this device. This is a fan roster exercise\u2014not an official roster projection or report.\n\n0 / 53\nClear picks\nNo fan picks yet.\nFIND PLAYER\nPOSITION\nAll positions\nC\nCB\nDB\nDE\nDL\nDT\nG\nK\nLB\nLS\nP\nQB\nRB\nS\nT\nTE\nWR\nSelected only\nShare / Copy My 53\n91 shown \u00b7 0 selected\nSelect players to see unit composition.\n#61\nAndre James\nC \u00b7 Offense\n+\n#51\nAustin Schlottmann\nC \u00b7 Offense\n+\n#79\nPat Coogan\nC \u00b7 Offense\n+\n#73\nCordell Volson\nG \u00b7 Offense\n+\n#67\nDrew Moss\nG \u00b7 Offense\n+\n#66\nFernando Carmona Jr.\nG \u00b7 Offense\n+\n#71\nGarrett Dellinger\nG \u00b7 Offense\n+\n#64\nJackson Slater\nG \u00b7 Offense\n+\n#77\nPeter Skoronski\nG \u00b7 Offense\n+\n#1\nCam Ward\nQB \u00b7 Offense\n+\n#16\nHendon Hooker\nQB \u00b7 Offense\n+\n#10\nMitchell Trubisky\nQB \u00b7 Offense\n+\n#8\nWill Levis\nQB \u00b7 Offense\n+\n#21\nD'Ernest Johnson\nRB \u00b7 Offense\n+\n#36\nJulius Chestnut\nRB \u00b7 Offense\n+\n#31\nKalel Mullings\nRB \u00b7 Offense\n+\n#35\nMichael Carter\nRB \u00b7 Offense\n+\n#32\nNicholas Singleton\nRB \u00b7 Offense\n+\n#20\nTony Pollard\nRB \u00b7 Offense\n+\n#2\nTyjae Spears\nRB \u00b7 Offense\n+\n#69\nAamil Wagner\nT \u00b7 Offense\n+\n#76\nAustin Deculus\nT \u00b7 Offense\n+\n#78\nBrandon Crenshaw-Dickson\nT \u00b7 Offense\n+\n#75\nDan Moore Jr.\nT \u00b7 Offense\n+\n#55\nJC Latham\nT \u00b7 Offense\n+\n#62\nRasheed Miller\nT \u00b7 Offense\n+\n#72\nZachary Thomas\nT \u00b7 Offense\n+\n#82\nDaniel Bellinger\nTE \u00b7 Offense\n+\n#88\nDavid Martin-Robinson",
   "cutdownMobileTargets": [
     {
       "h": 48,
@@ -758,7 +758,7 @@
   "gameDayMobileViewport": 375,
   "gameDayFastPass": true,
   "gameDayFastPassGameId": "wk1",
-  "gameDayFastPassText": "NEXT GAME FAST PASS\nNew York Jets at Titans\nWEEK 1\nWHEN\nSun, Sep 13, 12:00 PM CDT \u00b7 13d 20h\nWATCH / LISTEN\nCBS \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
+  "gameDayFastPassText": "NEXT GAME FAST PASS\nNew York Jets at Titans\nWEEK 1\nWHEN\nSun, Sep 13, 12:00 PM CDT \u00b7 13d 5h\nWATCH / LISTEN\nCBS \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
   "gameDayFastPassMobileTargets": [
     {
       "h": 48,
@@ -774,8 +774,8 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 4.47,
-  "testedAt": "2026-08-30T20:31:34Z"
+  "durationSeconds": 4.78,
+  "testedAt": "2026-08-31T11:33:41Z"
 }```
 
 ## Ask Titans browser regression
@@ -881,8 +881,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 1.97,
-  "testedAt": "2026-08-30T20:31:36Z"
+  "durationSeconds": 2.03,
+  "testedAt": "2026-08-31T11:33:43Z"
 }```
 
 ## Change Intelligence browser regression
@@ -919,8 +919,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.05,
-  "testedAt": "2026-08-30T20:31:38Z"
+  "durationSeconds": 2.91,
+  "testedAt": "2026-08-31T11:33:47Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -940,7 +940,8 @@
     "cacheUrls": [
       "/api/data",
       "/api/fan-intel",
-      "/api/social-pulse"
+      "/api/social-pulse",
+      "/api/tickets"
     ],
     "panel": {
       "cards": 4,
@@ -955,23 +956,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1788121930482,
+          "expiresAt": 1788176058922,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788121900482,
+          "updatedAt": 1788176028922,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1788121930539,
+          "expiresAt": 1788176059065,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788121900539,
+          "updatedAt": 1788176029065,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-30T20:31:40.444Z",
+        "at": "2026-08-31T11:33:48.886Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -1098,7 +1099,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.75
+  "durationSeconds": 3.65
 }```
 
 ## Data freshness browser regression
@@ -1108,7 +1109,7 @@
   "ok": true,
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "desktop": {
-    "detail": "Roster verified Aug 27 \u00b7 Moves 5 days ago \u00b7 Intel 5 days ago",
+    "detail": "Roster verified Aug 27 \u00b7 Moves 6 days ago \u00b7 Intel 6 days ago",
     "overflow": false,
     "rect": {
       "bottom": 1312.375,
@@ -1120,7 +1121,7 @@
     },
     "state": "fallback",
     "strong": "Verified backup \u00b7 Aug 27",
-    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 27Roster verified Aug 27 \u00b7 Moves 5 days ago \u00b7 Intel 5 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 27Roster verified Aug 27 \u00b7 Moves 6 days ago \u00b7 Intel 6 days agoSee sources \u2192",
     "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 27.",
     "viewport": {
       "height": 757,
@@ -1128,7 +1129,7 @@
     }
   },
   "mobile": {
-    "detail": "Roster verified Aug 27 \u00b7 Moves 5 days ago \u00b7 Intel 5 days ago",
+    "detail": "Roster verified Aug 27 \u00b7 Moves 6 days ago \u00b7 Intel 6 days ago",
     "overflow": false,
     "rect": {
       "bottom": 2356.453125,
@@ -1140,7 +1141,7 @@
     },
     "state": "fallback",
     "strong": "Verified backup \u00b7 Aug 27",
-    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 27Roster verified Aug 27 \u00b7 Moves 5 days ago \u00b7 Intel 5 days agoSee sources \u2192",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 27Roster verified Aug 27 \u00b7 Moves 6 days ago \u00b7 Intel 6 days agoSee sources \u2192",
     "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 27.",
     "viewport": {
       "height": 701,
@@ -1148,8 +1149,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 1.53,
-  "testedAt": "2026-08-30T20:31:44Z"
+  "durationSeconds": 1.46,
+  "testedAt": "2026-08-31T11:33:52Z"
 }```
 
 ## Account / Guest browser regression
@@ -1242,7 +1243,7 @@
     "route": "#roster",
     "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
   },
-  "durationSeconds": 1.9
+  "durationSeconds": 1.88
 }```
 
 ## Advanced analytics browser regression
@@ -1306,8 +1307,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.06,
-  "testedAt": "2026-08-30T20:31:49Z"
+  "durationSeconds": 2.03,
+  "testedAt": "2026-08-31T11:33:57Z"
 }```
 
 ## Player headshot browser regression
@@ -1318,16 +1319,16 @@
   "base": "https://titans-command-center.alecjordanprice.workers.dev",
   "rosterCards": 95,
   "rosterDecoratedHeadshots": 80,
-  "rosterLoadedHeadshots": 7,
+  "rosterLoadedHeadshots": 66,
   "statsPlayerRows": 97,
   "statsDecoratedHeadshots": 81,
-  "statsLoadedHeadshots": 47,
-  "mobileLoadedHeadshots": 47,
+  "statsLoadedHeadshots": 71,
+  "mobileLoadedHeadshots": 71,
   "richPlayer": "Austin Schlottmann",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.39,
-  "testedAt": "2026-08-30T20:31:52Z"
+  "durationSeconds": 3.34,
+  "testedAt": "2026-08-31T11:34:00Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
