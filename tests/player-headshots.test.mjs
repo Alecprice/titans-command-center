@@ -85,12 +85,11 @@ test('headshot browser regression isolates onboarding and follows a real roster 
 });
 
 test('headshot release is CSP-scoped and PWA packaged',()=>{
-  const html=read('index.html'),headers=read('_headers'),vercel=read('vercel.json'),sw=read('sw.js');
+  const html=read('index.html'),headers=read('_headers'),sw=read('sw.js');
   assert.match(html,/href="\/headshot-polish\.css\?v=31"/);
   assert.match(html,/src="\/headshot-polish\.js\?v=31"/);
   for(const host of allowedHosts){
     assert.match(headers,new RegExp(host.replace(/\./g,'\\.')));
-    assert.match(vercel,new RegExp(host.replace(/\./g,'\\.')));
   }
   assert.doesNotMatch(headers,/img-src[^;]*\shttps:\s/);
   assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);

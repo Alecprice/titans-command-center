@@ -19,7 +19,7 @@ async function run(method,query={},headers={},env){
   return state;
 }
 
-test('one serverless gateway owns the API directory',()=>{
+test('one compatibility gateway owns the API directory',()=>{
   const files=fs.readdirSync(new URL('../api/',import.meta.url)).filter(name=>name.endsWith('.js')).sort();
   assert.deepEqual(files,['index.js']);
 });
@@ -46,12 +46,17 @@ test('provider diagnostics remain GET-only',async()=>{
   assert.equal(result.status,405);
 });
 
-test('Vercel rewrites preserve the public API contract',()=>{
-  const config=JSON.parse(fs.readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
-  const map=new Map((config.rewrites||[]).map(item=>[item.source,item.destination]));
-  for(const route of ['health','data','player','analytics','preseason-stats','market-data','odds','bluesky-search','espn-scoreboard','provider-health','sync','cron-refresh']){
-    assert.equal(map.get(`/api/${route}`),`/api?route=${route}`);
+test('Cloudflare Worker owns public API routing and retired Vercel config stays absent',()=>{
+  const root=new URL('../',import.meta.url);
+  const worker=fs.readFileSync(new URL('cloudflare/worker.mjs',root),'utf8');
+  assert.equal(fs.existsSync(new URL('vercel.json',root)),false);
+  assert.match(worker,/const API_PREFIX='\/api\/'/);
+  assert.match(worker,/pathname\.startsWith\(API_PREFIX\)/);
+  assert.match(worker,/import apiHandler from '\.\.\/api\/index\.js'/);
+  for(const route of ['health','data','player','preseason-stats','market-data','advanced-analytics','espn-scoreboard']){
+    assert.match(worker,new RegExp(`route==='${route}'`));
   }
+  assert.doesNotMatch(worker,/vercelRequest|vercelResponse/);
 });
 
 test('legacy warehouse gateway routes are explicit retired states and never database fallbacks',async()=>{
