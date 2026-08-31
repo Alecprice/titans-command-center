@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
+      PRODUCTION_URL: https://titans.alecjprice.com
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       SEATGEEK_CLIENT_ID: ${{ secrets.SEATGEEK_CLIENT_ID }}
       SEATGEEK_AID: ${{ secrets.SEATGEEK_AID }}
@@ -92,11 +93,19 @@ jobs:
           wranglerVersion: '4'
           command: deploy --secrets-file /tmp/titans-worker-secrets.json
 
-      - name: Run production regression audit
-        id: smoke
+      - name: Verify canonical front door and Worker rollback path
+        id: frontdoor
         if: steps.deploy.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          CUSTOM_DOMAIN_URL: ${{ env.PRODUCTION_URL }}
+          ORIGIN_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: node scripts/custom-domain-regression.mjs
+
+      - name: Run production regression audit
+        id: smoke
+        if: steps.frontdoor.outcome == 'success'
+        env:
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
           EXPECTED_SHA: ${{ github.sha }}
         run: npm run audit:production && node scripts/advanced-analytics-regression.mjs && node scripts/headshot-production-regression.mjs
 
@@ -108,84 +117,84 @@ jobs:
         id: browser
         if: steps.smoke.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/browser-navigation-smoke.py
 
       - name: Run Listen Watch browser regression
         id: media_browser
         if: steps.browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/media-browser-smoke.py
 
       - name: Run Market Pulse browser regression
         id: market_browser
         if: steps.media_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/market-browser-smoke.py
 
       - name: Run Command Intelligence browser regression
         id: command_browser
         if: steps.market_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/command-intelligence-browser-smoke.py
 
       - name: Run Player Intelligence and Game Day browser regression
         id: player_gameday_browser
         if: steps.command_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/player-gameday-browser-smoke.py
 
       - name: Run Ask Titans browser regression
         id: ask_browser
         if: steps.player_gameday_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/ask-titans-browser-smoke.py
 
       - name: Run Change Intelligence browser regression
         id: change_browser
         if: steps.ask_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/change-intelligence-browser-smoke.py
 
       - name: Run runtime and 365 Mode browser regression
         id: runtime_365_browser
         if: steps.change_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/runtime-365-browser-smoke.py
 
       - name: Run data freshness browser regression
         id: freshness_browser
         if: steps.runtime_365_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/freshness-browser-smoke.py
 
       - name: Run Account and Guest browser regression
         id: account_browser
         if: steps.freshness_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/account-browser-smoke.py
 
       - name: Run advanced analytics browser regression
         id: analytics_browser
         if: steps.account_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/analytics-browser-smoke.py
 
       - name: Run player headshot browser regression
         id: headshot_browser
         if: steps.analytics_browser.outcome == 'success'
         env:
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/headshot-browser-smoke.py
 
       - name: Record Cloudflare deployment result
@@ -199,6 +208,7 @@ jobs:
           TICKETMASTER_READY: ${{ steps.creds.outputs.ticketmaster }}
           STUBHUB_READY: ${{ steps.creds.outputs.stubhub }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          FRONTDOOR_OUTCOME: ${{ steps.frontdoor.outcome }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
           BROWSER_OUTCOME: ${{ steps.browser.outcome }}
           MEDIA_BROWSER_OUTCOME: ${{ steps.media_browser.outcome }}
@@ -212,11 +222,13 @@ jobs:
           ACCOUNT_BROWSER_OUTCOME: ${{ steps.account_browser.outcome }}
           ANALYTICS_BROWSER_OUTCOME: ${{ steps.analytics_browser.outcome }}
           HEADSHOT_BROWSER_OUTCOME: ${{ steps.headshot_browser.outcome }}
-          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+          PRODUCTION_URL: ${{ env.PRODUCTION_URL }}
+          ORIGIN_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: |
           if [[ "$QUALITY_OUTCOME" != "success" ]]; then STATUS='quality gate failed before Cloudflare deploy';
           elif [[ "$CLOUDFLARE_READY" != "true" ]]; then STATUS='Cloudflare credentials unavailable to workflow';
           elif [[ "$DEPLOY_OUTCOME" != "success" ]]; then STATUS='Cloudflare deploy failed';
+          elif [[ "$FRONTDOOR_OUTCOME" != "success" ]]; then STATUS="deployed + canonical front door ${FRONTDOOR_OUTCOME:-not-run}";
           elif [[ "$SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}";
           elif [[ "$BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + browser navigation regression ${BROWSER_OUTCOME:-not-run}";
           elif [[ "$MEDIA_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Listen Watch browser regression ${MEDIA_BROWSER_OUTCOME:-not-run}";
@@ -229,7 +241,7 @@ jobs:
           elif [[ "$FRESHNESS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + data freshness browser regression ${FRESHNESS_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ACCOUNT_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Account / Guest browser regression ${ACCOUNT_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ANALYTICS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + advanced analytics browser regression ${ANALYTICS_BROWSER_OUTCOME:-not-run}";
-          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
+          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + canonical front door + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
           else STATUS="deployed + player headshot browser regression ${HEADSHOT_BROWSER_OUTCOME:-not-run}"; fi
 
           git config user.name 'github-actions[bot]'
@@ -248,6 +260,7 @@ jobs:
             echo "- YouTube Data API configured: ${YOUTUBE_READY:-false}"
             echo "- Ticket providers configured: SeatGeek=${SEATGEEK_READY:-false}, Ticketmaster=${TICKETMASTER_READY:-false}, StubHub=${STUBHUB_READY:-false}"
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
+            echo "- Canonical front door: ${FRONTDOOR_OUTCOME:-not-run}"
             echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"
             echo "- Browser navigation regression: ${BROWSER_OUTCOME:-not-run}"
             echo "- Listen Watch browser regression: ${MEDIA_BROWSER_OUTCOME:-not-run}"
@@ -261,7 +274,8 @@ jobs:
             echo "- Account / Guest browser regression: ${ACCOUNT_BROWSER_OUTCOME:-not-run}"
             echo "- Advanced analytics browser regression: ${ANALYTICS_BROWSER_OUTCOME:-not-run}"
             echo "- Player headshot browser regression: ${HEADSHOT_BROWSER_OUTCOME:-not-run}"
-            [[ -n "$WORKER_URL" ]] && echo "- Worker URL: $WORKER_URL" || echo '- Worker URL: existing deployment remains unchanged'
+            [[ -n "$PRODUCTION_URL" ]] && echo "- Production URL: $PRODUCTION_URL" || echo '- Production URL: unavailable'
+            [[ -n "$ORIGIN_URL" ]] && echo "- Rollback Worker URL: $ORIGIN_URL" || echo '- Rollback Worker URL: existing deployment remains unchanged'
             echo "- Recorded: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             if [[ "$QUALITY_OUTCOME" != "success" && -f /tmp/quality.log ]]; then
               echo; echo '## Quality gate failure context'; echo; echo '```text'
@@ -269,6 +283,7 @@ jobs:
               echo; echo '--- tail ---'; tail -n 80 /tmp/quality.log
               echo '```'
             fi
+            if [[ -f /tmp/custom-domain-smoke.json ]]; then echo; echo '## Canonical front door regression'; echo; echo '```json'; cat /tmp/custom-domain-smoke.json; echo '```'; fi
             if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Production regression'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
             if [[ -f /tmp/headshot-production-smoke.json ]]; then echo; echo '## Player headshot production regression'; echo; echo '```json'; cat /tmp/headshot-production-smoke.json; echo '```'; fi
             if [[ -f /tmp/browser-nav-smoke.json ]]; then echo; echo '## Browser navigation regression'; echo; echo '```json'; cat /tmp/browser-nav-smoke.json; echo '```'; fi
