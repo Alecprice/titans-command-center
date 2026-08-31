@@ -1,0 +1,83 @@
+name: Titans Custom Domain Verify
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: titans-custom-domain-verify
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CUSTOM_DOMAIN_URL: https://titans.alecjprice.com
+      ORIGIN_URL: https://titans-command-center.alecjordanprice.workers.dev
+      PRODUCTION_URL: https://titans.alecjprice.com
+      WORKER_URL: https://titans.alecjprice.com
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Use Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Verify CloudFront front door and Worker revision
+        run: node scripts/custom-domain-regression.mjs
+
+      - name: Run production API regressions through custom domain
+        run: |
+          node scripts/production-regression.mjs
+          node scripts/advanced-analytics-regression.mjs
+          node scripts/headshot-production-regression.mjs
+
+      - name: Install Selenium for browser regressions
+        run: python -m pip install --disable-pip-version-check 'selenium>=4.25,<5'
+
+      - name: Run browser navigation stress test
+        run: python scripts/browser-navigation-smoke.py
+
+      - name: Run Listen Watch browser regression
+        run: python scripts/media-browser-smoke.py
+
+      - name: Run Market Pulse browser regression
+        run: python scripts/market-browser-smoke.py
+
+      - name: Run Command Intelligence browser regression
+        run: python scripts/command-intelligence-browser-smoke.py
+
+      - name: Run Player Intelligence and Game Day browser regression
+        run: python scripts/player-gameday-browser-smoke.py
+
+      - name: Run Ask Titans browser regression
+        run: python scripts/ask-titans-browser-smoke.py
+
+      - name: Run Change Intelligence browser regression
+        run: python scripts/change-intelligence-browser-smoke.py
+
+      - name: Run runtime and 365 Mode browser regression
+        run: python scripts/runtime-365-browser-smoke.py
+
+      - name: Run data freshness browser regression
+        run: python scripts/freshness-browser-smoke.py
+
+      - name: Run Account and Guest browser regression
+        run: python scripts/account-browser-smoke.py
+
+      - name: Run advanced analytics browser regression
+        run: python scripts/analytics-browser-smoke.py
+
+      - name: Run player headshot browser regression
+        run: python scripts/headshot-browser-smoke.py
