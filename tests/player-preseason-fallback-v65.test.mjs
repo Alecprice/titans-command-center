@@ -57,6 +57,12 @@ test('post-deploy fallback gate checks the exact successful Cloudflare revision 
   assert.match(fallbackWorkflow,/persist-credentials: false/);
 });
 
+test('preseason fallback production gate and manual smoke target the canonical public host',()=>{
+  assert.match(fallbackWorkflow,/WORKER_URL: https:\/\/titans\.alecjprice\.com/);
+  assert.doesNotMatch(fallbackWorkflow,/WORKER_URL: https:\/\/titans-command-center\.alecjordanprice\.workers\.dev/);
+  assert.match(browserSmoke,/BASE=os\.environ\.get\('WORKER_URL','https:\/\/titans\.alecjprice\.com'\)/);
+});
+
 test('exact revision probe uses the same production-safe Node fetch contract as the main release audit',()=>{
   assert.match(fallbackWorkflow,/name: Use Node 24/);
   assert.match(fallbackWorkflow,/actions\/setup-node@820762786026740c76f36085b0efc47a31fe5020/);
@@ -75,19 +81,23 @@ test('new production browser smoke compiles with SyntaxWarning promoted to failu
   assert.doesNotThrow(()=>execFileSync('python',['-W','error::SyntaxWarning','-m','py_compile','scripts/player-preseason-fallback-browser-smoke.py'],{stdio:'pipe'}));
 });
 
-test('hydrated player hash parser preserves the UUID query instead of rewriting the route',()=>{
+test('player route parser accepts either a database UUID or the audited-name route',()=>{
+  assert.match(browserSmoke,/def player_query_value\(href,key\):/);
+  assert.match(browserSmoke,/return parse_qs\(query\)\.get\(key,\[''\]\)\[0\]/);
   assert.match(browserSmoke,/def player_id_from_href\(href\):/);
-  assert.match(browserSmoke,/raw\.split\('\?',1\)\[1\] if '\?' in raw else ''/);
-  assert.match(browserSmoke,/return parse_qs\(query\)\.get\('id',\[''\]\)\[0\]/);
-  assert.match(browserSmoke,/player_id=player_id_from_href\(player_href\)/);
+  assert.match(browserSmoke,/def player_name_from_href\(href\):/);
+  assert.match(browserSmoke,/return '#player\?id=' in raw or '#player\?name=' in raw/);
+  assert.match(browserSmoke,/\.player-card\[href\*=\\"#player\?id=\\"\],\.player-card\[href\*=\\"#player\?name=\\"\]/);
+  assert.match(browserSmoke,/player_route_mode='database-uuid'/);
+  assert.match(browserSmoke,/player_route_mode='audited-name'/);
   assert.doesNotMatch(browserSmoke,/replace\('#','\?',1\)/);
   assert.doesNotMatch(browserSmoke,/urlparse\(/);
 });
 
-test('live fallback smoke is conditional on the real warehouse state and fail-closed when fallback is required',()=>{
+test('live fallback smoke is conditional on the supported route and real warehouse state',()=>{
   assert.match(browserSmoke,/Cam Ward/);
   assert.match(browserSmoke,/warehouseRows/);
-  assert.match(browserSmoke,/fallback_required=api_context\.get\('warehouseRows',-1\)==0/);
+  assert.match(browserSmoke,/fallback_required=player_route_mode=='audited-name' or api_context\.get\('warehouseRows',0\)==0/);
   assert.match(browserSmoke,/preseasonRows/);
   assert.match(browserSmoke,/completedGamesWithPlayerStats/);
   assert.match(browserSmoke,/completedGamesMissingPlayerStats/);
