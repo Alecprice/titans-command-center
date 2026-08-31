@@ -2,6 +2,7 @@ import {getD1Preferences,hasD1,putD1Preferences} from './d1-store.mjs';
 
 const AUTH_ORIGIN='https://ep-cold-moon-a6z7a2ag.neonauth.us-west-2.aws.neon.tech/neondb/auth';
 const TRUSTED_ACCOUNT_ORIGINS=new Set([
+  'https://titans.alecjprice.com',
   'https://titans-command-center.alecjprice.com',
   'https://titans-command-center.alecjordanprice.workers.dev'
 ]);

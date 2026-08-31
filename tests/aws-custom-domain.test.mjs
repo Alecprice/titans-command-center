@@ -4,14 +4,14 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('pay-as-you-go AWS custom domain template is fail-closed and keeps safe origin settings',()=>{
+test('pay-as-you-go AWS custom domain template is fail-closed and targets titans.alecjprice.com',()=>{
   const template=read('infra/aws/titans-command-center-domain.yaml');
   assert.match(template,/PAY-AS-YOU-GO FALLBACK ONLY/);
   assert.match(template,/PayAsYouGoAcknowledgement/);
   assert.match(template,/Default: BLOCKED/);
   assert.match(template,/I_UNDERSTAND_CHARGES/);
   assert.match(template,/RequireExplicitMeteredBillingAcknowledgement/);
-  assert.match(template,/titans-command-center\.alecjprice\.com/);
+  assert.match(template,/Default: titans\.alecjprice\.com/);
   assert.match(template,/titans-command-center\.alecjordanprice\.workers\.dev/);
   assert.match(template,/AWS::CertificateManager::Certificate/);
   assert.match(template,/ValidationMethod: DNS/);
@@ -27,8 +27,9 @@ test('pay-as-you-go AWS custom domain template is fail-closed and keeps safe ori
   assert.doesNotMatch(template,/AKIA[0-9A-Z]{16}/);
 });
 
-test('metered deployment helper refuses normal execution and requires explicit charge acknowledgement',()=>{
+test('metered deployment helper refuses normal execution and defaults to the canonical subdomain',()=>{
   const script=read('scripts/deploy-aws-custom-domain.sh');
+  assert.match(script,/DOMAIN="\$\{DOMAIN:-titans\.alecjprice\.com\}"/);
   assert.match(script,/REGION="us-east-1"/);
   assert.match(script,/COST SAFETY STOP/);
   assert.match(script,/ALLOW_PAY_AS_YOU_GO_CLOUDFRONT/);
@@ -42,8 +43,9 @@ test('metered deployment helper refuses normal execution and requires explicit c
   assert.doesNotMatch(script,/aws_secret_access_key/i);
 });
 
-test('AWS free-plan preflight is read-only and checks account, DNS, CloudFront and ACM state',()=>{
+test('AWS free-plan preflight is read-only and checks titans.alecjprice.com state',()=>{
   const script=read('scripts/aws-free-plan-preflight.sh');
+  assert.match(script,/DOMAIN="\$\{DOMAIN:-titans\.alecjprice\.com\}"/);
   assert.match(script,/AWS COST-SAFE PREFLIGHT/);
   assert.match(script,/READ ONLY/);
   assert.match(script,/sts get-caller-identity/);
@@ -60,4 +62,21 @@ test('AWS free-plan preflight is read-only and checks account, DNS, CloudFront a
   assert.doesNotMatch(script,/request-certificate/);
   assert.doesNotMatch(script,/create-distribution/);
   assert.doesNotMatch(script,/aws_secret_access_key/i);
+});
+
+test('AWS custom-domain guide keeps D1 authoritative, Neon Auth isolated, and titans.alecjprice.com canonical',()=>{
+  const guide=read('docs/AWS_CUSTOM_DOMAIN.md');
+  assert.match(guide,/Canonical public hostname:\s+`https:\/\/titans\.alecjprice\.com`/s);
+  assert.match(guide,/Cloudflare Worker and D1 database remain the application origin and production data authority/);
+  assert.match(guide,/titans\.alecjprice\.com -> Route 53 -> CloudFront Free flat-rate \+ ACM -> Cloudflare Worker -> D1/);
+  assert.match(guide,/Browser -> CloudFront -> Cloudflare Worker account proxy -> Neon Auth/);
+  assert.match(guide,/AWS layer is only a public HTTPS\/DNS front door/);
+  assert.match(guide,/does not receive D1 credentials/);
+  assert.match(guide,/\/api\/health` reports Cloudflare D1 as the primary storage provider/);
+  assert.match(guide,/optional Neon Auth outage must not turn public fan routes into an application outage/);
+  assert.match(guide,/Retire the old custom hostname only after the new hostname is production-proven/);
+  assert.match(guide,/Do not delete .*Cloudflare Worker, D1 database, Neon Auth project, or GitHub repository/s);
+  assert.doesNotMatch(guide,/Target public hostname:\s+`https:\/\/titans-command-center\.alecjprice\.com`/s);
+  assert.doesNotMatch(guide,/Cloudflare Worker and Neon database remain the origin\/backend/);
+  assert.doesNotMatch(guide,/Neon configured and healthy/);
 });

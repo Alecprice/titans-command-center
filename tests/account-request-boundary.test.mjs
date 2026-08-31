@@ -8,6 +8,7 @@ const source=fs.readFileSync(new URL('../src/account-api.mjs',import.meta.url),'
 test('state-changing account routes reject untrusted cross-site browser requests',()=>{
   assert.match(source,/function accountMutationIsCrossSite\(request\)/);
   assert.match(source,/TRUSTED_ACCOUNT_ORIGINS/);
+  assert.match(source,/https:\/\/titans\.alecjprice\.com/);
   assert.match(source,/request\.method==='POST'&&accountMutationIsCrossSite\(request\)/);
   assert.match(source,/request\.method==='PUT'&&accountMutationIsCrossSite\(request\)/);
   assert.match(source,/Cross-site account request rejected/);
@@ -19,18 +20,24 @@ test('state-changing account routes reject untrusted cross-site browser requests
   assert.equal(accountMutationIsCrossSite(malicious),true);
 });
 
-test('trusted Titans public origins survive the custom-domain to Worker boundary',()=>{
-  const proxiedMobile=new Request('https://titans-command-center.alecjordanprice.workers.dev/api/account/auth/sign-in/email',{
+test('titans.alecjprice.com survives the CloudFront to Worker account boundary',()=>{
+  const proxiedCanonical=new Request('https://titans-command-center.alecjordanprice.workers.dev/api/account/auth/sign-in/email',{
+    method:'POST',
+    headers:{origin:'https://titans.alecjprice.com','sec-fetch-site':'cross-site'}
+  });
+  assert.equal(accountMutationIsCrossSite(proxiedCanonical),false);
+
+  const directCanonical=new Request('https://titans.alecjprice.com/api/account/preferences',{
+    method:'PUT',
+    headers:{origin:'https://titans.alecjprice.com','sec-fetch-site':'same-origin'}
+  });
+  assert.equal(accountMutationIsCrossSite(directCanonical),false);
+
+  const legacyTransitionAlias=new Request('https://titans-command-center.alecjordanprice.workers.dev/api/account/auth/sign-out',{
     method:'POST',
     headers:{origin:'https://titans-command-center.alecjprice.com','sec-fetch-site':'cross-site'}
   });
-  assert.equal(accountMutationIsCrossSite(proxiedMobile),false);
-
-  const directCustomDomain=new Request('https://titans-command-center.alecjprice.com/api/account/preferences',{
-    method:'PUT',
-    headers:{origin:'https://titans-command-center.alecjprice.com','sec-fetch-site':'same-origin'}
-  });
-  assert.equal(accountMutationIsCrossSite(directCustomDomain),false);
+  assert.equal(accountMutationIsCrossSite(legacyTransitionAlias),false);
 });
 
 test('fetch metadata remains a fallback when Origin is absent',()=>{
