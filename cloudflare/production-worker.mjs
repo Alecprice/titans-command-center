@@ -1,7 +1,4 @@
 import worker from './worker.mjs';
-import {d1Health,getD1Snapshot} from '../src/d1-store.mjs';
-
-const BOOTSTRAP_SNAPSHOT_KEY='bootstrap:v1';
 
 export function productionDataEnv(env={}){
   return new Proxy(env,{
@@ -20,50 +17,8 @@ export function productionDataEnv(env={}){
   });
 }
 
-function contentAuditFromSnapshot(row){
-  const payload=row?.payload;
-  if(!payload||typeof payload!=='object')return null;
-  return payload?.dataQuality?.contentAuditAt||payload?.meta?.content_audit_at||payload?.meta?.contentAuditAt||payload?.contentAudit||null;
-}
-
-export async function d1AuthoritativeHealth(request,env,ctx){
-  const sanitized=productionDataEnv(env);
-  const baseline=await worker.fetch(request,sanitized,ctx);
-  if(new URL(request.url).pathname!=='/api/health'||request.method!=='GET')return baseline;
-
-  let body={};
-  try{body=await baseline.clone().json();}catch{}
-  const [d1,snapshot]=await Promise.all([
-    d1Health(env),
-    getD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY).catch(()=>null)
-  ]);
-  const primaryReady=Boolean(d1.ok&&snapshot?.payload?.ok===true);
-  const database={
-    configured:Boolean(d1.configured),
-    ok:primaryReady,
-    provider:'cloudflare-d1',
-    snapshotFresh:Boolean(snapshot),
-    warehouse:{configured:Boolean(env?.DATABASE_URL),disabled:true,provider:'neon'}
-  };
-  const responseBody={
-    ...body,
-    ok:true,
-    status:primaryReady?'healthy':'degraded',
-    contentAudit:contentAuditFromSnapshot(snapshot)||body?.contentAudit||null,
-    database,
-    storage:{...(body?.storage||{}),primary:'cloudflare-d1',d1},
-    fallbacks:{...(body?.fallbacks||{}),d1Snapshot:true}
-  };
-  const headers=new Headers(baseline.headers);
-  headers.set('content-type','application/json; charset=utf-8');
-  headers.set('cache-control','no-store');
-  return new Response(JSON.stringify(responseBody),{status:200,headers});
-}
-
 export default {
   fetch(request,env,ctx){
-    const pathname=new URL(request.url).pathname;
-    if(pathname==='/api/health')return d1AuthoritativeHealth(request,env,ctx);
     return worker.fetch(request,productionDataEnv(env),ctx);
   },
   scheduled(controller,env,ctx){
