@@ -142,26 +142,38 @@ try:
       const text=root?.innerText||'';
       const metrics=[...root.querySelectorAll('.v16-snapshot strong')].map(x=>x.textContent.trim()).filter(Boolean);
       const logRows=root?.querySelectorAll('.v16-game-log article').length||0;
-      const fallbackRows=[...root.querySelectorAll('.v16-game-log article')].filter(x=>x.innerText.includes('Official fallback')).length;
       return {
         text:text.slice(0,6000),
         fallbackLabel:text.includes('2026 Preseason · official fallback'),
-        regularSeasonDisclaimer:text.includes('They are not regular-season totals.'),
+        regularSeasonDisclaimer:text.includes('They are not regular-season totals.')||text.includes('These are not regular-season totals.'),
         awaitingIngest:text.includes('Season production is awaiting ingest.'),
-        officialFallbackText:text.includes('Official fallback'),
         metrics,
         logRows,
-        fallbackRows,
         tabs:[...root.querySelectorAll('[data-v16-player-tab]')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height}))
       };
     """)
 
+    game_log={'logRows':state['logRows'],'fallbackRows':0,'officialFallbackText':False}
     if fallback_required:
         numeric_metrics=[value for value in state['metrics'] if any(ch.isdigit() for ch in value)]
         if not state['fallbackLabel'] or not state['regularSeasonDisclaimer'] or state['awaitingIngest']:
             raise RuntimeError(f'Player Intelligence did not disclose the required official preseason fallback: {state}')
-        if state['logRows']<1 or state['fallbackRows']<1 or not state['officialFallbackText'] or not numeric_metrics:
-            raise RuntimeError(f'Player Intelligence fallback did not render official game rows/metrics: {state}')
+
+        stage='render-player-game-log'
+        driver.execute_script("document.querySelector('[data-v16-player-tab=\"games\"]')?.click()")
+        wait_for(driver,"document.querySelector('[data-v16-player-tab=\"games\"]')?.getAttribute('aria-selected')==='true' && !document.querySelector('[data-v16-pane=\"games\"]')?.hidden")
+        game_log=driver.execute_script("""
+          const pane=document.querySelector('[data-v16-pane="games"]');
+          const rows=[...pane.querySelectorAll('.v16-game-log article')];
+          const text=pane.innerText||'';
+          return {
+            logRows:rows.length,
+            fallbackRows:rows.filter(x=>(x.innerText||'').includes('Official fallback')).length,
+            officialFallbackText:text.includes('Official fallback')
+          };
+        """)
+        if game_log['logRows']<1 or game_log['fallbackRows']<1 or not game_log['officialFallbackText'] or not numeric_metrics:
+            raise RuntimeError(f'Player Intelligence fallback did not render visible official game rows/metrics: {game_log} metrics={state["metrics"]}')
     else:
         if not state['metrics'] and state['logRows']<1:
             raise RuntimeError(f'Warehouse-backed Player Intelligence has no usable production rows: {state}')
@@ -205,8 +217,9 @@ try:
         'regularSeasonDisclaimer':state['regularSeasonDisclaimer'],
         'awaitingIngest':state['awaitingIngest'],
         'metrics':state['metrics'],
-        'gameLogRows':state['logRows'],
-        'fallbackGameRows':state['fallbackRows']
+        'gameLogRows':game_log['logRows'],
+        'fallbackGameRows':game_log['fallbackRows'],
+        'officialFallbackText':game_log['officialFallbackText']
       },
       'mobile':mobile,
       'browserWarnings':warnings[:20],
