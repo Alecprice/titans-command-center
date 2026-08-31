@@ -10,6 +10,7 @@ Titans Command Center is intentionally designed to remain usable on no-card/free
 - Cloudflare D1 is the production data authority.
 - Cloudflare cache and materialized D1 snapshots keep request-time work bounded.
 - Optional provider integrations remain optional; loss of a provider must not break the core app or create fabricated data.
+- Neon Auth remains a temporary, isolated auth HTTP service only; it is not the application database.
 
 ## D1 usage model
 
@@ -37,8 +38,12 @@ Raw full-season play-by-play is not copied into D1 just to serve request-time an
 
 Core production deployment requires the Cloudflare API token/account ID already configured in GitHub Actions. Optional provider keys are server-only. No Postgres `DATABASE_URL` is required or supported by the production runtime.
 
-## Legacy Vercel context
+The optional AWS custom-domain front door does not receive database or auth credentials. It forwards HTTPS to the Cloudflare Worker origin only.
 
-Earlier versions optimized around Vercel Hobby build-rate constraints and routed API URLs through a single `api/index.js` gateway. That history explains the remaining `vercel.json`/gateway compatibility files, but Vercel is no longer the production release path.
+## Retired Vercel context
 
-The public API URLs remain stable even though Cloudflare now owns the live routes.
+Earlier versions optimized around Vercel Hobby build-rate constraints and routed API URLs through a single `api/index.js` gateway. `vercel.json` is intentionally absent now and Vercel is not a release target.
+
+`api/index.js` remains only because the Cloudflare Worker still imports it as a compatibility gateway for routes that have not yet moved to dedicated Worker-native handlers. As those routes migrate, that gateway can be reduced further without restoring Vercel hosting configuration.
+
+Public `/api/*` URLs remain stable because Cloudflare owns the live routes.
