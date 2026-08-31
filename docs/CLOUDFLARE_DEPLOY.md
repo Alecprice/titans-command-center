@@ -1,15 +1,17 @@
 # Cloudflare deployment runbook
 
-This project can run in parallel on Vercel and Cloudflare during migration. Do **not** remove the Vercel project or switch DNS until the Cloudflare deployment passes the production checklist below.
+Cloudflare Worker + Static Assets is the active Titans Command Center production host. Cloudflare D1 is the production data authority.
 
-## Target architecture
+## Production architecture
 
-- GitHub: source of truth (`Alecprice/titans-command-center`)
+- GitHub `main`: source of truth
+- GitHub Actions: quality and release gates
 - Cloudflare Workers + Static Assets: public app and `/api/*`
-- Neon: existing PostgreSQL database
-- Vercel: temporary fallback during cutover
+- Cloudflare D1 `TITANS_DB`: production persistence and materialized API snapshots
+- Neon Auth: temporary, isolated authentication HTTP service only
+- Vercel configuration: legacy/non-authoritative
 
-Static HTML/CSS/JS/assets are served directly by Cloudflare's asset layer. Only `/api/*` is routed through Worker compute.
+Static HTML/CSS/JS/assets are served through Cloudflare's asset layer. `/api/*` is routed through Worker compute.
 
 ## Build locally
 
@@ -21,73 +23,64 @@ npm run build:cloudflare
 
 `dist/` is generated and intentionally ignored by Git.
 
-## One-time Cloudflare setup
+## GitHub Actions deployment
 
-The repository contains `.github/workflows/cloudflare-deploy.yml`. On every push to `main`, GitHub runs the full Titans quality gate and then deploys through Wrangler when both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets are configured.
+`.github/workflows/cloudflare-deploy.yml` deploys changes from `main` after the complete Titans quality gate succeeds. Deployment requires repository secrets for:
 
-For a local/manual fallback deployment, sign in to Cloudflare / Wrangler:
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+The API token must have the Worker/D1 permissions required by the configured workflows.
+
+Optional provider secrets are bundled only when configured. `DATABASE_URL` is not read, required, or uploaded.
+
+## D1
+
+The production database is configured in `wrangler.jsonc` as the `TITANS_DB` binding.
+
+Apply the checked-in D1 schema with:
 
 ```bash
-npx wrangler@4 login
+npm run d1:migrate
 ```
 
-Then deploy with:
+Current migrations live under `db/d1/migrations/`. Legacy files under `db/migrations/` are retired Postgres history and must not be applied to D1.
+
+## Optional Worker/provider secrets
+
+Provider integrations are designed to remain optional and fail safely when not configured. Examples include YouTube and free ticket/market providers documented in `.env.example` and their feature-specific runbooks.
+
+Do not add a Postgres `DATABASE_URL` Worker secret. The production runtime is intentionally unable to reopen the retired warehouse.
+
+## Scheduled work
+
+Wrangler defines the production schedules. Scheduled source checks and bounded reconciliation writes persist their audit/state through D1 and fail closed if the binding is unavailable. The scoreboard refresh is centrally scheduled so clients do not create independent high-frequency database polling.
+
+## Production verification
+
+Every normal production deployment must pass the automated gates for the exact deployed Git SHA. The release chain verifies at minimum:
+
+- Worker/static deployment succeeds with the D1 binding.
+- `/api/health` reports `cloudflare-d1` as the primary database provider and truthful snapshot freshness.
+- `/api/data` returns D1 snapshot data or the explicit dated audited fallback contract.
+- `/api/preseason-stats` reports `d1-snapshot` or audited fallback roster provenance.
+- Advanced Analytics verifies D1 snapshot provenance and truthful season fallback.
+- Account/Guest behavior remains guest-safe and preference persistence remains D1-backed.
+- Player/Game Day, Listen/Watch, Market Pulse, Command Intelligence, Ask Titans, Change Intelligence, freshness, 365 Mode, navigation and headshots pass real browser checks.
+- Static/PWA security headers, service-worker packaging, mobile touch targets and source-truth assertions remain intact.
+
+`docs/CLOUDFLARE_STATUS.md` is generated from that workflow and records the last release result.
+
+## Manual deployment
+
+For an authorized manual deployment:
 
 ```bash
 npm run deploy:cloudflare
 ```
 
-## Worker runtime secrets
+A manual deploy should still be followed by the same production regression checks before it is considered a release.
 
-After the first Worker exists, add the existing Neon connection string as a Worker secret:
+## Recovery
 
-```bash
-npx wrangler@4 secret put DATABASE_URL
-```
-
-Add ingestion/cron secrets if preserving the scheduled source-check automation:
-
-```bash
-npx wrangler@4 secret put INGEST_SECRET
-npx wrangler@4 secret put CRON_SECRET
-```
-
-Optional market-provider secrets:
-
-```bash
-npx wrangler@4 secret put PROPLINE_API_KEY
-npx wrangler@4 secret put ODDS_API_IO_KEY
-```
-
-The market UI still has its non-key fallback path when these are absent.
-
-The Worker configuration in `wrangler.jsonc` includes the same daily `15 10 * * *` UTC source-check schedule used by the Vercel project.
-
-## Production verification before DNS cutover
-
-Verify the Cloudflare `workers.dev` URL before attaching a custom domain:
-
-- `/` loads the current Titans Command Center UI.
-- Current Shield image is correct in Legacy.
-- `/api/health` returns HTTP 200 and reports database `ok: true` once `DATABASE_URL` is configured.
-- `/api/data` returns the current roster/data warehouse payload.
-- `/api/preseason-stats` returns the complete roster and preseason stat book.
-- `/api/market-data` returns a safe market response without a provider-configuration crash.
-- Stats Lab filters/search work on desktop, tablet and mobile.
-- Market refresh works repeatedly.
-- PWA/service worker updates to the current cache version.
-- No secrets are present in client assets or response bodies.
-- Scheduled source-check run succeeds after `CRON_SECRET` is configured.
-
-## Cutover
-
-Only after the Cloudflare URL passes the checklist:
-
-1. Attach the desired custom domain in Cloudflare.
-2. Verify HTTPS and API routes on the custom domain.
-3. Leave Vercel online briefly as rollback insurance.
-4. Remove/retire the old Vercel production deployment only after the Cloudflare deployment is stable.
-
-## Notes
-
-Cloudflare's `nodejs_compat` mode is enabled because the existing API uses Node-compatible modules and `process.env`. With a compatibility date after 2025-04-01, Worker text/JSON bindings and secrets are available through `process.env`, allowing the existing single API gateway to be reused rather than forked.
+The retired Neon warehouse is not a supported rollback path. If a D1-backed feature fails, repair the D1 binding/data/materializer or use the feature's explicit audited/unavailable state. Do not restore `DATABASE_URL` or a warehouse compatibility adapter.
