@@ -4,7 +4,7 @@
 
 **Production data cutover is complete.** Titans Command Center now runs its production data plane on Cloudflare D1 through the `TITANS_DB` binding.
 
-The staged migration removed the former request-time and scheduled-write dependence on Neon Postgres, then deleted the Neon warehouse runtime adapter and `@neondatabase/serverless` package after production verification.
+The staged migration removed the former request-time and scheduled-write dependence on Neon Postgres, then deleted the Neon warehouse runtime adapter and `@neondatabase/serverless` package after production verification. The retired Postgres schema, seed, and migration files were subsequently removed from the active working tree; Git history preserves them for historical review.
 
 ## Current production data plane
 
@@ -46,7 +46,7 @@ npm run d1:migrate
 
 The configured production database is named `titans-command-center` and is bound to the Worker as `TITANS_DB` in `wrangler.jsonc`.
 
-`db/schema.sql`, `db/seed.sql`, and `db/migrations/` are retired Postgres migration history until their separate archival/removal pass is complete. They are not executed by the Cloudflare deployment.
+There is no active `db/schema.sql`, `db/seed.sql`, or `db/migrations/` Postgres tree. Those retired artifacts remain recoverable from Git history only and must not be restored as a production rollback mechanism.
 
 ## Analytics materialization
 
@@ -93,6 +93,6 @@ The application uses central scheduled refreshes, materialized snapshots, and Cl
 
 ## Rollback policy
 
-The old Postgres rollback path has been intentionally retired. Production must not regain warehouse access by toggling an environment flag or restoring `DATABASE_URL`.
+The old Postgres rollback path has been intentionally retired. Production must not regain warehouse access by toggling an environment flag, restoring `DATABASE_URL`, or restoring the retired Postgres schema files.
 
 If a D1-backed feature fails, the supported recovery path is to repair the D1 binding/data/materializer or use the explicit audited/unavailable behavior already defined by that API—not to reconnect the retired warehouse.

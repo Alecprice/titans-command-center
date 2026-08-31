@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
+const root=new URL('../',import.meta.url);
+const read=p=>fs.readFileSync(new URL(p,root),'utf8');
+const exists=p=>fs.existsSync(new URL(p,root));
 
 test('account layer is explicitly loaded and packaged offline',()=>{
   const html=read('index.html'),sw=read('sw.js'),quality=read('.github/workflows/quality.yml'),ui=read('account-v112.js');
@@ -35,11 +37,14 @@ test('account portability exports only selected preferences and resets safely',(
   assert.match(ui,/data-account-export/);assert.match(ui,/data-account-reset/);assert.match(ui,/Confirm reset/);assert.match(ui,/within 6 seconds/);assert.match(ui,/It does not delete your account/);assert.match(css,/\.account-tools/);assert.match(css,/\.account-danger\.armed/);assert.match(css,/@media\(max-width:400px\)/);
 });
 
-test('legacy account portability migration remains explicit and non-runtime',()=>{
-  const sql=read('db/migrations/20260822_fan_user_preferences.sql');
-  const rollback=read('db/migrations/20260822_fan_user_preferences.rollback.sql');
+test('retired Postgres account portability schema no longer ships',()=>{
+  for(const path of ['db/migrations/20260822_fan_user_preferences.sql','db/migrations/20260822_fan_user_preferences.rollback.sql'])assert.equal(exists(path),false,`${path} must stay retired`);
+  const d1=read('db/d1/migrations/0001_core.sql');
   const api=read('src/account-api.mjs');
-  assert.match(sql,/create table if not exists fan_user_preferences/);assert.match(sql,/user_id text primary key/);assert.match(sql,/preferences jsonb not null default '\{\}'::jsonb/);assert.match(sql,/schema_version integer not null default 1/);assert.match(sql,/jsonb_typeof\(preferences\) = 'object'/);assert.match(sql,/create index if not exists fan_user_preferences_updated_at_idx/);assert.match(rollback,/Never run automatically from application deploys/);assert.match(rollback,/drop table if exists fan_user_preferences/);assert.doesNotMatch(api,/::jsonb|getSql\(|DATABASE_URL/);
+  assert.match(d1,/create table if not exists fan_user_preferences/i);
+  assert.match(d1,/user_id text primary key/i);
+  assert.match(d1,/schema_version integer not null default 1/i);
+  assert.doesNotMatch(api,/::jsonb|getSql\(|DATABASE_URL/);
 });
 
 test('production deployment gates on guest and account browser health',()=>{

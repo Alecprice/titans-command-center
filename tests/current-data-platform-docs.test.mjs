@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+const root=new URL('../',import.meta.url);
+const read=path=>fs.readFileSync(new URL(path,root),'utf8');
+const exists=path=>fs.existsSync(new URL(path,root));
 
 test('current contributor docs identify Cloudflare D1 as production data authority',()=>{
   const readme=read('README.md');
@@ -30,6 +32,13 @@ test('retired warehouse configuration cannot return as a normal environment requ
   assert.doesNotMatch(productionWorker,/process\.env\.DATABASE_URL\s*=/);
 });
 
+test('active repository schema surface is D1-only',()=>{
+  assert.equal(exists('db/d1/migrations/0001_core.sql'),true);
+  for(const path of ['db/schema.sql','db/seed.sql','db/migrations'])assert.equal(exists(path),false,`${path} must stay retired`);
+  const pkg=JSON.parse(read('package.json'));
+  assert.match(pkg.scripts['d1:migrate'],/wrangler@4 d1 migrations apply titans-command-center --remote/);
+});
+
 test('Neon documentation is historical and keeps auth separate from retired Postgres',()=>{
   const neon=read('docs/NEON.md');
   const deployment=read('docs/DEPLOYMENT.md');
@@ -37,6 +46,7 @@ test('Neon documentation is historical and keeps auth separate from retired Post
   assert.match(neon,/^# Retired Neon warehouse/m);
   assert.match(neon,/Neon Auth is separate/i);
   assert.match(neon,/not\*\* part of the Titans Command Center production data runtime/i);
+  assert.match(neon,/removed from the active working tree/i);
   assert.match(deployment,/Cloudflare D1 persistence/i);
   assert.match(deployment,/DATABASE_URL.*not a current deployment variable/i);
   assert.match(precutover,/Historical migration record/i);
