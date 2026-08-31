@@ -62,11 +62,14 @@ test('D1 snapshot expiry uses SQLite datetime normalization for ISO timestamps',
   assert.match(source,/datetime\(expires_at\)>CURRENT_TIMESTAMP/);
 });
 
-test('account preferences prefer D1 when the binding exists',()=>{
+test('account preferences require D1 and cannot fall back to Neon',()=>{
   const source=fs.readFileSync(new URL('../src/account-api.mjs',import.meta.url),'utf8');
   assert.match(source,/import \{getD1Preferences,hasD1,putD1Preferences\} from '\.\/d1-store\.mjs'/);
-  assert.match(source,/const useD1=hasD1\(env\)/);
-  assert.match(source,/storage:useD1\?'cloudflare-d1':'neon'/);
+  assert.match(source,/if\(!hasD1\(env\)\)return json\(\{ok:false,error:'Database unavailable',code:'DATABASE_UNAVAILABLE',localOnly:true\},503\)/);
+  assert.match(source,/storage:'cloudflare-d1'/);
+  assert.match(source,/getD1Preferences\(env,String\(user\.id\)\)/);
+  assert.match(source,/putD1Preferences\(env,String\(user\.id\),preferences,1\)/);
+  assert.doesNotMatch(source,/storage:.*neon|getSql\(|DATABASE_URL|::jsonb/);
 });
 
 test('bootstrap API uses only fresh D1 then stale D1 then the bundled audited fallback',()=>{
