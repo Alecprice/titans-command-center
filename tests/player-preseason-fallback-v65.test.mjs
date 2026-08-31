@@ -94,7 +94,7 @@ test('player route parser accepts either a database UUID or the audited-name rou
   assert.doesNotMatch(browserSmoke,/urlparse\(/);
 });
 
-test('live fallback smoke is conditional on the supported route and real warehouse state',()=>{
+test('live fallback smoke validates explicit disclosure and visible Game Log rows',()=>{
   assert.match(browserSmoke,/Cam Ward/);
   assert.match(browserSmoke,/warehouseRows/);
   assert.match(browserSmoke,/fallback_required=player_route_mode=='audited-name' or api_context\.get\('warehouseRows',0\)==0/);
@@ -103,7 +103,11 @@ test('live fallback smoke is conditional on the supported route and real warehou
   assert.match(browserSmoke,/completedGamesMissingPlayerStats/);
   assert.match(browserSmoke,/2026 Preseason · official fallback/);
   assert.match(browserSmoke,/They are not regular-season totals\./);
+  assert.match(browserSmoke,/These are not regular-season totals\./);
+  assert.match(browserSmoke,/data-v16-player-tab=\\"games\\"/);
+  assert.match(browserSmoke,/data-v16-pane=\\"games\\"/);
+  assert.match(browserSmoke,/getAttribute\('aria-selected'\)==='true'/);
+  assert.match(browserSmoke,/fallbackRows:rows\.filter\(x=>\(x\.innerText\|\|''\)\.includes\('Official fallback'\)\)\.length/);
   assert.match(browserSmoke,/Season production is awaiting ingest\./);
-  assert.match(browserSmoke,/Official fallback/);
   assert.match(browserSmoke,/any\(x\['h'\]<44 for x in mobile\['tabs'\]\)/);
 });
