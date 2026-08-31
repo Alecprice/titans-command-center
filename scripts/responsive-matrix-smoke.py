@@ -6,7 +6,7 @@ from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
-BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
+BASE=os.environ.get('WORKER_URL','https://titans.alecjprice.com').rstrip('/')
 REPORT=Path('/tmp/responsive-matrix-smoke.json')
 VIEWPORTS=[
     ('small-phone',360,780,'mobile'),
