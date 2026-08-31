@@ -11,8 +11,9 @@ test('deployment docs identify Cloudflare and D1 as the current production path'
     assert.match(doc,/Cloudflare Worker \+ Static Assets/);
     assert.match(doc,/Cloudflare D1/);
     assert.match(doc,/vercel\.json` is intentionally absent/);
-    assert.match(doc,/Vercel .*not (?:a )?(?:release target|production)/i);
   }
+  assert.match(deployment,/does \*\*not\*\* make Vercel a deployment target or release authority/);
+  assert.match(freeTier,/Vercel is not a release target/);
 });
 
 test('retired Vercel configuration cannot be described as a current compatibility surface',()=>{
