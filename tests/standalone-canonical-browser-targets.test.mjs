@@ -16,7 +16,15 @@ test('standalone production browser workflows exercise the canonical front door'
   ]) {
     assert.match(workflow,new RegExp(`WORKER_URL: ${canonical.replaceAll('.','\\.')}`),`${name} must use canonical production`);
     assert.equal(workflow.includes(`WORKER_URL: ${rollback}`),false,`${name} must not bypass CloudFront`);
+    assert.match(workflow,/workflows: \['Titans Cloudflare Deploy'\]/,`${name} must run after the deployment workflow`);
   }
+});
+
+test('standalone workflows retain deployed-revision verification before browser evidence',()=>{
+  assert.match(responsiveWorkflow,/EXPECTED_SHA:/);
+  assert.match(responsiveWorkflow,/Confirm deployed SHA/);
+  assert.match(diagnosticsWorkflow,/SOURCE_SHA:/);
+  assert.match(diagnosticsWorkflow,/Verify source revision is live/);
 });
 
 test('manual responsive smoke defaults to canonical production',()=>{
