@@ -1,15 +1,16 @@
-import { getBootstrapData } from './db.mjs';
+import {getD1Snapshot,hasD1} from './d1-store.mjs';
 import { games as seedGames } from './data.mjs';
 import { auditedRoster20260827, ROSTER_AUDIT_DATE } from './roster-audit-20260827.mjs';
 import { auditedPreseasonGames, auditedPlayerPreseasonStats, auditedTeamPreseasonStats, auditedPreseasonSources, PRESEASON_GAMEBOOK_URL } from './preseason-p1-20260813.mjs';
 import { auditedPreseasonGameP2, auditedPlayerPreseasonStatsP2, auditedPreseasonSourcesP2 } from './preseason-p2-20260823.mjs';
 import { aggregatePlayerStats, aggregateTeamStats, buildLeaders, positionCounts } from './preseason-model.mjs';
 
-const TEAM_ID='10',SEASON=2026,TIMEOUT=5500;
+const TEAM_ID='10',SEASON=2026,TIMEOUT=5500,BOOTSTRAP_SNAPSHOT_KEY='bootstrap:v1';
 const signal=()=>typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(TIMEOUT):undefined;
 const norm=s=>String(s||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9 ]/g,'').replace(/\b(jr|sr|ii|iii|iv)\b/g,'').replace(/\s+/g,' ').trim();
 const asArray=v=>Array.isArray(v)?v:[];
 async function json(url){const r=await fetch(url,{headers:{'User-Agent':'TitansCommandCenter/1.0'},signal:signal()});if(!r.ok)throw new Error(`ESPN ${r.status}`);return r.json();}
+async function bootstrapSnapshot(env){if(!hasD1(env))return null;const row=await getD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY,{allowExpired:true});return row?.payload?.ok?row.payload:null;}
 function dbRoster(data){return asArray(data?.roster).map(p=>({id:String(p.id||''),name:p.name||p.full_name||'',number:String(p.number??p.jerseyNumber??''),position:p.position||'',unit:p.unit||'',status:p.status||'Current roster',experience:p.experience||'',headshot:''})).filter(p=>p.name);}
 function isPreseasonEvent(e){return Number(e?.season?.type??e?.seasonType?.type??e?.seasonType)===1||/preseason/i.test(`${e?.seasonType?.name||''} ${e?.week?.text||''} ${e?.name||''}`)}
 function completed(e){return Boolean(e?.status?.type?.completed)||/final/i.test(e?.status?.type?.name||e?.status?.type?.description||'')}
@@ -29,7 +30,7 @@ export async function preseasonStatsRoute(req,res,env=process.env){
   if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({ok:false,error:'Method not allowed'})}
   res.setHeader('Cache-Control','public, s-maxage=180, stale-while-revalidate=900');
   const diagnostics=[];let roster=auditedRoster20260827.map(x=>({...x,id:'',headshot:''})),rosterSource=`Tennessee Titans official roster + newer official transactions · audited ${ROSTER_AUDIT_DATE}`,rosterMode='audited-fallback';
-  try{const db=await getBootstrapData(env);const live=db?.ok?dbRoster(db):[];if(live.length>=90){roster=live;rosterSource='Tennessee Titans official roster / transaction snapshot · latest audited database state';rosterMode='live-database';}else diagnostics.push(`Live roster database unavailable; serving the dated ${auditedRoster20260827.length}-player ${ROSTER_AUDIT_DATE} audited roster snapshot.`);}catch{diagnostics.push(`Live roster database unavailable; serving the dated ${auditedRoster20260827.length}-player ${ROSTER_AUDIT_DATE} audited roster snapshot.`);}
+  try{const snapshot=await bootstrapSnapshot(env);const live=snapshot?dbRoster(snapshot):[];if(live.length>=90){roster=live;rosterSource='Tennessee Titans official roster / transaction snapshot · Cloudflare D1';rosterMode='d1-snapshot';}else diagnostics.push(`Live roster snapshot unavailable; serving the dated ${auditedRoster20260827.length}-player ${ROSTER_AUDIT_DATE} audited roster snapshot.`);}catch{diagnostics.push(`Live roster snapshot unavailable; serving the dated ${auditedRoster20260827.length}-player ${ROSTER_AUDIT_DATE} audited roster snapshot.`);}
   const gameBooks=[gameBookFromAuditP1(),gameBookFromAuditP2()];let liveAdded=0,liveMisses=0;
   try{const schedule=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/${TEAM_ID}/schedule?season=${SEASON}`);const liveEvents=asArray(schedule.events).filter(isPreseasonEvent).filter(completed).sort((a,b)=>new Date(a.date)-new Date(b.date));for(const event of liveEvents){if(gameBooks.some(g=>sameDay(g.date,event.date)))continue;try{const summary=await json(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${encodeURIComponent(event.id)}`),statRows=parseTeamBox(summary,event),teamStats=parseTeamStats(summary,event);if(statRows.length){gameBooks.push({id:String(event.id),week:`P${gameBooks.length+1}`,name:event.shortName||event.name,date:event.date,status:event.status?.type?.shortDetail||'Final',opponent:'',source:'ESPN public game summary',sourceUrl:`https://www.espn.com/nfl/game/_/gameId/${event.id}`,sourceScope:'Public ESPN player and team box-score fields returned for this completed event.',teamStats,teamStatsComplete:Boolean(Object.keys(teamStats).length>=8),statRows});liveAdded++;}else liveMisses++;}catch{liveMisses++;}}}catch{diagnostics.push('ESPN server-side feed is currently unavailable in this hosting environment; official audited gamebook data remains active.');}
   gameBooks.sort((a,b)=>new Date(a.date)-new Date(b.date));
