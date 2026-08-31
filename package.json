@@ -18,6 +18,5 @@
     "deploy:cloudflare":"npm run build:cloudflare && npx wrangler@4 deploy",
     "check":"npm test && npm run audit:content && npm run secret-scan && npm run syntax-check && npm run build:cloudflare && npm run verify:cloudflare"
   },
-  "dependencies":{"@neondatabase/serverless":"1.0.2"},
   "engines":{"node":">=20"}
 }
