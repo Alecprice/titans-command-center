@@ -39,6 +39,7 @@ ROUTES=[
 ]
 ROUTE_READY_SELECTORS={
     'fantasy':'#app[data-fantasy-command="ready"]',
+    'fan-hub':'#app .v13-hero ~ #v13-view .v13-section',
 }
 
 def wait(driver,expression,timeout=10):
