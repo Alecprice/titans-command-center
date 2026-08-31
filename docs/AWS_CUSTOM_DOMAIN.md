@@ -20,15 +20,24 @@ Important safety rules:
 - Do not choose Pro, Business, Premium, or pay-as-you-go.
 - Do not enable Lambda@Edge, paid CAPTCHA API usage, Route 53 DNS query logging, enhanced CloudFront metrics, or other separately billed extras.
 - Do not attach the entire `alecjprice.com` Route 53 hosted zone to the plan during the initial cutover. The existing zone can remain exactly as it is. Route 53 A/AAAA Alias queries to CloudFront are not billed as DNS queries; the existing hosted-zone fee remains unchanged.
-- The existing Cloudflare Worker and Neon database remain the origin/backend and are not replaced by this AWS front door.
+- The existing Cloudflare Worker and D1 database remain the application origin and production data authority. The AWS front door does not replace either one and does not receive D1 credentials.
+- Neon Auth remains a separate, isolated account-authentication dependency behind the Worker's same-origin account proxy. It is not the application data plane and is not part of the AWS front door.
 
 ## Architecture
 
-`Route 53 -> CloudFront Free flat-rate + ACM -> Cloudflare Worker -> Neon`
+Primary application/data path:
+
+`Route 53 -> CloudFront Free flat-rate + ACM -> Cloudflare Worker -> D1`
+
+Isolated account-auth path:
+
+`Browser -> CloudFront -> Cloudflare Worker account proxy -> Neon Auth`
 
 This deliberately does **not** move `alecjprice.com` DNS to Cloudflare. Cloudflare Workers native Custom Domains require an active Cloudflare DNS zone, so CloudFront is used as the AWS-controlled HTTPS front door instead.
 
 CloudFront should forward viewer values except the viewer `Host` header. The Worker must receive its own `titans-command-center.alecjordanprice.workers.dev` hostname as `Host` so TLS validation against the origin remains correct.
+
+The AWS layer is only a public HTTPS/DNS front door. D1 stays bound directly to the Worker, scheduled materialization stays in Cloudflare/GitHub automation, and account authentication continues through the isolated Neon Auth proxy. No database connection string or D1 credential belongs in CloudFront, Route 53, ACM, or the AWS deployment helper.
 
 The Worker staging hostname returns `X-Robots-Tag: noindex, nofollow`. The public custom hostname must remove that staging-only response header while preserving the application's other security headers.
 
@@ -97,7 +106,8 @@ Expected results:
 - HTTPS certificate is valid for `titans-command-center.alecjprice.com`.
 - HTTP redirects to HTTPS.
 - Root page returns 200.
-- `/api/health` reports a healthy application with Neon configured and healthy.
+- `/api/health` reports Cloudflare D1 as the primary storage provider and reports the bootstrap snapshot truthfully as healthy or degraded.
+- Account/guest behavior remains usable independently of the D1 health result; an optional Neon Auth outage must not turn public fan routes into an application outage.
 - `X-Robots-Tag: noindex` is not present on the public custom hostname.
 - Existing CSP/security headers remain present.
 - Roster, Transactions, Stats Lab, Advanced Analytics, Market Pulse and player-headshot paths continue to work.
@@ -121,4 +131,4 @@ The existing `workers.dev` hostname remains untouched and usable as the origin/f
 
 If a Free-plan CloudFront distribution is created and later needs to be removed, cancel its Free pricing plan first (Free plan cancellation is immediate), then disable/delete the distribution and remove only the target A/AAAA aliases if they are not removed automatically.
 
-Do not delete the `alecjprice.com` hosted zone, Cloudflare Worker, Neon database, or GitHub repository.
+Do not delete the `alecjprice.com` hosted zone, Cloudflare Worker, D1 database, Neon Auth project, or GitHub repository as part of an AWS front-door rollback.

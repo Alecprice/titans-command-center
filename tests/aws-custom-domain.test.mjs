@@ -61,3 +61,18 @@ test('AWS free-plan preflight is read-only and checks account, DNS, CloudFront a
   assert.doesNotMatch(script,/create-distribution/);
   assert.doesNotMatch(script,/aws_secret_access_key/i);
 });
+
+test('AWS custom-domain guide keeps D1 authoritative and Neon Auth isolated',()=>{
+  const guide=read('docs/AWS_CUSTOM_DOMAIN.md');
+  assert.match(guide,/Cloudflare Worker and D1 database remain the application origin and production data authority/);
+  assert.match(guide,/Route 53 -> CloudFront Free flat-rate \+ ACM -> Cloudflare Worker -> D1/);
+  assert.match(guide,/Browser -> CloudFront -> Cloudflare Worker account proxy -> Neon Auth/);
+  assert.match(guide,/AWS layer is only a public HTTPS\/DNS front door/);
+  assert.match(guide,/does not receive D1 credentials/);
+  assert.match(guide,/\/api\/health` reports Cloudflare D1 as the primary storage provider/);
+  assert.match(guide,/optional Neon Auth outage must not turn public fan routes into an application outage/);
+  assert.match(guide,/Do not delete .*Cloudflare Worker, D1 database, Neon Auth project, or GitHub repository/s);
+  assert.doesNotMatch(guide,/Cloudflare Worker and Neon database remain the origin\/backend/);
+  assert.doesNotMatch(guide,/Cloudflare Worker -> Neon(?:\s|`)/);
+  assert.doesNotMatch(guide,/Neon configured and healthy/);
+});
