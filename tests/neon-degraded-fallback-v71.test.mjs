@@ -34,7 +34,8 @@ test('database fallback uses the current Aug 27 audited roster everywhere',()=>{
 
 test('production gate accepts degraded only when audited fallback truth is proven',()=>{
   assert.match(production,/appStatus==='healthy'\|\|appStatus==='degraded'/);
-  assert.match(production,/if\(appStatus==='degraded'\)assert\(!databaseOk/);
+  assert.match(production,/if\(appStatus==='degraded'\)\{assert\(!databaseOk/);
+  assert.match(production,/snapshotFresh===false/);
   assert.match(production,/data\.body\?\.databaseAvailable===false/);
   assert.match(production,/data\.body\?\.fallback\?\.active===true/);
   assert.match(production,/Stats Lab roster count .* does not match Data API roster count/);
