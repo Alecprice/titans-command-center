@@ -119,7 +119,13 @@ def dimensions(driver):
     """)
 
 def assert_layout(state,label,mode):
-    if state['scrollWidth']>state['clientWidth']+3 or state['bodyScrollWidth']>state['clientWidth']+3:
+    # documentElement.clientWidth excludes the vertical scrollbar gutter while
+    # window.innerWidth and body.scrollWidth include it. Compare each scroll
+    # surface against the matching viewport metric so a vertical scrollbar is
+    # not misclassified as horizontal overflow.
+    root_overflow=state['scrollWidth']>state['clientWidth']+3
+    body_overflow=state['bodyScrollWidth']>state['innerWidth']+3
+    if root_overflow or body_overflow:
         raise RuntimeError(f'{label}: horizontal overflow {state}')
     if state['appWidth']<=0 or state['topbarWidth']<=0 or state['appTextLength']<=0:
         raise RuntimeError(f'{label}: primary shell/content is empty {state}')
