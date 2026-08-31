@@ -6,22 +6,21 @@ const worker=fs.readFileSync(new URL('../cloudflare/worker.mjs',import.meta.url)
 const preseason=fs.readFileSync(new URL('../src/preseason-api.mjs',import.meta.url),'utf8');
 const production=fs.readFileSync(new URL('../scripts/production-regression.mjs',import.meta.url),'utf8');
 
-test('Data API keeps Neon health visible while D1 and audited data provide labeled fallback paths',()=>{
+test('Data API is D1-first with a dated bundled fallback and no request-time warehouse path',()=>{
   assert.match(worker,/function auditedBootstrapFallback/);
   assert.match(worker,/mode:'audited-fallback'/);
   assert.match(worker,/databaseAvailable:false/);
   assert.match(worker,/fallback:\{active:true/);
   assert.match(worker,/const snapshot=await readD1Bootstrap\(env\)/);
   assert.match(worker,/if\(snapshot\)return jsonResponse\(snapshot,200,headers\)/);
-  assert.match(worker,/data=await getBootstrapData\(env\)/);
-  assert.match(worker,/readD1Bootstrap\(env,\{allowExpired:true/);
-  assert.match(worker,/auditedBootstrapFallback\(data\?\.error\|\|'Live database unavailable'\)/);
+  assert.match(worker,/readD1Bootstrap\(env,\{allowExpired:true,reason\}/);
+  assert.match(worker,/auditedBootstrapFallback\(reason\)/);
   assert.match(worker,/writeD1Bootstrap\(env,fallback,\{source:'audited-fallback'\}\)/);
   assert.match(worker,/getAuditedTeamContext\(null\)/);
-  assert.doesNotMatch(worker,/if\(!data\.configured\)return jsonResponse/);
-  assert.doesNotMatch(worker,/if\(!data\.ok\)return jsonResponse\(data,503/);
-  assert.match(worker,/status:db\.ok\?'healthy':'degraded'/);
+  assert.match(worker,/status:primaryReady\?'healthy':'degraded'/);
+  assert.match(worker,/provider:'cloudflare-d1'/);
   assert.match(worker,/'Cache-Control':'no-store'/);
+  assert.doesNotMatch(worker,/DATABASE_URL|getBootstrapData\(|getSql\(|databaseHealth\(|source:'neon-bootstrap'/);
 });
 
 test('database fallback uses the current Aug 27 audited roster everywhere',()=>{
@@ -33,12 +32,11 @@ test('database fallback uses the current Aug 27 audited roster everywhere',()=>{
   assert.doesNotMatch(preseason,/96-player Aug\. 24/);
 });
 
-test('production gate accepts degraded only when fallback truth is proven',()=>{
+test('production gate accepts degraded only when audited fallback truth is proven',()=>{
   assert.match(production,/appStatus==='healthy'\|\|appStatus==='degraded'/);
-  assert.match(production,/if\(appStatus==='degraded'\)assert\(!databaseOk/);
-  assert.match(production,/Degraded Neon health must serve the explicit audited Data API fallback/);
+  assert.match(production,/if\(appStatus==='degraded'\)\{assert\(!databaseOk/);
+  assert.match(production,/snapshotFresh===false/);
   assert.match(production,/data\.body\?\.databaseAvailable===false/);
   assert.match(production,/data\.body\?\.fallback\?\.active===true/);
-  assert.match(production,/Degraded Neon health must keep Stats Lab on the audited fallback roster/);
   assert.match(production,/Stats Lab roster count .* does not match Data API roster count/);
 });

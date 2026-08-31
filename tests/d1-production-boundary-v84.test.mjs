@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {d1AuthoritativeHealth,productionDataEnv} from '../cloudflare/production-worker.mjs';
+import worker from '../cloudflare/worker.mjs';
+import {productionDataEnv} from '../cloudflare/production-worker.mjs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
@@ -45,10 +46,10 @@ test('legacy rollback flags cannot re-enable warehouse access',()=>{
   assert.equal('DATABASE_URL' in cutover,false);
 });
 
-test('D1 health is authoritative with a fresh bootstrap snapshot',async()=>{
+test('Worker D1 health is authoritative with a fresh bootstrap snapshot',async()=>{
   const snapshot={cache_key:'bootstrap:v1',payload:{ok:true,dataQuality:{contentAuditAt:'2026-08-27T00:00:00.000Z'}},source:'audited-fallback',fetched_at:new Date().toISOString(),expires_at:new Date(Date.now()+60_000).toISOString()};
   const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:new FakeD1(snapshot)};
-  const response=await d1AuthoritativeHealth(new Request('https://example.test/api/health'),env,{});
+  const response=await worker.fetch(new Request('https://example.test/api/health'),productionDataEnv(env),{});
   const body=await response.json();
   assert.equal(response.status,200);
   assert.equal(body.status,'healthy');
@@ -56,32 +57,38 @@ test('D1 health is authoritative with a fresh bootstrap snapshot',async()=>{
   assert.equal(body.database.configured,true);
   assert.equal(body.database.ok,true);
   assert.equal(body.database.snapshotFresh,true);
-  assert.equal(body.database.warehouse.configured,true);
-  assert.equal(body.database.warehouse.disabled,true);
+  assert.equal(body.database.warehouse,undefined);
   assert.equal(body.storage.primary,'cloudflare-d1');
   assert.equal(body.contentAudit,'2026-08-27T00:00:00.000Z');
 });
 
-test('D1 health remains authoritative with no warehouse secret at all',async()=>{
+test('Worker D1 health remains authoritative with no warehouse secret at all',async()=>{
   const snapshot={cache_key:'bootstrap:v1',payload:{ok:true},source:'audited-fallback',fetched_at:new Date().toISOString(),expires_at:new Date(Date.now()+60_000).toISOString()};
   const env={TITANS_DB:new FakeD1(snapshot)};
-  const response=await d1AuthoritativeHealth(new Request('https://example.test/api/health'),env,{});
+  const response=await worker.fetch(new Request('https://example.test/api/health'),env,{});
   const body=await response.json();
   assert.equal(body.status,'healthy');
   assert.equal(body.database.provider,'cloudflare-d1');
-  assert.equal(body.database.warehouse.configured,false);
-  assert.equal(body.database.warehouse.disabled,true);
+  assert.equal(body.database.configured,true);
+  assert.equal(body.database.ok,true);
+  assert.equal(body.database.warehouse,undefined);
 });
 
-test('D1 health degrades when the primary snapshot is not fresh even if the binding responds',async()=>{
-  const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:new FakeD1(null)};
-  const response=await d1AuthoritativeHealth(new Request('https://example.test/api/health'),env,{});
+test('Worker D1 health degrades when the primary snapshot is not fresh even if the binding responds',async()=>{
+  const env={TITANS_DB:new FakeD1(null)};
+  const response=await worker.fetch(new Request('https://example.test/api/health'),env,{});
   const body=await response.json();
   assert.equal(body.status,'degraded');
   assert.equal(body.database.provider,'cloudflare-d1');
   assert.equal(body.database.configured,true);
   assert.equal(body.database.ok,false);
   assert.equal(body.database.snapshotFresh,false);
+});
+
+test('production wrapper only strips warehouse credentials and does not translate D1 health',()=>{
+  const production=read('cloudflare/production-worker.mjs');
+  assert.match(production,/productionDataEnv\(env\)/);
+  assert.doesNotMatch(production,/d1AuthoritativeHealth|d1Health|getD1Snapshot|BOOTSTRAP_SNAPSHOT_KEY|pathname==='\/api\/health'/);
 });
 
 test('Advanced Analytics owns D1 outage behavior without a production-wrapper translator',()=>{

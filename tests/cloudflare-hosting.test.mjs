@@ -20,11 +20,14 @@ test('Cloudflare Worker serves static assets and runs only API paths through com
   assert.match(config,/"binding"\s*:\s*"TITANS_DB"/);
 });
 
-test('Cloudflare adapter uses native Worker env and execution context for core API routes and trusted scheduler',()=>{
+test('Cloudflare adapter uses D1-native core API routes and trusted scheduler',()=>{
   const worker=read('cloudflare/worker.mjs');
   assert.match(worker,/import apiHandler from '\.\.\/api\/index\.js'/);
-  assert.match(worker,/databaseHealth\(env\)/);
-  assert.match(worker,/getBootstrapData\(env\)/);
+  assert.match(worker,/d1Health\(env\)/);
+  assert.match(worker,/getD1Snapshot\(env,BOOTSTRAP_SNAPSHOT_KEY\)/);
+  assert.match(worker,/readD1Bootstrap\(env\)/);
+  assert.match(worker,/readD1Bootstrap\(env,\{allowExpired:true/);
+  assert.match(worker,/auditedBootstrapFallback\(reason\)/);
   assert.match(worker,/preseasonStatsRoute,env/);
   assert.match(worker,/marketDataRoute,env/);
   assert.match(worker,/cachedMarketData\(request,env,ctx\)/);
@@ -34,6 +37,7 @@ test('Cloudflare adapter uses native Worker env and execution context for core A
   assert.match(worker,/executeScheduledJob/);
   assert.match(worker,/syncTitansOfficialAudit/);
   assert.match(worker,/syncEspn/);
+  assert.doesNotMatch(worker,/from '\.\.\/src\/db\.mjs'|databaseHealth\(|getBootstrapData\(|getSql\(|DATABASE_URL/);
   assert.doesNotMatch(worker,/CRON_SECRET\|\|env\.INGEST_SECRET/);
 });
 
