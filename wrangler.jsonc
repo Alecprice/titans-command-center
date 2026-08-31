@@ -9,9 +9,6 @@
   "placement": {
     "mode": "smart"
   },
-  "vars": {
-    "NEON_WAREHOUSE_DISABLED": "true"
-  },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
