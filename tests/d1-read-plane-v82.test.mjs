@@ -149,7 +149,40 @@ test('Player Profile serves its player-specific D1 snapshot without DATABASE_URL
   const result=harness.result();
   assert.equal(result.statusCode,200);
   assert.equal(result.payload.storage,'cloudflare-d1');
+  assert.equal(result.payload.snapshot.stale,false);
   assert.equal(result.payload.player.name,'Snapshot Player');
+});
+
+test('Player Profile serves its last D1 snapshot when fresh materialization expires',async()=>{
+  const env={TITANS_DB:new FakeD1()};
+  const id='22222222-2222-4222-8222-222222222222';
+  const key=apiSnapshotKey('player-profile:v1',{id});
+  await seed(env,key,{configured:true,ok:true,player:{id,name:'Stale Snapshot Player'},stats:[],injuries:[],props:[]});
+  env.TITANS_DB.expire(key);
+  const harness=responseHarness();
+  await playerProfileRoute({method:'GET',query:{id}},harness.res,env);
+  const result=harness.result();
+  assert.equal(result.statusCode,200);
+  assert.equal(result.payload.storage,'cloudflare-d1');
+  assert.equal(result.payload.snapshot.stale,true);
+  assert.match(result.payload.snapshot.reason,/Fresh player snapshot unavailable/);
+  assert.equal(result.payload.player.name,'Stale Snapshot Player');
+});
+
+test('Player Profile signals a non-cacheable outage when no D1 snapshot exists',async()=>{
+  const env={TITANS_DB:new FakeD1()};
+  const id='33333333-3333-4333-8333-333333333333';
+  const harness=responseHarness();
+  await playerProfileRoute({method:'GET',query:{id}},harness.res,env);
+  const result=harness.result();
+  assert.equal(result.statusCode,503);
+  assert.equal(result.payload.ok,false);
+  assert.equal(result.payload.available,false);
+  assert.equal(result.payload.configured,true);
+  assert.equal(result.payload.mode,'player-snapshot-unavailable');
+  assert.equal(result.payload.id,id);
+  assert.match(result.payload.error,/snapshot unavailable/i);
+  assert.match(result.headers.get('cache-control')||'',/no-store/i);
 });
 
 test('expired D1 snapshots are withheld normally and available for explicit fallback reads',async()=>{
@@ -163,15 +196,16 @@ test('expired D1 snapshots are withheld normally and available for explicit fall
   assert.equal(stale.snapshot.reason,'materialization unavailable');
 });
 
-test('Fan Intel and Analytics are D1-only while Player retains the remaining warehouse fallback',()=>{
+test('Fan Intel Analytics and Player public read planes are D1-only',()=>{
   const fan=fs.readFileSync(new URL('../src/fan-intel-api.mjs',import.meta.url),'utf8');
   const analytics=fs.readFileSync(new URL('../src/advanced-analytics-api.mjs',import.meta.url),'utf8');
   const player=fs.readFileSync(new URL('../src/player-api.mjs',import.meta.url),'utf8');
   assert.match(fan,/readApiSnapshot\(env,FAN_INTEL_SNAPSHOT_KEY\)/);
   assert.match(fan,/allowExpired:true/);
   assert.doesNotMatch(fan,/getSql|writeApiSnapshot|DATABASE_URL|standings_snapshots|injury_reports|depth_chart_snapshots|\bcontracts\b[\s\S]*sql|player_game_stats|neon-fan-intel/i);
-  assert.match(player,/PLAYER_SNAPSHOT_TTL_SECONDS=21600/);
-  assert.match(player,/if\(data\.ok\)[\s\S]*writeApiSnapshot\(env,snapshotKey,data/);
+  assert.match(player,/readApiSnapshot\(env,snapshotKey\)/);
+  assert.match(player,/allowExpired:true/);
+  assert.doesNotMatch(player,/getPlayerProfile|getSql|writeApiSnapshot|DATABASE_URL|roster_snapshots|player_game_stats|injury_reports|market_odds|neon-player-profile/i);
   assert.match(analytics,/readApiSnapshot\(env,snapshotKey\)/);
   assert.match(analytics,/allowExpired:true/);
   assert.doesNotMatch(analytics,/getSql|writeApiSnapshot|DATABASE_URL|team_week_metrics|\bfrom plays\b|neon-advanced-analytics/i);
