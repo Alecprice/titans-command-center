@@ -13,12 +13,16 @@ test('Fan Hub assets are loaded and available offline',()=>{
   assert.match(html,/href="#fan" data-route="fan"/);
 });
 
-test('Fan intelligence API is Cloudflare-wired and database-backed',()=>{
+test('Fan intelligence API is Cloudflare-wired and D1-backed without request-time warehouse queries',()=>{
   const worker=read('cloudflare/worker.mjs'),api=read('src/fan-intel-api.mjs');
   assert.match(worker,/fanIntelRoute/);
   assert.match(worker,/route==='fan-intel'/);
-  for(const token of ['standings_snapshots','injury_reports','depth_chart_snapshots','contracts','drives','plays','player_game_stats'])assert.match(api,new RegExp(token));
+  assert.match(api,/apiSnapshotKey\('fan-intel:v1',\{season:2026\}\)/);
+  assert.match(api,/readApiSnapshot\(env,FAN_INTEL_SNAPSHOT_KEY\)/);
+  assert.match(api,/allowExpired:true/);
   assert.match(api,/s-maxage=60, stale-while-revalidate=300/);
+  assert.match(api,/Cache-Control','no-store/);
+  assert.doesNotMatch(api,/getSql|writeApiSnapshot|DATABASE_URL|standings_snapshots|injury_reports|depth_chart_snapshots|player_game_stats|neon-fan-intel/i);
 });
 
 test('Fan Hub contains the requested football, fan, offseason and history experiences',()=>{
