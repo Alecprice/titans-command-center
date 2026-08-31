@@ -11,35 +11,6 @@ function methodOnly(req,res){
   return false;
 }
 
-function unavailableFanIntel(reason='Fan intelligence snapshot unavailable'){
-  return {
-    ok:true,
-    available:false,
-    configured:false,
-    mode:'database-unavailable',
-    season:2026,
-    standings:[],
-    injuries:[],
-    depthChart:{capturedAt:null,previousCapturedAt:null,changes:[]},
-    contracts:[],
-    opponent:null,
-    gameDay:{drives:[],plays:[],teamMetrics:[]},
-    playerStats:[],
-    availability:{
-      standings:false,
-      injuries:false,
-      depthChanges:false,
-      contracts:false,
-      opponent:false,
-      drives:false,
-      plays:false,
-      playerStats:false
-    },
-    diagnostics:[reason],
-    fetchedAt:new Date().toISOString()
-  };
-}
-
 export async function fanIntelRoute(req,res,env=process.env){
   if(methodOnly(req,res))return;
   res.setHeader('Cache-Control','public, s-maxage=60, stale-while-revalidate=300');
@@ -54,5 +25,5 @@ export async function fanIntelRoute(req,res,env=process.env){
   if(staleSnapshot)return res.status(200).json(staleSnapshot);
 
   res.setHeader('Cache-Control','no-store');
-  return res.status(200).json(unavailableFanIntel());
+  return res.status(503).json({ok:false,configured:false,error:'Fan intelligence snapshot unavailable'});
 }
