@@ -1,5 +1,4 @@
 import apiHandler from '../api/index.js';
-import {databaseHealth,getBootstrapData,getSql} from '../src/db.mjs';
 import {d1Health,getD1Snapshot,hasD1,putD1Snapshot} from '../src/d1-store.mjs';
 import {getAuditedTeamContext} from '../src/team-context.mjs';
 import {team as fallbackTeam,games as fallbackGames,roster as fallbackRoster,feed as fallbackFeed,sources as fallbackSources} from '../src/data.mjs';
@@ -40,7 +39,12 @@ function marketCacheKey(request){const url=new URL(request.url);url.search='';re
 function apiCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 function queryAwareApiCacheKey(request,keys=[]){const input=new URL(request.url),url=new URL(`${input.origin}${input.pathname}`);for(const key of [...keys].sort()){const value=input.searchParams.get(key);if(value!=null&&value!=='')url.searchParams.set(key,value);}return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 function edgeResponseCacheable(response){const policy=String(response.headers.get('Cache-Control')||'').toLowerCase();return response.ok&&!policy.includes('no-store')&&!policy.includes('private');}
-function auditedBootstrapFallback(reason='Live database unavailable'){
+function contentAuditFromSnapshot(row){
+  const payload=row?.payload;
+  if(!payload||typeof payload!=='object')return null;
+  return payload?.dataQuality?.contentAuditAt||payload?.meta?.content_audit_at||payload?.meta?.contentAuditAt||payload?.contentAudit||null;
+}
+function auditedBootstrapFallback(reason='Fresh bootstrap snapshot unavailable'){
   const transactions=fallbackFeed.filter(row=>row.type==='transaction').map(row=>({id:String(row.id||''),date:row.publishedAt||null,type:'transaction',description:row.summary||row.title||'',sourceUrl:row.url||''}));
   const coverage={};
   return {
@@ -55,9 +59,9 @@ function auditedBootstrapFallback(reason='Live database unavailable'){
     fetchedAt:new Date().toISOString()
   };
 }
-function unavailableFanIntel(env,reason='Live fan intelligence warehouse unavailable'){
+function unavailableFanIntel(reason='Fan intelligence snapshot unavailable'){
   return {
-    ok:true,available:false,configured:Boolean(env?.DATABASE_URL),mode:'database-unavailable',season:2026,
+    ok:true,available:false,configured:false,mode:'database-unavailable',season:2026,
     standings:[],injuries:[],depthChart:{capturedAt:null,previousCapturedAt:null,changes:[]},contracts:[],opponent:null,
     gameDay:{drives:[],plays:[],teamMetrics:[]},playerStats:[],
     availability:{standings:false,injuries:false,depthChanges:false,contracts:false,opponent:false,drives:false,plays:false,playerStats:false},
@@ -70,13 +74,13 @@ function accountServiceUnavailable(status=503){return jsonResponse({ok:false,err
 function d1BootstrapPayload(row,{stale=false,reason=''}={}){
   const payload=row?.payload;
   if(!payload||typeof payload!=='object'||payload.ok!==true)return null;
-  const originalMode=payload.mode||'live-database';
+  const originalMode=payload.mode||'audited-fallback';
   return {
     ...payload,
     mode:stale?'audited-fallback':originalMode,
     databaseAvailable:stale?false:payload.databaseAvailable,
     storage:'cloudflare-d1',
-    fallback:stale?{...(payload.fallback||{}),active:true,reason:reason||'Live source unavailable; serving last D1 snapshot.',d1Snapshot:true}:payload.fallback,
+    fallback:stale?{...(payload.fallback||{}),active:true,reason:reason||'Fresh bootstrap snapshot unavailable; serving last D1 snapshot.',d1Snapshot:true}:payload.fallback,
     snapshot:{key:row.cache_key||BOOTSTRAP_SNAPSHOT_KEY,source:row.source||'unknown',fetchedAt:row.fetched_at||payload.fetchedAt||null,expiresAt:row.expires_at||null,stale:Boolean(stale),originalMode,reason:reason||null}
   };
 }
@@ -85,7 +89,7 @@ async function readD1Bootstrap(env,{allowExpired=false,reason=''}={}){
   try{const row=await getD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY,{allowExpired});return d1BootstrapPayload(row,{stale:allowExpired,reason});}
   catch(error){console.warn('[d1-bootstrap-read]',error);return null;}
 }
-async function writeD1Bootstrap(env,payload,{source='neon-bootstrap',ttlSeconds=BOOTSTRAP_SNAPSHOT_TTL_SECONDS}={}){
+async function writeD1Bootstrap(env,payload,{source='audited-fallback',ttlSeconds=BOOTSTRAP_SNAPSHOT_TTL_SECONDS}={}){
   if(!hasD1(env)||!payload?.ok)return false;
   try{await putD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY,payload,{source,ttlSeconds});return true;}
   catch(error){console.warn('[d1-bootstrap-write]',error);return false;}
@@ -112,26 +116,30 @@ async function fetchScoreboardUpstream(env,{persist=true}={}){
 }
 async function nativeHealth(request,env){
   if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET','Cache-Control':'no-store'});
-  const [db,d1]=await Promise.all([databaseHealth(env),d1Health(env)]);
-  return jsonResponse({ok:true,status:db.ok?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,contentAudit:db.content_audit_at||null,time:new Date().toISOString(),database:db,storage:{primary:hasD1(env)?'cloudflare-d1':'neon',d1},providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true,d1Snapshot:hasD1(env)}},200,{'Cache-Control':'no-store'});
+  const [d1,snapshot]=await Promise.all([
+    d1Health(env),
+    hasD1(env)?getD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY).catch(()=>null):Promise.resolve(null)
+  ]);
+  const primaryReady=Boolean(d1.ok&&snapshot?.payload?.ok===true);
+  return jsonResponse({
+    ok:true,status:primaryReady?'healthy':'degraded',app:'titans-command-center',version:APP_VERSION,
+    contentAudit:contentAuditFromSnapshot(snapshot)||fallbackTeam.rosterCoverage?.asOf||fallbackTeam.auditedAt||null,
+    time:new Date().toISOString(),
+    database:{configured:Boolean(d1.configured),ok:primaryReady,provider:'cloudflare-d1',snapshotFresh:Boolean(snapshot)},
+    storage:{primary:'cloudflare-d1',d1},
+    providers:{propLine:Boolean(env?.PROPLINE_API_KEY),oddsApiIo:Boolean(env?.ODDS_API_IO_KEY),youtubeData:Boolean(env?.YOUTUBE_API_KEY),espnFallback:true,nws:true},
+    fallbacks:{auditedRoster:true,officialPreseasonGamebook:true,marketReference:true,d1Snapshot:hasD1(env)}
+  },200,{'Cache-Control':'no-store'});
 }
 async function nativeData(request,env){
   if(request.method!=='GET')return jsonResponse({ok:false,error:'Method not allowed'},405,{Allow:'GET'});
   const headers={'Cache-Control':BOOTSTRAP_CACHE_CONTROL};
   const snapshot=await readD1Bootstrap(env);
   if(snapshot)return jsonResponse(snapshot,200,headers);
-  let data={configured:Boolean(env?.DATABASE_URL),ok:false,error:env?.DATABASE_URL?'Database query failed':'DATABASE_URL is not configured'};
-  if(env?.DATABASE_URL){try{data=await getBootstrapData(env);}catch(error){console.error('[native-data-bootstrap]',error);}}
-  if(data?.ok){
-    const sql=await getSql(env);let teamContext;
-    try{teamContext=await getAuditedTeamContext(sql);}catch(error){console.warn('[team-context-fallback]',error);teamContext=await getAuditedTeamContext(null);}
-    const payload={...data,mode:'live-database',databaseAvailable:true,storage:'neon',teamContext};
-    await writeD1Bootstrap(env,payload,{source:'neon-bootstrap'});
-    return jsonResponse(payload,200,headers);
-  }
-  const staleSnapshot=await readD1Bootstrap(env,{allowExpired:true,reason:data?.error||'Live database unavailable'});
+  const reason='Fresh bootstrap snapshot unavailable';
+  const staleSnapshot=await readD1Bootstrap(env,{allowExpired:true,reason});
   if(staleSnapshot)return jsonResponse(staleSnapshot,200,headers);
-  const fallback={...auditedBootstrapFallback(data?.error||'Live database unavailable'),teamContext:await getAuditedTeamContext(null),storage:'bundled-audited-data'};
+  const fallback={...auditedBootstrapFallback(reason),teamContext:await getAuditedTeamContext(null),storage:'bundled-audited-data'};
   await writeD1Bootstrap(env,fallback,{source:'audited-fallback'});
   return jsonResponse(fallback,200,headers);
 }
@@ -205,7 +213,7 @@ async function resilientFanIntel(request,env,ctx){
   const response=await cachedAdapterData(request,'fan-intel',fanIntelRoute,env,ctx);
   if(response.status<500)return response;
   try{await response.body?.cancel();}catch{}
-  return withEdgeCacheStatus(jsonResponse(unavailableFanIntel(env),200,{'Cache-Control':'no-store'}),'BYPASS');
+  return withEdgeCacheStatus(jsonResponse(unavailableFanIntel(),200,{'Cache-Control':'no-store'}),'BYPASS');
 }
 async function runApi(request,env,ctx){
   const url=new URL(request.url);const route=url.pathname.slice(API_PREFIX.length).replace(/^\/+|\/+$/g,'');if(!route)return jsonResponse({ok:false,error:'API route required'},404);
