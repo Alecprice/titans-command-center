@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      WORKER_URL: https://titans-command-center.alecjordanprice.workers.dev
+      WORKER_URL: https://titans.alecjprice.com
       SOURCE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || '' }}
     steps:
       - name: Checkout deployed revision
