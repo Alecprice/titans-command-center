@@ -69,14 +69,17 @@ test('account preferences prefer D1 when the binding exists',()=>{
   assert.match(source,/storage:useD1\?'cloudflare-d1':'neon'/);
 });
 
-test('bootstrap API uses D1 before Neon and retains an expired snapshot for outage fallback',()=>{
+test('bootstrap API uses only fresh D1 then stale D1 then the bundled audited fallback',()=>{
   const worker=fs.readFileSync(new URL('../cloudflare/worker.mjs',import.meta.url),'utf8');
   const dataBlock=worker.match(/async function nativeData\([\s\S]*?\n\}/)?.[0]||'';
   assert.match(dataBlock,/const snapshot=await readD1Bootstrap\(env\)/);
-  assert.match(dataBlock,/data=await getBootstrapData\(env\)/);
-  assert.ok(dataBlock.indexOf('readD1Bootstrap(env)')<dataBlock.indexOf('getBootstrapData(env)'));
-  assert.match(dataBlock,/readD1Bootstrap\(env,\{allowExpired:true/);
-  assert.match(dataBlock,/writeD1Bootstrap\(env,payload,\{source:'neon-bootstrap'\}\)/);
+  assert.match(dataBlock,/readD1Bootstrap\(env,\{allowExpired:true,reason\}/);
+  assert.match(dataBlock,/auditedBootstrapFallback\(reason\)/);
+  assert.match(dataBlock,/getAuditedTeamContext\(null\)/);
+  assert.match(dataBlock,/writeD1Bootstrap\(env,fallback,\{source:'audited-fallback'\}\)/);
+  assert.ok(dataBlock.indexOf('readD1Bootstrap(env)')<dataBlock.indexOf('allowExpired:true'));
+  assert.ok(dataBlock.indexOf('allowExpired:true')<dataBlock.indexOf('auditedBootstrapFallback(reason)'));
+  assert.doesNotMatch(dataBlock,/DATABASE_URL|getBootstrapData|getSql|neon-bootstrap|storage:'neon'/);
 });
 
 test('near-live scoreboard is centrally refreshed every three minutes only after D1 is bound',()=>{
