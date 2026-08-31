@@ -13,6 +13,11 @@ for(const [name,source] of [['responsive',responsive],['readability',readability
     assert.match(source,/if\(selector\)return Boolean\(document\.querySelector\(selector\)\)/);
     assert.match(source,/'stage':current/);
   });
+
+  test(`${name} audit waits for the rendered Fan Hub view instead of its loading shell`,()=>{
+    assert.match(source,/'fan-hub':'#app \.v13-hero ~ #v13-view \.v13-section'/);
+    assert.match(source,/\('fan-hub','fan'\)/);
+  });
 }
 
 test('readability audit alpha-composites translucent ancestor backgrounds before WCAG contrast math',()=>{
