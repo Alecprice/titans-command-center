@@ -8,15 +8,15 @@ test('Cloudflare Worker serves static assets and runs only API paths through com
   const config=read('wrangler.jsonc');
   const boundary=read('cloudflare/production-worker.mjs');
   assert.match(config,/"main"\s*:\s*"cloudflare\/production-worker\.mjs"/);
-  assert.match(config,/"NEON_WAREHOUSE_DISABLED"\s*:\s*"true"/);
+  assert.doesNotMatch(config,/NEON_WAREHOUSE_DISABLED|DATABASE_URL/);
   assert.match(boundary,/import worker from '\.\/worker\.mjs'/);
   assert.match(boundary,/productionDataEnv\(env\)/);
+  assert.match(boundary,/if\(property==='DATABASE_URL'\)return undefined/);
   assert.match(config,/"nodejs_compat"/);
   assert.match(config,/"directory"\s*:\s*"\.\/dist"/);
   assert.match(config,/"not_found_handling"\s*:\s*"single-page-application"/);
   assert.match(config,/"run_worker_first"\s*:\s*\["\/api\/\*"\]/);
   assert.match(config,/"15 10 \* \* \*"/);
-  assert.doesNotMatch(config,/DATABASE_URL/);
   assert.match(config,/"binding"\s*:\s*"TITANS_DB"/);
 });
 

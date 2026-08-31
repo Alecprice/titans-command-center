@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {d1AuthoritativeHealth,neonWarehouseDisabled,productionDataEnv} from '../cloudflare/production-worker.mjs';
+import {d1AuthoritativeHealth,productionDataEnv} from '../cloudflare/production-worker.mjs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
@@ -18,10 +18,9 @@ class FakeD1{
   }
 }
 
-test('production boundary hides DATABASE_URL when Neon warehouse cutover is enabled',()=>{
+test('production boundary always hides DATABASE_URL',()=>{
   const d1={prepare(){}};
-  const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:d1,ASSETS:{fetch(){}},NEON_WAREHOUSE_DISABLED:'true'};
-  assert.equal(neonWarehouseDisabled(env),true);
+  const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:d1,ASSETS:{fetch(){}}};
   const cutover=productionDataEnv(env);
   assert.equal(cutover.DATABASE_URL,undefined);
   assert.equal('DATABASE_URL' in cutover,false);
@@ -30,25 +29,25 @@ test('production boundary hides DATABASE_URL when Neon warehouse cutover is enab
   assert.equal(env.DATABASE_URL,'postgresql://example.invalid/titans');
 });
 
-test('production boundary is already safe when DATABASE_URL is absent',()=>{
+test('production boundary is safe when DATABASE_URL is absent',()=>{
   const d1={prepare(){}};
-  const env={TITANS_DB:d1,ASSETS:{fetch(){}},NEON_WAREHOUSE_DISABLED:'true'};
+  const env={TITANS_DB:d1,ASSETS:{fetch(){}}};
   const cutover=productionDataEnv(env);
   assert.equal(cutover.DATABASE_URL,undefined);
   assert.equal('DATABASE_URL' in cutover,false);
   assert.equal(cutover.TITANS_DB,d1);
 });
 
-test('production boundary preserves warehouse access when rollback flag is disabled',()=>{
+test('legacy rollback flags cannot re-enable warehouse access',()=>{
   const env={DATABASE_URL:'postgresql://example.invalid/titans',NEON_WAREHOUSE_DISABLED:'false'};
-  assert.equal(neonWarehouseDisabled(env),false);
-  assert.equal(productionDataEnv(env),env);
-  assert.equal(productionDataEnv(env).DATABASE_URL,env.DATABASE_URL);
+  const cutover=productionDataEnv(env);
+  assert.equal(cutover.DATABASE_URL,undefined);
+  assert.equal('DATABASE_URL' in cutover,false);
 });
 
-test('D1 health is authoritative when warehouse cutover is enabled and bootstrap snapshot is fresh',async()=>{
+test('D1 health is authoritative with a fresh bootstrap snapshot',async()=>{
   const snapshot={cache_key:'bootstrap:v1',payload:{ok:true,dataQuality:{contentAuditAt:'2026-08-27T00:00:00.000Z'}},source:'audited-fallback',fetched_at:new Date().toISOString(),expires_at:new Date(Date.now()+60_000).toISOString()};
-  const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:new FakeD1(snapshot),NEON_WAREHOUSE_DISABLED:'true'};
+  const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:new FakeD1(snapshot)};
   const response=await d1AuthoritativeHealth(new Request('https://example.test/api/health'),env,{});
   const body=await response.json();
   assert.equal(response.status,200);
@@ -65,7 +64,7 @@ test('D1 health is authoritative when warehouse cutover is enabled and bootstrap
 
 test('D1 health remains authoritative with no warehouse secret at all',async()=>{
   const snapshot={cache_key:'bootstrap:v1',payload:{ok:true},source:'audited-fallback',fetched_at:new Date().toISOString(),expires_at:new Date(Date.now()+60_000).toISOString()};
-  const env={TITANS_DB:new FakeD1(snapshot),NEON_WAREHOUSE_DISABLED:'true'};
+  const env={TITANS_DB:new FakeD1(snapshot)};
   const response=await d1AuthoritativeHealth(new Request('https://example.test/api/health'),env,{});
   const body=await response.json();
   assert.equal(body.status,'healthy');
@@ -75,7 +74,7 @@ test('D1 health remains authoritative with no warehouse secret at all',async()=>
 });
 
 test('D1 health degrades when the primary snapshot is not fresh even if the binding responds',async()=>{
-  const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:new FakeD1(null),NEON_WAREHOUSE_DISABLED:'true'};
+  const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:new FakeD1(null)};
   const response=await d1AuthoritativeHealth(new Request('https://example.test/api/health'),env,{});
   const body=await response.json();
   assert.equal(body.status,'degraded');
@@ -95,12 +94,13 @@ test('Advanced Analytics owns D1 outage behavior without a production-wrapper tr
   assert.match(analytics,/Cache-Control','no-store/);
 });
 
-test('wrangler routes production through D1 without requiring a Neon warehouse secret',()=>{
+test('wrangler makes D1 primary without any Neon warehouse rollback variable or secret requirement',()=>{
   const config=JSON.parse(read('wrangler.jsonc'));
   assert.equal(config.main,'cloudflare/production-worker.mjs');
-  assert.equal(config.vars?.NEON_WAREHOUSE_DISABLED,'true');
+  assert.equal(config.vars,undefined);
   assert.equal(config.secrets,undefined);
   assert.ok(config.d1_databases?.some(entry=>entry.binding==='TITANS_DB'&&entry.database_name==='titans-command-center'));
+  assert.doesNotMatch(read('wrangler.jsonc'),/NEON_WAREHOUSE_DISABLED|DATABASE_URL/);
 });
 
 test('Cloudflare deploy workflow neither reads nor uploads DATABASE_URL',()=>{
