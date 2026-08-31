@@ -1,15 +1,9 @@
 import worker from './worker.mjs';
 import {d1Health,getD1Snapshot} from '../src/d1-store.mjs';
 
-const enabled=value=>/^(1|true|yes|on)$/i.test(String(value??'').trim());
 const BOOTSTRAP_SNAPSHOT_KEY='bootstrap:v1';
 
-export function neonWarehouseDisabled(env={}){
-  return enabled(env?.NEON_WAREHOUSE_DISABLED);
-}
-
 export function productionDataEnv(env={}){
-  if(!neonWarehouseDisabled(env))return env;
   return new Proxy(env,{
     get(target,property,receiver){
       if(property==='DATABASE_URL')return undefined;
@@ -35,7 +29,7 @@ function contentAuditFromSnapshot(row){
 export async function d1AuthoritativeHealth(request,env,ctx){
   const sanitized=productionDataEnv(env);
   const baseline=await worker.fetch(request,sanitized,ctx);
-  if(!neonWarehouseDisabled(env)||new URL(request.url).pathname!=='/api/health'||request.method!=='GET')return baseline;
+  if(new URL(request.url).pathname!=='/api/health'||request.method!=='GET')return baseline;
 
   let body={};
   try{body=await baseline.clone().json();}catch{}
@@ -69,7 +63,7 @@ export async function d1AuthoritativeHealth(request,env,ctx){
 export default {
   fetch(request,env,ctx){
     const pathname=new URL(request.url).pathname;
-    if(neonWarehouseDisabled(env)&&pathname==='/api/health')return d1AuthoritativeHealth(request,env,ctx);
+    if(pathname==='/api/health')return d1AuthoritativeHealth(request,env,ctx);
     return worker.fetch(request,productionDataEnv(env),ctx);
   },
   scheduled(controller,env,ctx){
