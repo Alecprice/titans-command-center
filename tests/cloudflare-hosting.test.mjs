@@ -41,7 +41,7 @@ test('Cloudflare adapter uses D1-native core API routes and trusted scheduler',(
   assert.doesNotMatch(worker,/CRON_SECRET\|\|env\.INGEST_SECRET/);
 });
 
-test('Cloudflare passes bindings explicitly through legacy gateway routes without mutating process.env',()=>{
+test('Cloudflare passes bindings through a warehouse-free legacy gateway without mutating process.env',()=>{
   const worker=read('cloudflare/worker.mjs');
   const gateway=read('api/index.js');
   assert.match(worker,/apiHandler\(req,res\.api,env\)/);
@@ -52,6 +52,8 @@ test('Cloudflare passes bindings explicitly through legacy gateway routes withou
   assert.match(gateway,/return await run\(req,res,env\)/);
   assert.match(gateway,/requireAdminAuth\(req,env\)/);
   assert.match(gateway,/requireIngestAuth\(req,env\)/);
+  assert.doesNotMatch(gateway,/from ['"]\.\.\/src\/db\.mjs['"]|databaseHealth\(|getBootstrapData\(|getAnalyticsExplorer\(|getPlayerProfile\(|getSql\(/);
+  assert.match(gateway,/WAREHOUSE_ROUTE_RETIRED/);
 });
 
 test('browser-facing responses enforce a restrictive security header baseline',()=>{
