@@ -28,8 +28,18 @@ The Worker requires the checked-in `TITANS_DB` D1 binding. Feature-specific medi
 
 Neon Auth remains temporarily behind the narrow same-origin account auth proxy. This is not a database requirement: account preferences use D1 and an auth outage must not restore or require Postgres.
 
-## Legacy hosts
+## Retired Vercel surface
 
-Old Vercel configuration may remain in the repository for historical compatibility/reference, but it is not the production release authority. Cloudflare deployment status and exact-SHA browser gates decide whether a release is healthy.
+Vercel production deployment has been retired and `vercel.json` is intentionally absent. Do not restore Vercel rewrites, headers, cron ownership, or a parallel Vercel release path.
+
+`api/index.js` still exists only as a compatibility gateway module imported by the Cloudflare Worker for a small set of routes that have not yet been moved to dedicated Worker-native handlers. Its presence does **not** make Vercel a deployment target or authority.
+
+Public API URLs remain stable because Cloudflare owns `/api/*` routing directly.
+
+## Optional AWS custom-domain front door
+
+The Route 53 + CloudFront setup documented in `docs/AWS_CUSTOM_DOMAIN.md` is an optional custom-domain front door only. It proxies HTTPS to the existing Worker origin and must not become a second application runtime, database authority, or secret store.
+
+Cloudflare Worker + Static Assets remains the app host, Cloudflare D1 remains the production data authority, and Neon Auth remains the isolated temporary auth service.
 
 See `docs/CLOUDFLARE_DEPLOY.md` for the operational runbook and `docs/CLOUDFLARE_D1_MIGRATION.md` for the completed data-cutover record.

@@ -24,6 +24,7 @@ test('pay-as-you-go AWS custom domain template is fail-closed and keeps safe ori
   assert.match(template,/Header: X-Robots-Tag/);
   assert.match(template,/ViewerProtocolPolicy: redirect-to-https/);
   assert.match(template,/MinimumProtocolVersion: TLSv1\.2_2021/);
+  assert.doesNotMatch(template,/DATABASE_URL|postgres:\/\/|Neon/i);
   assert.doesNotMatch(template,/AKIA[0-9A-Z]{16}/);
 });
 
@@ -39,7 +40,7 @@ test('metered deployment helper refuses normal execution and requires explicit c
   assert.match(script,/cloudformation deploy/);
   assert.match(script,/PRODUCTION_URL="https:\/\/\$\{DOMAIN\}" node scripts\/production-regression\.mjs/);
   assert.match(script,/x-robots-tag:.*noindex/i);
-  assert.doesNotMatch(script,/aws_secret_access_key/i);
+  assert.doesNotMatch(script,/DATABASE_URL|postgres:\/\/|aws_secret_access_key/i);
 });
 
 test('AWS free-plan preflight is read-only and checks account, DNS, CloudFront and ACM state',()=>{
@@ -60,4 +61,27 @@ test('AWS free-plan preflight is read-only and checks account, DNS, CloudFront a
   assert.doesNotMatch(script,/request-certificate/);
   assert.doesNotMatch(script,/create-distribution/);
   assert.doesNotMatch(script,/aws_secret_access_key/i);
+});
+
+test('deployment runbooks keep AWS as a front door and D1 as production data authority',()=>{
+  const awsDocs=read('docs/AWS_CUSTOM_DOMAIN.md');
+  const deployment=read('docs/DEPLOYMENT.md');
+  const freeTier=read('docs/FREE_TIER_DEPLOYMENT.md');
+
+  assert.match(awsDocs,/AWS is an \*\*optional HTTPS\/DNS front door only\*\*/);
+  assert.match(awsDocs,/Cloudflare D1 `TITANS_DB` -> production persistence and materialized API snapshots/);
+  assert.match(awsDocs,/Neon Auth -> temporary, isolated authentication HTTP service only/);
+  assert.match(awsDocs,/cloudflare-d1/);
+  assert.match(awsDocs,/Do not add `DATABASE_URL`, Postgres credentials, D1 credentials, or auth-provider credentials to CloudFront/);
+  assert.doesNotMatch(awsDocs,/Cloudflare Worker -> Neon/);
+  assert.doesNotMatch(awsDocs,/Neon database remain/i);
+  assert.doesNotMatch(awsDocs,/healthy application with Neon configured and healthy/i);
+
+  assert.match(deployment,/Vercel production deployment has been retired and `vercel\.json` is intentionally absent/);
+  assert.match(deployment,/`api\/index\.js` still exists only as a compatibility gateway module imported by the Cloudflare Worker/);
+  assert.doesNotMatch(deployment,/Vercel configuration may remain/i);
+
+  assert.match(freeTier,/`vercel\.json` is intentionally absent now/);
+  assert.match(freeTier,/Cloudflare Worker still imports it as a compatibility module/);
+  assert.doesNotMatch(freeTier,/remaining `vercel\.json`/i);
 });
