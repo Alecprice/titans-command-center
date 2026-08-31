@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import {extractFinalTitansScores} from '../src/ingest.mjs';
 
 const source=fs.readFileSync(new URL('../src/ingest.mjs',import.meta.url),'utf8');
+const d1Source=fs.readFileSync(new URL('../src/d1-ingest-store.mjs',import.meta.url),'utf8');
 const dataSource=fs.readFileSync(new URL('../src/data.mjs',import.meta.url),'utf8');
 
 const competitor=(abbr,homeAway,score)=>({homeAway,score:String(score),team:{abbreviation:abbr,displayName:abbr==='TEN'?'Tennessee Titans':abbr}});
@@ -17,15 +18,17 @@ test('ESPN final parser keeps only completed Titans games with valid scores',()=
   assert.deepEqual(parsed,[{eventId:'done',kickoff:'2026-08-24T00:00:00.000Z',homeAbbr:'TEN',awayAbbr:'SEA',homeScore:19,awayScore:16}]);
 });
 
-test('final-score reconciliation is bounded, unambiguous, and conflict-safe',()=>{
-  assert.match(source,/finals\.slice\(0,3\)/);
-  assert.match(source,/g\.kickoff between \$\{start\} and \$\{end\}/);
-  assert.match(source,/ht\.abbreviation=\$\{final\.homeAbbr\}/);
-  assert.match(source,/at\.abbreviation=\$\{final\.awayAbbr\}/);
-  assert.match(source,/if\(rows\.length!==1\)/);
-  assert.match(source,/final-conflict/);
-  assert.match(source,/lower\(status\) not in \('final','postponed','cancelled','canceled'\)/);
-  assert.match(source,/official_audit_required:true/);
+test('final-score reconciliation is D1-only, bounded, unambiguous, and conflict-safe',()=>{
+  assert.doesNotMatch(source,/getSql\(|from '\.\/db\.mjs'/);
+  assert.match(source,/reconcileD1FinalTitansScores\(env,finals\)/);
+  assert.match(source,/d1-unavailable/);
+  assert.match(d1Source,/finals\.slice\(0,3\)/);
+  assert.match(d1Source,/Math\.abs\(gameKickoff-kickoff\)<=6\*60\*60\*1000/);
+  assert.match(d1Source,/pair\.home===final\.homeAbbr&&pair\.away===final\.awayAbbr/);
+  assert.match(d1Source,/if\(matches\.length!==1\)/);
+  assert.match(d1Source,/final-conflict/);
+  assert.match(d1Source,/game\.scoreSource='ESPN scoreboard \(secondary\)'/);
+  assert.match(d1Source,/game\.officialAuditRequired=true/);
   assert.match(source,/TennesseeTitans\.com remains the audit authority/);
 });
 
