@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const regression=fs.readFileSync(new URL('../scripts/advanced-analytics-regression.mjs',import.meta.url),'utf8');
 const browser=fs.readFileSync(new URL('../scripts/analytics-browser-smoke.py',import.meta.url),'utf8');
 const api=fs.readFileSync(new URL('../src/advanced-analytics-api.mjs',import.meta.url),'utf8');
+const production=fs.readFileSync(new URL('../cloudflare/production-worker.mjs',import.meta.url),'utf8');
 
 test('advanced analytics production audit treats a verified D1 snapshot as authoritative even when legacy health is degraded',()=>{
   assert.match(regression,/healthStatus==='healthy'\|\|healthStatus==='degraded'/);
@@ -29,12 +30,25 @@ test('advanced analytics outage remains explicit quiet non-cacheable and does no
   assert.doesNotMatch(regression,/if\(response\.status===500\)process\.exit\(0\)/);
 });
 
-test('analytics API turns database query failure into non-cacheable unavailable data without fake metrics',()=>{
+test('analytics API is D1-only and owns its stale plus unavailable behavior directly',()=>{
+  assert.match(api,/readApiSnapshot\(env,snapshotKey\)/);
+  assert.match(api,/allowExpired:true/);
+  assert.match(api,/Fresh analytics snapshot unavailable; serving last D1 snapshot\./);
+  assert.match(api,/hasD1\(env\)/);
   assert.match(api,/res\.setHeader\('Cache-Control','no-store'\)/);
   assert.match(api,/res\.status\(200\)\.json\(\{/);
-  assert.match(api,/ok:false,available:false,status:'database-unavailable',configured:true/);
-  assert.match(api,/summary:null,weeks:\[\],league:\[\],recentPlays:\[\],byDown:\[\],personnel:\[\]/);
+  assert.match(api,/ok:false/);
+  assert.match(api,/available:false/);
+  assert.match(api,/status:'database-unavailable'/);
+  assert.match(api,/summary:null/);
+  assert.match(api,/weeks:\[\]/);
+  assert.match(api,/league:\[\]/);
+  assert.match(api,/recentPlays:\[\]/);
+  assert.match(api,/byDown:\[\]/);
+  assert.match(api,/personnel:\[\]/);
   assert.match(api,/error:'Advanced analytics query failed'/);
+  assert.doesNotMatch(api,/getSql|DATABASE_URL|writeApiSnapshot|team_week_metrics|\bfrom plays\b|neon-advanced-analytics/i);
+  assert.doesNotMatch(production,/d1WarehouseFallback|Database not configured/);
 });
 
 test('browser smoke follows actual analytics availability instead of global legacy health',()=>{

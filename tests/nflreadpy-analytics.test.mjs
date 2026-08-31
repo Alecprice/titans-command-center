@@ -70,19 +70,17 @@ test('analytics snapshot builder preserves season fallback and situation metrics
   assert.match(py,/away_rest/);
 });
 
-test('advanced analytics API still exposes EPA pace rest and play situations safely',()=>{
+test('advanced analytics API serves the materialized D1 contract instead of recomputing metrics',()=>{
   const api=read('src/advanced-analytics-api.mjs');
-  assert.match(api,/offensiveEpaPerPlay/);
-  assert.match(api,/defensiveEpaPerPlayAllowed/);
-  assert.match(api,/paceSecondsPerPlay/);
-  assert.match(api,/latestRestDays/);
-  assert.match(api,/scoreDifferential/);
-  assert.match(api,/gameSecondsRemaining/);
-  assert.match(api,/offensePersonnel/);
-  assert.match(api,/defensePersonnel/);
-  assert.match(api,/offenseFormation/);
-  assert.match(api,/seasonFallback/);
+  const py=read('scripts/ingest_nflreadpy.py');
+  for(const token of [
+    'offensiveEpaPerPlay','defensiveEpaPerPlayAllowed','paceSecondsPerPlay','latestRestDays',
+    'scoreDifferential','gameSecondsRemaining','offensePersonnel','defensePersonnel','offenseFormation','seasonFallback'
+  ])assert.match(py,new RegExp(token));
   assert.match(api,/readApiSnapshot\(env,snapshotKey\)/);
+  assert.match(api,/allowExpired:true/);
+  assert.match(api,/sources:sources\(\)/);
+  assert.doesNotMatch(api,/getSql|DATABASE_URL|team_week_metrics|\bfrom plays\b|writeApiSnapshot/i);
 });
 
 test('Stats Lab advanced analytics UI keeps the requested situation explorer and route guards',()=>{
