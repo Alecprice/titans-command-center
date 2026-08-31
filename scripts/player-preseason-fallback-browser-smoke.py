@@ -8,7 +8,7 @@ from urllib.parse import parse_qs
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
-BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
+BASE=os.environ.get('WORKER_URL','https://titans.alecjprice.com').rstrip('/')
 REPORT=Path('/tmp/player-preseason-fallback-browser-smoke.json')
 
 
@@ -26,28 +26,43 @@ def no_overflow(driver,label):
         raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
 
-def player_id_from_href(href):
+def player_query_value(href,key):
     raw=str(href or '')
     query=raw.split('?',1)[1] if '?' in raw else ''
-    return parse_qs(query).get('id',[''])[0]
+    return parse_qs(query).get(key,[''])[0]
 
 
-def fetch_player_context(driver,player_id):
+def player_id_from_href(href):
+    return player_query_value(href,'id')
+
+
+def player_name_from_href(href):
+    return player_query_value(href,'name')
+
+
+def valid_player_route(href):
+    raw=str(href or '')
+    return '#player?id=' in raw or '#player?name=' in raw
+
+
+def fetch_player_context(driver,player_id,player_name):
     return driver.execute_async_script("""
-      const id=arguments[0],done=arguments[arguments.length-1];
-      Promise.all([
-        fetch(`/api/player?id=${encodeURIComponent(id)}`,{cache:'no-store'}).then(async r=>({status:r.status,body:await r.json().catch(()=>null)})),
-        fetch('/api/preseason-stats',{cache:'no-store'}).then(async r=>({status:r.status,body:await r.json().catch(()=>null)}))
-      ]).then(([profile,preseason])=>{
+      const id=arguments[0],routeName=arguments[1],done=arguments[arguments.length-1];
+      const profilePromise=id
+        ? fetch(`/api/player?id=${encodeURIComponent(id)}`,{cache:'no-store'}).then(async r=>({status:r.status,body:await r.json().catch(()=>null)}))
+        : Promise.resolve({status:0,body:null});
+      const preseasonPromise=fetch('/api/preseason-stats',{cache:'no-store'}).then(async r=>({status:r.status,body:await r.json().catch(()=>null)}));
+      Promise.all([profilePromise,preseasonPromise]).then(([profile,preseason])=>{
         const slug=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
         const player=profile.body?.player||{};
+        const resolvedName=player.name||routeName||'';
         const candidates=[...(Array.isArray(preseason.body?.players)?preseason.body.players:[]),...(Array.isArray(preseason.body?.otherParticipants)?preseason.body.otherParticipants:[])];
-        const matched=candidates.find(item=>String(item?.id||'')&&String(item.id)===String(player.id||''))||candidates.find(item=>slug(item?.name)===slug(player.name));
+        const matched=(id?candidates.find(item=>String(item?.id||'')&&String(item.id)===String(player.id||'')):null)||candidates.find(item=>slug(item?.name)===slug(resolvedName));
         done({
           profileStatus:profile.status,
           profileOk:Boolean(profile.body?.ok),
-          playerName:player.name||'',
-          warehouseRows:Array.isArray(profile.body?.stats)?profile.body.stats.length:-1,
+          playerName:resolvedName,
+          warehouseRows:id?(Array.isArray(profile.body?.stats)?profile.body.stats.length:0):0,
           preseasonStatus:preseason.status,
           preseasonOk:Boolean(preseason.body?.ok),
           preseasonRows:Array.isArray(matched?.stats)?matched.stats.length:0,
@@ -57,7 +72,7 @@ def fetch_player_context(driver,player_id):
           completedGamesMissingPlayerStats:Number(preseason.body?.coverage?.completedGamesMissingPlayerStats||0)
         });
       }).catch(error=>done({error:String(error)}));
-    """,player_id)
+    """,player_id,player_name)
 
 
 options=webdriver.ChromeOptions()
@@ -80,29 +95,42 @@ try:
     stage='resolve-cam-ward'
     driver.get(f'{BASE}/#roster')
     wait_for(driver,"document.querySelectorAll('.player-card').length > 20")
-    wait_for(driver,"document.querySelector('.player-card[href*=\"#player?id=\"]')",timeout=18)
+    # The production roster can hydrate from D1 UUID rows or from the explicit
+    # audited roster fallback. Both are supported Player Intelligence routes.
+    wait_for(driver,"document.querySelector('.player-card[href*=\"#player?id=\"],.player-card[href*=\"#player?name=\"]')",timeout=18)
     player_href=driver.execute_script("""
-      const cards=[...document.querySelectorAll('.player-card[href*="#player?id="]')];
+      const cards=[...document.querySelectorAll('.player-card[href*="#player?id="],.player-card[href*="#player?name="]')];
       return cards.find(x=>x.querySelector('h3')?.textContent?.trim()==='Cam Ward')?.getAttribute('href')||'';
     """)
-    if not player_href or '#player?id=' not in player_href:
-        raise RuntimeError(f'Could not resolve hydrated Cam Ward route: {player_href}')
+    if not player_href or not valid_player_route(player_href):
+        raise RuntimeError(f'Could not resolve routable Cam Ward route: {player_href}')
     player_id=player_id_from_href(player_href)
-    if len(player_id)!=36:
-        raise RuntimeError(f'Cam Ward route did not contain a UUID: {player_href}')
+    player_name=player_name_from_href(player_href)
+    if player_id:
+        if len(player_id)!=36:
+            raise RuntimeError(f'Cam Ward database route did not contain a UUID: {player_href}')
+        player_route_mode='database-uuid'
+    elif player_name:
+        if player_name!='Cam Ward':
+            raise RuntimeError(f'Audited-name route did not resolve Cam Ward: {player_href}')
+        player_route_mode='audited-name'
+    else:
+        raise RuntimeError(f'Cam Ward route had no supported player key: {player_href}')
 
     stage='read-live-api-context'
-    api_context=fetch_player_context(driver,player_id)
+    api_context=fetch_player_context(driver,player_id,player_name or 'Cam Ward')
     if api_context.get('error'):
         raise RuntimeError(f'Could not read player/preseason APIs: {api_context}')
-    if not api_context.get('profileOk') or api_context.get('profileStatus')!=200:
-        raise RuntimeError(f'Cam Ward player API unavailable: {api_context}')
+    if player_id and (not api_context.get('profileOk') or api_context.get('profileStatus')!=200):
+        raise RuntimeError(f'Cam Ward player API unavailable for UUID route: {api_context}')
+    if api_context.get('playerName')!='Cam Ward':
+        raise RuntimeError(f'Player/preseason context did not resolve Cam Ward: {api_context}')
     if not api_context.get('preseasonOk') or api_context.get('preseasonStatus')!=200 or api_context.get('preseasonRows',0)<1:
         raise RuntimeError(f'Official preseason rows unavailable for Cam Ward: {api_context}')
     if api_context.get('completedGames',0)<2 or api_context.get('completedGamesWithPlayerStats',0)<2 or api_context.get('completedGamesMissingPlayerStats',1)!=0:
         raise RuntimeError(f'Preseason coverage regressed before Player Intelligence fallback check: {api_context}')
 
-    fallback_required=api_context.get('warehouseRows',-1)==0
+    fallback_required=player_route_mode=='audited-name' or api_context.get('warehouseRows',0)==0
 
     stage='render-player'
     driver.get(f'{BASE}/{player_href}')
@@ -169,6 +197,7 @@ try:
       'base':BASE,
       'player':'Cam Ward',
       'playerRoute':player_href,
+      'playerRouteMode':player_route_mode,
       'fallbackRequired':fallback_required,
       'apiContext':api_context,
       'rendered':{
