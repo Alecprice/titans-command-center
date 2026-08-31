@@ -15,7 +15,7 @@ function sameOriginPost(path,body={}){
   });
 }
 
-test('Fan Intel degrades to an explicit empty 200 state when Neon is unavailable',async()=>{
+test('Fan Intel degrades to an explicit empty 200 state when no D1 snapshot is available',async()=>{
   const response=await worker.fetch(new Request(`${BASE}/api/fan-intel`),{},ctx);
   assert.equal(response.status,200);
   assert.equal(response.headers.get('cache-control'),'no-store');
