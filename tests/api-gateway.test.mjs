@@ -54,19 +54,26 @@ test('Vercel rewrites preserve the public API contract',()=>{
   }
 });
 
-test('health endpoint treats optional warehouse loss as degraded, not app-down',async()=>{
-  const previous=process.env.DATABASE_URL;delete process.env.DATABASE_URL;
-  try{const result=await run('GET',{route:'health'});assert.equal(result.status,200);assert.equal(result.body?.ok,true);assert.equal(result.body?.status,'degraded');assert.equal(result.body?.fallbacks?.auditedRoster,true);}finally{if(previous)process.env.DATABASE_URL=previous;}
+test('legacy warehouse gateway routes are explicit retired states and never database fallbacks',async()=>{
+  for(const route of ['health','data','analytics','player']){
+    const result=await run('GET',{route},{},{DATABASE_URL:'postgres://must-never-be-read.invalid/db'});
+    assert.equal(result.status,503,`${route} should be retired in the legacy gateway`);
+    assert.equal(result.headers['Cache-Control'],'no-store');
+    assert.equal(result.body?.ok,false);
+    assert.equal(result.body?.code,'WAREHOUSE_ROUTE_RETIRED');
+    assert.equal(result.body?.route,route);
+    assert.match(result.body?.error||'',/Cloudflare D1 Worker/i);
+  }
 });
 
-test('explicit runtime env overrides process.env for Cloudflare compatibility',async()=>{
-  const previous=process.env.DATABASE_URL;process.env.DATABASE_URL='postgres://must-not-be-read.invalid/db';
-  try{
-    const result=await run('GET',{route:'health'},{},{});
-    assert.equal(result.status,200);
-    assert.equal(result.body?.status,'degraded');
-    assert.equal(result.body?.database?.configured,false);
-  }finally{if(previous===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=previous;}
+test('legacy gateway has no Neon warehouse adapter import or query helpers',()=>{
+  const source=fs.readFileSync(new URL('../api/index.js',import.meta.url),'utf8');
+  assert.doesNotMatch(source,/from ['"]\.\.\/src\/db\.mjs['"]/);
+  assert.doesNotMatch(source,/databaseHealth\(|getBootstrapData\(|getAnalyticsExplorer\(|getPlayerProfile\(|getSql\(/);
+  assert.match(source,/\['health',retiredWarehouseRoute\]/);
+  assert.match(source,/\['data',retiredWarehouseRoute\]/);
+  assert.match(source,/\['analytics',retiredWarehouseRoute\]/);
+  assert.match(source,/\['player',retiredWarehouseRoute\]/);
 });
 
 test('Bluesky limit parsing is finite integer bounded with a safe fallback',()=>{
