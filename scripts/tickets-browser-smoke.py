@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 REPORT=Path('/tmp/tickets-browser-smoke.json')
-SAFE_HOSTS={'seatgeek.com','www.seatgeek.com','ticketmaster.com','www.ticketmaster.com','tennesseetitans.com','www.tennesseetitans.com'}
+SAFE_ROOTS=('seatgeek.com','ticketmaster.com','stubhub.com','tennesseetitans.com')
 
 
 def driver_for(width=1280,height=900):
@@ -143,9 +143,14 @@ def summary(driver):
     """)
 
 
+def host_allowed(host,root):
+    return host==root or host.endswith(f'.{root}')
+
+
 def safe_ticket_url(value):
     parsed=urlparse(value)
-    return parsed.scheme=='https' and parsed.hostname in SAFE_HOSTS
+    host=(parsed.hostname or '').lower()
+    return parsed.scheme=='https' and any(host_allowed(host,root) for root in SAFE_ROOTS)
 
 
 def assert_base_state(state,label,expected_fallback):
@@ -157,6 +162,8 @@ def assert_base_state(state,label,expected_fallback):
         if not state['comparison']:raise RuntimeError(f'{label}: comparison mode has no game cards: {state}')
         urls=[url for card in state['comparison'] for url in card['offers']]
         if not urls or any(not safe_ticket_url(url) for url in urls):raise RuntimeError(f'{label}: comparison contains unsafe or missing checkout URL: {urls[:8]}')
+        ancillary=[card['text'] for card in state['comparison'] if any(term in card['text'].lower() for term in ('official hotel package','travel package','parking'))]
+        if ancillary:raise RuntimeError(f'{label}: ancillary Ticketmaster products entered game comparison: {ancillary[:4]}')
     else:
         if not state['offline']:raise RuntimeError(f'{label}: fallback mode lacks explicit price-feed state: {state}')
         if expected_fallback and not state['fallback']:raise RuntimeError(f'{label}: fallback schedule did not hydrate: {state}')
