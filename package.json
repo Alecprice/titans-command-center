@@ -7,7 +7,7 @@
     "dev":"node server.mjs",
     "test":"node --test tests/*.test.mjs",
     "audit:content":"node scripts/content-audit.mjs",
-    "audit:production":"node scripts/production-regression.mjs",
+    "audit:production":"node scripts/production-regression.mjs && node scripts/regular-season-production-regression.mjs",
     "postaudit:production":"node scripts/health-content-audit-production-regression.mjs && node scripts/market-cache-production-regression.mjs",
     "secret-scan":"node scripts/check-secrets.mjs",
     "syntax-check":"node scripts/check-syntax.mjs",
