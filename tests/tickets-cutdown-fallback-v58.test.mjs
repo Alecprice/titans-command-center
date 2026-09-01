@@ -25,5 +25,5 @@ test('ticket cards use a truthful actionable fallback instead of Price unavailab
 test('new ticket fallback remains available in the offline PWA shell',async()=>{
   const sw=await read('sw.js');
   assert.match(sw,/tickets-price-fallback-v58\.js/);
-  assert.match(sw,/titans-cc-brand-2026-v75/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
 });

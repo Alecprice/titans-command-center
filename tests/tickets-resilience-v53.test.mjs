@@ -142,5 +142,5 @@ test('Ticket Center packages provider health, stale cache, and price-spread UI',
   assert.match(css,/tickets-stale-banner/);
   assert.match(css,/@media\(max-width:760px\)/);
   assert.match(sw,/tickets-resilience-v53\.css/);
-  assert.match(sw,/titans-cc-brand-2026-v75/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
 });

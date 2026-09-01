@@ -35,7 +35,8 @@ The project follows a **content-integrity first** model. Current facts are check
 
 The repository keeps dated source assertions rather than silently presenting old snapshots as live facts.
 
-- The current fallback roster is the Aug. 27 official audit and contains 95 players.
+- The current fallback roster is the **Aug. 31 post-cutdown official audit**: 53 Active players plus 8 separately labeled Reserve/Injured or Reserve/Injured–Designated for Return players. Practice-squad players are not folded into the 53-man roster count.
+- The 2026 preseason is complete at **2–1** after the Aug. 29 24–15 loss to Chicago; the next scheduled game is Week 1 vs. the New York Jets on Sept. 13.
 - Week 9 is the 2026 bye; Week 18 at Houston remains **TBD** in the audited schedule baseline and the official venue name used by the project is **Reliant Stadium**.
 - Team Room includes dated official roster/depth information with ties and uncertainty preserved rather than inferred.
 - Stats Lab separates verified prior-season baselines from not-yet-complete 2026 regular-season totals and exposes known source conflicts instead of filling gaps with guesses.

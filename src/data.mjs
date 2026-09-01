@@ -1,17 +1,17 @@
-import { auditedRoster20260827, ROSTER_SOURCE_CONFLICT } from './roster-audit-20260827.mjs';
+import { auditedRoster20260831, ROSTER_SOURCE_CONFLICT } from './roster-audit-20260831.mjs';
 
 export const team = {
   name:'Tennessee Titans',shortName:'Titans',abbreviation:'TEN',city:'Nashville',conference:'AFC',division:'AFC South',
   owner:'Amy Adams Strunk',generalManager:'Mike Borgonzi',president:'Burke Nihill',coach:'Robert Saleh',coachOfficialHireDate:'2026-01-22',
-  season:2026,phase:'Preseason',stadium:'Nissan Stadium',franchiseGranted:'1959-08-14',firstSeason:1960,firstSeasonInTennessee:1997,firstSeasonAsTitans:1999,byeWeek:9,
+  season:2026,phase:'Regular Season',stadium:'Nissan Stadium',franchiseGranted:'1959-08-14',firstSeason:1960,firstSeasonInTennessee:1997,firstSeasonAsTitans:1999,byeWeek:9,
   colors:['Titans blue','red','white','navy blue'],primaryLogo:'The Shield',
-  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:95,officialActivePlayersAtAudit:91,officialReservePlayersAtAudit:4,asOf:'2026-08-27',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-27T12:00:00Z'
+  rosterCoverage:{fallbackType:'cross-source-audited-snapshot',fallbackPlayers:61,officialActivePlayersAtAudit:53,officialReservePlayersAtAudit:8,asOf:'2026-08-31',sourceConflict:ROSTER_SOURCE_CONFLICT},auditedAt:'2026-08-31T19:45:00Z'
 };
 
 export const games = [
   {id:'pre1',week:'P1',date:'2026-08-14T01:00:00Z',opponent:'San Francisco 49ers',opponentAbbr:'SF',homeAway:'away',status:'final',score:19,opponentScore:13,venue:"Levi's Stadium",network:'WKRN-TV News 2',source:'Tennessee Titans'},
   {id:'pre2',week:'P2',date:'2026-08-24T00:00:00Z',opponent:'Seattle Seahawks',opponentAbbr:'SEA',homeAway:'home',status:'final',score:19,opponentScore:16,venue:'Nissan Stadium',network:'FOX',source:'Tennessee Titans'},
-  {id:'pre3',week:'P3',date:'2026-08-29T22:00:00Z',opponent:'Chicago Bears',opponentAbbr:'CHI',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'NFL Network / WKRN-TV News 2 (regional)',source:'Tennessee Titans'},
+  {id:'pre3',week:'P3',date:'2026-08-29T22:00:00Z',opponent:'Chicago Bears',opponentAbbr:'CHI',homeAway:'home',status:'final',score:15,opponentScore:24,venue:'Nissan Stadium',network:'NFL Network / WKRN-TV News 2 (regional)',source:'Tennessee Titans'},
   {id:'wk1',week:1,date:'2026-09-13T17:00:00Z',opponent:'New York Jets',opponentAbbr:'NYJ',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'CBS',source:'Tennessee Titans'},
   {id:'wk2',week:2,date:'2026-09-20T17:00:00Z',opponent:'Philadelphia Eagles',opponentAbbr:'PHI',homeAway:'home',status:'scheduled',venue:'Nissan Stadium',network:'FOX',source:'Tennessee Titans'},
   {id:'wk3',week:3,date:'2026-09-27T17:00:00Z',opponent:'New York Giants',opponentAbbr:'NYG',homeAway:'away',status:'scheduled',venue:'MetLife Stadium',network:'CBS',source:'Tennessee Titans'},
@@ -32,12 +32,16 @@ export const games = [
   {id:'wk18',week:18,date:null,opponent:'Houston Texans',opponentAbbr:'HOU',homeAway:'away',status:'scheduled',venue:'Reliant Stadium',network:'TBD',source:'Tennessee Titans / NFL',dateTbd:true}
 ];
 
-export const roster = auditedRoster20260827.map(player=>({...player}));
+export const roster = auditedRoster20260831.map(player=>({...player}));
 
 export const feed = [
-  {id:'n11',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign LB Dyontae Johnson, waive/injured LB Dominique Hampton',summary:'Tennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.',publishedAt:'2026-08-25T15:26:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-lb-dyontae-johnson-waive-injured-lb-dominique-hamptonroster-move'},
-  {id:'n10',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign LB Reid Carrico, place LB Milo Eifler on injured reserve',summary:'The Titans announced the move Aug. 24. This newer official transaction controls over any roster page that has not yet reflected the same-day move.',publishedAt:'2026-08-24T19:19:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-lb-reid-carrico-place-lb-milo-eifler-on-injured-reserve'},
-  {id:'n9',type:'news',tier:'official',source:'Tennessee Titans',title:'Roster jobs remain open entering Bears week',summary:'Robert Saleh said a number of jobs remain open ahead of the Aug. 29 preseason finale and the roster reduction to 53.',publishedAt:'2026-08-24T13:55:00Z',topics:['coach','roster','preseason'],url:'https://www.tennesseetitans.com/news/hot-topics-from-titans-hc-robert-saleh-s-zoom-call-on-monday'},
+  {id:'n15',type:'transaction',tier:'official',source:'Tennessee Titans',title:"Titans sign 16 players to the practice squad",summary:'Tennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.',publishedAt:'2026-08-31T19:57:00Z',topics:['transactions','roster','practice-squad'],url:'https://www.tennesseetitans.com/news/titans-sign-16-players-to-the-team-s-practice-squad'},
+  {id:'n14',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Updated 53-man roster: Titans add five, part ways with five',summary:'Tennessee added LB Owen Pappoe, DB Melvin Smith Jr., DT Nazir Stackhouse, S Terrell Burgess and T James Hudson III on Aug. 31, while five players from the initial 53 were removed.',publishedAt:'2026-08-31T18:46:00Z',topics:['transactions','roster','cutdown'],url:'https://www.tennesseetitans.com/news/titans-add-five-players-part-ways-with-five-others'},
+  {id:'n13',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans trim roster to 53 players',summary:'Tennessee completed the Aug. 30 cutdown, including the departures of Will Levis, Hendon Hooker, Cordell Volson and Kalel Mullings from the Active roster and reserve-list designations for Dorian Mausi and Joshua Williams.',publishedAt:'2026-08-30T21:41:00Z',topics:['transactions','roster','cutdown'],url:'https://www.tennesseetitans.com/news/titans-trim-roster-to-53-players'},
+  {id:'n12',type:'game',tier:'official',source:'Tennessee Titans',title:'Preseason Week 3: Bears 24, Titans 15',summary:'Tennessee lost the preseason finale 24-15 at Nissan Stadium and finished the 2026 preseason 2-1.',publishedAt:'2026-08-29T23:59:00Z',topics:['games','preseason','bears'],url:'https://www.tennesseetitans.com/news/titans-end-preseason-with-24-15-loss-to-the-bears'},
+  {id:'n11',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign LB Dyontae Johnson, waive/injured LB Dominique Hampton',summary:'Tennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. This item is retained as dated transaction history; the Aug. 31 audited roster controls current fallback status.',publishedAt:'2026-08-25T15:26:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-lb-dyontae-johnson-waive-injured-lb-dominique-hamptonroster-move'},
+  {id:'n10',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign LB Reid Carrico, place LB Milo Eifler on injured reserve',summary:'The Titans announced the move Aug. 24. This item is retained as dated transaction history; the Aug. 31 audited roster controls current fallback status.',publishedAt:'2026-08-24T19:19:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/news/titans-sign-lb-reid-carrico-place-lb-milo-eifler-on-injured-reserve'},
+  {id:'n9',type:'news',tier:'official',source:'Tennessee Titans',title:'Roster jobs remained open entering Bears week',summary:'Robert Saleh said a number of jobs remained open ahead of the Aug. 29 preseason finale and the roster reduction to 53. This is retained as dated preseason context.',publishedAt:'2026-08-24T13:55:00Z',topics:['coach','roster','preseason'],url:'https://www.tennesseetitans.com/news/hot-topics-from-titans-hc-robert-saleh-s-zoom-call-on-monday'},
   {id:'n8',type:'game',tier:'official',source:'Tennessee Titans',title:'Preseason Week 2: Titans 19, Seahawks 16',summary:'Tennessee erased a 16-3 first-quarter deficit, scored the final 16 points and improved to 2-0 in preseason.',publishedAt:'2026-08-24T02:05:00Z',topics:['games','preseason','seahawks'],url:'https://www.tennesseetitans.com/news/titans-seahawks-preseason-week-2-postgame-notes'},
   {id:'n7',type:'transaction',tier:'official',source:'Tennessee Titans',title:'Titans sign Tanoh Kpassagnon and Milo Eifler',summary:'On Aug. 21, Tennessee signed DE Tanoh Kpassagnon and LB Milo Eifler, released TE Matt Lauter, placed DB Nazeeh Johnson on Reserve/Injured, and later waived LB Sean Brown from injured reserve with an injury settlement.',publishedAt:'2026-08-21T15:38:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/team/transactions/'},
   {id:'n0',type:'transaction',tier:'official',source:'Tennessee Titans',title:"Titans sign D'Ernest Johnson, waive Dominic Richardson",summary:"Tennessee's official Aug. 19 transaction log lists RB D'Ernest Johnson signed and RB Dominic Richardson waived.",publishedAt:'2026-08-19T16:00:00Z',topics:['transactions','roster'],url:'https://www.tennesseetitans.com/team/transactions/'},
@@ -63,4 +67,9 @@ export const sources = [
   {name:'Odds-API.io',category:'Market',tier:'media',status:'Server key optional',method:'Odds-API.io v3',cost:'Free · no card',cadence:'Live / pregame',purpose:'Second free NFL odds source for cross-checks and fallback'}
 ];
 
-export const metrics=[{label:'Preseason',value:'2–0',delta:'W 19–16 vs SEA',tone:'good'},{label:'Next game',value:'CHI',delta:'Aug 29 · 5 PM CDT · NFL Network / WKRN regional',tone:'neutral'},{label:'Audited roster',value:'95',delta:'91 active · 4 reserve/injured',tone:'good'},{label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}];
+export const metrics=[
+  {label:'Preseason',value:'2–1',delta:'L 15–24 vs CHI',tone:'neutral'},
+  {label:'Next game',value:'NYJ',delta:'Sep 13 · 12 PM CDT · CBS',tone:'neutral'},
+  {label:'Audited roster',value:'53',delta:'8 reserve / designated-return listed separately',tone:'good'},
+  {label:'Bye week',value:'9',delta:'Official 2026 schedule',tone:'neutral'}
+];
