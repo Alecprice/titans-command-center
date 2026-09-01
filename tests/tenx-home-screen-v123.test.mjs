@@ -4,6 +4,7 @@ import fs from 'node:fs';
 
 const runtime=fs.readFileSync(new URL('../runtime-v19.js',import.meta.url),'utf8');
 const home=fs.readFileSync(new URL('../home-command-v123.js',import.meta.url),'utf8');
+const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
 
 test('TENX home command layer is loaded fail-soft after the shared runtime is ready',()=>{
   assert.match(runtime,/window\.TitansRuntime=\{/);
@@ -53,4 +54,9 @@ test('TENX home screen escapes dynamic API-backed strings before HTML insertion'
   assert.match(home,/esc\(matchup\)/);
   assert.match(home,/esc\(description\)/);
   assert.match(home,/meta\.map\(item=>`<span>\$\{esc\(item\)\}<\/span>`\)/);
+});
+
+test('TENX home command ships with the offline PWA shell and a refreshed cache generation',()=>{
+  assert.match(sw,/titans-cc-brand-2026-v77/);
+  assert.match(sw,/'\/runtime-v19\.js', '\/home-command-v123\.js'/);
 });
