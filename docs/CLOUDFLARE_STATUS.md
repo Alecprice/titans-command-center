@@ -1,6 +1,6 @@
 # Cloudflare deployment status
 
-- Status: **deployed + Ask Titans browser regression failure**
+- Status: **deployed + canonical front door + full production + browser + media + market + tickets + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
 - Source commit: `a9be0b562082340a4bdbce1dbafc26a5f2a1fb15`
 - Quality gate: success
 - Cloudflare credentials available: true
@@ -16,16 +16,16 @@
 - Ticket Center browser regression: success
 - Command Intelligence browser regression: success
 - Player Intelligence / Game Day browser regression: success
-- Ask Titans browser regression: failure
-- Change Intelligence browser regression: skipped
-- Runtime / 365 Mode browser regression: skipped
-- Data freshness browser regression: skipped
-- Account / Guest browser regression: skipped
-- Advanced analytics browser regression: skipped
-- Player headshot browser regression: skipped
+- Ask Titans browser regression: success
+- Change Intelligence browser regression: success
+- Runtime / 365 Mode browser regression: success
+- Data freshness browser regression: success
+- Account / Guest browser regression: success
+- Advanced analytics browser regression: success
+- Player headshot browser regression: success
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-01T20:00:32Z
+- Recorded: 2026-09-01T20:04:13Z
 
 ## Canonical front door regression
 
@@ -34,13 +34,13 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "deployedCommit": "4e3b132c5a62b5ae5f0081207b2e03b52bbeca85",
+  "deployedCommit": "a9be0b562082340a4bdbce1dbafc26a5f2a1fb15",
   "version": "1.0.0",
-  "revisionAttempts": 2,
+  "revisionAttempts": 1,
   "cloudFront": {
-    "requestId": "MUNkS5-OaKTLKsbYz33j1j7COhN0uLJ16A1gdNqSgvm5l3OGWZbtqA==",
-    "pop": "ORD51-P2",
-    "via": "1.1 6cb03ad529b99ef54866d7ba6041dd04.cloudfront.net (CloudFront)",
+    "requestId": "J5eiz2lMD7wc4Js1brJkO9ypNN8vkSaQh6Lci9dXWnkUbQ8e0qv6yg==",
+    "pop": "IAD55-P2",
+    "via": "1.1 640e1fde1214554c9f15c8cb85df826a.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -59,13 +59,13 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 180,
-    "originMeta": 203,
-    "canonicalRoot": 124,
-    "originRoot": 205,
-    "health": 465
+    "canonicalMeta": 639,
+    "originMeta": 379,
+    "canonicalRoot": 456,
+    "originRoot": 114,
+    "health": 702
   },
-  "testedAt": "2026-09-01T19:58:05.096Z"
+  "testedAt": "2026-09-01T20:02:30.216Z"
 }```
 
 ## Production regression
@@ -128,16 +128,16 @@
     "commit": "a9be0b562082340a4bdbce1dbafc26a5f2a1fb15",
     "builtAt": "2026-09-01T19:57:45.861Z"
   },
-  "deploymentPropagationAttempts": 4,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 781,
-    "health": 575,
-    "data": 1102,
-    "stats": 1228,
-    "market": 9255,
-    "analytics": 530
+    "root": 112,
+    "health": 569,
+    "data": 526,
+    "stats": 433,
+    "market": 1762,
+    "analytics": 338
   },
-  "testedAt": "2026-09-01T19:59:18.181Z",
+  "testedAt": "2026-09-01T20:02:58.437Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-primary-cached-fallback",
@@ -148,8 +148,8 @@
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 1044,
-    "testedAt": "2026-09-01T19:59:19.921Z"
+    "responseMs": 618,
+    "testedAt": "2026-09-01T20:02:59.754Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -157,17 +157,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 1903,
-    "warmHitMs": 1903,
+    "coldOrInitialMs": 532,
+    "warmHitMs": 532,
     "rows": 608,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 1903,
+        "durationMs": 532,
         "rows": 608
       }
     ],
-    "testedAt": "2026-09-01T19:59:21.854Z"
+    "testedAt": "2026-09-01T20:03:00.317Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -226,8 +226,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 272,
-  "testedAt": "2026-09-01T19:59:22.727Z"
+  "durationMs": 203,
+  "testedAt": "2026-09-01T20:03:00.928Z"
 }```
 
 ## Browser navigation regression
@@ -273,11 +273,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 83,
+  "maxLongTaskMs": 89,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 16.63,
-  "testedAt": "2026-09-01T19:59:44Z"
+  "durationSeconds": 9.05,
+  "testedAt": "2026-09-01T20:03:14Z"
 }```
 
 ## Listen Watch browser regression
@@ -333,11 +333,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788292788390
+      "timestamp": 1788292998065
     }
   ],
-  "durationSeconds": 4.37,
-  "testedAt": "2026-09-01T19:59:48Z"
+  "durationSeconds": 3.55,
+  "testedAt": "2026-09-01T20:03:18Z"
 }```
 
 ## Market Pulse browser regression
@@ -610,8 +610,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 8.97,
-  "testedAt": "2026-09-01T19:59:58Z"
+  "durationSeconds": 7.07,
+  "testedAt": "2026-09-01T20:03:25Z"
 }```
 
 ## Ticket Center browser regression
@@ -958,8 +958,8 @@
   },
   "browserWarnings": [],
   "eligibleFallbackGames": 17,
-  "durationSeconds": 4.15,
-  "testedAt": "2026-09-01T20:00:02Z"
+  "durationSeconds": 3.13,
+  "testedAt": "2026-09-01T20:03:29Z"
 }```
 
 ## Command Intelligence browser regression
@@ -1017,8 +1017,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 3.57,
-  "testedAt": "2026-09-01T20:00:06Z"
+  "durationSeconds": 3.11,
+  "testedAt": "2026-09-01T20:03:32Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -1164,23 +1164,607 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 6.41,
-  "testedAt": "2026-09-01T20:00:13Z"
+  "durationSeconds": 9.62,
+  "testedAt": "2026-09-01T20:03:42Z"
 }```
 
 ## Ask Titans browser regression
 
 ```json
 {
-  "ok": false,
+  "ok": true,
   "base": "https://titans.alecjprice.com",
-  "stage": "ask:Who is next?",
-  "error": "TimeoutException: Message: \n",
-  "durationSeconds": 18.38,
-  "testedAt": "2026-09-01T20:00:31Z",
-  "hash": "#fan",
-  "pageText": "FAN HUB\nEverything Titans.\nEasy to use.\n\nStart simple. Open more detail only when you want it.\n\nSimple view\nToday\nGame\nTeam\nSeason\nOffseason\nHistory\nToday\n\nThe important stuff first. No hunting around.\n\nNext game\nVS New York Jets\nSep 13, 12:00 PM\nCBS \u00b7 Nissan Stadium\nGame Day\nWhat changed?\nNo major tracked changes since your last Fan Hub visit\nRoster moves\nYour players\nPick a favorite player\n\nOpen the roster and favorite a player. Their updates will show here.\n\nRoster\nLatest move\n\nTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.\n\nAug 31, 2:57 PM\nFan pulse\nroster\n9 recent mentions\ntransactions\n7 recent mentions\npreseason\n5 recent mentions\ngames\n3 recent mentions\ncoach\n3 recent mentions\nMarket pulse\nMarket pulse waiting\n\nNo current cached market row is available.\n\nMarkets\nFan picks\nSeason MVP\nChoose\n#38 Tony Adams \u00b7 S\n#5 Elic Ayomanor \u00b7 WR\n#50 Cody Barton \u00b7 LB\n#82 Daniel Bellinger \u00b7 TE\n#\u2014 Terrell Burgess \u00b7 S\n#66 Fernando Carmona Jr. \u00b7 G\n#36 Julius Chestnut \u00b7 RB\n#79 Pat Coogan \u00b7 C\n#46 Morgan Cox \u00b7 LS\n#78 Brandon Crenshaw-Dickson \u00b7 T\n#71 Garrett Dellinger \u00b7 G\n#17 Chimere Dike \u00b7 WR\n#95 Jordan Elliott \u00b7 DL\n#15 Keldric Faulk \u00b7 DE\n#18 Cor'Dale Flott \u00b7 CB\n#91 John Franklin-Myers \u00b7 DL\n#86 Kylen Granson \u00b7 TE\n#33 Cedric Gray \u00b7 LB\n#26 Marcus Harris \u00b7 CB\n#84 Gunnar Helm \u00b7 TE\n#53 Anthony Hill Jr. \u00b7 LB\n#37 Amani Hooker \u00b7 S\n#\u2014 James Hudson \u00b7 T\n#11 Jermaine Johnson II \u00b7 DE\n#56 Truman Jones \u00b7 DE\n#55 JC Latham \u00b7 T\n#96 Jackie Marshall \u00b7 DT\n#88 David Martin-Robinson \u00b7 TE\n#57 Jacob Martin \u00b7 DE\n#75 Dan Moore Jr. \u00b7 T\n#7 Oluwafemi Oladejo \u00b7 DE\n#\u2014 Owen Pappoe \u00b7 LB\n#20 Tony Pollard \u00b7 RB\n#0 Calvin Ridley \u00b7 WR\n#21 Micah Robinson \u00b7 CB\n#4 Wan'Dale Robinson \u00b7 WR\n#51 Austin Schlottmann \u00b7 C\n#98 Jeffery Simmons \u00b7 DT\n#32 Nicholas Singleton \u00b7 RB\n#77 Peter Skoronski \u00b7 G\n#64 Jackson Slater \u00b7 G\n#6 Joey Slye \u00b7 K\n#\u2014 Melvin Smith Jr. \u00b7 DB\n#2 Tyjae Spears \u00b7 RB\n#\u2014 Nazir Stackhouse \u00b7 DT\n#14 Carnell Tate \u00b7 WR\n#24 Alontae Taylor \u00b7 CB\n#90 Solomon Thomas \u00b7 DT\n#3 Tommy Townsend \u00b7 P\n#10 Mitchell Trubisky \u00b7 QB\n#1 Cam Ward \u00b7 QB\n#52 James Williams Sr. \u00b7 LB\n#23 Kevi",
-  "browserWarnings": []
+  "answers": [
+    {
+      "question": "Who is next?",
+      "action": "#live",
+      "answer": "Tennessee is next scheduled to host New York Jets on Sun, Sep 13, 12:00 PM CDT (Nashville time).",
+      "facts": 4,
+      "sources": 1,
+      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. CBS is the listed network."
+    },
+    {
+      "question": "Cam Ward",
+      "action": "#roster",
+      "answer": "Cam Ward is listed as QB #1 with roster status Active.",
+      "facts": 2,
+      "sources": 2,
+      "why": "No recent structured player-game rows are loaded, so I am not treating missing stats as zero production."
+    },
+    {
+      "question": "What is EPA?",
+      "action": "#stats",
+      "answer": "EPA: Expected Points Added estimates how much a play helped or hurt scoring expectation.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Advanced metrics are context tools, not standalone player grades. Command Center labels model-derived metrics and keeps them behind plain-English explanations."
+    },
+    {
+      "question": "How do I watch?",
+      "action": "#media",
+      "answer": "The next game is Sun, Sep 13, 12:00 PM CDT (Nashville time) and the loaded TV listing is CBS. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
+    }
+  ],
+  "teamTimeVerified": [
+    "Who is next?",
+    "How do I watch?"
+  ],
+  "fantasyHandoff": {
+    "actionHeight": 46,
+    "href": "#fantasy",
+    "text": "FANTASY HANDOFFEvidence workspaceUse Fantasy Decision Center for this one.WHY IT MATTERSStart/sit and waiver choices depend on league context. Command Center will carry this question into the fantasy workspace and compare loaded evidence without inventing a point projection or guarantee.Scoring presetPPRSleeper leagueNot connectedSaved fantasy players2SOURCE + CONTEXTFantasy CommandDevice-local scoring, roster selections and read-only Sleeper context when connectedNo projection generatedOpen Decision Center \u2192",
+    "title": "Use Fantasy Decision Center for this one."
+  },
+  "fantasyCarried": {
+    "hash": "#fantasy",
+    "selected": [
+      "Decision Smoke A \u00b7 WR \u00b7 TEN",
+      "Decision Smoke B \u00b7 RB \u00b7 IND"
+    ],
+    "values": [
+      "manual:0",
+      "manual:1"
+    ],
+    "verdict": "Evidence leans Decision Smoke A, but this is not a point projection or guarantee."
+  },
+  "unsupportedRefused": true,
+  "mobileTargets": {
+    "askButton": 44,
+    "input": 44,
+    "quick": [
+      {
+        "h": 44,
+        "label": "What changed?"
+      },
+      {
+        "h": 44,
+        "label": "Who is next?"
+      },
+      {
+        "h": 44,
+        "label": "Injuries"
+      },
+      {
+        "h": 44,
+        "label": "Watch"
+      },
+      {
+        "h": 44,
+        "label": "Cam Ward"
+      },
+      {
+        "h": 44,
+        "label": "Explain EPA"
+      }
+    ],
+    "viewport": 375,
+    "width": 357
+  },
+  "mobileFantasyHandoff": {
+    "actionHeight": 46,
+    "left": 24,
+    "overflow": false,
+    "right": 351,
+    "viewport": 375
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.71,
+  "testedAt": "2026-09-01T20:03:45Z"
+}```
+
+## Change Intelligence browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "detectedBeforeReview": 68,
+  "categories": [
+    "Roster",
+    "Transaction"
+  ],
+  "favoritePriority": "Added to loaded roster",
+  "rosterFilterVisible": 61,
+  "clearedAfterReview": true,
+  "mobileTargets": {
+    "filters": [
+      {
+        "h": 44,
+        "label": "All"
+      },
+      {
+        "h": 44,
+        "label": "Roster \u00b7 61"
+      },
+      {
+        "h": 44,
+        "label": "Transaction \u00b7 7"
+      }
+    ],
+    "review": 44,
+    "viewport": 375,
+    "width": 357
+  },
+  "browserWarnings": [],
+  "durationSeconds": 3.97,
+  "testedAt": "2026-09-01T20:03:49Z"
+}```
+
+## Runtime / 365 Mode browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "desktop": {
+    "phase": "regular",
+    "cards": 4,
+    "runtimeVersion": "1.10.0",
+    "teamTimeZone": "America/Chicago",
+    "teamTimeLabel": "Nashville time",
+    "routeCycle": true,
+    "singlePanel": true,
+    "cacheUrls": [
+      "/api/data",
+      "/api/fan-intel",
+      "/api/social-pulse",
+      "/api/tickets"
+    ],
+    "readiness": {
+      "availability": {
+        "copy": "Kickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
+        "title": "Week 1 prep window"
+      },
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      }
+    },
+    "panel": {
+      "cards": 4,
+      "display": "block",
+      "height": 427.890625,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "refresh": {
+      "cache": [
+        {
+          "expiresAt": 1788293062605,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1788293032605,
+          "url": "/api/data"
+        },
+        {
+          "expiresAt": 1788293062669,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1788293032669,
+          "url": "/api/fan-intel"
+        }
+      ],
+      "epoch": 1,
+      "last": {
+        "at": "2026-09-01T20:03:52.325Z",
+        "epoch": 1,
+        "reason": "scoreboard-control",
+        "urls": null
+      }
+    },
+    "refreshedReadiness": {
+      "availability": {
+        "copy": "Kickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
+        "title": "Week 1 prep window"
+      },
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      }
+    },
+    "refreshedPanel": {
+      "cards": 4,
+      "display": "block",
+      "height": 427.890625,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "returnReadiness": {
+      "availability": {
+        "copy": "Kickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
+        "title": "Week 1 prep window"
+      },
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      }
+    },
+    "returnPanel": {
+      "cards": 4,
+      "display": "block",
+      "height": 427.890625,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    }
+  },
+  "mobile": {
+    "layout": {
+      "dock": {
+        "display": "grid",
+        "h": 72,
+        "w": 465,
+        "x": 10,
+        "y": 621
+      },
+      "dockTargets": [
+        {
+          "h": 58,
+          "label": "Home",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Roster",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Game",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Search",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "More",
+          "w": 89.8125
+        }
+      ],
+      "menu": {
+        "display": "grid",
+        "h": 46,
+        "w": 46,
+        "x": 10,
+        "y": 8
+      },
+      "overflow": false,
+      "panelHeight": 844.734375,
+      "panelWidth": 461,
+      "reviewHeight": 48,
+      "targets": [
+        {
+          "h": 112,
+          "label": "NEXT GAME",
+          "w": 427
+        },
+        {
+          "h": 124.4375,
+          "label": "AVAILABILITY",
+          "w": 427
+        },
+        {
+          "h": 145.3125,
+          "label": "AFC SOUTH",
+          "w": 427
+        },
+        {
+          "h": 166.1875,
+          "label": "WHAT CHANGED?",
+          "w": 427
+        }
+      ],
+      "viewport": 500
+    },
+    "readiness": {
+      "availability": {
+        "copy": "Kickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
+        "title": "Week 1 prep window"
+      },
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      }
+    },
+    "panelState": {
+      "cards": 4,
+      "display": "block",
+      "height": 844.734375,
+      "opacity": "1",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 461
+    },
+    "sheet": {
+      "bottom": 611,
+      "dockTop": 621,
+      "height": 504.71875,
+      "links": 15,
+      "top": 106.28125
+    },
+    "smartSearch": {
+      "height": 110,
+      "left": 10,
+      "right": 475,
+      "rows": 1,
+      "targets": [
+        58
+      ],
+      "width": 465
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 5.78
+}```
+
+## Data freshness browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "desktop": {
+    "detail": "Roster verified Aug 31 \u00b7 Moves yesterday \u00b7 Intel yesterday",
+    "overflow": false,
+    "rect": {
+      "bottom": 1029.3125,
+      "height": 139.578125,
+      "left": 915.328125,
+      "right": 1216.984375,
+      "top": 889.734375,
+      "width": 301.65625
+    },
+    "state": "fallback",
+    "strong": "Verified backup \u00b7 Aug 31",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves yesterday \u00b7 Intel yesterdaySee sources \u2192",
+    "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 31.",
+    "viewport": {
+      "height": 757,
+      "width": 1280
+    }
+  },
+  "mobile": {
+    "detail": "Roster verified Aug 31 \u00b7 Moves yesterday \u00b7 Intel yesterday",
+    "overflow": false,
+    "rect": {
+      "bottom": 1741.484375,
+      "height": 117.1875,
+      "left": 9,
+      "right": 366,
+      "top": 1624.296875,
+      "width": 357
+    },
+    "state": "fallback",
+    "strong": "Verified backup \u00b7 Aug 31",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves yesterday \u00b7 Intel yesterdaySee sources \u2192",
+    "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 31.",
+    "viewport": {
+      "height": 701,
+      "width": 390
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.5,
+  "testedAt": "2026-09-01T20:03:58Z"
+}```
+
+## Account / Guest browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "browserWarnings": [],
+  "guest": {
+    "accountGuest": true,
+    "route": "#home",
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "mobileShell": {
+    "dock": {
+      "h": 72,
+      "top": 621,
+      "w": 465
+    },
+    "more": {
+      "bottom": 686,
+      "h": 58,
+      "top": 628,
+      "w": 89.8125
+    },
+    "runtime": "1.10.0",
+    "sidebarHidden": "true",
+    "sidebarInert": true
+  },
+  "sheet": {
+    "bottom": 611,
+    "dockTop": 621,
+    "top": 106.28125
+  },
+  "accountEntry": {
+    "bottom": 290.53125,
+    "h": 44,
+    "parent": "sidebar",
+    "top": 246.53125,
+    "visibleBottom": 611,
+    "visibleTop": 106.28125,
+    "w": 390
+  },
+  "panel": {
+    "bottom": 701,
+    "h": 602.859375,
+    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordLog inContinue as guestGUEST DATAThese settings exist only on this device.Export this deviceImport backupReset this deviceReset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.",
+    "vh": 701,
+    "w": 485
+  },
+  "portabilityTools": {
+    "exportHeight": 50,
+    "exportLabel": "Export this device",
+    "guest": true,
+    "importHeight": 50,
+    "importLabel": "Import backup",
+    "resetHeight": 50,
+    "resetLabel": "Reset this device"
+  },
+  "importPreview": {
+    "applyHeight": 46,
+    "favorite": null,
+    "pending": {
+      "accountEmail": "",
+      "exportedAt": "2026-08-22T12:00:00Z",
+      "keys": [
+        "titans:v15MyTitans"
+      ],
+      "preferences": {
+        "titans:v15MyTitans": {
+          "favorite": "Browser Smoke"
+        }
+      },
+      "scope": "guest-device"
+    },
+    "text": "READY TO RESTORE1 setting groupAug 22, 2026, 12:00 PM \u00b7 guest-deviceNothing has changed yet. Applying restores only recognized Titans preferences from this file.Apply imported settingsCancel"
+  },
+  "resetArmed": {
+    "guest": true,
+    "hash": "#home",
+    "hint": "Tap Confirm reset again within 6 seconds.",
+    "label": "Confirm reset"
+  },
+  "authOutage": {
+    "guest": true,
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "roster": {
+    "route": "#roster",
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
+  },
+  "durationSeconds": 3.38
+}```
+
+## Advanced analytics browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "mode": "cloudflare-d1",
+  "healthStatus": "healthy",
+  "analyticsStorage": "cloudflare-d1",
+  "analyticsSnapshotSource": "nflreadpy-d1-snapshot",
+  "analyticsSnapshotStale": false,
+  "seasonContext": {
+    "bannerRole": "note",
+    "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "bannerVisible": true,
+    "dataSeason": "2025",
+    "heading": "2025 advanced analytics baseline",
+    "requestedSeason": "2026",
+    "seasonFallback": "true"
+  },
+  "mobileSeasonContext": {
+    "fallback": "true",
+    "text": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "visible": true
+  },
+  "metricCount": 4,
+  "metricValues": [
+    {
+      "detail": "#30 of 32",
+      "label": "Offensive EPA / play",
+      "value": "-0.148"
+    },
+    {
+      "detail": "#28 of 32",
+      "label": "Defensive EPA / play allowed",
+      "value": "+0.104"
+    },
+    {
+      "detail": "#11 of 32",
+      "label": "Pace",
+      "value": "28.9 sec/play"
+    },
+    {
+      "detail": "Latest loaded week: 18",
+      "label": "Rest days",
+      "value": "7 days"
+    }
+  ],
+  "situationFields": [
+    "Down & distance",
+    "Field position",
+    "Formation",
+    "Personnel",
+    "Score diff",
+    "TEN EPA",
+    "Time remaining"
+  ],
+  "initialPlayCards": 60,
+  "offenseFilteredPlayCards": 39,
+  "mobileMetricCount": 4,
+  "browserWarnings": [],
+  "durationSeconds": 3.32,
+  "testedAt": "2026-09-01T20:04:06Z"
+}```
+
+## Player headshot browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "expectedCurrentRoster": 61,
+  "minimumCurrentRosterHeadshots": 52,
+  "minimumHeadshotCoveragePct": 85.0,
+  "rosterCards": 61,
+  "rosterDecoratedHeadshots": 56,
+  "rosterHeadshotCoveragePct": 91.8,
+  "rosterLoadedHeadshots": 8,
+  "statsPlayerRows": 61,
+  "statsDecoratedHeadshots": 56,
+  "statsHeadshotCoveragePct": 91.8,
+  "statsLoadedHeadshots": 56,
+  "formerPreseasonParticipantRows": 29,
+  "mobileLoadedHeadshots": 56,
+  "richPlayer": "Tony Adams",
+  "richPlayerHeadshotLoaded": true,
+  "browserWarnings": [],
+  "durationSeconds": 6.85,
+  "testedAt": "2026-09-01T20:04:13Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
