@@ -57,7 +57,7 @@ test('global scoreboard control invalidates the shared runtime cache',()=>{
   assert.match(js,/refreshInfo/);
 });
 
-test('365 and premium surfaces subscribe to shared refresh without migrating stable Ask or Change modules',()=>{
+test('365 premium and Ask reuse shared runtime while stable Change remains isolated',()=>{
   const mode=read('mode-365-v19.js');
   const premium=read('premium-experience-v14.js');
   const ask=read('ask-titans-v17.js');
@@ -66,7 +66,9 @@ test('365 and premium surfaces subscribe to shared refresh without migrating sta
   assert.match(mode,/document\.querySelector\('\.v19-365'\)\?\.remove\(\)/);
   assert.match(premium,/runtime\.onRefresh\(refreshPremium\)/);
   assert.match(premium,/document\.querySelectorAll\('\.v14-now,\.v14-gameday-quick,\.v14-stats-help,\.v14-player-help'\)/);
-  assert.doesNotMatch(ask,/TitansRuntime/);
+  assert.match(ask,/const runtime=window\.TitansRuntime/);
+  assert.match(ask,/runtime\.apiJson\('\/api\/data',\{ttl:30000\}\)/);
+  assert.match(ask,/runtime\.apiJson\('\/api\/espn-scoreboard',\{ttl:5000\}\)/);
   assert.doesNotMatch(change,/TitansRuntime/);
 });
 
