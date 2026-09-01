@@ -146,7 +146,7 @@ jobs:
         if: steps.command_browser.outcome == 'success'
         env:
           WORKER_URL: ${{ env.PRODUCTION_URL }}
-        run: python scripts/player-gameday-browser-smoke.py
+        run: python scripts/player-gameday-browser-smoke-resilient.py
 
       - name: Run Ask Titans browser regression
         id: ask_browser

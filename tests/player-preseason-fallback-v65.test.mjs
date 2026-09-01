@@ -7,6 +7,7 @@ const source=fs.readFileSync(new URL('../player-intelligence-v16.js',import.meta
 const deployWorkflow=fs.readFileSync(new URL('../.github/workflows/cloudflare-deploy.yml',import.meta.url),'utf8');
 const fallbackWorkflow=fs.readFileSync(new URL('../.github/workflows/player-preseason-fallback-production.yml',import.meta.url),'utf8');
 const browserSmoke=fs.readFileSync(new URL('../scripts/player-preseason-fallback-browser-smoke.py',import.meta.url),'utf8');
+const resilientRunner=fs.readFileSync(new URL('../scripts/player-gameday-browser-smoke-resilient.py',import.meta.url),'utf8');
 
 test('Player Intelligence loads the verified preseason feed only as a missing-warehouse fallback',()=>{
   assert.match(source,/preseasonPromise/);
@@ -44,7 +45,8 @@ test('fallback shares the existing Player Intelligence lifecycle rather than add
 });
 
 test('normal Cloudflare release still gates the established Player Intelligence and Game Day smoke',()=>{
-  assert.match(deployWorkflow,/Run Player Intelligence and Game Day browser regression[\s\S]*python scripts\/player-gameday-browser-smoke\.py/);
+  assert.match(deployWorkflow,/Run Player Intelligence and Game Day browser regression[\s\S]*python scripts\/player-gameday-browser-smoke-resilient\.py/);
+  assert.match(resilientRunner,/player-gameday-browser-smoke\.py/);
 });
 
 test('post-deploy fallback gate checks the exact successful Cloudflare revision before browser validation',()=>{
