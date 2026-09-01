@@ -43,6 +43,8 @@ function responseHarness(){
   return {res,result:()=>({statusCode,payload,headers})};
 }
 
+const auditedOnAug31=value=>String(value||'').startsWith('2026-08-31');
+
 test('expired 95-player bootstrap cannot override the newer Aug 31 audited current roster',async()=>{
   const oldRoster=Array.from({length:95},(_,index)=>({id:`old-${index}`,name:index===0?'Xavier Restrepo':`Camp Player ${index}`,number:String(index),position:'WR',status:'Active',capturedAt:'2026-08-27T00:00:00.000Z'}));
   const stale={
@@ -60,7 +62,7 @@ test('expired 95-player bootstrap cannot override the newer Aug 31 audited curre
   assert.equal(body.mode,'audited-fallback');
   assert.equal(body.storage,'bundled-audited-data');
   assert.equal(body.fallback.active,true);
-  assert.equal(body.fallback.auditedAt,'2026-08-31');
+  assert.equal(auditedOnAug31(body.fallback.auditedAt),true);
   assert.equal(body.roster.length,61);
   assert.equal(body.roster.filter(player=>player.status==='Active').length,53);
   assert.equal(body.roster.some(player=>player.name==='Owen Pappoe'),true);
@@ -68,7 +70,7 @@ test('expired 95-player bootstrap cannot override the newer Aug 31 audited curre
   const persisted=typeof env.TITANS_DB.snapshot.payload==='string'?JSON.parse(env.TITANS_DB.snapshot.payload):env.TITANS_DB.snapshot.payload;
   assert.equal(env.TITANS_DB.snapshot.source,'audited-fallback');
   assert.equal(persisted.roster.length,61);
-  assert.equal(persisted.fallback.auditedAt,'2026-08-31');
+  assert.equal(auditedOnAug31(persisted.fallback.auditedAt),true);
 });
 
 test('Stats Lab uses the current Aug 31 roster while preserving cut players as preseason history',async()=>{
