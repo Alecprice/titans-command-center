@@ -34,6 +34,7 @@ import {scheduleFocus} from './src/core.mjs';
 
   function gameFocus(){return scheduleFocus(state.base?.games||[])}
   function upcomingGame(){return gameFocus().next||null}
+  function nextHomeGame(now=Date.now()){return (state.base?.games||[]).map((game,index)=>({game,index,kickoff:Date.parse(game?.date)})).filter(row=>row.game?.homeAway==='home'&&Number.isFinite(row.kickoff)&&row.kickoff>now).sort((a,b)=>a.kickoff-b.kickoff||a.index-b.index)[0]?.game||null}
   function latestFinal(){return [...(state.base?.games||[])].reverse().find(g=>/final/i.test(String(g.status||'')))||null}
   function favoriteIds(){return new Set(parse(localStorage.getItem('titans:favoritePlayers'),[]).map(String))}
   function favoritePlayers(){const ids=favoriteIds();return (state.base?.roster||[]).filter(p=>ids.has(String(p.id)))}
@@ -120,7 +121,7 @@ import {scheduleFocus} from './src/core.mjs';
   }
 
   function attending(){
-    const g=(state.base?.games||[]).find(x=>x.homeAway==='home'&&Date.parse(x.date)>Date.now());
+    const g=nextHomeGame();
     if(!g)return empty('No upcoming home game loaded','This mode will activate for the next home game.');
     const weather=(state.base?.weather?.rows||[]).find(w=>String(w.gameId)===String(g.id));
     return `<div class="v13-attend"><div class="v13-big"><strong>${esc(g.opponent)} at Tennessee</strong><span>${esc(fmtDate(g.date))}</span><span>${esc(g.venue||'Venue TBD')}</span></div><ul class="v13-clean-list"><li>Check your mobile tickets before leaving</li><li>Review official stadium bag and entry rules</li><li>${weather?`Forecast: ${esc(weather.condition||'')} ${weather.temperatureF==null?'':Math.round(weather.temperatureF)+'°F'}`:'Forecast will appear when available'}</li></ul><a class="button" href="https://www.tennesseetitans.com/" target="_blank" rel="noopener noreferrer">Official game-day info ↗</a></div>`;
