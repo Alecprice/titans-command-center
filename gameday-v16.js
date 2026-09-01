@@ -7,7 +7,7 @@
   let state={data:null,fan:null,espn:null,loading:null,serial:0};
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const arr=v=>Array.isArray(v)?v:[];
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num=v=>Number.isFinite(Number(v))?Number(v):null;
   const fmt=value=>{try{const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(d)}catch{return'TBD'}};
   const shortFmt=value=>{try{const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric'}).format(d)}catch{return'TBD'}};
