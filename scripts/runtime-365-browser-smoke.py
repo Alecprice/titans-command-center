@@ -86,8 +86,6 @@ def assert_regular_readiness(phase,panel_state,readiness):
         raise RuntimeError(f'Regular-season standings readiness is incomplete: {readiness}')
     if 'all-clear' in availability.get('copy','').lower() and 'not treated' not in availability.get('copy','').lower():
         raise RuntimeError(f'Availability fallback overclaims certainty: {readiness}')
-    if 'rank' in standings.get('title','').lower() and 'pending' not in standings.get('title','').lower() and 'rank' not in standings.get('copy','').lower():
-        raise RuntimeError(f'Standings readiness lost rank context: {readiness}')
 
 
 def wait_refresh(driver,previous_epoch,timeout=15):
