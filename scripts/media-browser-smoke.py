@@ -9,6 +9,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 BASE = os.environ.get('WORKER_URL', 'https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 REPORT = Path('/tmp/media-browser-smoke.json')
+SHELL_LOAD_ATTEMPTS = 2
+TRANSIENT_ASSET_FAILURE_THRESHOLD = 4
 
 
 def wait_for(driver, predicate, timeout=10):
@@ -19,6 +21,44 @@ def wait_for(driver, predicate, timeout=10):
 
 def write_report(payload):
     REPORT.write_text(json.dumps(payload, indent=2), encoding='utf-8')
+
+
+def browser_warnings(driver):
+    try:
+        return [x for x in driver.get_log('browser') if x.get('level') in ('SEVERE', 'WARNING')]
+    except Exception:
+        return []
+
+
+def broad_transient_asset_failures(entries):
+    failures = []
+    for entry in entries:
+        message = str(entry.get('message') or '')
+        if BASE in message and 'Failed to load resource: net::ERR_FAILED' in message:
+            failures.append(entry)
+    return failures
+
+
+def load_shell(driver, hash_value, predicate, timeout=10):
+    diagnostics = []
+    retries = 0
+    url = f'{BASE}/{hash_value}'
+    for attempt in range(1, SHELL_LOAD_ATTEMPTS + 1):
+        try:
+            driver.get(url)
+            wait_for(driver, predicate, timeout=timeout)
+            return {'retries': retries, 'diagnostics': diagnostics}
+        except Exception:
+            warnings = browser_warnings(driver)
+            broad = broad_transient_asset_failures(warnings)
+            diagnostics.extend(broad)
+            if attempt < SHELL_LOAD_ATTEMPTS and len(broad) >= TRANSIENT_ASSET_FAILURE_THRESHOLD:
+                retries += 1
+                driver.get('about:blank')
+                time.sleep(0.5)
+                continue
+            raise
+    raise RuntimeError(f'Unable to load shell after {SHELL_LOAD_ATTEMPTS} attempts')
 
 
 def no_overflow(driver, label):
@@ -48,14 +88,17 @@ options.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
 driver = None
 stage = 'starting'
 started = time.time()
+shell_retries = 0
+shell_load_diagnostics = []
 try:
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(20)
     driver.set_script_timeout(8)
 
     stage = 'desktop:home'
-    driver.get(f'{BASE}/#home')
-    wait_for(driver, "document.readyState === 'complete' && document.querySelector('.fan-hero')")
+    shell = load_shell(driver, '#home', "document.readyState === 'complete' && document.querySelector('.fan-hero')")
+    shell_retries += shell['retries']
+    shell_load_diagnostics.extend(shell['diagnostics'])
 
     stage = 'desktop:click-media-link'
     wait_for(driver, "document.querySelector('a[href=\"#media\"]')")
@@ -172,8 +215,9 @@ try:
 
     stage = 'mobile:media'
     driver.set_window_size(390, 844)
-    driver.get(f'{BASE}/#media')
-    wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-tune-guide')", timeout=12)
+    shell = load_shell(driver, '#media', "document.querySelector('.media-page') && document.querySelector('.media-tune-guide')", timeout=12)
+    shell_retries += shell['retries']
+    shell_load_diagnostics.extend(shell['diagnostics'])
     if body.get('configured') and videos:
         wait_for(driver, "document.querySelector('[data-youtube-official-shelf]')", timeout=12)
     no_overflow(driver, '390px media')
@@ -195,11 +239,7 @@ try:
         raise RuntimeError(f'Mobile official video shelf controls invalid: {mobile}')
 
     stage = 'console'
-    warnings = []
-    try:
-        warnings = [x for x in driver.get_log('browser') if x.get('level') in ('SEVERE', 'WARNING')]
-    except Exception:
-        pass
+    warnings = browser_warnings(driver)
     severe = [x for x in warnings if x.get('level') == 'SEVERE']
     if severe:
         raise RuntimeError(f'Media browser console has severe errors: {severe[:4]}')
@@ -207,6 +247,8 @@ try:
     result = {
         'ok': True,
         'base': BASE,
+        'shellLoadRetries': shell_retries,
+        'transientShellAssetFailures': len(shell_load_diagnostics),
         'territoryChecks': territory_checks,
         'officialTitansAudio': True,
         'official1045Player': True,
@@ -234,6 +276,8 @@ except Exception as exc:
         'base': BASE,
         'stage': stage,
         'error': f'{type(exc).__name__}: {exc}',
+        'shellLoadRetries': shell_retries,
+        'transientShellAssetFailures': len(shell_load_diagnostics),
         'durationSeconds': round(time.time() - started, 2),
         'testedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
     }
@@ -241,7 +285,9 @@ except Exception as exc:
         if driver is not None:
             result['hash'] = driver.execute_script('return location.hash')
             result['pageText'] = driver.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,1200)")
-            result['browserWarnings'] = [x for x in driver.get_log('browser') if x.get('level') in ('SEVERE', 'WARNING')][:20]
+            result['browserWarnings'] = browser_warnings(driver)[:20]
+            if shell_load_diagnostics:
+                result['transientShellWarnings'] = shell_load_diagnostics[:20]
     except Exception:
         pass
     write_report(result)
