@@ -152,8 +152,9 @@ import {scheduleFocus} from './src/core.mjs';
   function standingsView(){
     const rows=state.intel?.standings||[];
     if(!rows.length)return empty('Standings start with the regular season','The AFC South table will turn on automatically when standings snapshots are available.');
-    const south=rows.filter(r=>r.division==='AFC South');const use=south.length?south:rows.filter(r=>r.conference==='AFC').slice(0,8);
-    return `<div class="v13-standings">${use.map((r,i)=>`<div class="${r.abbreviation==='TEN'?'ten':''}"><b>${i+1}</b><strong>${esc(r.abbreviation)} <span>${esc(r.team)}</span></strong><em>${esc(r.record)}</em>${state.mode==='deep'?`<small>PF ${r.pointsFor??'—'} · PA ${r.pointsAgainst??'—'} · AFC #${r.conferenceRank??'—'}</small>`:''}</div>`).join('')}</div>`;
+    const south=rows.filter(r=>r.division==='AFC South'),rankKey=south.length?'divisionRank':'conferenceRank',pool=south.length?south:rows.filter(r=>r.conference==='AFC');
+    const use=pool.map((row,index)=>{const value=Number(row?.[rankKey]);return {row,index,rank:Number.isInteger(value)&&value>0?value:null}}).sort((a,b)=>(a.rank??Number.MAX_SAFE_INTEGER)-(b.rank??Number.MAX_SAFE_INTEGER)||a.index-b.index).slice(0,8);
+    return `<div class="v13-standings">${use.map(({row:r,rank})=>`<div class="${r.abbreviation==='TEN'?'ten':''}"><b>${esc(rank??'—')}</b><strong>${esc(r.abbreviation)} <span>${esc(r.team)}</span></strong><em>${esc(r.record)}</em>${state.mode==='deep'?`<small>PF ${r.pointsFor??'—'} · PA ${r.pointsAgainst??'—'} · AFC #${r.conferenceRank??'—'}</small>`:''}</div>`).join('')}</div>`;
   }
 
   function playoffView(){
