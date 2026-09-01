@@ -23,8 +23,31 @@ test('365 Mode uses shared structured APIs and preserves missing-data honesty',(
   assert.match(js,/runtime\.apiJson\('\/api\/data'/);
   assert.match(js,/runtime\.apiJson\('\/api\/fan-intel'/);
   assert.match(js,/Missing report data is not treated as an all-clear/);
-  assert.match(js,/Preseason results are kept separate/);
+  assert.match(js,/Division rank will appear when a current AFC South standings snapshot is loaded/);
+  assert.match(js,/Record is derived from loaded final Titans games/);
   assert.doesNotMatch(js,/fetch\(['"]https?:\/\//);
+});
+
+test('regular-season readiness does not present expected pregame data gaps as broken states',()=>{
+  const js=read('mode-365-v19.js');
+  assert.match(js,/function availabilityState\(game,rows\)/);
+  assert.match(js,/function standingsState\(row\)/);
+  assert.match(js,/Week \$\{Number\(game\.week\)\}/);
+  assert.match(js,/prep window/);
+  assert.match(js,/availability pending/);
+  assert.match(js,/Week 1 ahead/);
+  assert.match(js,/rank pending/);
+  assert.doesNotMatch(js,/Weekly report not loaded/);
+  assert.doesNotMatch(js,/Standings not loaded/);
+});
+
+test('standings fallback derives only completed regular-season Titans results and never invents division rank',()=>{
+  const js=read('mode-365-v19.js');
+  assert.match(js,/const regularFinals=\(\)=>games\(\)\.filter\(g=>Number\(g\?\.week\)>=1&&\/final\/i\.test/);
+  assert.match(js,/Number\.isFinite\(Number\(g\?\.score\)\)/);
+  assert.match(js,/Number\.isFinite\(Number\(g\?\.opponentScore\)\)/);
+  assert.match(js,/const record=scheduleRecord\(\)/);
+  assert.match(js,/division rank waits for a current AFC South standings snapshot/);
 });
 
 test('365 Mode is mobile first and reduced-motion friendly',()=>{
