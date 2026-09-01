@@ -59,13 +59,22 @@ test('read-only workflow checkouts do not persist repository credentials',()=>{
 test('Cloudflare status writer syncs to current main before committing its generated report',()=>{
   const deploy=read('cloudflare-deploy.yml');
   const fetchIndex=deploy.indexOf('git fetch origin main');
+  const guardIndex=deploy.indexOf('git diff --quiet "$GITHUB_SHA" origin/main');
   const checkoutIndex=deploy.indexOf('git checkout -B main origin/main');
   const reportIndex=deploy.indexOf("echo '# Cloudflare deployment status'");
   const pushIndex=deploy.indexOf('git push origin main');
   assert.ok(fetchIndex>=0,'deployment status writer must fetch the latest main');
-  assert.ok(checkoutIndex>fetchIndex,'deployment status writer must move to current main after fetching');
+  assert.ok(guardIndex>fetchIndex,'deployment status writer must reject superseded source revisions after fetching');
+  assert.ok(checkoutIndex>guardIndex,'deployment status writer must move to current main only after the supersession guard passes');
   assert.ok(reportIndex>checkoutIndex,'deployment report must be generated after syncing current main');
   assert.ok(pushIndex>reportIndex,'deployment report must push only after the synced report commit is created');
+  assert.match(deploy,/':\(exclude\)docs\/CLOUDFLARE_STATUS\.md'/,'generated status-only commits must not make the active release look superseded');
+  assert.match(deploy,/Skipping deployment status write because main contains newer non-status changes/);
+});
+
+test('cancelled Cloudflare releases never publish generated deployment status',()=>{
+  const deploy=read('cloudflare-deploy.yml');
+  assert.match(deploy,/name: Record Cloudflare deployment result[\s\S]*if: \$\{\{ always\(\) && !cancelled\(\) \}\}/);
 });
 
 test('critical workflow dependencies stay on the reviewed pinned releases',()=>{
