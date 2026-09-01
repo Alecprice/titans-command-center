@@ -3,7 +3,7 @@ import {filterFeed,relativeTime,gameStatus,normalizeEspnEvent,mergeLiveGames} fr
 import {formatAmerican,americanToImplied} from './src/odds.mjs';
 const $=s=>document.querySelector(s),app=$('#app'),toast=$('#toast'),sidebar=$('#sidebar');
 let games=[...seedGames],roster=[...seedRoster],feed=[...seedFeed],sources=[...seedSources],transactions=[],markets=[],futures=[],mode='fallback',db={connected:false,schemaVersion:null,storage:null,mode:'audited-fallback'},installPrompt=null;
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home',params=()=>new URLSearchParams(location.hash.split('?')[1]||'');
 const validDate=v=>{if(!v)return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d};
 const date=(v,o={})=>{const d=validDate(v);return d?new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',...o}).format(d):'TBD'};
