@@ -5,8 +5,32 @@ export const SOURCE_TIERS = {
   community: { label: 'Community', rank: 1 }
 };
 
+export const GAME_FOCUS_WINDOW_MS = 5 * 60 * 60 * 1000;
+
 export function sourceRank(tier) {
   return SOURCE_TIERS[tier]?.rank ?? 0;
+}
+
+export function scheduleFocus(games, now = new Date(), windowMs = GAME_FOCUS_WINDOW_MS) {
+  const nowTime = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  const width = Math.max(0, Number(windowMs) || 0);
+  if (!Number.isFinite(nowTime)) return { state: 'none', game: null, current: null, next: null };
+
+  const candidates = (Array.isArray(games) ? games : [])
+    .filter(game => !/final|bye/i.test(String(game?.status || '')))
+    .map(game => ({ game, kickoff: new Date(game?.date).getTime() }))
+    .filter(row => Number.isFinite(row.kickoff))
+    .sort((a, b) => a.kickoff - b.kickoff);
+
+  const current = candidates.find(row => row.kickoff <= nowTime && row.kickoff >= nowTime - width) || null;
+  const next = candidates.find(row => row.kickoff > nowTime) || null;
+
+  return {
+    state: current ? 'game-window' : next ? 'upcoming' : 'none',
+    game: current?.game || next?.game || null,
+    current: current?.game || null,
+    next: next?.game || null
+  };
 }
 
 export function filterFeed(items, filters = {}) {
