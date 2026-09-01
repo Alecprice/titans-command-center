@@ -73,7 +73,7 @@
   function applyGameWindow(data){
     if(runtime.route()!=='live')return false;
     const root=app.querySelector('.v16-gameday');
-    if(!root||root.dataset.phase==='live'||root.dataset.phase==='postgame')return false;
+    if(!root||root.dataset.phase==='live')return false;
     const games=Array.isArray(data?.games)?data.games:[];
     const focus=runtime.scheduleFocus(games);
     if(focus.state!=='game-window'||!focus.current)return false;
