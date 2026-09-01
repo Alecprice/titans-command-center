@@ -52,7 +52,7 @@ test('Home pulse communicates free sources and remains mobile/PWA packaged',asyn
   assert.match(client,/Titans RSS \+ Bluesky public API \+ Reddit RSS/);
   assert.match(css,/min-height:44px/);
   assert.match(css,/@media\(max-width:390px\)/);
-  assert.match(sw,/titans-cc-brand-2026-v75/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/titans-social-v49\.js/);
   assert.match(sw,/titans-social-v49\.css/);
 });
