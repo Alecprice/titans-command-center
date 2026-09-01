@@ -62,6 +62,32 @@ def wait_365_panel(driver,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_state)
 
 
+def read_regular_readiness(driver):
+    return driver.execute_script("""
+      const cards=[...document.querySelectorAll('.v19-365-grid>a')];
+      const row=label=>{
+        const card=cards.find(x=>(x.querySelector('small')?.textContent||'').trim()===label);
+        return card?{title:(card.querySelector('strong')?.textContent||'').trim(),copy:(card.querySelector('span')?.textContent||'').trim()}:null;
+      };
+      return {availability:row('AVAILABILITY'),standings:row('AFC SOUTH')};
+    """)
+
+
+def assert_regular_readiness(phase,panel_state,readiness):
+    if phase!='regular': return
+    text=panel_state.get('text','')
+    if 'Weekly report not loaded' in text or 'Standings not loaded' in text:
+        raise RuntimeError(f'Regular-season 365 Mode exposes stale broken-state copy: {readiness}')
+    availability=(readiness or {}).get('availability') or {}
+    standings=(readiness or {}).get('standings') or {}
+    if not availability.get('title') or not availability.get('copy'):
+        raise RuntimeError(f'Regular-season availability readiness is incomplete: {readiness}')
+    if not standings.get('title') or not standings.get('copy'):
+        raise RuntimeError(f'Regular-season standings readiness is incomplete: {readiness}')
+    if 'all-clear' in availability.get('copy','').lower() and 'not treated' not in availability.get('copy','').lower():
+        raise RuntimeError(f'Availability fallback overclaims certainty: {readiness}')
+
+
 def wait_refresh(driver,previous_epoch,timeout=15):
     def read_refresh(d):
         return d.execute_script("""
@@ -120,10 +146,12 @@ try:
         runtime=d.execute_script("return window.TitansRuntime ? {version:window.TitansRuntime.version,route:window.TitansRuntime.route(),teamTimeZone:window.TitansRuntime.teamTimeZone,teamTimeLabel:window.TitansRuntime.teamTimeLabel,cache:window.TitansRuntime.apiCacheInfo(),refresh:window.TitansRuntime.refreshInfo()} : null")
         phase=d.execute_script("return document.body.dataset.v19Phase || ''")
         cards=d.find_elements(By.CSS_SELECTOR,'.v19-365-grid > a')
+        readiness=read_regular_readiness(d)
         if not runtime or runtime.get('version')!='1.10.0': raise RuntimeError(f'Runtime missing or wrong version: {runtime}')
         if runtime.get('route')!='home': raise RuntimeError(f'Runtime route mismatch: {runtime}')
         if runtime.get('teamTimeZone')!='America/Chicago' or runtime.get('teamTimeLabel')!='Nashville time': raise RuntimeError(f'Team-time runtime contract missing: {runtime}')
         if not phase or len(cards)!=4: raise RuntimeError(f'365 panel contract failed: phase={phase} cards={len(cards)} state={panel_state}')
+        assert_regular_readiness(phase,panel_state,readiness)
         if 'NEXT GAME' in panel_state['text'] and 'Next game TBD' not in panel_state['text']:
             if ' UTC' in panel_state['text'] or not ('CDT' in panel_state['text'] or 'CST' in panel_state['text']):
                 raise RuntimeError(f'365 Mode kickoff is not rendered in Nashville time: {panel_state}')
@@ -137,13 +165,17 @@ try:
         refresh_button.click()
         stage='desktop:wait-refresh';refresh_state=wait_refresh(d,previous_epoch)
         stage='desktop:wait-refreshed-panel';refreshed_panel=wait_365_panel(d)
+        refreshed_readiness=read_regular_readiness(d)
+        assert_regular_readiness(phase,refreshed_panel,refreshed_readiness)
         if refresh_state['epoch']!=previous_epoch+1: raise RuntimeError(f'Unexpected refresh epoch: before={previous_epoch} after={refresh_state}')
 
         stage='desktop:command-route';d.execute_script("location.hash='#command'");wait_css(d,'.v15-command')
         stage='desktop:return-home';d.execute_script("location.hash='#home'");return_state=wait_365_panel(d)
+        return_readiness=read_regular_readiness(d)
+        assert_regular_readiness(phase,return_state,return_readiness)
         count=d.execute_script("return document.querySelectorAll('.v19-365').length")
         if count!=1: raise RuntimeError(f'365 panel duplicated after route cycle: {count}')
-        result['desktop']={'phase':phase,'cards':len(cards),'runtimeVersion':runtime['version'],'teamTimeZone':runtime['teamTimeZone'],'teamTimeLabel':runtime['teamTimeLabel'],'routeCycle':True,'singlePanel':True,'cacheUrls':sorted(urls),'panel':panel_state,'refresh':refresh_state,'refreshedPanel':refreshed_panel,'returnPanel':return_state}
+        result['desktop']={'phase':phase,'cards':len(cards),'runtimeVersion':runtime['version'],'teamTimeZone':runtime['teamTimeZone'],'teamTimeLabel':runtime['teamTimeLabel'],'routeCycle':True,'singlePanel':True,'cacheUrls':sorted(urls),'readiness':readiness,'panel':panel_state,'refresh':refresh_state,'refreshedReadiness':refreshed_readiness,'refreshedPanel':refreshed_panel,'returnReadiness':return_readiness,'returnPanel':return_state}
         result['browserWarnings'].extend(severe_logs(d))
     finally:
         d.quit();d=None
@@ -153,6 +185,8 @@ try:
     stage='mobile:prepare-returning-user';prepare_returning_user(m)
     stage='mobile:disable-sidebar-motion';disable_sidebar_motion(m)
     stage='mobile:wait-365-panel';mobile_panel=wait_365_panel(m)
+    stage='mobile:read-readiness';mobile_readiness=read_regular_readiness(m)
+    assert_regular_readiness(phase,mobile_panel,mobile_readiness)
     stage='mobile:read-layout'
     mobile=m.execute_script("""
       const panel=document.querySelector('.v19-365');
@@ -181,6 +215,7 @@ try:
     dock_labels={x['label'] for x in mobile['dockTargets']}
     if not {'Home','Roster','Game','Search','More'}.issubset(dock_labels): raise RuntimeError(f'Mobile five-action dock labels invalid: {mobile}')
     result['mobile']['layout']=mobile
+    result['mobile']['readiness']=mobile_readiness
     result['mobile']['panelState']=mobile_panel
 
     stage='mobile:more-click';m.find_element(By.ID,'mobile-more-button').click()
