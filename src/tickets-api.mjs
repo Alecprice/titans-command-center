@@ -102,9 +102,19 @@ function ticketmasterPriceRange(event){
   const maximums=ranges.map(range=>priceFinite(range?.max)).filter(value=>value!=null);
   return {min:minimums.length?Math.min(...minimums):null,max:maximums.length?Math.max(...maximums):null};
 }
+function ticketmasterGameEvent(event,title){
+  const text=String(title||event?.name||'').toLowerCase();
+  if(!text.includes('tennessee titans'))return false;
+  if(/\bparking\b/.test(text)||/\b(?:hotel|travel)\s+packages?\b/.test(text))return false;
+  try{
+    const host=new URL(String(event?.url||'')).hostname.toLowerCase();
+    if(host==='travel.ticketmaster.com'||host.endsWith('.travel.ticketmaster.com'))return false;
+  }catch{}
+  return true;
+}
 function normalizeTicketmasterEvent(event){
   const title=String(event?.name||'');
-  if(!title.toLowerCase().includes('tennessee titans'))return null;
+  if(!ticketmasterGameEvent(event,title))return null;
   const range=ticketmasterPriceRange(event);
   const venue=Array.isArray(event?._embedded?.venues)?event._embedded.venues[0]:null;
   return {
