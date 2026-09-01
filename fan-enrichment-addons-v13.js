@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const app=document.querySelector('#app');
+  const runtime=window.TitansRuntime;
   const KEY='titans:v13FanPicks';
   const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9,10 +10,14 @@
   async function load(){
     if(state.base&&state.intel)return;
     if(state.loading)return state.loading;
-    state.loading=Promise.all([
+    const request=runtime?[
+      runtime.apiJson('/api/data',{ttl:30000}),
+      runtime.apiJson('/api/fan-intel',{ttl:30000})
+    ]:[
       fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
       fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
-    ]).then(([base,intel])=>{state.base=base?.ok?base:null;state.intel=intel?.ok?intel:null}).finally(()=>state.loading=null);
+    ];
+    state.loading=Promise.all(request).then(([base,intel])=>{state.base=base?.ok?base:null;state.intel=intel?.ok?intel:null}).finally(()=>state.loading=null);
     return state.loading;
   }
 
