@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + canonical front door + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `1fc4d46c99c330a0870418c7b8f42c713069b416`
+- Source commit: `fb99c10915acc61874fdffd798c6838e16a58228`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Neon warehouse deployment secret required: false (D1 primary)
@@ -24,7 +24,7 @@
 - Player headshot browser regression: success
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-08-31T23:10:48Z
+- Recorded: 2026-09-01T01:34:28Z
 
 ## Canonical front door regression
 
@@ -36,9 +36,9 @@
   "deployedCommit": "1fc4d46c99c330a0870418c7b8f42c713069b416",
   "version": "1.0.0",
   "cloudFront": {
-    "requestId": "I1055abLKvbbcSPBCpgDGkhQ4Z142yJI5H4sUxqMkXLdG0SPzS5dqg==",
-    "pop": "PHX50-P1",
-    "via": "1.1 f0c69aaab12c2df7a91cf822152fa666.cloudfront.net (CloudFront)",
+    "requestId": "XHEy6jL6dqnNgLoWdSIs_NFM7JPHN6lGvM6AQ9ZSmdusIjv2ubmpQg==",
+    "pop": "ORD51-P2",
+    "via": "1.1 10e2ea298500a275e093909178c9a022.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -57,13 +57,13 @@
     "snapshotFresh": false
   },
   "responseMs": {
-    "canonicalMeta": 213,
-    "originMeta": 235,
-    "canonicalRoot": 185,
-    "originRoot": 181,
-    "health": 395
+    "canonicalMeta": 573,
+    "originMeta": 201,
+    "canonicalRoot": 531,
+    "originRoot": 247,
+    "health": 561
   },
-  "testedAt": "2026-08-31T23:09:57.633Z"
+  "testedAt": "2026-09-01T01:33:21.937Z"
 }```
 
 ## Production regression
@@ -123,19 +123,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "1fc4d46c99c330a0870418c7b8f42c713069b416",
-    "builtAt": "2026-08-31T23:09:43.103Z"
+    "commit": "fb99c10915acc61874fdffd798c6838e16a58228",
+    "builtAt": "2026-09-01T01:33:04.188Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 45,
-    "health": 171,
-    "data": 204,
-    "stats": 190,
-    "market": 666,
-    "analytics": 239
+    "root": 79,
+    "health": 229,
+    "data": 170,
+    "stats": 335,
+    "market": 557,
+    "analytics": 256
   },
-  "testedAt": "2026-08-31T23:10:05.207Z",
+  "testedAt": "2026-09-01T01:33:36.523Z",
   "healthTruth": {
     "ok": true,
     "mode": "audited-fallback",
@@ -145,8 +145,8 @@
     "fallbackContentAudit": "2026-08-29",
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": false,
-    "responseMs": 311,
-    "testedAt": "2026-08-31T23:10:05.549Z"
+    "responseMs": 591,
+    "testedAt": "2026-09-01T01:33:37.154Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -154,17 +154,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 105,
-    "warmHitMs": 105,
+    "coldOrInitialMs": 406,
+    "warmHitMs": 406,
     "rows": 608,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 105,
+        "durationMs": 406,
         "rows": 608
       }
     ],
-    "testedAt": "2026-08-31T23:10:05.678Z"
+    "testedAt": "2026-09-01T01:33:37.596Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -237,8 +237,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 204,
-  "testedAt": "2026-08-31T23:10:06.197Z"
+  "durationMs": 229,
+  "testedAt": "2026-09-01T01:33:38.153Z"
 }```
 
 ## Browser navigation regression
@@ -284,11 +284,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 69,
-  "longTasksOver250ms": 0,
+  "maxLongTaskMs": 262,
+  "longTasksOver250ms": 1,
   "browserWarnings": [],
-  "durationSeconds": 7.16,
-  "testedAt": "2026-08-31T23:10:16Z"
+  "durationSeconds": 8.0,
+  "testedAt": "2026-09-01T01:33:51Z"
 }```
 
 ## Listen Watch browser regression
@@ -317,8 +317,8 @@
       "fallbackText": "",
       "iframe": true,
       "iframeApiScript": true,
-      "iframeSrc": "https://www.youtube.com/embed/EABngjgct8U?autoplay=0&playsinline=1&rel=0&origin=https%3A%2F%2Ftitans.alecjprice.com&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Ftitans.alecjprice.com%2F%23media&aoriginsup=1&vf=1",
-      "videoId": "EABngjgct8U"
+      "iframeSrc": "https://www.youtube.com/embed/WDfCsnILy-Q?autoplay=0&playsinline=1&rel=0&origin=https%3A%2F%2Ftitans.alecjprice.com&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Ftitans.alecjprice.com%2F%23media&aoriginsup=1&vf=1",
+      "videoId": "WDfCsnILy-Q"
     }
   },
   "mobileAreaTargets": [
@@ -342,11 +342,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788217819713
+      "timestamp": 1788226434014
     }
   ],
-  "durationSeconds": 3.41,
-  "testedAt": "2026-08-31T23:10:20Z"
+  "durationSeconds": 2.86,
+  "testedAt": "2026-09-01T01:33:54Z"
 }```
 
 ## Market Pulse browser regression
@@ -360,9 +360,9 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 76,
+        "shown": 73,
         "total": 608,
-        "renderedRows": 76
+        "renderedRows": 73
       },
       "summary": {
         "controls": [
@@ -410,16 +410,16 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 76 of 608 rows",
+        "result": "Showing 73 of 608 rows",
         "resultTotal": 608,
-        "rowCount": 76,
+        "rowCount": 73,
         "rowSample": [
           "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine1.5Price-108Implied51.9%",
           "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine1.5Price-105Implied51.2%",
           "New York Jets at Tennessee Titans Spread \u00b7 LowVig.ag \u2197SideNew York JetsLine1.5Price-103Implied50.7%"
         ],
         "scrollWidth": 1265,
-        "shown": 76,
+        "shown": 73,
         "title": "Live Titans market board",
         "total": 608,
         "viewport": 1265
@@ -430,27 +430,27 @@
         "available": true,
         "options": 3,
         "selectedValue": "25077",
-        "before": "Showing 76 of 608 rows",
-        "after": "Showing 68 of 608 rows"
+        "before": "Showing 73 of 608 rows",
+        "after": "Showing 65 of 608 rows"
       },
       "book": {
         "available": true,
-        "options": 12,
+        "options": 11,
         "selectedValue": "betonlineag",
-        "before": "Showing 76 of 608 rows",
+        "before": "Showing 73 of 608 rows",
         "after": "Showing 6 of 608 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Showing 76 of 608 rows",
-        "after": "Showing 76 of 608 rows"
+        "before": "Showing 73 of 608 rows",
+        "after": "Showing 73 of 608 rows"
       }
     },
     "alternateLines": {
       "available": true,
-      "beforeRows": 76,
+      "beforeRows": 73,
       "afterRows": 608
     },
     "refresh": {
@@ -619,8 +619,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 5.35,
-  "testedAt": "2026-08-31T23:10:25Z"
+  "durationSeconds": 6.24,
+  "testedAt": "2026-09-01T01:34:01Z"
 }```
 
 ## Command Intelligence browser regression
@@ -678,8 +678,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 1.64,
-  "testedAt": "2026-08-31T23:10:27Z"
+  "durationSeconds": 2.24,
+  "testedAt": "2026-09-01T01:34:03Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -809,7 +809,7 @@
   "gameDayMobileViewport": 375,
   "gameDayFastPass": true,
   "gameDayFastPassGameId": "wk1",
-  "gameDayFastPassText": "NEXT GAME FAST PASS\nNew York Jets at Titans\nWEEK 1\nWHEN\nSun, Sep 13, 12:00 PM CDT \u00b7 12d 17h\nWATCH / LISTEN\nCBS \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
+  "gameDayFastPassText": "NEXT GAME FAST PASS\nNew York Jets at Titans\nWEEK 1\nWHEN\nSun, Sep 13, 12:00 PM CDT \u00b7 12d 15h\nWATCH / LISTEN\nCBS \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
   "gameDayFastPassMobileTargets": [
     {
       "h": 48,
@@ -825,8 +825,8 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 4.23,
-  "testedAt": "2026-08-31T23:10:32Z"
+  "durationSeconds": 4.93,
+  "testedAt": "2026-09-01T01:34:08Z"
 }```
 
 ## Ask Titans browser regression
@@ -932,8 +932,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 1.51,
-  "testedAt": "2026-08-31T23:10:33Z"
+  "durationSeconds": 2.06,
+  "testedAt": "2026-09-01T01:34:11Z"
 }```
 
 ## Change Intelligence browser regression
@@ -970,8 +970,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.23,
-  "testedAt": "2026-08-31T23:10:36Z"
+  "durationSeconds": 2.21,
+  "testedAt": "2026-09-01T01:34:13Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -981,7 +981,7 @@
   "ok": true,
   "base": "https://titans.alecjprice.com",
   "desktop": {
-    "phase": "preseason",
+    "phase": "regular",
     "cards": 4,
     "runtimeVersion": "1.10.0",
     "teamTimeZone": "America/Chicago",
@@ -991,15 +991,14 @@
     "cacheUrls": [
       "/api/data",
       "/api/fan-intel",
-      "/api/social-pulse",
-      "/api/tickets"
+      "/api/social-pulse"
     ],
     "panel": {
       "cards": 4,
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSWHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.AFC SOUTHStandings not loadedRegular-season standings only. Preseason results are kept separate.WHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -1007,23 +1006,30 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1788217867700,
+          "expiresAt": 1788226485515,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788217837700,
+          "updatedAt": 1788226455515,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1788217867871,
+          "expiresAt": 1788226485526,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788217837871,
+          "updatedAt": 1788226455526,
           "url": "/api/fan-intel"
+        },
+        {
+          "expiresAt": 1788226755518,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1788226455518,
+          "url": "/api/tickets"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-08-31T23:10:37.678Z",
+        "at": "2026-09-01T01:34:15.436Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -1034,7 +1040,7 @@
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSWHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.AFC SOUTHStandings not loadedRegular-season standings only. Preseason results are kept separate.WHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -1044,7 +1050,7 @@
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSWHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.AFC SOUTHStandings not loadedRegular-season standings only. Preseason results are kept separate.WHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -1094,7 +1100,7 @@
         "y": 8
       },
       "overflow": false,
-      "panelHeight": 853.171875,
+      "panelHeight": 811.421875,
       "panelWidth": 461,
       "reviewHeight": 48,
       "targets": [
@@ -1104,18 +1110,18 @@
           "w": 427
         },
         {
-          "h": 166.1875,
-          "label": "WHAT CHANGED?",
-          "w": 427
-        },
-        {
-          "h": 166.1875,
-          "label": "ROSTER",
-          "w": 427
-        },
-        {
           "h": 112,
           "label": "AVAILABILITY",
+          "w": 427
+        },
+        {
+          "h": 124.4375,
+          "label": "AFC SOUTH",
+          "w": 427
+        },
+        {
+          "h": 166.1875,
+          "label": "WHAT CHANGED?",
           "w": 427
         }
       ],
@@ -1124,9 +1130,9 @@
     "panelState": {
       "cards": 4,
       "display": "block",
-      "height": 853.171875,
+      "height": 811.421875,
       "opacity": "1",
-      "text": "365 MODE \u00b7 PRESEASONRoster decisions are the storyNext game, position battles, depth changes and roster movement matter more than standings.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSWHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.ROSTERtransactionTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.AVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.AFC SOUTHStandings not loadedRegular-season standings only. Preseason results are kept separate.WHAT CHANGED?Review team changesTennessee announced the Aug. 25 move and also waived S Sanoussi Kane from injured reserve. The current official roster now shows Johnson active and four Reserve/Injured players.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 461
@@ -1150,7 +1156,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.08
+  "durationSeconds": 3.61
 }```
 
 ## Data freshness browser regression
@@ -1200,8 +1206,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 1.21,
-  "testedAt": "2026-08-31T23:10:41Z"
+  "durationSeconds": 1.52,
+  "testedAt": "2026-09-01T01:34:19Z"
 }```
 
 ## Account / Guest browser regression
@@ -1294,7 +1300,7 @@
     "route": "#roster",
     "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
   },
-  "durationSeconds": 1.48
+  "durationSeconds": 1.92
 }```
 
 ## Advanced analytics browser regression
@@ -1358,8 +1364,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.62,
-  "testedAt": "2026-08-31T23:10:44Z"
+  "durationSeconds": 2.18,
+  "testedAt": "2026-09-01T01:34:24Z"
 }```
 
 ## Player headshot browser regression
@@ -1378,8 +1384,8 @@
   "richPlayer": "Andre James",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 2.87,
-  "testedAt": "2026-08-31T23:10:47Z"
+  "durationSeconds": 3.63,
+  "testedAt": "2026-09-01T01:34:28Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
