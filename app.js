@@ -1,5 +1,5 @@
 import {team,games as seedGames,roster as seedRoster,feed as seedFeed,sources as seedSources} from './src/data.mjs';
-import {filterFeed,relativeTime,gameStatus,normalizeEspnEvent,mergeLiveGames} from './src/core.mjs';
+import {filterFeed,relativeTime,gameStatus,normalizeEspnEvent,mergeLiveGames,scheduleFocus} from './src/core.mjs';
 import {formatAmerican,americanToImplied} from './src/odds.mjs';
 const $=s=>document.querySelector(s),app=$('#app'),toast=$('#toast'),sidebar=$('#sidebar');
 let games=[...seedGames],roster=[...seedRoster],feed=[...seedFeed],sources=[...seedSources],transactions=[],markets=[],futures=[],mode='fallback',db={connected:false,schemaVersion:null,storage:null,mode:'audited-fallback'},installPrompt=null;
@@ -13,7 +13,7 @@ function say(m){toast.textContent=m;toast.classList.add('show');clearTimeout(say
 function active(){document.querySelectorAll('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===route()));sidebar.classList.remove('open')}
 function head(k,t,d,a=''){return `<div class="page-head"><div><div class="eyebrow">${k}</div><h1>${t}</h1><p>${d}</p></div>${a}</div>`}
 function panel(t,b,s=''){return `<section class="panel"><div class="panel-head"><h2>${t}</h2>${s}</div>${b}</section>`}
-function nextGame(){const now=new Date();return games.find(g=>{const d=validDate(g.date);return d&&d>now&&g.status!=='final'&&g.status!=='bye'})||games.at(-1)}
+function nextGame(){const focus=scheduleFocus(games);return focus.game||games.at(-1)||null}
 function badge(){return `<span class="tag official">${mode==='live'?'LIVE DATA':'VERIFIED BACKUP'}</span>`}
 function record(){const f=games.filter(g=>String(g.week).startsWith('P')&&g.status==='final');return {w:f.filter(g=>+g.score>+g.opponentScore).length,l:f.filter(g=>+g.score<+g.opponentScore).length,n:f.length}}
 function matchup(g){if(!g)return '<div class="empty">Schedule unavailable.</div>';const wk=String(g.week).startsWith('P')?`Preseason ${String(g.week).slice(1)}`:`Week ${g.week}`;return `<div class="game-hero"><div class="game-meta"><span>${esc(wk)}</span>${badge()}</div><div class="matchup"><div><div class="team-token">TEN</div><strong>Tennessee</strong></div><div class="vs">${g.status==='final'?`${esc(g.score)}<br><small>FINAL</small><br>${esc(g.opponentScore)}`:'VS'}</div><div><div class="team-token opponent">${esc(g.opponentAbbr)}</div><strong>${esc(g.opponent)}</strong></div></div><div class="game-footer"><span><strong>${esc(g.venue||'Venue TBD')}</strong><br>${g.homeAway==='home'?'Nashville, TN':'Road game'}</span><span><strong>${gameTime(g.date)}</strong><br>${esc(g.network||'TV TBD')} · ${gameStatus(g)}</span></div></div>`}
