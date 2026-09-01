@@ -195,7 +195,7 @@ jobs:
         if: steps.account_browser.outcome == 'success'
         env:
           WORKER_URL: ${{ env.PRODUCTION_URL }}
-        run: python scripts/analytics-browser-smoke.py
+        run: python scripts/analytics-browser-smoke-resilient.py
 
       - name: Run player headshot browser regression
         id: headshot_browser

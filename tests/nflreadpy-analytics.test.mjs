@@ -146,8 +146,10 @@ test('production gate validates D1 analytics API data and the real Stats Lab bro
   const workflow=read('.github/workflows/cloudflare-deploy.yml');
   const production=read('scripts/advanced-analytics-regression.mjs');
   const browser=read('scripts/analytics-browser-smoke.py');
+  const resilient=read('scripts/analytics-browser-smoke-resilient.py');
   assert.match(workflow,/advanced-analytics-regression\.mjs/);
-  assert.match(workflow,/analytics-browser-smoke\.py/);
+  assert.match(workflow,/analytics-browser-smoke-resilient\.py/);
+  assert.match(resilient,/analytics-browser-smoke\.py/);
   assert.match(workflow,/ANALYTICS_BROWSER_OUTCOME/);
   assert.match(workflow,/Advanced analytics browser regression/);
   assert.match(production,/\/api\/advanced-analytics\?season=2026&team=TEN/);
