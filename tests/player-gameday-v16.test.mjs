@@ -72,6 +72,18 @@ test('Game Day 3.0 has pregame live and postgame state models',()=>{
   assert.match(js,/WHAT CHANGED\?/);
 });
 
+test('Game Day kickoff-window bridge fills the scoreboard-gap state without claiming live',()=>{
+  const bridge=read('gameday-today-v22.js');
+  assert.match(bridge,/runtime\.scheduleFocus/);
+  assert.match(bridge,/focus\.state!=='game-window'/);
+  assert.match(bridge,/root\.dataset\.phase==='live'/);
+  assert.match(bridge,/root\.dataset\.phase==='postgame'/);
+  assert.match(bridge,/root\.dataset\.phase='game-window'/);
+  assert.match(bridge,/Scoreboard verification pending/);
+  assert.match(bridge,/No live score, clock, drive, or result is inferred from kickoff time alone/);
+  assert.doesNotMatch(bridge,/<small>LIVE<\/small><h3>Scoreboard verification pending/);
+});
+
 test('Game Day live state is sourced and model labels are transparent',()=>{
   const js=read('gameday-v16.js');
   assert.match(js,/fetch\('\/api\/espn-scoreboard'/);
@@ -85,9 +97,12 @@ test('Game Day live state is sourced and model labels are transparent',()=>{
 
 test('Game Day keeps Listen Watch integrated across states',()=>{
   const js=read('gameday-v16.js');
+  const bridge=read('gameday-today-v22.js');
   assert.match(js,/TUNE IN/);
   assert.match(js,/href="#media"/);
   assert.match(js,/Plan how to watch/);
+  assert.match(bridge,/TUNE IN/);
+  assert.match(bridge,/Listen \/ Watch →/);
 });
 
 test('v1.6 remains mobile first and reduced-motion friendly',()=>{
