@@ -30,6 +30,13 @@ test('smart search supports sections players quick questions and keyboard naviga
   assert.match(js,/stopImmediatePropagation/);
 });
 
+test('smart search player results remain routable when the roster is using audited fallback data',()=>{
+  const js=read('smart-search-v111.js');
+  assert.match(js,/const playerHref=p=>p\?\.id\?`#player\?id=\$\{encodeURIComponent\(p\.id\)\}`:p\?\.name\?`#player\?name=\$\{encodeURIComponent\(p\.name\)\}`:'#roster'/);
+  assert.match(js,/href:playerHref\(p\)/);
+  assert.doesNotMatch(js,/href:p\.id\?`#player\?id=.*:'#roster'/);
+});
+
 test('smart search mobile palette remains touch friendly',()=>{
   const css=read('smart-search-v111.css');
   assert.match(css,/@media\(max-width:760px\)/);
