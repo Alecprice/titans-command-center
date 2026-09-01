@@ -117,8 +117,10 @@ test('v1.6 remains mobile first and reduced-motion friendly',()=>{
 
 test('Cloudflare cannot report full success without v1.6 browser health',()=>{
   const workflow=read('.github/workflows/cloudflare-deploy.yml');
+  const runner=read('scripts/player-gameday-browser-smoke-resilient.py');
   assert.match(workflow,/id: player_gameday_browser/);
-  assert.match(workflow,/python scripts\/player-gameday-browser-smoke\.py/);
+  assert.match(workflow,/python scripts\/player-gameday-browser-smoke-resilient\.py/);
+  assert.match(runner,/player-gameday-browser-smoke\.py/);
   assert.match(workflow,/if: steps\.player_gameday_browser\.outcome == 'success'/);
   assert.match(workflow,/PLAYER_GAMEDAY_BROWSER_OUTCOME/);
   assert.match(workflow,/Player Intelligence \/ Game Day browser regression/);
