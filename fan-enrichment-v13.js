@@ -1,3 +1,5 @@
+import {scheduleFocus} from './src/core.mjs';
+
 (() => {
   'use strict';
 
@@ -25,16 +27,14 @@
     return state.loading;
   }
 
-  function nextGame(){
-    const now=Date.now();
-    return (state.base?.games||[]).find(g=>{const t=Date.parse(g.date);return Number.isFinite(t)&&t>now&&!/final|bye/i.test(String(g.status||''))})||null;
-  }
+  function gameFocus(){return scheduleFocus(state.base?.games||[])}
+  function upcomingGame(){return gameFocus().next||null}
   function latestFinal(){return [...(state.base?.games||[])].reverse().find(g=>/final/i.test(String(g.status||'')))||null}
   function favoriteIds(){return new Set(parse(localStorage.getItem('titans:favoritePlayers'),[]).map(String))}
   function favoritePlayers(){const ids=favoriteIds();return (state.base?.roster||[]).filter(p=>ids.has(String(p.id)))}
   function latestMove(){return state.base?.transactions?.[0]||null}
   function finalGames(){return (state.base?.games||[]).filter(g=>/final/i.test(String(g.status||'')))}
-  function currentMarket(){const game=nextGame();return (state.base?.markets?.rows||[]).filter(r=>!game||!r.gameId||String(r.gameId)===String(game.id)).slice(0,4)}
+  function currentMarket(game=gameFocus().game){return (state.base?.markets?.rows||[]).filter(r=>!game||!r.gameId||String(r.gameId)===String(game.id)).slice(0,4)}
 
   function card(title,body,actions='',className=''){
     return `<article class="v13-card ${className}"><h3>${esc(title)}</h3>${body}${actions?`<div class="v13-actions">${actions}</div>`:''}</article>`;
@@ -67,7 +67,7 @@
   }
 
   function askAnswer(query){
-    const q=String(query||'').toLowerCase(),ng=nextGame(),standings=state.intel?.standings||[],ten=standings.find(r=>r.abbreviation==='TEN');
+    const q=String(query||'').toLowerCase(),ng=upcomingGame(),standings=state.intel?.standings||[],ten=standings.find(r=>r.abbreviation==='TEN');
     if(/next game|who.*play|opponent/.test(q))return ng?`Tennessee's next loaded game is ${ng.homeAway==='home'?'vs.':'at'} ${ng.opponent} on ${fmtDate(ng.date)}.`:'The next game is not available in the loaded schedule yet.';
     if(/stand|record|afc south|division/.test(q))return ten?`Tennessee is ${ten.record}. ${ten.divisionRank?`That is division rank ${ten.divisionRank}.`:''}`:'Regular-season standings are not loaded yet.';
     if(/injur|practice/.test(q)){const rows=state.intel?.injuries||[];return rows.length?`${rows.length} current injury-report row${rows.length===1?' is':'s are'} loaded. Open Team → Injuries for the official statuses.`:'No current weekly injury-report rows are loaded. Reserve/Injured roster status is tracked separately.'}
@@ -80,13 +80,13 @@
   function askBox(){return `<div class="v13-ask"><label for="v13-ask-input">Ask Titans Command Center</label><div><input id="v13-ask-input" type="search" placeholder="Example: Any injuries?" autocomplete="off"><button class="button primary" type="button" data-v13-ask>Ask</button></div><div class="v13-quick-asks"><button data-q="Who is next?">Who is next?</button><button data-q="Any injuries?">Any injuries?</button><button data-q="AFC South standings">Standings</button><button data-q="Latest roster move">Latest move</button></div><div id="v13-answer" class="v13-answer" aria-live="polite">Answers use the verified data already loaded by this site.</div></div>`}
 
   function todayView(){
-    const ng=nextGame(),fav=favoritePlayers(),changes=changeSummary(),move=latestMove(),market=currentMarket()[0];
+    const focus=gameFocus(),ng=focus.game,current=focus.state==='game-window',fav=favoritePlayers(),changes=changeSummary(),move=latestMove(),market=currentMarket(ng)[0];
     const next=ng?`<div class="v13-big"><strong>${ng.homeAway==='home'?'VS':'AT'} ${esc(ng.opponent)}</strong><span>${esc(fmtDate(ng.date))}</span><span>${esc(ng.network||'TV TBD')} · ${esc(ng.venue||'Venue TBD')}</span></div>`:empty('Next game TBD','The schedule will fill this card automatically.');
     const favorite=fav.length?`<div class="v13-favorites">${fav.slice(0,3).map(p=>`<a href="#player?id=${encodeURIComponent(p.id)}"><strong>#${esc(p.number||'—')} ${esc(p.name)}</strong><span>${esc(p.position)} · ${esc(p.status||'Active')}</span></a>`).join('')}</div>`:empty('Pick a favorite player','Open the roster and favorite a player. Their updates will show here.');
     const changeBody=`<ul class="v13-clean-list">${changes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
     const moveBody=move?`<p>${esc(move.description)}</p><small>${esc(move.date?fmtDate(move.date):'')}</small>`:empty('No move loaded','Transactions will appear as they are indexed.');
-    const marketBody=market?`<p>${esc(market.entityName||market.marketName||'Next-game market')} ${market.line??''}</p><small>Optional information · can be hidden in Settings</small>`:empty('Market pulse waiting','No current cached market row is available.');
-    return section('Today','The important stuff first. No hunting around.',`<div class="v13-grid">${card('Next game',next,'<a class="button" href="#live">Game Day</a>','v13-feature')}${card('What changed?',changeBody,'<a class="button" href="#transactions">Roster moves</a>')}${card('Your players',favorite,'<a class="button" href="#roster">Roster</a>')}${card('Latest move',moveBody)}${card('Fan pulse',topicPulse())}${card('Market pulse',marketBody,'<a class="button" href="#markets">Markets</a>','v13-optional-market')}</div>${section('Ask Titans','Plain-English answers from the site data.',askBox())}`);
+    const marketBody=market?`<p>${esc(market.entityName||market.marketName||(current?'Current-game market':'Next-game market'))} ${market.line??''}</p><small>Optional information · can be hidden in Settings</small>`:empty('Market pulse waiting','No current cached market row is available.');
+    return section('Today','The important stuff first. No hunting around.',`<div class="v13-grid">${card(current?'Current matchup':'Next game',next,'<a class="button" href="#live">Game Day</a>','v13-feature')}${card('What changed?',changeBody,'<a class="button" href="#transactions">Roster moves</a>')}${card('Your players',favorite,'<a class="button" href="#roster">Roster</a>')}${card('Latest move',moveBody)}${card('Fan pulse',topicPulse())}${card('Market pulse',marketBody,'<a class="button" href="#markets">Markets</a>','v13-optional-market')}</div>${section('Ask Titans','Plain-English answers from the site data.',askBox())}`);
   }
 
   function opponentScout(){
@@ -105,7 +105,7 @@
   }
 
   function predictionCard(){
-    const ng=nextGame();if(!ng)return empty('Prediction opens when a game is scheduled','Your prediction stays on this device.');
+    const ng=upcomingGame();if(!ng)return empty('Prediction opens when a game is scheduled','Your prediction stays on this device.');
     const all=parse(localStorage.getItem(KEY.predictions),{}),saved=all[ng.id]||{};
     return `<div class="v13-predict"><p>What do you think happens?</p><div class="v13-score-pick"><label>TEN <input type="number" min="0" max="99" inputmode="numeric" data-pred-ten value="${esc(saved.ten??'')}"></label><label>${esc(ng.opponentAbbr||'OPP')} <input type="number" min="0" max="99" inputmode="numeric" data-pred-opp value="${esc(saved.opp??'')}"></label></div><label>Confidence <input type="range" min="1" max="10" value="${esc(saved.confidence??5)}" data-pred-confidence><span data-confidence-label>${esc(saved.confidence??5)}/10</span></label><button class="button primary" type="button" data-save-prediction data-game-id="${esc(ng.id)}">Save my prediction</button><small>Private to this device.</small></div>`;
   }
