@@ -5,6 +5,7 @@ import {scheduleFocus} from './src/core.mjs';
 
   const app=document.querySelector('#app');
   const toast=document.querySelector('#toast');
+  const runtime=window.TitansRuntime;
   const KEY={mode:'titans:v13Mode',tab:'titans:v13Tab',predictions:'titans:v13Predictions',draft:'titans:v13DraftBoard',visit:'titans:v13VisitSnapshot'};
   const TABS=[['today','Today'],['game','Game'],['team','Team'],['season','Season'],['offseason','Offseason'],['history','History']];
   const state={base:null,intel:null,loading:null,hubRendering:false,tab:localStorage.getItem(KEY.tab)||'today',mode:localStorage.getItem(KEY.mode)||'simple'};
@@ -20,10 +21,14 @@ import {scheduleFocus} from './src/core.mjs';
   async function load(){
     if(state.base&&state.intel)return state;
     if(state.loading)return state.loading;
-    state.loading=Promise.all([
+    const request=runtime?[
+      runtime.apiJson('/api/data',{ttl:30000}),
+      runtime.apiJson('/api/fan-intel',{ttl:30000})
+    ]:[
       fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
       fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
-    ]).then(([base,intel])=>{state.base=base?.ok?base:null;state.intel=intel?.ok?intel:null;return state}).finally(()=>state.loading=null);
+    ];
+    state.loading=Promise.all(request).then(([base,intel])=>{state.base=base?.ok?base:null;state.intel=intel?.ok?intel:null;return state}).finally(()=>state.loading=null);
     return state.loading;
   }
 
