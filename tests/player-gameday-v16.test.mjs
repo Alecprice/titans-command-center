@@ -77,7 +77,7 @@ test('Game Day kickoff-window bridge fills the scoreboard-gap state without clai
   assert.match(bridge,/runtime\.scheduleFocus/);
   assert.match(bridge,/focus\.state!=='game-window'/);
   assert.match(bridge,/root\.dataset\.phase==='live'/);
-  assert.match(bridge,/root\.dataset\.phase==='postgame'/);
+  assert.doesNotMatch(bridge,/root\.dataset\.phase==='postgame'/);
   assert.match(bridge,/root\.dataset\.phase='game-window'/);
   assert.match(bridge,/Scoreboard verification pending/);
   assert.match(bridge,/No live score, clock, drive, or result is inferred from kickoff time alone/);
