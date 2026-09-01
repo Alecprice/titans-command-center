@@ -37,6 +37,7 @@ function withEdgeCacheStatus(response,status){const headers=new Headers(response
 function withCacheControl(response,value){const headers=new Headers(response.headers);headers.set('Cache-Control',value);return new Response(response.body,{status:response.status,statusText:response.statusText,headers});}
 function marketCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 function apiCacheKey(request){const url=new URL(request.url);url.search='';return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
+function bootstrapApiCacheKey(request){const url=new URL(request.url);url.search='';url.searchParams.set('__audit',String(fallbackTeam.auditedAt||fallbackTeam.rosterCoverage?.asOf||'unknown'));return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 function queryAwareApiCacheKey(request,keys=[]){const input=new URL(request.url),url=new URL(`${input.origin}${input.pathname}`);for(const key of [...keys].sort()){const value=input.searchParams.get(key);if(value!=null&&value!=='')url.searchParams.set(key,value);}return new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}});}
 function edgeResponseCacheable(response){const policy=String(response.headers.get('Cache-Control')||'').toLowerCase();return response.ok&&!policy.includes('no-store')&&!policy.includes('private');}
 function contentAuditFromSnapshot(row){
@@ -137,8 +138,6 @@ async function nativeData(request,env){
   const snapshot=await readD1Bootstrap(env);
   if(snapshot)return jsonResponse(snapshot,200,headers);
   const reason='Fresh bootstrap snapshot unavailable';
-  const staleSnapshot=await readD1Bootstrap(env,{allowExpired:true,reason});
-  if(staleSnapshot)return jsonResponse(staleSnapshot,200,headers);
   const fallback={...auditedBootstrapFallback(reason),teamContext:await getAuditedTeamContext(null),storage:'bundled-audited-data'};
   await writeD1Bootstrap(env,fallback,{source:'audited-fallback'});
   return jsonResponse(fallback,200,headers);
@@ -147,7 +146,7 @@ async function cachedNativeData(request,env,ctx){
   if(request.method!=='GET')return withEdgeCacheStatus(await nativeData(request,env),'BYPASS');
   const cache=globalThis.caches?.default;
   if(!cache)return withEdgeCacheStatus(await nativeData(request,env),'UNAVAILABLE');
-  const key=apiCacheKey(request),hit=await cache.match(key);
+  const key=bootstrapApiCacheKey(request),hit=await cache.match(key);
   if(hit)return withEdgeCacheStatus(hit,'HIT');
   const fresh=await nativeData(request,env);
   if(fresh.ok){const write=cache.put(key,fresh.clone()).catch(error=>console.warn('[data-edge-cache]',error));if(ctx?.waitUntil)ctx.waitUntil(write);else await write;}

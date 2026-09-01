@@ -22,12 +22,13 @@ test('Cloudflare Worker serves static assets and runs only API paths through com
 
 test('Cloudflare adapter uses D1-native core API routes and trusted scheduler',()=>{
   const worker=read('cloudflare/worker.mjs');
+  const dataBlock=worker.match(/async function nativeData\([\s\S]*?\n\}/)?.[0]||'';
   assert.match(worker,/import apiHandler from '\.\.\/api\/index\.js'/);
   assert.match(worker,/d1Health\(env\)/);
   assert.match(worker,/getD1Snapshot\(env,BOOTSTRAP_SNAPSHOT_KEY\)/);
-  assert.match(worker,/readD1Bootstrap\(env\)/);
-  assert.match(worker,/readD1Bootstrap\(env,\{allowExpired:true/);
-  assert.match(worker,/auditedBootstrapFallback\(reason\)/);
+  assert.match(dataBlock,/readD1Bootstrap\(env\)/);
+  assert.doesNotMatch(dataBlock,/readD1Bootstrap\(env,\{allowExpired:true/);
+  assert.match(dataBlock,/auditedBootstrapFallback\(reason\)/);
   assert.match(worker,/preseasonStatsRoute,env/);
   assert.match(worker,/marketDataRoute,env/);
   assert.match(worker,/cachedMarketData\(request,env,ctx\)/);
