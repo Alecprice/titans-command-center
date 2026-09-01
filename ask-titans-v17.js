@@ -187,7 +187,7 @@ import {formatCalendarDate,formatTeamKickoff,TEAM_TIME_LABEL} from './team-time-
   async function ask(query){
     const token=++state.serial;
     const initialOut=document.querySelector('.v17-ask [data-v17-result]');if(!initialOut)return;
-    initialOut.innerHTML='<div class="v17-ask-empty"><strong>Checking loaded Titans data…</strong><span>Roster, game, injury, depth and scoreboard context.</span></div>';
+    initialOut.innerHTML='<div class="v17-ask-empty"><strong>Checking loaded Titans data…</strong><span>Checking the verified data needed for this question.</span></div>';
     await load();
     if(needsScoreboard(query))await loadScoreboard();
     if(token!==state.serial||route()!=='fan')return;
