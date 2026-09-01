@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + canonical front door + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `a6de47f774982099e19a929f45598a43f424f5fe`
+- Source commit: `b61c90b9c90eaac60a56b25caec50d87aa5f7d3b`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Neon warehouse deployment secret required: false (D1 primary)
@@ -24,7 +24,7 @@
 - Player headshot browser regression: success
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-01T17:08:44Z
+- Recorded: 2026-09-01T17:46:35Z
 
 ## Canonical front door regression
 
@@ -33,13 +33,13 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "deployedCommit": "6d106a6d365c5a35508774511cfa2afb32598eb2",
+  "deployedCommit": "a6de47f774982099e19a929f45598a43f424f5fe",
   "version": "1.0.0",
   "revisionAttempts": 1,
   "cloudFront": {
-    "requestId": "1bMSSGjSjY99DLTmo58lSIC9b9MF9RAIRrbe4F6i9xP1qDvn5F7ShA==",
-    "pop": "IAD55-P2",
-    "via": "1.1 2e9efc6c92f43e49016092f40e32ddc4.cloudfront.net (CloudFront)",
+    "requestId": "yUnMIp6gglLjgJ8X_VG_qfziaTHnElYN5M9tHZvndPnGxPkeLztu8g==",
+    "pop": "DFW57-P1",
+    "via": "1.1 9fe7d47ea2a815113a41181f1d63f69e.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -52,19 +52,19 @@
   },
   "originRobots": "noindex, nofollow",
   "health": {
-    "status": "healthy",
+    "status": "degraded",
     "databaseProvider": "cloudflare-d1",
     "databaseConfigured": true,
-    "snapshotFresh": true
+    "snapshotFresh": false
   },
   "responseMs": {
-    "canonicalMeta": 394,
-    "originMeta": 116,
-    "canonicalRoot": 101,
-    "originRoot": 35,
-    "health": 171
+    "canonicalMeta": 277,
+    "originMeta": 184,
+    "canonicalRoot": 46,
+    "originRoot": 37,
+    "health": 340
   },
-  "testedAt": "2026-09-01T17:07:22.170Z"
+  "testedAt": "2026-09-01T17:45:15.028Z"
 }```
 
 ## Production regression
@@ -99,11 +99,11 @@
     }
   },
   "healthStatus": 200,
-  "appStatus": "healthy",
+  "appStatus": "degraded",
   "databaseProvider": "cloudflare-d1",
   "databaseConfigured": true,
-  "databaseOk": true,
-  "snapshotFresh": true,
+  "databaseOk": false,
+  "snapshotFresh": false,
   "dataMode": "audited-fallback",
   "databaseAvailable": false,
   "dataStatus": 200,
@@ -124,49 +124,54 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "a6de47f774982099e19a929f45598a43f424f5fe",
-    "builtAt": "2026-09-01T17:07:06.240Z"
+    "commit": "b61c90b9c90eaac60a56b25caec50d87aa5f7d3b",
+    "builtAt": "2026-09-01T17:44:56.573Z"
   },
-  "deploymentPropagationAttempts": 5,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 84,
-    "health": 184,
-    "data": 131,
-    "stats": 208,
-    "market": 2427,
-    "analytics": 133
+    "root": 61,
+    "health": 244,
+    "data": 313,
+    "stats": 248,
+    "market": 708,
+    "analytics": 295
   },
-  "testedAt": "2026-09-01T17:07:41.677Z",
+  "testedAt": "2026-09-01T17:45:28.640Z",
   "healthTruth": {
     "ok": true,
-    "mode": "d1-snapshot",
+    "mode": "d1-primary-cached-fallback",
     "status": 200,
     "healthStatus": "healthy",
     "contentAudit": "2026-08-31",
-    "dataAudit": "2026-09-01",
+    "dataAudit": "2026-08-31",
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 239,
-    "testedAt": "2026-09-01T17:07:42.246Z"
+    "responseMs": 330,
+    "testedAt": "2026-09-01T17:45:29.375Z"
   },
   "marketEdgeCache": {
     "ok": true,
     "base": "https://titans.alecjprice.com",
-    "initialStatus": "HIT",
+    "initialStatus": "MISS",
     "finalStatus": "HIT",
-    "attempts": 1,
-    "coldOrInitialMs": 120,
-    "warmHitMs": 120,
+    "attempts": 2,
+    "coldOrInitialMs": 850,
+    "warmHitMs": 132,
     "rows": 608,
     "sequence": [
       {
+        "status": "MISS",
+        "durationMs": 850,
+        "rows": 608
+      },
+      {
         "status": "HIT",
-        "durationMs": 120,
+        "durationMs": 132,
         "rows": 608
       }
     ],
-    "testedAt": "2026-09-01T17:07:42.399Z"
+    "testedAt": "2026-09-01T17:45:30.739Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -225,8 +230,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 191,
-  "testedAt": "2026-09-01T17:07:42.859Z"
+  "durationMs": 180,
+  "testedAt": "2026-09-01T17:45:31.308Z"
 }```
 
 ## Browser navigation regression
@@ -272,11 +277,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 139,
+  "maxLongTaskMs": 83,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 12.92,
-  "testedAt": "2026-09-01T17:07:59Z"
+  "durationSeconds": 18.2,
+  "testedAt": "2026-09-01T17:45:55Z"
 }```
 
 ## Listen Watch browser regression
@@ -332,11 +337,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788282481553
+      "timestamp": 1788284758658
     }
   ],
-  "durationSeconds": 2.37,
-  "testedAt": "2026-09-01T17:08:02Z"
+  "durationSeconds": 3.15,
+  "testedAt": "2026-09-01T17:45:59Z"
 }```
 
 ## Market Pulse browser regression
@@ -350,9 +355,9 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 75,
+        "shown": 73,
         "total": 608,
-        "renderedRows": 75
+        "renderedRows": 73
       },
       "summary": {
         "controls": [
@@ -400,16 +405,16 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 75 of 608 rows",
+        "result": "Showing 73 of 608 rows",
         "resultTotal": 608,
-        "rowCount": 75,
+        "rowCount": 73,
         "rowSample": [
           "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine1.5Price-108Implied51.9%",
           "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine1.5Price-105Implied51.2%",
           "New York Jets at Tennessee Titans Spread \u00b7 LowVig.ag \u2197SideNew York JetsLine1.5Price-103Implied50.7%"
         ],
         "scrollWidth": 1265,
-        "shown": 75,
+        "shown": 73,
         "title": "Live Titans market board",
         "total": 608,
         "viewport": 1265
@@ -420,36 +425,36 @@
         "available": true,
         "options": 3,
         "selectedValue": "25077",
-        "before": "Showing 75 of 608 rows",
-        "after": "Showing 67 of 608 rows"
+        "before": "Showing 73 of 608 rows",
+        "after": "Showing 65 of 608 rows"
       },
       "book": {
         "available": true,
         "options": 11,
         "selectedValue": "betonlineag",
-        "before": "Showing 75 of 608 rows",
+        "before": "Showing 73 of 608 rows",
         "after": "Showing 6 of 608 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Showing 75 of 608 rows",
-        "after": "Showing 75 of 608 rows"
+        "before": "Showing 73 of 608 rows",
+        "after": "Showing 73 of 608 rows"
       }
     },
     "alternateLines": {
       "available": true,
-      "beforeRows": 75,
+      "beforeRows": 73,
       "afterRows": 608
     },
     "refresh": {
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 600,
-        "total": 600,
-        "renderedRows": 600
+        "shown": 608,
+        "total": 608,
+        "renderedRows": 608
       },
       "summary": {
         "controls": [
@@ -497,18 +502,18 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 600 of 600 rows",
-        "resultTotal": 600,
-        "rowCount": 600,
+        "result": "Showing 608 of 608 rows",
+        "resultTotal": 608,
+        "rowCount": 608,
         "rowSample": [
           "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine1.5Price-108Implied51.9%",
           "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine1.5Price-105Implied51.2%",
           "New York Jets at Tennessee Titans Spread \u00b7 LowVig.ag \u2197SideNew York JetsLine1.5Price-103Implied50.7%"
         ],
         "scrollWidth": 1265,
-        "shown": 600,
+        "shown": 608,
         "title": "Live Titans market board",
-        "total": 600,
+        "total": 608,
         "viewport": 1265
       }
     }
@@ -517,9 +522,9 @@
     "state": {
       "quality": "Live",
       "provider": "PropLine",
-      "shown": 600,
-      "total": 600,
-      "renderedRows": 600
+      "shown": 608,
+      "total": 608,
+      "renderedRows": 608
     },
     "summary": {
       "controls": [
@@ -567,18 +572,18 @@
       "quality": "Live",
       "referenceNotice": "",
       "refreshHeight": 44,
-      "result": "Showing 600 of 600 rows",
-      "resultTotal": 600,
-      "rowCount": 600,
+      "result": "Showing 608 of 608 rows",
+      "resultTotal": 608,
+      "rowCount": 608,
       "rowSample": [
         "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine1.5Price-108Implied51.9%",
         "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine1.5Price-105Implied51.2%",
         "New York Jets at Tennessee Titans Spread \u00b7 LowVig.ag \u2197SideNew York JetsLine1.5Price-103Implied50.7%"
       ],
       "scrollWidth": 375,
-      "shown": 600,
+      "shown": 608,
       "title": "Live Titans market board",
-      "total": 600,
+      "total": 608,
       "viewport": 375
     },
     "rowGeometry": [
@@ -609,8 +614,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 14.91,
-  "testedAt": "2026-09-01T17:08:17Z"
+  "durationSeconds": 6.26,
+  "testedAt": "2026-09-01T17:46:05Z"
 }```
 
 ## Command Intelligence browser regression
@@ -668,8 +673,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.04,
-  "testedAt": "2026-09-01T17:08:19Z"
+  "durationSeconds": 2.09,
+  "testedAt": "2026-09-01T17:46:08Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -815,8 +820,8 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 4.58,
-  "testedAt": "2026-09-01T17:08:24Z"
+  "durationSeconds": 4.96,
+  "testedAt": "2026-09-01T17:46:13Z"
 }```
 
 ## Ask Titans browser regression
@@ -922,8 +927,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 2.02,
-  "testedAt": "2026-09-01T17:08:26Z"
+  "durationSeconds": 2.14,
+  "testedAt": "2026-09-01T17:46:15Z"
 }```
 
 ## Change Intelligence browser regression
@@ -960,8 +965,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.45,
-  "testedAt": "2026-09-01T17:08:29Z"
+  "durationSeconds": 3.19,
+  "testedAt": "2026-09-01T17:46:19Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -981,8 +986,7 @@
     "cacheUrls": [
       "/api/data",
       "/api/fan-intel",
-      "/api/social-pulse",
-      "/api/tickets"
+      "/api/social-pulse"
     ],
     "readiness": {
       "availability": {
@@ -1007,23 +1011,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1788282541184,
+          "expiresAt": 1788284811197,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788282511184,
+          "updatedAt": 1788284781197,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1788282541343,
+          "expiresAt": 1788284811274,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788282511343,
+          "updatedAt": 1788284781274,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-09-01T17:08:31.128Z",
+        "at": "2026-09-01T17:46:21.159Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -1180,7 +1184,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.55
+  "durationSeconds": 3.73
 }```
 
 ## Data freshness browser regression
@@ -1190,7 +1194,7 @@
   "ok": true,
   "base": "https://titans.alecjprice.com",
   "desktop": {
-    "detail": "Roster verified Aug 31 \u00b7 Moves 21 hours ago \u00b7 Intel 21 hours ago",
+    "detail": "Roster verified Aug 31 \u00b7 Moves 22 hours ago \u00b7 Intel 22 hours ago",
     "overflow": false,
     "rect": {
       "bottom": 1296.1875,
@@ -1202,7 +1206,7 @@
     },
     "state": "fallback",
     "strong": "Verified backup \u00b7 Aug 31",
-    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves 21 hours ago \u00b7 Intel 21 hours agoSee sources \u2192",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves 22 hours ago \u00b7 Intel 22 hours agoSee sources \u2192",
     "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 31.",
     "viewport": {
       "height": 757,
@@ -1210,7 +1214,7 @@
     }
   },
   "mobile": {
-    "detail": "Roster verified Aug 31 \u00b7 Moves 21 hours ago \u00b7 Intel 21 hours ago",
+    "detail": "Roster verified Aug 31 \u00b7 Moves 22 hours ago \u00b7 Intel 22 hours ago",
     "overflow": false,
     "rect": {
       "bottom": 2334.46875,
@@ -1222,7 +1226,7 @@
     },
     "state": "fallback",
     "strong": "Verified backup \u00b7 Aug 31",
-    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves 21 hours ago \u00b7 Intel 21 hours agoSee sources \u2192",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves 22 hours ago \u00b7 Intel 22 hours agoSee sources \u2192",
     "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 31.",
     "viewport": {
       "height": 701,
@@ -1230,8 +1234,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 1.53,
-  "testedAt": "2026-09-01T17:08:35Z"
+  "durationSeconds": 1.82,
+  "testedAt": "2026-09-01T17:46:25Z"
 }```
 
 ## Account / Guest browser regression
@@ -1322,9 +1326,9 @@
   },
   "roster": {
     "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknownRos"
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
   },
-  "durationSeconds": 1.87
+  "durationSeconds": 2.14
 }```
 
 ## Advanced analytics browser regression
@@ -1388,8 +1392,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 2.17,
-  "testedAt": "2026-09-01T17:08:39Z"
+  "durationSeconds": 2.08,
+  "testedAt": "2026-09-01T17:46:30Z"
 }```
 
 ## Player headshot browser regression
@@ -1404,7 +1408,7 @@
   "rosterCards": 61,
   "rosterDecoratedHeadshots": 56,
   "rosterHeadshotCoveragePct": 91.8,
-  "rosterLoadedHeadshots": 46,
+  "rosterLoadedHeadshots": 3,
   "statsPlayerRows": 61,
   "statsDecoratedHeadshots": 56,
   "statsHeadshotCoveragePct": 91.8,
@@ -1414,8 +1418,8 @@
   "richPlayer": "Tony Adams",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.82,
-  "testedAt": "2026-09-01T17:08:43Z"
+  "durationSeconds": 4.31,
+  "testedAt": "2026-09-01T17:46:35Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
