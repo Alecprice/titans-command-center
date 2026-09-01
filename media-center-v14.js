@@ -48,11 +48,18 @@
     return state.loading;
   }
 
-  function nextGame(){
-    const now=Date.now();
-    return (state.data?.games||[])
-      .filter(g=>{const t=gameTime(g);return Number.isFinite(t)&&t>now&&!/final|bye/i.test(String(g.status||''))})
-      .sort((a,b)=>gameTime(a)-gameTime(b))[0]||null;
+  function focusedGame(){
+    const games=state.data?.games||[];
+    const shared=window.TitansRuntime?.scheduleFocus;
+    if(typeof shared==='function'){
+      const focus=shared(games,new Date());
+      if(focus?.game)return focus.game;
+    }
+    const now=Date.now(),windowMs=Math.max(0,Number(window.TitansRuntime?.gameFocusWindowMs)||5*60*60*1000);
+    const candidates=games
+      .filter(g=>!/final|bye/i.test(String(g.status||''))&&Number.isFinite(gameTime(g)))
+      .sort((a,b)=>gameTime(a)-gameTime(b));
+    return candidates.find(g=>gameTime(g)<=now&&gameTime(g)>=now-windowMs)||candidates.find(g=>gameTime(g)>now)||null;
   }
   function gameLabel(g){if(!g)return'Titans game';return `${g.homeAway==='home'?'vs':'at'} ${g.opponent||g.opponentAbbr||'Opponent'}`}
   function providerCards(g){
@@ -107,9 +114,9 @@
   function fanMediaSection(){return `<section class="media-future"><div><small>MORE TITANS MEDIA</small><h2>Keep the Two-Toned Blue on all week</h2><p>Game broadcasts are only part of the fan experience. These official Titans destinations cover team shows, podcasts, highlights, interviews and press conferences.</p></div><div class="media-future-grid"><article><strong>Official Titans broadcast hub</strong><p>Find the team’s current radio and TV programming, station information and broadcast features.</p><a class="button" href="${OFFICIAL.titansBroadcast}" target="_blank" rel="noopener noreferrer">Open broadcast hub ↗</a></article><article><strong>The OTP: Official Titans Podcast</strong><p>Go straight to the Titans’ podcast home for the latest episodes plus official listening and video options.</p><a class="button" href="${OFFICIAL.titansOtp}" target="_blank" rel="noopener noreferrer">Open The OTP ↗</a></article><article><strong>Titans video</strong><p>Catch official highlights, Mic’d Up, player interviews and other rights-holder video.</p><a class="button" href="${OFFICIAL.titansVideo}" target="_blank" rel="noopener noreferrer">Open Titans video ↗</a></article><article><strong>Postgame podium</strong><p>Use the official Titans video hub for coach and player press conferences after games and throughout the week.</p><a class="button" href="${OFFICIAL.titansVideo}" target="_blank" rel="noopener noreferrer">Watch official video ↗</a></article></div></section>`}
 
   function syncChrome(){document.querySelectorAll('[data-route]').forEach(a=>{const active=a.dataset.route===route();a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});const sidebar=document.querySelector('#sidebar');sidebar?.classList.remove('open');if(sidebar&&matchMedia('(max-width: 759px)').matches)sidebar.inert=true;const more=document.querySelector('#mobile-more-button');if(more){more.setAttribute('aria-expanded','false');more.setAttribute('aria-pressed','false')}}
-  function mediaPage(){if(!app)return;const g=nextGame();app.innerHTML=`<section class="media-page"><header class="media-hero"><div><div class="eyebrow">TITANS MEDIA CENTER</div><h1>Watch / Listen</h1><p>Match the next Titans game to the right TV, stream or radio option — then stay connected with official team video and audio all week.</p>${areaSwitch()}</div><div class="media-next"><small>NEXT GAME</small><strong>${esc(gameLabel(g))}</strong><span>${g?fmt(g.date):'Schedule loading'}</span><em>${esc(g?.network||'Network TBD')}</em></div></header>${radioSection(g)}${watchSection(g)}${fanMediaSection()}</section>`;syncChrome()}
+  function mediaPage(){if(!app)return;const g=focusedGame();app.innerHTML=`<section class="media-page"><header class="media-hero"><div><div class="eyebrow">TITANS MEDIA CENTER</div><h1>Watch / Listen</h1><p>Match the current or next Titans game to the right TV, stream or radio option — then stay connected with official team video and audio all week.</p>${areaSwitch()}</div><div class="media-next"><small>CURRENT / NEXT GAME</small><strong>${esc(gameLabel(g))}</strong><span>${g?fmt(g.date):'Schedule loading'}</span><em>${esc(g?.network||'Network TBD')}</em></div></header>${radioSection(g)}${watchSection(g)}${fanMediaSection()}</section>`;syncChrome()}
 
-  function homeCard(){if(route()!=='home'||document.querySelector('.media-home-card'))return;const hero=document.querySelector('.fan-hero');if(!hero)return;const g=nextGame(),card=document.createElement('section');card.className='media-home-card';const scheduleLine=g?`${fmt(g.date)} · ${esc(g.network||'Network TBD')}`:'Find the authorized radio or streaming option.';card.innerHTML=`<div><small>WATCH / LISTEN</small><strong>${esc(g?gameLabel(g):'Titans media')}</strong><span>${scheduleLine}</span></div><a href="#media">Open media center →</a>`;hero.insertAdjacentElement('afterend',card)}
+  function homeCard(){if(route()!=='home'||document.querySelector('.media-home-card'))return;const hero=document.querySelector('.fan-hero');if(!hero)return;const g=focusedGame(),card=document.createElement('section');card.className='media-home-card';const scheduleLine=g?`${fmt(g.date)} · ${esc(g.network||'Network TBD')}`:'Find the authorized radio or streaming option.';card.innerHTML=`<div><small>WATCH / LISTEN</small><strong>${esc(g?gameLabel(g):'Titans media')}</strong><span>${scheduleLine}</span></div><a href="#media">Open media center →</a>`;hero.insertAdjacentElement('afterend',card)}
 
   document.addEventListener('click',event=>{
     const areaButton=event.target instanceof Element?event.target.closest('[data-media-area]'):null;
