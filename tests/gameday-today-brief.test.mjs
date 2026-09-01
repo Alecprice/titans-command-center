@@ -8,11 +8,11 @@ const data=read('src/data.mjs');
 const html=read('index.html');
 const sw=read('sw.js');
 
-test('next-game fast pass follows the schedule instead of one hardcoded matchup',()=>{
-  assert.match(brief,/const upcoming=games=>games/);
-  assert.match(brief,/kickoff>Date\.now\(\)/);
-  assert.match(brief,/!\/final\|bye\/i/);
-  assert.match(brief,/sort\(\(a,b\)=>Date\.parse\(a\.date\)-Date\.parse\(b\.date\)\)/);
+test('next-game fast pass reuses the shared schedule focus contract',()=>{
+  assert.match(brief,/const upcoming=games=>runtime\.scheduleFocus\(games\)\.next\|\|null;/);
+  assert.doesNotMatch(brief,/const upcoming=games=>games/);
+  assert.doesNotMatch(brief,/kickoff>Date\.now\(\).*final\|bye/s);
+  assert.doesNotMatch(brief,/sort\(\(a,b\)=>Date\.parse\(a\.date\)-Date\.parse\(b\.date\)\)/);
   assert.doesNotMatch(brief,/opponentAbbr:'SEA'/);
   assert.doesNotMatch(brief,/teamDate:'2026-08-23'/);
   assert.match(brief,/runtime\.formatTeamKickoff/);
