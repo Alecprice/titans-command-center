@@ -20,6 +20,6 @@ test('base app does not duplicate future-only kickoff selection',()=>{
 
 test('shared focus remains bounded and never calls schedule time live',()=>{
   assert.match(core,/GAME_FOCUS_WINDOW_MS\s*=\s*5\s*\*\s*60\s*\*\s*60\s*\*\s*1000/);
-  assert.match(core,/state:'game-window'/);
-  assert.doesNotMatch(core,/state:'live'/);
+  assert.match(core,/state:\s*current\s*\?\s*'game-window'\s*:\s*next\s*\?\s*'upcoming'\s*:\s*'none'/);
+  assert.doesNotMatch(core,/state:\s*'live'/);
 });
