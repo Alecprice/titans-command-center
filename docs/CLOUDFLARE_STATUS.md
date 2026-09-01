@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
-- Status: **deployed + canonical front door + full production + browser + media + market + tickets + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `6963788f8304a631af23063b805ab54468f9a931`
+- Status: **deployed + runtime / 365 Mode browser regression failure**
+- Source commit: `b4cf48f1cdef7500a4558664bdaa4754330d2c14`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Neon warehouse deployment secret required: false (D1 primary)
@@ -18,14 +18,14 @@
 - Player Intelligence / Game Day browser regression: success
 - Ask Titans browser regression: success
 - Change Intelligence browser regression: success
-- Runtime / 365 Mode browser regression: success
-- Data freshness browser regression: success
-- Account / Guest browser regression: success
-- Advanced analytics browser regression: success
-- Player headshot browser regression: success
+- Runtime / 365 Mode browser regression: failure
+- Data freshness browser regression: skipped
+- Account / Guest browser regression: skipped
+- Advanced analytics browser regression: skipped
+- Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-01T23:43:30Z
+- Recorded: 2026-09-01T23:46:53Z
 
 ## Canonical front door regression
 
@@ -34,13 +34,13 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "deployedCommit": "751d635369a6dcc93008153654c7fd8fc16414ab",
+  "deployedCommit": "b4cf48f1cdef7500a4558664bdaa4754330d2c14",
   "version": "1.0.0",
   "revisionAttempts": 1,
   "cloudFront": {
-    "requestId": "GD-K2qUeP6jjh06zACzIAkwarlfbhTDzBU-Jzezf9jOKUIlKqL9EqQ==",
-    "pop": "DFW57-P1",
-    "via": "1.1 73e04d645babcbb9ee8f20cc865b009c.cloudfront.net (CloudFront)",
+    "requestId": "HlXAw0J-JU6_FwGpWaN_bGF-2dEMvOQwJZxH_d2IsRtb4kqEvWQ-Yg==",
+    "pop": "SFO5-P1",
+    "via": "1.1 52a50599e55838e3cced4f5e481dca9e.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -59,13 +59,13 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 264,
-    "originMeta": 157,
-    "canonicalRoot": 48,
-    "originRoot": 38,
-    "health": 275
+    "canonicalMeta": 169,
+    "originMeta": 118,
+    "canonicalRoot": 24,
+    "originRoot": 22,
+    "health": 223
   },
-  "testedAt": "2026-09-01T23:42:15.455Z"
+  "testedAt": "2026-09-01T23:46:02.426Z"
 }```
 
 ## Production regression
@@ -125,19 +125,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "6963788f8304a631af23063b805ab54468f9a931",
-    "builtAt": "2026-09-01T23:41:59.608Z"
+    "commit": "b4cf48f1cdef7500a4558664bdaa4754330d2c14",
+    "builtAt": "2026-09-01T23:45:47.275Z"
   },
-  "deploymentPropagationAttempts": 2,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 56,
-    "health": 152,
-    "data": 178,
-    "stats": 351,
-    "market": 4477,
-    "analytics": 277
+    "root": 25,
+    "health": 159,
+    "data": 41,
+    "stats": 227,
+    "market": 6575,
+    "analytics": 191
   },
-  "testedAt": "2026-09-01T23:42:29.757Z",
+  "testedAt": "2026-09-01T23:46:13.747Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-snapshot",
@@ -148,8 +148,8 @@
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 354,
-    "testedAt": "2026-09-01T23:42:30.508Z"
+    "responseMs": 186,
+    "testedAt": "2026-09-01T23:46:14.163Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -157,17 +157,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 170,
-    "warmHitMs": 170,
+    "coldOrInitialMs": 106,
+    "warmHitMs": 106,
     "rows": 608,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 170,
+        "durationMs": 106,
         "rows": 608
       }
     ],
-    "testedAt": "2026-09-01T23:42:30.708Z"
+    "testedAt": "2026-09-01T23:46:14.302Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -226,8 +226,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 170,
-  "testedAt": "2026-09-01T23:42:31.253Z"
+  "durationMs": 122,
+  "testedAt": "2026-09-01T23:46:14.715Z"
 }```
 
 ## Browser navigation regression
@@ -273,11 +273,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 228,
+  "maxLongTaskMs": 90,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 15.11,
-  "testedAt": "2026-09-01T23:42:51Z"
+  "durationSeconds": 8.66,
+  "testedAt": "2026-09-01T23:46:26Z"
 }```
 
 ## Listen Watch browser regression
@@ -333,11 +333,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788306174443
+      "timestamp": 1788306389432
     }
   ],
-  "durationSeconds": 2.75,
-  "testedAt": "2026-09-01T23:42:54Z"
+  "durationSeconds": 2.73,
+  "testedAt": "2026-09-01T23:46:30Z"
 }```
 
 ## Market Pulse browser regression
@@ -610,8 +610,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 5.93,
-  "testedAt": "2026-09-01T23:43:01Z"
+  "durationSeconds": 6.27,
+  "testedAt": "2026-09-01T23:46:36Z"
 }```
 
 ## Ticket Center browser regression
@@ -958,8 +958,8 @@
   },
   "browserWarnings": [],
   "eligibleFallbackGames": 17,
-  "durationSeconds": 1.59,
-  "testedAt": "2026-09-01T23:43:02Z"
+  "durationSeconds": 1.67,
+  "testedAt": "2026-09-01T23:46:38Z"
 }```
 
 ## Command Intelligence browser regression
@@ -1017,8 +1017,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 1.95,
-  "testedAt": "2026-09-01T23:43:05Z"
+  "durationSeconds": 1.94,
+  "testedAt": "2026-09-01T23:46:40Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -1164,8 +1164,8 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 4.83,
-  "testedAt": "2026-09-01T23:43:10Z"
+  "durationSeconds": 4.06,
+  "testedAt": "2026-09-01T23:46:45Z"
 }```
 
 ## Ask Titans browser regression
@@ -1271,8 +1271,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 1.71,
-  "testedAt": "2026-09-01T23:43:12Z"
+  "durationSeconds": 1.78,
+  "testedAt": "2026-09-01T23:46:47Z"
 }```
 
 ## Change Intelligence browser regression
@@ -1309,15 +1309,15 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.28,
-  "testedAt": "2026-09-01T23:43:14Z"
+  "durationSeconds": 2.12,
+  "testedAt": "2026-09-01T23:46:49Z"
 }```
 
 ## Runtime / 365 Mode browser regression
 
 ```json
 {
-  "ok": true,
+  "ok": false,
   "base": "https://titans.alecjprice.com",
   "desktop": {
     "phase": "regular",
@@ -1355,23 +1355,23 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1788306226638,
+          "expiresAt": 1788306441271,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788306196638,
+          "updatedAt": 1788306411271,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1788306226721,
+          "expiresAt": 1788306441406,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788306196721,
+          "updatedAt": 1788306411406,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-09-01T23:43:16.582Z",
+        "at": "2026-09-01T23:46:51.245Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
@@ -1418,352 +1418,61 @@
       "width": 925
     }
   },
-  "mobile": {
-    "layout": {
-      "dock": {
-        "display": "grid",
-        "h": 72,
-        "w": 465,
-        "x": 10,
-        "y": 621
+  "mobile": {},
+  "browserWarnings": [],
+  "stage": "mobile:read-layout",
+  "error": "RuntimeError: Mobile menu unreachable: {'dock': {'display': 'grid', 'h': 72, 'w': 465, 'x': 10, 'y': 621}, 'dockTargets': [{'h': 58, 'label': 'Home', 'w': 89.796875}, {'h': 58, 'label': 'Roster', 'w': 89.796875}, {'h': 58, 'label': 'Game', 'w': 89.796875}, {'h': 58, 'label': 'Search', 'w': 89.796875}, {'h': 58, 'label': 'More', 'w': 89.8125}], 'menu': {'display': 'none', 'h': 0, 'w': 0, 'x': 0, 'y': 0}, 'overflow': False, 'panelHeight': 844.734375, 'panelWidth': 461, 'reviewHeight': 48, 'targets': [{'h': 112, 'label': 'NEXT GAME', 'w': 427}, {'h': 124.4375, 'label': 'AVAILABILITY', 'w': 427}, {'h': 145.3125, 'label': 'AFC SOUTH', 'w': 427}, {'h': 166.1875, 'label': 'WHAT CHANGED?', 'w': 427}], 'viewport': 500}",
+  "mobileState": {
+    "appText": "2026 SEASON \u00b7 REGULAR SEASON \u00b7 FAN-BUILT HQ\nTENNESSEE FOOTBALL.\nEVERY ANGLE.\n\nGame day, roster movement, official team updates, stats, free market data, and the franchise history that made Titans blue mean something. Built as a fan destination \u2014 not a generic dashboard.\n\nFIND CHEAPEST TITANS TICKETS\n\u2192\nENTER GAME DAY \u2192\nEXPLORE THE LEGACY\nNEXT UP \u00b7 VS NEW YORK",
+    "dock": {
+      "rect": {
+        "bottom": 693,
+        "height": 72,
+        "top": 621,
+        "width": 465
       },
-      "dockTargets": [
-        {
-          "h": 58,
-          "label": "Home",
-          "w": 89.796875
-        },
-        {
-          "h": 58,
-          "label": "Roster",
-          "w": 89.796875
-        },
-        {
-          "h": 58,
-          "label": "Game",
-          "w": 89.796875
-        },
-        {
-          "h": 58,
-          "label": "Search",
-          "w": 89.796875
-        },
-        {
-          "h": 58,
-          "label": "More",
-          "w": 89.8125
-        }
-      ],
-      "menu": {
-        "display": "grid",
-        "h": 46,
-        "w": 46,
-        "x": 10,
-        "y": 8
-      },
-      "overflow": false,
-      "panelHeight": 844.734375,
-      "panelWidth": 461,
-      "reviewHeight": 48,
-      "targets": [
-        {
-          "h": 112,
-          "label": "NEXT GAME",
-          "w": 427
-        },
-        {
-          "h": 124.4375,
-          "label": "AVAILABILITY",
-          "w": 427
-        },
-        {
-          "h": 145.3125,
-          "label": "AFC SOUTH",
-          "w": 427
-        },
-        {
-          "h": 166.1875,
-          "label": "WHAT CHANGED?",
-          "w": 427
-        }
-      ],
-      "viewport": 500
+      "targets": 5
     },
-    "readiness": {
-      "availability": {
-        "copy": "Kickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
-        "title": "Week 1 prep window"
-      },
-      "standings": {
-        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
-        "title": "0-0 \u00b7 Week 1 ahead"
+    "hash": "#home",
+    "moreExpanded": "false",
+    "onboarding": false,
+    "panel": {
+      "count": 1,
+      "rect": {
+        "bottom": 3816.203125,
+        "height": 844.734375,
+        "top": 2971.46875,
+        "width": 461
       }
     },
-    "panelState": {
-      "cards": 4,
-      "display": "block",
-      "height": 844.734375,
-      "opacity": "1",
-      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 12 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
-      "visibility": "visible",
-      "visible": true,
-      "width": 461
-    },
-    "sheet": {
-      "bottom": 611,
-      "dockTop": 621,
-      "height": 504.71875,
-      "links": 15,
-      "top": 106.28125
-    },
-    "smartSearch": {
-      "height": 110,
-      "left": 10,
-      "right": 475,
-      "rows": 1,
-      "targets": [
-        58
-      ],
-      "width": 465
-    }
-  },
-  "browserWarnings": [],
-  "durationSeconds": 3.62
-}```
-
-## Data freshness browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans.alecjprice.com",
-  "desktop": {
-    "detail": "Roster verified Aug 31 \u00b7 Moves yesterday \u00b7 Intel yesterday",
-    "overflow": false,
-    "rect": {
-      "bottom": 1296.1875,
-      "height": 139.578125,
-      "left": 915.328125,
-      "right": 1216.984375,
-      "top": 1156.609375,
-      "width": 301.65625
-    },
-    "state": "fallback",
-    "strong": "Verified backup \u00b7 Aug 31",
-    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves yesterday \u00b7 Intel yesterdaySee sources \u2192",
-    "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 31.",
-    "viewport": {
-      "height": 757,
-      "width": 1280
-    }
-  },
-  "mobile": {
-    "detail": "Roster verified Aug 31 \u00b7 Moves yesterday \u00b7 Intel yesterday",
-    "overflow": false,
-    "rect": {
-      "bottom": 2334.46875,
-      "height": 117.1875,
-      "left": 9,
-      "right": 366,
-      "top": 2217.28125,
-      "width": 357
-    },
-    "state": "fallback",
-    "strong": "Verified backup \u00b7 Aug 31",
-    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves yesterday \u00b7 Intel yesterdaySee sources \u2192",
-    "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 31.",
-    "viewport": {
-      "height": 701,
-      "width": 390
-    }
-  },
-  "browserWarnings": [],
-  "durationSeconds": 1.5,
-  "testedAt": "2026-09-01T23:43:20Z"
-}```
-
-## Account / Guest browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans.alecjprice.com",
-  "browserWarnings": [],
-  "guest": {
-    "accountGuest": true,
-    "route": "#home",
-    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
-  },
-  "mobileShell": {
-    "dock": {
-      "h": 72,
-      "top": 621,
-      "w": 465
-    },
-    "more": {
-      "bottom": 686,
-      "h": 58,
-      "top": 628,
-      "w": 89.8125
-    },
-    "runtime": "1.10.0",
-    "sidebarHidden": "true",
-    "sidebarInert": true
-  },
-  "sheet": {
-    "bottom": 611,
-    "dockTop": 621,
-    "top": 106.28125
-  },
-  "accountEntry": {
-    "bottom": 290.53125,
-    "h": 44,
-    "parent": "sidebar",
-    "top": 246.53125,
-    "visibleBottom": 611,
-    "visibleTop": 106.28125,
-    "w": 390
-  },
-  "panel": {
-    "bottom": 701,
-    "h": 602.859375,
-    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordLog inContinue as guestGUEST DATAThese settings exist only on this device.Export this deviceImport backupReset this deviceReset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.",
-    "vh": 701,
-    "w": 485
-  },
-  "portabilityTools": {
-    "exportHeight": 50,
-    "exportLabel": "Export this device",
-    "guest": true,
-    "importHeight": 50,
-    "importLabel": "Import backup",
-    "resetHeight": 50,
-    "resetLabel": "Reset this device"
-  },
-  "importPreview": {
-    "applyHeight": 46,
-    "favorite": null,
-    "pending": {
-      "accountEmail": "",
-      "exportedAt": "2026-08-22T12:00:00Z",
-      "keys": [
-        "titans:v15MyTitans"
-      ],
-      "preferences": {
-        "titans:v15MyTitans": {
-          "favorite": "Browser Smoke"
-        }
+    "search": {
+      "exists": true,
+      "hidden": true,
+      "rect": {
+        "height": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0
       },
-      "scope": "guest-device"
+      "rows": 0
     },
-    "text": "READY TO RESTORE1 setting groupAug 22, 2026, 12:00 PM \u00b7 guest-deviceNothing has changed yet. Applying restores only recognized Titans preferences from this file.Apply imported settingsCancel"
-  },
-  "resetArmed": {
-    "guest": true,
-    "hash": "#home",
-    "hint": "Tap Confirm reset again within 6 seconds.",
-    "label": "Confirm reset"
-  },
-  "authOutage": {
-    "guest": true,
-    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
-  },
-  "roster": {
-    "route": "#roster",
-    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
-  },
-  "durationSeconds": 1.99
-}```
-
-## Advanced analytics browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans.alecjprice.com",
-  "mode": "cloudflare-d1",
-  "healthStatus": "healthy",
-  "analyticsStorage": "cloudflare-d1",
-  "analyticsSnapshotSource": "nflreadpy-d1-snapshot",
-  "analyticsSnapshotStale": false,
-  "seasonContext": {
-    "bannerRole": "note",
-    "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
-    "bannerVisible": true,
-    "dataSeason": "2025",
-    "heading": "2025 advanced analytics baseline",
-    "requestedSeason": "2026",
-    "seasonFallback": "true"
-  },
-  "mobileSeasonContext": {
-    "fallback": "true",
-    "text": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
-    "visible": true
-  },
-  "metricCount": 4,
-  "metricValues": [
-    {
-      "detail": "#30 of 32",
-      "label": "Offensive EPA / play",
-      "value": "-0.148"
+    "sidebar": {
+      "className": "sidebar",
+      "inert": true,
+      "open": false,
+      "rect": {
+        "bottom": 1231.71875,
+        "height": 504.71875,
+        "top": 727,
+        "width": 469
+      }
     },
-    {
-      "detail": "#28 of 32",
-      "label": "Defensive EPA / play allowed",
-      "value": "+0.104"
-    },
-    {
-      "detail": "#11 of 32",
-      "label": "Pace",
-      "value": "28.9 sec/play"
-    },
-    {
-      "detail": "Latest loaded week: 18",
-      "label": "Rest days",
-      "value": "7 days"
+    "viewport": {
+      "h": 701,
+      "w": 500
     }
-  ],
-  "situationFields": [
-    "Down & distance",
-    "Field position",
-    "Formation",
-    "Personnel",
-    "Score diff",
-    "TEN EPA",
-    "Time remaining"
-  ],
-  "initialPlayCards": 60,
-  "offenseFilteredPlayCards": 39,
-  "mobileMetricCount": 4,
-  "browserWarnings": [],
-  "durationSeconds": 2.07,
-  "testedAt": "2026-09-01T23:43:25Z"
-}```
-
-## Player headshot browser regression
-
-```json
-{
-  "ok": true,
-  "base": "https://titans.alecjprice.com",
-  "expectedCurrentRoster": 61,
-  "minimumCurrentRosterHeadshots": 52,
-  "minimumHeadshotCoveragePct": 85.0,
-  "rosterCards": 61,
-  "rosterDecoratedHeadshots": 56,
-  "rosterHeadshotCoveragePct": 91.8,
-  "rosterLoadedHeadshots": 2,
-  "statsPlayerRows": 61,
-  "statsDecoratedHeadshots": 56,
-  "statsHeadshotCoveragePct": 91.8,
-  "statsLoadedHeadshots": 46,
-  "formerPreseasonParticipantRows": 29,
-  "mobileLoadedHeadshots": 48,
-  "richPlayer": "Tony Adams",
-  "richPlayerHeadshotLoaded": true,
-  "browserWarnings": [],
-  "durationSeconds": 4.3,
-  "testedAt": "2026-09-01T23:43:29Z"
+  },
+  "durationSeconds": 3.3
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
