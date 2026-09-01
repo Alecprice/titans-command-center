@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import {team,games} from '../src/data.mjs';
 
 const script=fs.readFileSync(new URL('../scripts/regular-season-production-regression.mjs',import.meta.url),'utf8');
+const worker=fs.readFileSync(new URL('../cloudflare/worker.mjs',import.meta.url),'utf8');
+const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
 
 test('2026 source data is in regular-season phase with the Jets opener locked',()=>{
   assert.equal(team.season,2026);
@@ -24,13 +26,26 @@ test('completed preseason history remains immutable as the app enters Week 1',()
   ]);
 });
 
+test('production audit follows the same dual-source contract as the browser app',()=>{
+  assert.match(app,/import \{team,games as seedGames/);
+  assert.match(app,/if\(d\.games\?\.length\)games=d\.games/);
+  assert.match(worker,/games:fallbackGames\.map/);
+  assert.match(script,/getText\('\/src\/data\.mjs','Deployed data module'\)/);
+  assert.match(script,/getData\(\)/);
+  assert.match(script,/readTeamContract\(seedSource\)/);
+  assert.match(script,/const games=Array\.isArray\(data\.games\)\?data\.games:\[\]/);
+  assert.doesNotMatch(script,/const team=data\.team/);
+});
+
 test('production audit is date-aware around Week 1 kickoff and validates fan-facing schedule truth',()=>{
   assert.match(script,/WEEK1_KICKOFF='2026-09-13T17:00:00Z'/);
-  assert.match(script,/team\.phase\|\|''\)==='Regular Season'/);
+  assert.match(script,/team\.phase==='Regular Season'/);
   assert.match(script,/opponentAbbr\|\|''\)==='NYJ'/);
   assert.match(script,/homeAway\|\|''\)==='home'/);
   assert.match(script,/venue\|\|''\)==='Nissan Stadium'/);
   assert.match(script,/network\|\|''\)==='CBS'/);
   assert.match(script,/Date\.now\(\)<Date\.parse\(WEEK1_KICKOFF\)/);
   assert.match(script,/Historical preseason score/);
+  assert.match(script,/teamContractSource:'\/src\/data\.mjs'/);
+  assert.match(script,/scheduleContractSource:'\/api\/data'/);
 });
