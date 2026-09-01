@@ -4,11 +4,12 @@ import {formatCalendarDate,formatTeamKickoff,TEAM_TIME_LABEL} from './team-time-
   'use strict';
 
   const app=document.querySelector('#app');
+  const runtime=window.TitansRuntime;
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const arr=value=>Array.isArray(value)?value:[];
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num=value=>Number.isFinite(Number(value))?Number(value):null;
-  const state={data:null,fan:null,score:null,loading:null,viewObserver:null,serial:0};
+  const state={data:null,fan:null,score:null,loading:null,scoreLoading:null,viewObserver:null,serial:0};
   const METRICS={
     epa:['EPA','Expected Points Added estimates how much a play helped or hurt scoring expectation.'],
     wpa:['WPA','Win Probability Added estimates how much a play changed a model’s chance of winning.'],
@@ -20,17 +21,28 @@ import {formatCalendarDate,formatTeamKickoff,TEAM_TIME_LABEL} from './team-time-
   async function load(){
     if(state.data&&state.fan)return state;
     if(state.loading)return state.loading;
-    state.loading=Promise.all([
+    const request=runtime?[
+      runtime.apiJson('/api/data',{ttl:30000}),
+      runtime.apiJson('/api/fan-intel',{ttl:30000})
+    ]:[
       fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
-      fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
-      fetch('/api/espn-scoreboard',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
-    ]).then(([data,fan,score])=>{
+      fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+    ];
+    state.loading=Promise.all(request).then(([data,fan])=>{
       state.data=data?.ok?data:{};
       state.fan=fan?.ok?fan:{};
-      state.score=score?.ok?score:null;
       return state;
     }).finally(()=>state.loading=null);
     return state.loading;
+  }
+
+  async function loadScoreboard(){
+    if(state.scoreLoading)return state.scoreLoading;
+    const request=runtime
+      ?runtime.apiJson('/api/espn-scoreboard',{ttl:5000})
+      :fetch('/api/espn-scoreboard',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+    state.scoreLoading=Promise.resolve(request).then(score=>{state.score=score?.ok?score:null;return state.score}).finally(()=>state.scoreLoading=null);
+    return state.scoreLoading;
   }
 
   const games=()=>arr(state.data?.games);
@@ -45,6 +57,7 @@ import {formatCalendarDate,formatTeamKickoff,TEAM_TIME_LABEL} from './team-time-
   const age=value=>{const t=Date.parse(value);if(!Number.isFinite(t))return'Freshness not provided';const m=Math.max(0,Math.round((Date.now()-t)/60000));return m<2?'Updated just now':m<60?`Updated ${m} min ago`:m<1440?`Updated ${Math.round(m/60)} hr ago`:`Updated ${Math.round(m/1440)} day${Math.round(m/1440)===1?'':'s'} ago`};
   const sourceTime=(...values)=>values.map(iso).find(Boolean)||null;
   const clean=value=>String(value??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  function needsScoreboard(query){const q=clean(query);if(/watch|listen|radio|stream|broadcast|channel|network|what time/.test(q))return false;return /live|score|clock|quarter|game status/.test(q)}
 
   function scoreGame(){
     for(const event of arr(state.score?.payload?.events)){
@@ -176,6 +189,7 @@ import {formatCalendarDate,formatTeamKickoff,TEAM_TIME_LABEL} from './team-time-
     const initialOut=document.querySelector('.v17-ask [data-v17-result]');if(!initialOut)return;
     initialOut.innerHTML='<div class="v17-ask-empty"><strong>Checking loaded Titans data…</strong><span>Roster, game, injury, depth and scoreboard context.</span></div>';
     await load();
+    if(needsScoreboard(query))await loadScoreboard();
     if(token!==state.serial||route()!=='fan')return;
     upgrade();
     const liveOut=document.querySelector('.v17-ask [data-v17-result]');
