@@ -41,6 +41,20 @@ test('custom-domain probe proves CloudFront fronts the live Worker without weake
   assert.doesNotMatch(probe,/DATABASE_URL/);
 });
 
+test('custom-domain revision comparison tolerates bounded edge propagation but still fails closed',()=>{
+  const probe=read('scripts/custom-domain-regression.mjs');
+  assert.match(probe,/REVISION_CONVERGENCE_ATTEMPTS=6/);
+  assert.match(probe,/REVISION_CONVERGENCE_DELAY_MS=2500/);
+  assert.match(probe,/async function waitForRevisionConvergence\(\)/);
+  assert.match(probe,/for\(let attempt=1;attempt<=REVISION_CONVERGENCE_ATTEMPTS;attempt\+\+\)/);
+  assert.match(probe,/if\(customCommit===originCommit\)return \{\.\.\.pair,attempts:attempt\}/);
+  assert.match(probe,/await wait\(REVISION_CONVERGENCE_DELAY_MS\)/);
+  assert.match(probe,/did not converge after \$\{REVISION_CONVERGENCE_ATTEMPTS\} attempts/);
+  assert.match(probe,/const \{canonicalMeta,originMeta,attempts:revisionAttempts\}=await waitForRevisionConvergence\(\)/);
+  assert.match(probe,/revisionAttempts,/);
+  assert.match(probe,/assert\(canonicalMeta\.body\.commit===originMeta\.body\.commit/);
+});
+
 test('custom-domain workflow reuses the established production and browser gates',()=>{
   const workflow=read('.github/workflows/custom-domain-verify.yml');
   for(const command of [
