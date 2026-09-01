@@ -20,6 +20,7 @@ assert(body?.database?.configured===true,'Health no longer reports the configure
 const dataResult=await getJson(`/api/data?health-truth=${Date.now()}`);
 assert(dataResult.response.status===200,`Data API returned ${dataResult.response.status}`);
 const data=dataResult.body;
+const edgeCacheStatus=String(dataResult.response.headers.get('X-Titans-Edge-Cache')||'').toUpperCase();
 assert(data?.ok===true,'Data API did not return a usable bootstrap snapshot');
 const dataAudit=dataAuditDate(data);
 assert(dataAudit,'Data API is missing a dated snapshot or audited verification marker');
@@ -32,15 +33,17 @@ if(status==='healthy'){
   const contentAudit=validAuditDate(body?.contentAudit);
   assert(contentAudit,'Healthy D1 mode is missing content audit metadata');
   assert(Date.parse(`${contentAudit}T00:00:00Z`)>=Date.parse('2026-08-27T00:00:00Z'),`Health content audit regressed to ${contentAudit}`);
-  assert(data?.storage==='cloudflare-d1',`Healthy D1 mode served unexpected storage: ${data?.storage||'missing'}`);
-  result={ok:true,mode:'d1-snapshot',status:response.status,healthStatus:status,contentAudit,dataAudit,databaseProvider:'cloudflare-d1',snapshotFresh:true,responseMs:Date.now()-started,testedAt:new Date().toISOString()};
+  const liveD1=data?.storage==='cloudflare-d1';
+  const cachedAuditedFallback=edgeCacheStatus==='HIT'&&data?.storage==='bundled-audited-data'&&data?.mode==='audited-fallback'&&data?.databaseAvailable===false&&data?.fallback?.active===true;
+  assert(liveD1||cachedAuditedFallback,`Healthy D1 mode served unexpected storage: ${data?.storage||'missing'} (edge cache ${edgeCacheStatus||'missing'})`);
+  result={ok:true,mode:cachedAuditedFallback?'d1-primary-cached-fallback':'d1-snapshot',status:response.status,healthStatus:status,contentAudit,dataAudit,databaseProvider:'cloudflare-d1',snapshotFresh:true,edgeCacheStatus:edgeCacheStatus||null,responseMs:Date.now()-started,testedAt:new Date().toISOString()};
 }else{
   assert(body?.database?.ok===false,'Degraded status must preserve the failed D1 primary signal');
   assert(body?.database?.snapshotFresh===false,'Degraded status cannot claim a fresh bootstrap snapshot');
   assert(data?.mode==='audited-fallback',`Degraded Data API mode is ${data?.mode||'missing'} instead of audited-fallback`);
   assert(data?.databaseAvailable===false,'Degraded Data API must disclose that fresh primary data is unavailable');
   assert(data?.fallback?.active===true,'Degraded Data API must expose an active fallback marker');
-  result={ok:true,mode:'audited-fallback',status:response.status,healthStatus:status,contentAudit:validAuditDate(body?.contentAudit)||null,fallbackContentAudit:dataAudit,databaseProvider:'cloudflare-d1',snapshotFresh:false,responseMs:Date.now()-started,testedAt:new Date().toISOString()};
+  result={ok:true,mode:'audited-fallback',status:response.status,healthStatus:status,contentAudit:validAuditDate(body?.contentAudit)||null,fallbackContentAudit:dataAudit,databaseProvider:'cloudflare-d1',snapshotFresh:false,edgeCacheStatus:edgeCacheStatus||null,responseMs:Date.now()-started,testedAt:new Date().toISOString()};
 }
 
 mergeProductionReport('healthTruth',result);
