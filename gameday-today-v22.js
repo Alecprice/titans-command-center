@@ -26,12 +26,7 @@
   };
   const weekLabel=game=>String(game?.week||'').startsWith('P')?`Preseason ${String(game.week).slice(1)}`:`Week ${game?.week||'TBD'}`;
   const matchup=game=>game?.homeAway==='home'?`${game.opponent||'Opponent'} at Titans`:`Titans at ${game?.opponent||'Opponent'}`;
-  const upcoming=games=>games
-    .filter(game=>{
-      const kickoff=Date.parse(game?.date);
-      return Number.isFinite(kickoff)&&kickoff>Date.now()&&!/final|bye/i.test(String(game?.status||''));
-    })
-    .sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))[0]||null;
+  const upcoming=games=>runtime.scheduleFocus(games).next||null;
 
   function ensureStyle(){
     if(document.querySelector('#gameday-today-v22-style'))return;
