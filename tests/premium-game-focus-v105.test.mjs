@@ -4,10 +4,12 @@ import fs from 'node:fs';
 
 const js=fs.readFileSync(new URL('../premium-experience-v14.js',import.meta.url),'utf8');
 
-test('premium experience reuses shared schedule focus',()=>{
-  assert.match(js,/import \{scheduleFocus\} from '\.\/src\/core\.mjs';/);
+test('premium experience reuses shared schedule and completed-game truth',()=>{
+  assert.match(js,/import \{scheduleFocus,latestCompletedGame\} from '\.\/src\/core\.mjs';/);
   assert.match(js,/const gameFocus=\(\)=>scheduleFocus\(state\.data\?\.games\|\|\[\]\);/);
+  assert.match(js,/const latestFinal=\(\)=>latestCompletedGame\(state\.data\?\.games\|\|\[\]\);/);
   assert.doesNotMatch(js,/const nextGame=\(\)=>/);
+  assert.doesNotMatch(js,/\.reverse\(\)\.find\(g=>\/final/i);
 });
 
 test('What matters right now keeps the kickoff matchup with truthful copy',()=>{
@@ -20,4 +22,9 @@ test('premium Quick Read does not call schedule time live',()=>{
   assert.match(js,/Kickoff has passed\. Open Game Day for verified game status/);
   assert.doesNotMatch(js,/current\?'LIVE'/);
   assert.doesNotMatch(js,/Date\.parse\(g\.date\).*return.*live/is);
+});
+
+test('premium January lifecycle stays neutral without verified playoff state',()=>{
+  assert.match(js,/if\(m===1\)return'POSTSEASON WINDOW'/);
+  assert.doesNotMatch(js,/PLAYOFF PUSH/);
 });
