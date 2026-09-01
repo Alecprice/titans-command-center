@@ -2,6 +2,7 @@ import json
 import os
 import time
 from pathlib import Path
+from urllib.parse import parse_qs,unquote
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -9,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
-BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
+BASE=os.environ.get('WORKER_URL','https://titans.alecjprice.com').rstrip('/')
 OUT=Path('/tmp/smart-search-browser-smoke.json')
 
 def driver_for(width=1280,height=900):
@@ -27,6 +28,18 @@ def severe_logs(driver):
 
 def wait_for(driver,script,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(script))
+
+def valid_player_route(value):
+    raw=str(value or '')
+    return raw.startswith('#player?id=') or raw.startswith('#player?name=')
+
+def player_route_mode(value):
+    return 'database-uuid' if str(value or '').startswith('#player?id=') else 'audited-name'
+
+def audited_player_name(value):
+    raw=str(value or '')
+    if '?' not in raw:return ''
+    return unquote(parse_qs(raw.split('?',1)[1]).get('name',[''])[0])
 
 def desktop_hit_areas(driver):
     return driver.execute_script("""
@@ -53,43 +66,73 @@ def settled_hit_areas(driver):
         return hit if stable>=2 else False
     return WebDriverWait(driver,10,poll_frequency=.1).until(ready)
 
-result={'ok':False,'base':BASE,'desktop':{},'mobile':{},'browserWarnings':[]};start=time.time()
+result={'ok':False,'base':BASE,'stage':'starting','desktop':{},'mobile':{},'browserWarnings':[]};start=time.time();d=None;m=None
 try:
+    result['stage']='desktop:launch'
     d=driver_for()
-    try:
-        d.get(f'{BASE}/#home');prepare_returning_user(d)
-        search=WebDriverWait(d,15).until(lambda x:x.find_element(By.ID,'global-search'))
-        hit=settled_hit_areas(d)
-        if not hit or hit['input']['width']<120 or hit['input']['height']<32: raise RuntimeError(f'Desktop search input geometry invalid: {hit}')
-        if hit['shortcut']['width']<32 or hit['shortcut']['height']<32: raise RuntimeError(f'Desktop command shortcut geometry invalid: {hit}')
-        if hit['overlap']>0.5: raise RuntimeError(f'Desktop search input overlaps command shortcut: {hit}')
-        if hit['inputCenterOwner']!='global-search': raise RuntimeError(f'Desktop search center click is owned by another element: {hit}')
-        search.click();search.send_keys('Cam Ward')
-        rows=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].map(x=>({kind:x.querySelector('small')?.textContent||'',label:x.querySelector('strong')?.textContent||'',href:x.getAttribute('href')}))")
-        players=[r for r in rows if r['kind']=='PLAYER']
-        if not players or 'Cam Ward' not in players[0]['label']: raise RuntimeError(f'Player result missing: {rows}')
-        search.send_keys(Keys.ARROW_DOWN);search.send_keys(Keys.ENTER)
-        wait_for(d,"return location.hash.startsWith('#player?id=')")
-        player_route=d.execute_script('return location.hash')
-        d.execute_script("location.hash='#home'");wait_for(d,"return location.hash==='#home'")
-        search=d.find_element(By.ID,'global-search');hit_after=settled_hit_areas(d)
-        if hit_after['inputCenterOwner']!='global-search':raise RuntimeError(f'Desktop quick-jump click target intercepted after route return: {hit_after}')
-        search.click()
-        quick=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].slice(0,6).map(x=>x.querySelector('strong')?.textContent||'')")
-        result['desktop']={'playerResult':players[0]['label'],'playerRoute':player_route,'quickJump':quick,'hitAreas':hit,'hitAreasAfterRoute':hit_after};result['browserWarnings']+=severe_logs(d)
-    finally:d.quit()
+    result['stage']='desktop:home'
+    d.get(f'{BASE}/#home');prepare_returning_user(d)
+    search=WebDriverWait(d,15).until(lambda x:x.find_element(By.ID,'global-search'))
+    result['stage']='desktop:geometry'
+    hit=settled_hit_areas(d)
+    if not hit or hit['input']['width']<120 or hit['input']['height']<32: raise RuntimeError(f'Desktop search input geometry invalid: {hit}')
+    if hit['shortcut']['width']<32 or hit['shortcut']['height']<32: raise RuntimeError(f'Desktop command shortcut geometry invalid: {hit}')
+    if hit['overlap']>0.5: raise RuntimeError(f'Desktop search input overlaps command shortcut: {hit}')
+    if hit['inputCenterOwner']!='global-search': raise RuntimeError(f'Desktop search center click is owned by another element: {hit}')
+
+    result['stage']='desktop:player-search'
+    search.click();search.send_keys('Cam Ward')
+    rows=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].map(x=>({kind:x.querySelector('small')?.textContent||'',label:x.querySelector('strong')?.textContent||'',href:x.getAttribute('href')}))")
+    players=[r for r in rows if r['kind']=='PLAYER' and 'Cam Ward' in r['label']]
+    if not players: raise RuntimeError(f'Player result missing: {rows}')
+    if not valid_player_route(players[0].get('href')): raise RuntimeError(f'Cam Ward result is not routable to Player Intelligence: {players[0]}')
+
+    result['stage']='desktop:player-open'
+    search.send_keys(Keys.ARROW_DOWN);search.send_keys(Keys.ENTER)
+    wait_for(d,"return location.hash.startsWith('#player?id=')||location.hash.startsWith('#player?name=')")
+    player_route=d.execute_script('return location.hash')
+    route_mode=player_route_mode(player_route)
+    if route_mode=='audited-name' and audited_player_name(player_route)!='Cam Ward':
+        raise RuntimeError(f'Audited Smart Search player route did not preserve Cam Ward: {player_route}')
+
+    result['stage']='desktop:player-hydration'
+    wait_for(d,"return Boolean(document.querySelector('.player-profile-rich')&&document.querySelector('.v16-player-intel'))",timeout=18)
+
+    result['stage']='desktop:return-home'
+    d.execute_script("location.hash='#home'");wait_for(d,"return location.hash==='#home'")
+    search=d.find_element(By.ID,'global-search');hit_after=settled_hit_areas(d)
+    if hit_after['inputCenterOwner']!='global-search':raise RuntimeError(f'Desktop quick-jump click target intercepted after route return: {hit_after}')
+    search.click()
+    quick=wait_for(d,"return [...document.querySelectorAll('.v111-search-panel [data-v111-index]')].slice(0,6).map(x=>x.querySelector('strong')?.textContent||'')")
+    result['desktop']={'playerResult':players[0]['label'],'playerResultHref':players[0]['href'],'playerRoute':player_route,'playerRouteMode':route_mode,'quickJump':quick,'hitAreas':hit,'hitAreasAfterRoute':hit_after};result['browserWarnings']+=severe_logs(d)
+    d.quit();d=None
+
+    result['stage']='mobile:launch'
     m=driver_for(390,844)
-    try:
-        m.get(f'{BASE}/#home');prepare_returning_user(m)
-        search=WebDriverWait(m,15).until(lambda x:x.find_element(By.ID,'global-search'));search.click();search.send_keys('roster')
-        mobile=wait_for(m,"""const p=document.querySelector('.v111-search-panel');const rows=[...p.querySelectorAll('[data-v111-index]')];const r=p.getBoundingClientRect();return p&&!p.hidden&&rows.length?{viewport:innerWidth,left:r.left,right:r.right,width:r.width,height:r.height,overflow:document.documentElement.scrollWidth>innerWidth+1,targets:rows.map(x=>x.getBoundingClientRect().height),labels:rows.map(x=>x.querySelector('strong')?.textContent||'')}:null;""")
-        if mobile['overflow'] or mobile['left']<0 or mobile['right']>mobile['viewport']+1: raise RuntimeError(f'Mobile search overflow: {mobile}')
-        if any(h<44 for h in mobile['targets']): raise RuntimeError(f'Mobile search target too small: {mobile}')
-        result['mobile']=mobile;result['browserWarnings']+=severe_logs(m)
-    finally:m.quit()
+    result['stage']='mobile:search'
+    m.get(f'{BASE}/#home');prepare_returning_user(m)
+    search=WebDriverWait(m,15).until(lambda x:x.find_element(By.ID,'global-search'));search.click();search.send_keys('roster')
+    mobile=wait_for(m,"""const p=document.querySelector('.v111-search-panel');const rows=[...p.querySelectorAll('[data-v111-index]')];const r=p.getBoundingClientRect();return p&&!p.hidden&&rows.length?{viewport:innerWidth,left:r.left,right:r.right,width:r.width,height:r.height,overflow:document.documentElement.scrollWidth>innerWidth+1,targets:rows.map(x=>x.getBoundingClientRect().height),labels:rows.map(x=>x.querySelector('strong')?.textContent||'')}:null;""")
+    if mobile['overflow'] or mobile['left']<0 or mobile['right']>mobile['viewport']+1: raise RuntimeError(f'Mobile search overflow: {mobile}')
+    if any(h<44 for h in mobile['targets']): raise RuntimeError(f'Mobile search target too small: {mobile}')
+    result['mobile']=mobile;result['browserWarnings']+=severe_logs(m)
+    m.quit();m=None
+
+    result['stage']='console'
     if result['browserWarnings']: raise RuntimeError(f'Browser console errors: {result["browserWarnings"][:5]}')
-    result['ok']=True
-except Exception as exc:result['error']=f'{type(exc).__name__}: {exc}'
+    result['ok']=True;result['stage']='complete'
+except Exception as exc:
+    result['error']=f'{type(exc).__name__}: {exc}'
+    active=d or m
+    try:
+        if active is not None:
+            result['hash']=active.execute_script('return location.hash')
+            result['pageText']=active.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,2400)")
+    except Exception:pass
 finally:
+    for driver in [d,m]:
+        if driver is not None:
+            try:driver.quit()
+            except Exception:pass
     result['durationSeconds']=round(time.time()-start,2);OUT.write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))
 if not result['ok']: raise SystemExit(1)
