@@ -27,7 +27,7 @@
   const standings=()=>arr(state.fan?.standings);
   const depthChanges=()=>arr(state.fan?.depthChart?.changes);
   const gameFocus=()=>runtime.scheduleFocus(games());
-  const latestFinal=()=>[...games()].reverse().find(g=>/final/i.test(String(g?.status||'')))||null;
+  const latestFinal=()=>runtime.latestCompletedGame(games());
   const regularFinals=()=>games().filter(g=>Number(g?.week)>=1&&/final/i.test(String(g?.status||''))&&Number.isFinite(Number(g?.score))&&Number.isFinite(Number(g?.opponentScore)));
 
   function scheduleRecord(){
