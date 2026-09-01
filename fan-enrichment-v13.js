@@ -13,7 +13,7 @@ import {scheduleFocus} from './src/core.mjs';
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
-  const fmtDate=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(d)};
+  const fmtDate=value=>{if(value==null||String(value).trim()==='')return'TBD';const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(d)};
   const say=message=>{if(!toast)return;toast.textContent=message;toast.classList.add('show');clearTimeout(say.timer);say.timer=setTimeout(()=>toast.classList.remove('show'),2200)};
   const safeNum=value=>Number.isFinite(Number(value))?Number(value):null;
   const money=value=>{const n=safeNum(value);if(n==null)return'Not loaded';return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',notation:'compact',maximumFractionDigits:1}).format(n)};
