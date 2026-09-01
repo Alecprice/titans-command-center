@@ -41,6 +41,16 @@ test('regular-season readiness does not present expected pregame data gaps as br
   assert.doesNotMatch(js,/Standings not loaded/);
 });
 
+test('Home keeps the kickoff matchup in focus without fabricating live state',()=>{
+  const js=read('mode-365-v19.js');
+  assert.match(js,/const gameFocus=\(\)=>runtime\.scheduleFocus\(games\(\)\)/);
+  assert.match(js,/focus\.state==='game-window'/);
+  assert.match(js,/eyebrow:'GAME WINDOW'/);
+  assert.match(js,/Live status has not been verified yet/);
+  assert.doesNotMatch(js,/const nextGame=\(\)=>games\(\)\.find/);
+  assert.doesNotMatch(js,/eyebrow:'LIVE'/);
+});
+
 test('standings fallback derives only completed regular-season Titans results and never invents division rank',()=>{
   const js=read('mode-365-v19.js');
   assert.match(js,/const regularFinals=\(\)=>games\(\)\.filter\(g=>Number\(g\?\.week\)>=1&&\/final\/i\.test/);

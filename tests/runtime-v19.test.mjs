@@ -24,6 +24,14 @@ test('shared runtime centralizes route, render, and refresh subscriptions',()=>{
   assert.doesNotMatch(js,/subtree:true/);
 });
 
+test('shared runtime exposes core schedule focus without duplicating kickoff-window math',()=>{
+  const js=read('runtime-v19.js');
+  assert.match(js,/import \{scheduleFocus,GAME_FOCUS_WINDOW_MS\} from '\.\/src\/core\.mjs';/);
+  assert.match(js,/scheduleFocus,/);
+  assert.match(js,/gameFocusWindowMs:GAME_FOCUS_WINDOW_MS/);
+  assert.doesNotMatch(js,/5\*60\*60\*1000/);
+});
+
 test('shared runtime deduplicates same-origin API requests with bounded TTL cache',()=>{
   const js=read('runtime-v19.js');
   assert.match(js,/if\(!key\.startsWith\('\/api\/'\)\)throw new Error/);

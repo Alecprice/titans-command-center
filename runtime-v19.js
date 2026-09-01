@@ -1,4 +1,5 @@
 import {formatTeamKickoff,TEAM_TIME_LABEL,TEAM_TIME_ZONE} from './team-time-v21.js';
+import {scheduleFocus,GAME_FOCUS_WINDOW_MS} from './src/core.mjs';
 
 (() => {
   'use strict';
@@ -93,6 +94,8 @@ import {formatTeamKickoff,TEAM_TIME_LABEL,TEAM_TIME_ZONE} from './team-time-v21.
     onRoute,
     onAppRender,
     formatTeamKickoff,
+    scheduleFocus,
+    gameFocusWindowMs:GAME_FOCUS_WINDOW_MS,
     teamTimeZone:TEAM_TIME_ZONE,
     teamTimeLabel:TEAM_TIME_LABEL,
     refreshInfo:()=>({epoch:refreshEpoch,last:lastRefresh}),

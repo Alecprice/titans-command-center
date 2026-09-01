@@ -29,6 +29,40 @@ test('fast pass stays official and supports home and road games',()=>{
   assert.match(brief,/Schedule facts: TennesseeTitans\.com/);
 });
 
+test('Game Day bridge preserves the kickoff matchup without inventing a live scoreboard',()=>{
+  assert.match(brief,/runtime\.scheduleFocus\(games\)/);
+  assert.match(brief,/focus\.state!=='game-window'/);
+  assert.match(brief,/GAME WINDOW/);
+  assert.match(brief,/Verification pending/);
+  assert.match(brief,/trustworthy live scoreboard has not confirmed game state yet/);
+  assert.match(brief,/No live score, clock, drive, or result is inferred from kickoff time alone/);
+  assert.match(brief,/root\.dataset\.phase==='live'/);
+  assert.doesNotMatch(brief,/root\.dataset\.phase==='postgame'/);
+  assert.doesNotMatch(brief,/<small>LIVE<\/small>.*Verification pending/s);
+});
+
+test('final-week kickoff window can replace a stale prior postgame while final schedule truth still wins',()=>{
+  assert.match(brief,/if\(!root\|\|root\.dataset\.phase==='live'\)return false/);
+  assert.match(brief,/const focus=runtime\.scheduleFocus\(games\)/);
+  assert.match(brief,/if\(focus\.state!=='game-window'\|\|!focus\.current\)return false/);
+});
+
+test('game-window refresh hands control back to stable Game Day for scoreboard re-verification',()=>{
+  assert.match(brief,/function refreshGameDay\(\)/);
+  assert.match(brief,/v16-gameday\[data-v92-game-window\]/);
+  assert.match(brief,/root\.remove\(\)/);
+  assert.match(brief,/new HashChangeEvent\('hashchange'\)/);
+  assert.match(brief,/runtime\.onRefresh\(refreshGameDay\)/);
+});
+
+test('fast pass mounts only inside a confirmed pregame phase',()=>{
+  assert.match(brief,/function tagPregamePhase\(\)/);
+  assert.match(brief,/v16-gameday\[data-phase="pregame"\]/);
+  assert.match(brief,/phase\.classList\.add\('pregame'\)/);
+  assert.match(brief,/const phase=tagPregamePhase\(\)/);
+  assert.match(brief,/v16-gd-phase:not\(\.live\):not\(\.post\):not\(\.window\)/);
+});
+
 test('preseason fallback is final at 2-1 and the Jets are the current next-game fact',()=>{
   assert.match(data,/id:'pre2'.*status:'final'.*score:19,opponentScore:16/);
   assert.match(data,/id:'pre3'.*status:'final'.*score:15,opponentScore:24/);
