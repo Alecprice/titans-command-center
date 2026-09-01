@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **deployed + canonical front door + full production + browser + media + market + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
-- Source commit: `c9a8fd1a13cff2c37ef045210262584f3bfe559c`
+- Source commit: `2ffb356a4b42b3745f3d609d2baabc8c69a47b38`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Neon warehouse deployment secret required: false (D1 primary)
@@ -24,7 +24,7 @@
 - Player headshot browser regression: success
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-01T14:21:18Z
+- Recorded: 2026-09-01T14:34:37Z
 
 ## Canonical front door regression
 
@@ -35,11 +35,11 @@
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
   "deployedCommit": "c9a8fd1a13cff2c37ef045210262584f3bfe559c",
   "version": "1.0.0",
-  "revisionAttempts": 2,
+  "revisionAttempts": 1,
   "cloudFront": {
-    "requestId": "t_fCNhvfbH8wL7p7Y4R_n1mupEbnO2rbJh8o6nRLMXi2r27g4UW2TQ==",
-    "pop": "ORD51-P2",
-    "via": "1.1 7b8bb8558b114d8d1c4b78c3a5ca8a0c.cloudfront.net (CloudFront)",
+    "requestId": "3ZkOfqkpGM9Hwpb_nuEWPheNIEFyy3C6VyhR2jin8CjQLPnHJpJuhw==",
+    "pop": "JFK50-P14",
+    "via": "1.1 cd348454cc72e01992f0a16dc939a8ae.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -52,19 +52,19 @@
   },
   "originRobots": "noindex, nofollow",
   "health": {
-    "status": "healthy",
+    "status": "degraded",
     "databaseProvider": "cloudflare-d1",
     "databaseConfigured": true,
-    "snapshotFresh": true
+    "snapshotFresh": false
   },
   "responseMs": {
-    "canonicalMeta": 577,
-    "originMeta": 34,
-    "canonicalRoot": 152,
-    "originRoot": 37,
-    "health": 364
+    "canonicalMeta": 265,
+    "originMeta": 123,
+    "canonicalRoot": 61,
+    "originRoot": 23,
+    "health": 196
   },
-  "testedAt": "2026-09-01T14:19:49.108Z"
+  "testedAt": "2026-09-01T14:33:30.891Z"
 }```
 
 ## Production regression
@@ -99,11 +99,11 @@
     }
   },
   "healthStatus": 200,
-  "appStatus": "healthy",
+  "appStatus": "degraded",
   "databaseProvider": "cloudflare-d1",
   "databaseConfigured": true,
-  "databaseOk": true,
-  "snapshotFresh": true,
+  "databaseOk": false,
+  "snapshotFresh": false,
   "dataMode": "audited-fallback",
   "databaseAvailable": false,
   "dataStatus": 200,
@@ -124,31 +124,31 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "c9a8fd1a13cff2c37ef045210262584f3bfe559c",
-    "builtAt": "2026-09-01T14:19:28.151Z"
+    "commit": "2ffb356a4b42b3745f3d609d2baabc8c69a47b38",
+    "builtAt": "2026-09-01T14:33:13.011Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 5,
   "responseMs": {
-    "root": 57,
-    "health": 169,
-    "data": 77,
-    "stats": 210,
-    "market": 541,
-    "analytics": 272
+    "root": 62,
+    "health": 187,
+    "data": 271,
+    "stats": 193,
+    "market": 2235,
+    "analytics": 215
   },
-  "testedAt": "2026-09-01T14:20:02.291Z",
+  "testedAt": "2026-09-01T14:33:47.418Z",
   "healthTruth": {
     "ok": true,
-    "mode": "d1-snapshot",
+    "mode": "d1-primary-cached-fallback",
     "status": 200,
     "healthStatus": "healthy",
     "contentAudit": "2026-08-31",
-    "dataAudit": "2026-09-01",
+    "dataAudit": "2026-08-31",
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 303,
-    "testedAt": "2026-09-01T14:20:02.869Z"
+    "responseMs": 286,
+    "testedAt": "2026-09-01T14:33:47.972Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -156,17 +156,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 183,
-    "warmHitMs": 183,
+    "coldOrInitialMs": 199,
+    "warmHitMs": 199,
     "rows": 608,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 183,
+        "durationMs": 199,
         "rows": 608
       }
     ],
-    "testedAt": "2026-09-01T14:20:03.080Z"
+    "testedAt": "2026-09-01T14:33:48.200Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -239,8 +239,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 187,
-  "testedAt": "2026-09-01T14:20:03.598Z"
+  "durationMs": 165,
+  "testedAt": "2026-09-01T14:33:48.674Z"
 }```
 
 ## Browser navigation regression
@@ -286,11 +286,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 150,
+  "maxLongTaskMs": 73,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 26.45,
-  "testedAt": "2026-09-01T14:20:38Z"
+  "durationSeconds": 8.16,
+  "testedAt": "2026-09-01T14:34:00Z"
 }```
 
 ## Listen Watch browser regression
@@ -344,11 +344,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788272443528
+      "timestamp": 1788273243169
     }
   ],
-  "durationSeconds": 4.7,
-  "testedAt": "2026-09-01T14:20:43Z"
+  "durationSeconds": 3.08,
+  "testedAt": "2026-09-01T14:34:03Z"
 }```
 
 ## Market Pulse browser regression
@@ -621,8 +621,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 6.11,
-  "testedAt": "2026-09-01T14:20:50Z"
+  "durationSeconds": 6.57,
+  "testedAt": "2026-09-01T14:34:10Z"
 }```
 
 ## Command Intelligence browser regression
@@ -680,8 +680,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.71,
-  "testedAt": "2026-09-01T14:20:53Z"
+  "durationSeconds": 2.03,
+  "testedAt": "2026-09-01T14:34:12Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -827,8 +827,8 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 5.07,
-  "testedAt": "2026-09-01T14:20:58Z"
+  "durationSeconds": 4.83,
+  "testedAt": "2026-09-01T14:34:18Z"
 }```
 
 ## Ask Titans browser regression
@@ -934,8 +934,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 2.4,
-  "testedAt": "2026-09-01T14:21:01Z"
+  "durationSeconds": 1.8,
+  "testedAt": "2026-09-01T14:34:20Z"
 }```
 
 ## Change Intelligence browser regression
@@ -972,8 +972,8 @@
     "width": 357
   },
   "browserWarnings": [],
-  "durationSeconds": 2.3,
-  "testedAt": "2026-09-01T14:21:04Z"
+  "durationSeconds": 2.29,
+  "testedAt": "2026-09-01T14:34:22Z"
 }```
 
 ## Runtime / 365 Mode browser regression
@@ -996,12 +996,22 @@
       "/api/social-pulse",
       "/api/tickets"
     ],
+    "readiness": {
+      "availability": {
+        "copy": "Kickoff is 13 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
+        "title": "Week 1 prep window"
+      },
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      }
+    },
     "panel": {
       "cards": 4,
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.AFC SOUTHStandings not loadedRegular-season standings only. Preseason results are kept separate.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 13 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -1009,26 +1019,36 @@
     "refresh": {
       "cache": [
         {
-          "expiresAt": 1788272495764,
+          "expiresAt": 1788273294667,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788272465764,
+          "updatedAt": 1788273264667,
           "url": "/api/data"
         },
         {
-          "expiresAt": 1788272495847,
+          "expiresAt": 1788273294792,
           "hasValue": true,
           "inflight": false,
-          "updatedAt": 1788272465847,
+          "updatedAt": 1788273264792,
           "url": "/api/fan-intel"
         }
       ],
       "epoch": 1,
       "last": {
-        "at": "2026-09-01T14:21:05.722Z",
+        "at": "2026-09-01T14:34:24.555Z",
         "epoch": 1,
         "reason": "scoreboard-control",
         "urls": null
+      }
+    },
+    "refreshedReadiness": {
+      "availability": {
+        "copy": "Kickoff is 13 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
+        "title": "Week 1 prep window"
+      },
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
       }
     },
     "refreshedPanel": {
@@ -1036,17 +1056,27 @@
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.AFC SOUTHStandings not loadedRegular-season standings only. Preseason results are kept separate.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 13 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
+    },
+    "returnReadiness": {
+      "availability": {
+        "copy": "Kickoff is 13 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
+        "title": "Week 1 prep window"
+      },
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      }
     },
     "returnPanel": {
       "cards": 4,
       "display": "block",
       "height": 427.890625,
       "opacity": "1",
-      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.AFC SOUTHStandings not loadedRegular-season standings only. Preseason results are kept separate.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 13 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 925
@@ -1096,7 +1126,7 @@
         "y": 8
       },
       "overflow": false,
-      "panelHeight": 811.421875,
+      "panelHeight": 844.734375,
       "panelWidth": 461,
       "reviewHeight": 48,
       "targets": [
@@ -1106,12 +1136,12 @@
           "w": 427
         },
         {
-          "h": 112,
+          "h": 124.4375,
           "label": "AVAILABILITY",
           "w": 427
         },
         {
-          "h": 124.4375,
+          "h": 145.3125,
           "label": "AFC SOUTH",
           "w": 427
         },
@@ -1123,12 +1153,22 @@
       ],
       "viewport": 500
     },
+    "readiness": {
+      "availability": {
+        "copy": "Kickoff is 13 days away. Weekly availability will replace this readiness state when structured report rows are loaded.",
+        "title": "Week 1 prep window"
+      },
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      }
+    },
     "panelState": {
       "cards": 4,
       "display": "block",
-      "height": 811.421875,
+      "height": 844.734375,
       "opacity": "1",
-      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeekly report not loadedMissing report data is not treated as an all-clear.AFC SOUTHStandings not loadedRegular-season standings only. Preseason results are kept separate.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "text": "365 MODE \u00b7 REGULAR SEASONGame week firstNext opponent, availability, standings and what changed lead the experience.Review changes \u2192NEXT GAMEvs New York JetsSun, Sep 13, 12:00 PM CDT \u00b7 CBSAVAILABILITYWeek 1 prep windowKickoff is 13 days away. Weekly availability will replace this readiness state when structured report rows are loaded.AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesTennessee announced 16 practice-squad signings on Aug. 31, with one standard practice-squad spot still open. Practice-squad players remain separate from the 53-player Active roster and the reserve lists.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
       "visibility": "visible",
       "visible": true,
       "width": 461
@@ -1152,7 +1192,7 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 3.73
+  "durationSeconds": 3.85
 }```
 
 ## Data freshness browser regression
@@ -1162,19 +1202,19 @@
   "ok": true,
   "base": "https://titans.alecjprice.com",
   "desktop": {
-    "detail": "Roster verified Aug 31 \u00b7 Moves 18 hours ago \u00b7 Intel 18 hours ago",
+    "detail": "Roster verified Aug 31 \u00b7 Moves 19 hours ago \u00b7 Intel 19 hours ago",
     "overflow": false,
     "rect": {
-      "bottom": 1029.3125,
+      "bottom": 1296.1875,
       "height": 139.578125,
       "left": 915.328125,
       "right": 1216.984375,
-      "top": 889.734375,
+      "top": 1156.609375,
       "width": 301.65625
     },
     "state": "fallback",
     "strong": "Verified backup \u00b7 Aug 31",
-    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves 18 hours ago \u00b7 Intel 18 hours agoSee sources \u2192",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves 19 hours ago \u00b7 Intel 19 hours agoSee sources \u2192",
     "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 31.",
     "viewport": {
       "height": 757,
@@ -1182,19 +1222,19 @@
     }
   },
   "mobile": {
-    "detail": "Roster verified Aug 31 \u00b7 Moves 18 hours ago \u00b7 Intel 18 hours ago",
+    "detail": "Roster verified Aug 31 \u00b7 Moves 19 hours ago \u00b7 Intel 19 hours ago",
     "overflow": false,
     "rect": {
-      "bottom": 1741.484375,
+      "bottom": 2334.46875,
       "height": 117.1875,
       "left": 9,
       "right": 366,
-      "top": 1624.296875,
+      "top": 2217.28125,
       "width": 357
     },
     "state": "fallback",
     "strong": "Verified backup \u00b7 Aug 31",
-    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves 18 hours ago \u00b7 Intel 18 hours agoSee sources \u2192",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Aug 31Roster verified Aug 31 \u00b7 Moves 19 hours ago \u00b7 Intel 19 hours agoSee sources \u2192",
     "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Aug 31.",
     "viewport": {
       "height": 701,
@@ -1202,8 +1242,8 @@
     }
   },
   "browserWarnings": [],
-  "durationSeconds": 1.57,
-  "testedAt": "2026-09-01T14:21:09Z"
+  "durationSeconds": 1.65,
+  "testedAt": "2026-09-01T14:34:28Z"
 }```
 
 ## Account / Guest browser regression
@@ -1296,7 +1336,7 @@
     "route": "#roster",
     "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
   },
-  "durationSeconds": 1.69
+  "durationSeconds": 1.81
 }```
 
 ## Advanced analytics browser regression
@@ -1360,8 +1400,8 @@
   "offenseFilteredPlayCards": 39,
   "mobileMetricCount": 4,
   "browserWarnings": [],
-  "durationSeconds": 1.85,
-  "testedAt": "2026-09-01T14:21:13Z"
+  "durationSeconds": 1.94,
+  "testedAt": "2026-09-01T14:34:33Z"
 }```
 
 ## Player headshot browser regression
@@ -1376,7 +1416,7 @@
   "rosterCards": 61,
   "rosterDecoratedHeadshots": 56,
   "rosterHeadshotCoveragePct": 91.8,
-  "rosterLoadedHeadshots": 39,
+  "rosterLoadedHeadshots": 36,
   "statsPlayerRows": 61,
   "statsDecoratedHeadshots": 56,
   "statsHeadshotCoveragePct": 91.8,
@@ -1386,8 +1426,8 @@
   "richPlayer": "Tony Adams",
   "richPlayerHeadshotLoaded": true,
   "browserWarnings": [],
-  "durationSeconds": 3.48,
-  "testedAt": "2026-09-01T14:21:17Z"
+  "durationSeconds": 3.84,
+  "testedAt": "2026-09-01T14:34:37Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
