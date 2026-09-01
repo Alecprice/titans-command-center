@@ -19,9 +19,10 @@ test('plain-English football glossary covers core advanced terms',()=>{
   assert.match(js,/Stats, made simple/i);
 });
 
-test('365 seasonal context covers major NFL calendar modes',()=>{
+test('365 seasonal context covers major NFL calendar modes without assuming playoff contention',()=>{
   const js=read('premium-experience-v14.js');
-  for(const phase of ['DRAFT SEASON','FREE AGENCY','OFFSEASON','TRAINING CAMP','PRESEASON','REGULAR SEASON','PLAYOFF PUSH'])assert.match(js,new RegExp(phase));
+  for(const phase of ['DRAFT SEASON','FREE AGENCY','OFFSEASON','TRAINING CAMP','PRESEASON','REGULAR SEASON','POSTSEASON WINDOW'])assert.match(js,new RegExp(phase));
+  assert.doesNotMatch(js,/PLAYOFF PUSH/);
   assert.match(js,/dataset\.v14Season/);
 });
 
