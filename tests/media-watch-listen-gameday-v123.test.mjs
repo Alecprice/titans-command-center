@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {scheduleFocus} from '../src/core.mjs';
 
 const center=await readFile(new URL('../media-center-v14.js',import.meta.url),'utf8');
 const timecodes=await readFile(new URL('../media-timecodes-v14.js',import.meta.url),'utf8');
@@ -12,7 +13,7 @@ function gameTime(game){
   return Number.isFinite(value)?value:NaN;
 }
 
-function nextGame(games,now){
+function nextFutureGame(games,now){
   return games
     .filter(game=>{
       const time=gameTime(game);
@@ -29,9 +30,23 @@ test('Watch Listen chooses the chronologically next game instead of trusting pro
     {opponent:'Bears',date:'2026-08-29T17:00:00Z',status:'Final'},
     {opponent:'Jaguars',date:null,status:'Scheduled'}
   ];
-  assert.equal(nextGame(games,now)?.opponent,'Broncos');
-  assert.match(center,/\.sort\(\(a,b\)=>gameTime\(a\)-gameTime\(b\)\)\[0\]\|\|null/);
-  assert.match(timecodes,/\.sort\(\(a,b\)=>gameTime\(a\)-gameTime\(b\)\)\[0\]\|\|null/);
+  assert.equal(nextFutureGame(games,now)?.opponent,'Broncos');
+  assert.match(center,/\.sort\(\(a,b\)=>gameTime\(a\)-gameTime\(b\)\)/);
+  assert.match(timecodes,/\.sort\(\(a,b\)=>gameTime\(a\)-gameTime\(b\)\)/);
+});
+
+test('Watch Listen reuses shared game focus so kickoff does not jump to next week',()=>{
+  const games=[
+    {opponent:'Jets',date:'2026-09-13T17:00:00Z',status:'scheduled'},
+    {opponent:'Rams',date:'2026-09-20T17:00:00Z',status:'scheduled'}
+  ];
+  const duringGameWindow=scheduleFocus(games,new Date('2026-09-13T19:00:00Z'));
+  assert.equal(duringGameWindow.state,'game-window');
+  assert.equal(duringGameWindow.game?.opponent,'Jets');
+  assert.match(center,/window\.TitansRuntime\?\.scheduleFocus/);
+  assert.match(timecodes,/window\.TitansRuntime\?\.scheduleFocus/);
+  assert.match(center,/CURRENT \/ NEXT GAME/);
+  assert.match(timecodes,/CURRENT \/ NEXT TITANS BROADCAST/);
 });
 
 test('missing dates never become phantom 1970 broadcasts',()=>{
