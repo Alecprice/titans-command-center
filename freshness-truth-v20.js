@@ -14,6 +14,10 @@
     return Number.isNaN(date.getTime())?null:date;
   }
 
+  function isCalendarDate(value){
+    return typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value.trim());
+  }
+
   function latestDate(values){
     return values.map(validDate).filter(Boolean).sort((a,b)=>b-a)[0]||null;
   }
@@ -30,11 +34,16 @@
   function shortDate(value){
     const date=validDate(value);
     if(!date)return'unknown date';
-    return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',timeZone:'America/Chicago'}).format(date);
+    return new Intl.DateTimeFormat('en-US',{
+      month:'short',
+      day:'numeric',
+      timeZone:isCalendarDate(value)?'UTC':'America/Chicago'
+    }).format(date);
   }
 
   function fallbackAuditDate(data){
-    return validDate(data?.fallback?.auditedAt||data?.dataQuality?.rosterSnapshotAt||data?.meta?.roster_snapshot_at||data?.dataQuality?.contentAuditAt||data?.meta?.content_audit_at);
+    const value=data?.fallback?.auditedAt||data?.dataQuality?.rosterSnapshotAt||data?.meta?.roster_snapshot_at||data?.dataQuality?.contentAuditAt||data?.meta?.content_audit_at;
+    return validDate(value)?value:null;
   }
 
   function isAuditedFallback(data){
