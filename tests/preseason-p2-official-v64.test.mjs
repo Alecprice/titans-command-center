@@ -67,13 +67,15 @@ test('receiving aggregate omits targets when any contributing game lacks target 
   assert.equal(receiving.fields.find(item=>item.label==='YDS')?.value,'30');
 });
 
-test('preseason API seeds audited P1 and P2 while withholding incomplete season team totals',()=>{
+test('preseason API seeds audited P1, P2 and P3 while withholding incomplete season team totals',()=>{
   assert.match(api,/from '\.\/preseason-p2-20260823\.mjs'/);
-  assert.match(api,/gameBooks=\[gameBookFromAuditP1\(\),gameBookFromAuditP2\(\)\]/);
+  assert.match(api,/from '\.\/preseason-p3-20260829\.mjs'/);
+  assert.match(api,/gameBooks=\[gameBookFromAuditP1\(\),gameBookFromAuditP2\(\),gameBookFromAuditP3\(\)\]/);
   assert.match(api,/gameBookFromAuditP2\(\)[\s\S]*teamStats:\{\},teamStatsComplete:false/);
-  assert.match(api,/sources=\[\.\.\.auditedPreseasonSources,\.\.\.auditedPreseasonSourcesP2\]/);
+  assert.match(api,/gameBookFromAuditP3\(\)[\s\S]*teamStatsComplete:false/);
+  assert.match(api,/sources=\[\.\.\.auditedPreseasonSources,\.\.\.auditedPreseasonSourcesP2,\.\.\.auditedPreseasonSourcesP3\]/);
   assert.match(api,/allTeamStatsComplete=completeTeamBooks\.length===gameBooks\.length/);
   assert.match(api,/seasonTeamStats=allTeamStatsComplete\?aggregateTeamStats[\s\S]*:\{\}/);
   assert.match(api,/Season team-stat totals are withheld because at least one completed preseason source does not expose the full team-stat table/);
-  assert.match(api,/Tennessee Titans official P2 Game Center\/postgame notes/);
+  assert.match(api,/Tennessee Titans official P3 Game Center\/game recap/);
 });
