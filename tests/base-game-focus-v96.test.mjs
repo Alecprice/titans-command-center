@@ -7,7 +7,8 @@ const core=fs.readFileSync(new URL('../src/core.mjs',import.meta.url),'utf8');
 
 test('base Home and Game Day use the shared schedule focus contract',()=>{
   assert.match(app,/import \{[^}]*scheduleFocus[^}]*\} from '\.\/src\/core\.mjs'/);
-  assert.match(app,/function nextGame\(\)\{const focus=scheduleFocus\(games\);return focus\.game\|\|games\.at\(-1\)\|\|null\}/);
+  assert.match(app,/function nextGame\(\)\{return scheduleFocus\(games\)\.game\|\|null\}/);
+  assert.doesNotMatch(app,/function nextGame\(\)[^\n]*games\.at\(-1\)/);
   assert.match(app,/function home\(\)\{const ng=nextGame\(\)/);
   assert.match(app,/matchup\(nextGame\(\)\)/);
 });

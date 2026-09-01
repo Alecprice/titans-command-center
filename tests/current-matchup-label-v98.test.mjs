@@ -7,9 +7,9 @@ const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
 test('Home derives current-matchup copy from the shared bounded game window',()=>{
   assert.match(app,/function isCurrentGameWindow\(\)\{return scheduleFocus\(games\)\.state==='game-window'\}/);
   assert.match(app,/function home\(\)\{const ng=nextGame\(\),current=isCurrentGameWindow\(\),r=record\(\)/);
-  assert.match(app,/\$\{current\?'Current matchup':'Next up'\} ·/);
-  assert.match(app,/<small>\$\{current\?'Current matchup':'Next opponent'\}<\/small>/);
-  assert.match(app,/panel\(current\?'Current matchup':'Next game',matchup\(ng\)/);
+  assert.match(app,/\$\{current\?'Current matchup':ng\?'Next up':'Schedule status'\} ·/);
+  assert.match(app,/<small>\$\{current\?'Current matchup':ng\?'Next opponent':'Upcoming opponent'\}<\/small>/);
+  assert.match(app,/panel\(current\?'Current matchup':ng\?'Next game':'Schedule status',matchup\(ng\)/);
 });
 
 test('kickoff-window copy never promotes schedule time to LIVE state',()=>{
