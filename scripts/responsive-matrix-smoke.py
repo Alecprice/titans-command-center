@@ -41,6 +41,7 @@ ROUTE_READY_SELECTORS={
     'fantasy':'#app[data-fantasy-command="ready"]',
     'fan-hub':'#app .v13-hero ~ #v13-view .v13-section',
     'listen-watch':'.media-page .media-tune-guide',
+    'command-intel':'.v15-command [data-v15-tab]',
 }
 
 def wait(driver,expression,timeout=10):
