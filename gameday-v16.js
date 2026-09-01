@@ -2,6 +2,7 @@
   'use strict';
 
   const app=document.querySelector('#app');
+  const runtime=window.TitansRuntime;
   const POSTGAME_WINDOW_MS=18*3600000;
   let state={data:null,fan:null,espn:null,loading:null,serial:0};
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
@@ -30,10 +31,15 @@
   const plays=()=>arr(state.fan?.gameDay?.plays);
   const playerStats=()=>arr(state.fan?.playerStats);
 
-  function nextGame(){const now=Date.now();return games().find(g=>{const t=Date.parse(g.date);return Number.isFinite(t)&&t>now&&!/final|bye/i.test(String(g.status||''))})||null}
-  function latestFinal(){return games().slice().reverse().find(g=>/final/i.test(String(g.status||'')))||null}
+  function gameFocus(){return runtime?.scheduleFocus?.(games())||{state:'none',game:null,current:null,next:null}}
+  function nextGame(){return gameFocus().next||null}
+  function latestFinal(){
+    const finals=games().map((game,index)=>({game,index,time:Date.parse(game?.date)})).filter(row=>/final/i.test(String(row.game?.status||'')));
+    if(!finals.length)return null;
+    finals.sort((a,b)=>{const av=Number.isFinite(a.time),bv=Number.isFinite(b.time);if(av&&bv)return a.time-b.time||a.index-b.index;if(av)return 1;if(bv)return-1;return a.index-b.index});
+    return finals.at(-1)?.game||null;
+  }
   function recentFinal(){const g=latestFinal(),t=Date.parse(g?.date);return g&&Number.isFinite(t)&&Date.now()>=t&&Date.now()-t<=POSTGAME_WINDOW_MS?g:null}
-  function currentDbGame(){const now=Date.now();return games().find(g=>{const t=Date.parse(g.date);return Number.isFinite(t)&&t<=now+5*3600000&&t>=now-5*3600000&&!/final|bye/i.test(String(g.status||''))})||null}
 
   function espnGame(){
     for(const event of arr(state.espn?.payload?.events)){
@@ -50,10 +56,10 @@
   }
 
   function phase(){
-    const eg=espnGame(),db=currentDbGame();
-    if(eg&&/in progress|halftime|end of/i.test(`${eg.status} ${eg.detail}`))return['live',db||nextGame()||latestFinal(),eg];
+    const eg=espnGame(),focus=gameFocus();
+    if(eg&&/in progress|halftime|end of/i.test(`${eg.status} ${eg.detail}`))return['live',focus.current||focus.game||latestFinal(),eg];
     const justFinished=recentFinal();if(justFinished)return['postgame',justFinished,eg];
-    const next=nextGame();if(next)return['pregame',next,eg];
+    if(focus.game)return['pregame',focus.game,eg];
     return['postgame',latestFinal(),eg];
   }
 
