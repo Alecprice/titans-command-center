@@ -35,7 +35,10 @@ export function scheduleFocus(games, now = new Date(), windowMs = GAME_FOCUS_WIN
 
 export function latestCompletedGame(games) {
   const finals = (Array.isArray(games) ? games : [])
-    .map((game, index) => ({ game, index, kickoff: new Date(game?.date).getTime() }))
+    .map((game, index) => {
+      const raw = String(game?.date || '').trim();
+      return { game, index, kickoff: raw ? new Date(raw).getTime() : Number.NaN };
+    })
     .filter(row => /final/i.test(String(row.game?.status || '')));
   if (!finals.length) return null;
 
