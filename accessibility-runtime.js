@@ -9,6 +9,7 @@ import './roster-filter-guard-v40.js';
 import './fantasy-weekly-command-v42.js';
 
 const menu=document.querySelector('#menu-button');
+const mobileMore=document.querySelector('#mobile-more-button');
 const sidebar=document.querySelector('#sidebar');
 const app=document.querySelector('#app');
 const mobileTypeFloor=matchMedia('(max-width:760px)');
@@ -47,6 +48,16 @@ function installMobileReadabilityFloor(){
         min-width:44px!important;
         min-height:44px!important;
       }
+      #app input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+      #app select,
+      #app textarea,
+      .search-wrap input{
+        font-size:16px!important;
+      }
+      .menu-button{display:none!important}
+      .topbar{padding-left:12px!important}
+      .mobile-nav a,.mobile-nav button{font-size:9px!important}
+      .sidebar .nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
     }
   `;
   document.head.appendChild(style);
@@ -136,7 +147,7 @@ if(menu&&sidebar){
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape'&&sidebar.classList.contains('open')){
       sidebar.classList.remove('open');
-      menu.focus();
+      (mobileTypeFloor.matches?mobileMore:menu)?.focus();
     }
   });
 }
