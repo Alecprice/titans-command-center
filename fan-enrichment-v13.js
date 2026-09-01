@@ -165,10 +165,10 @@ import {scheduleFocus} from './src/core.mjs';
 
   function seasonStory(){
     const games=state.base?.games||[],moves=state.base?.transactions||[];const items=[];
-    for(const g of games)items.push({at:g.date,title:`${String(g.week).startsWith('P')?'Preseason '+String(g.week).slice(1):'Week '+g.week}: ${g.homeAway==='home'?'vs':'at'} ${g.opponent}`,detail:/final/i.test(String(g.status||''))?`Final ${g.score}-${g.opponentScore}`:fmtDate(g.date)});
-    for(const m of moves.slice(0,12))items.push({at:m.date,title:'Roster move',detail:m.description});
-    items.sort((a,b)=>Date.parse(a.at||0)-Date.parse(b.at||0));
-    return `<div class="v13-story">${items.slice(-18).map(x=>`<div><time>${esc(x.at?fmtDate(x.at):'')}</time><strong>${esc(x.title)}</strong><p>${esc(x.detail)}</p></div>`).join('')}</div>`;
+    for(const g of games){const sortAt=Date.parse(g.date);if(!Number.isFinite(sortAt))continue;items.push({at:g.date,sortAt,title:`${String(g.week).startsWith('P')?'Preseason '+String(g.week).slice(1):'Week '+g.week}: ${g.homeAway==='home'?'vs':'at'} ${g.opponent}`,detail:/final/i.test(String(g.status||''))?`Final ${g.score}-${g.opponentScore}`:fmtDate(g.date)})}
+    for(const m of moves.slice(0,12)){const sortAt=Date.parse(m.date);if(!Number.isFinite(sortAt))continue;items.push({at:m.date,sortAt,title:'Roster move',detail:m.description})}
+    items.sort((a,b)=>a.sortAt-b.sortAt);
+    return `<div class="v13-story">${items.slice(-18).map(x=>`<div><time>${esc(fmtDate(x.at))}</time><strong>${esc(x.title)}</strong><p>${esc(x.detail)}</p></div>`).join('')}</div>`;
   }
 
   function recordsWatch(){
