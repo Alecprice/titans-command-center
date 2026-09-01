@@ -64,7 +64,7 @@
     return `<div class="fprop-shell"><div class="fprop-top"><div><div class="fprop-kicker">LIVE PLAYER PROP BOARD</div><h2>Titans matchup props across 3 books</h2><p>Loading current player prop lines from DraftKings, FanDuel and BetMGM…</p></div><button type="button" class="fprop-refresh" disabled>Loading…</button></div><div class="fprop-loading" role="status">Checking current provider coverage.</div></div>`;
   }
 
-  function render() {
+  function render({ focusId = '', selection = null } = {}) {
     const node = root();
     if (!node) return;
     if (state.loading && !state.data) { node.innerHTML = loadingMarkup(); return; }
@@ -75,11 +75,18 @@
     const statusText = state.error ? 'Provider check degraded' : `${reporting} of 3 books reporting`;
     node.innerHTML = `<div class="fprop-shell"><div class="fprop-top"><div><div class="fprop-kicker">LIVE PLAYER PROP BOARD</div><h2>Titans matchup props across 3 books</h2><p>${esc(eventText)}. Compare current lines by source; no projection or recommendation is invented here.</p></div><button type="button" class="fprop-refresh" id="fprop-refresh"${state.loading ? ' disabled' : ''}>${state.loading ? 'Refreshing…' : 'Refresh props'}</button></div><div class="fprop-meta"><span class="${reporting ? 'is-live' : ''}">${esc(statusText)}</span><span>Updated ${esc(formatTime(latestCapture(data)))}</span><span>Provider: ${esc(data.provider || 'free-odds-stack')}</span></div>${state.error ? `<div class="fprop-warning" role="status">${esc(state.error)}. Showing any current lines that remain available.</div>` : ''}${sourceCards(data)}${filterControls(data)}${propRows(data)}<p class="fprop-note">Odds are informational and can move quickly. “Reporting” means the source returned a current line for this Titans matchup; a missing book is shown as unavailable rather than estimated.</p></div>`;
     bind();
+    if (focusId) {
+      const focusTarget = root()?.querySelector(`#${focusId}`);
+      if (focusTarget) {
+        focusTarget.focus({ preventScroll: true });
+        if (Number.isInteger(selection) && typeof focusTarget.setSelectionRange === 'function') focusTarget.setSelectionRange(selection, selection);
+      }
+    }
   }
 
   function bind() {
     root()?.querySelector('#fprop-refresh')?.addEventListener('click', () => load(true));
-    root()?.querySelector('#fprop-player-filter')?.addEventListener('input', event => { state.player = event.target.value; render(); });
+    root()?.querySelector('#fprop-player-filter')?.addEventListener('input', event => { const selection = event.target.selectionStart; state.player = event.target.value; render({ focusId: 'fprop-player-filter', selection }); });
     root()?.querySelector('#fprop-market-filter')?.addEventListener('change', event => { state.market = event.target.value; render(); });
   }
 
