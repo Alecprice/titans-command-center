@@ -76,7 +76,15 @@ import './titans-social-v49.js';
     return `<section class="tickets-comparison-board"><header><div><small>LIVE PRICE COMPARISON</small><h2>Cheapest reported Titans tickets, lowest first</h2></div><span>${filtered.length} games</span></header><div class="tickets-compare-list">${filtered.map(comparisonGameCard).join('')}</div></section>`;
   }
   function fallbackGames(){
-    return (Array.isArray(state.data?.games)?state.data.games:[]).filter(game=>{const stamp=Date.parse(game.date);return game.status!=='final'&&game.status!=='bye'&&(!Number.isFinite(stamp)||stamp>Date.now()-21600000);}).sort((a,b)=>(Date.parse(a.date)||Number.MAX_SAFE_INTEGER)-(Date.parse(b.date)||Number.MAX_SAFE_INTEGER));
+    return (Array.isArray(state.data?.games)?state.data.games:[]).filter(game=>{
+      if(game.status==='final'||game.status==='bye')return false;
+      if(game.dateTbd)return true;
+      const stamp=Date.parse(game.date);
+      return Number.isFinite(stamp)&&stamp>Date.now();
+    }).sort((a,b)=>{
+      const aStamp=Date.parse(a.date),bStamp=Date.parse(b.date);
+      return (Number.isFinite(aStamp)?aStamp:Number.MAX_SAFE_INTEGER)-(Number.isFinite(bStamp)?bStamp:Number.MAX_SAFE_INTEGER);
+    });
   }
   function unavailableBody(){
     const games=fallbackGames();
