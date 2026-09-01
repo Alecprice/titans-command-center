@@ -122,13 +122,12 @@ def dimensions(driver):
     """)
 
 def assert_layout(state,label,mode):
-    # documentElement.clientWidth excludes the vertical scrollbar gutter while
-    # window.innerWidth and body.scrollWidth include it. Compare each scroll
-    # surface against the matching viewport metric so a vertical scrollbar is
-    # not misclassified as horizontal overflow.
+    # In standards mode Chromium uses documentElement as the scrolling root.
+    # body.scrollWidth can include fixed/off-canvas descendants that do not
+    # create a horizontal scrollbar. Keep body width for diagnostics, but only
+    # fail when the actual scrolling root exceeds its client viewport.
     root_overflow=state['scrollWidth']>state['clientWidth']+3
-    body_overflow=state['bodyScrollWidth']>state['innerWidth']+3
-    if root_overflow or body_overflow:
+    if root_overflow:
         raise RuntimeError(f'{label}: horizontal overflow {state}')
     if state['appWidth']<=0 or state['topbarWidth']<=0 or state['appTextLength']<=0:
         raise RuntimeError(f'{label}: primary shell/content is empty {state}')
@@ -166,7 +165,8 @@ try:
             assert_layout(state,label,mode)
             rows.append({
                 'viewport':name,'width':width,'height':height,'mode':mode,'route':route_name,'hash':route_hash,
-                'scrollWidth':state['scrollWidth'],'clientWidth':state['clientWidth'],'mobileNav':state['mobileNav'],
+                'scrollWidth':state['scrollWidth'],'clientWidth':state['clientWidth'],'bodyScrollWidth':state['bodyScrollWidth'],
+                'bodyExceedsViewport':state['bodyScrollWidth']>state['innerWidth']+3,'mobileNav':state['mobileNav'],
                 'suspiciousTiny':state['suspiciousTiny'],
                 'smallControls':state['smallControls'] if mode=='mobile' else [],
             })
@@ -174,14 +174,16 @@ try:
     if warnings: raise RuntimeError(f'Browser severe warnings: {warnings[:8]}')
     tiny_samples=[{'viewport':r['viewport'],'route':r['route'],'items':r['suspiciousTiny']} for r in rows if r['suspiciousTiny']]
     control_samples=[{'viewport':r['viewport'],'route':r['route'],'items':r['smallControls']} for r in rows if r['smallControls']]
+    body_excess_samples=[{'viewport':r['viewport'],'route':r['route'],'bodyScrollWidth':r['bodyScrollWidth'],'clientWidth':r['clientWidth']} for r in rows if r['bodyExceedsViewport']]
     payload={
         'ok':True,'base':BASE,'viewports':len(VIEWPORTS),'routes':len(ROUTES),'checks':len(rows),
         'tinyTextSurfaces':len(tiny_samples),'tinyTextSamples':tiny_samples[:12],
         'undersizedControlSurfaces':len(control_samples),'undersizedControlSamples':control_samples[:18],
+        'bodyExcessDiagnosticSurfaces':len(body_excess_samples),'bodyExcessDiagnosticSamples':body_excess_samples[:18],
         'rows':rows,'durationSeconds':round(time.time()-started,2)
     }
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
-    print(json.dumps({k:v for k,v in payload.items() if k not in ('rows','tinyTextSamples','undersizedControlSamples')},indent=2))
+    print(json.dumps({k:v for k,v in payload.items() if k not in ('rows','tinyTextSamples','undersizedControlSamples','bodyExcessDiagnosticSamples')},indent=2))
 except Exception as exc:
     payload={'ok':False,'base':BASE,'stage':current,'error':f'{type(exc).__name__}: {exc}','rows':rows,'durationSeconds':round(time.time()-started,2)}
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
