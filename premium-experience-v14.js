@@ -1,4 +1,4 @@
-import {scheduleFocus} from './src/core.mjs';
+import {scheduleFocus,latestCompletedGame} from './src/core.mjs';
 
 (() => {
   'use strict';
@@ -35,12 +35,12 @@ import {scheduleFocus} from './src/core.mjs';
   }
   const valid=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?null:d};
   const gameFocus=()=>scheduleFocus(state.data?.games||[]);
-  const latestFinal=()=>[...(state.data?.games||[])].reverse().find(g=>/final/i.test(String(g.status||'')))||null;
+  const latestFinal=()=>latestCompletedGame(state.data?.games||[]);
   const latestMove=()=>state.data?.transactions?.[0]||null;
   const latestStory=()=>state.data?.feed?.[0]||null;
   const gameName=g=>g?`${g.homeAway==='home'?'vs':'at'} ${g.opponent||g.opponentAbbr||'Opponent'}`:'Schedule TBD';
   const gameTime=g=>{const d=valid(g?.date);return d?new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(d):'TBD'};
-  function seasonPhase(){const m=new Date().getMonth()+1;if(m===4)return'DRAFT SEASON';if(m===3)return'FREE AGENCY';if(m>=5&&m<=6)return'OFFSEASON';if(m===7)return'TRAINING CAMP';if(m===8)return'PRESEASON';if(m>=9&&m<=12)return'REGULAR SEASON';if(m===1)return'PLAYOFF PUSH';return'OFFSEASON'}
+  function seasonPhase(){const m=new Date().getMonth()+1;if(m===4)return'DRAFT SEASON';if(m===3)return'FREE AGENCY';if(m>=5&&m<=6)return'OFFSEASON';if(m===7)return'TRAINING CAMP';if(m===8)return'PRESEASON';if(m>=9&&m<=12)return'REGULAR SEASON';if(m===1)return'POSTSEASON WINDOW';return'OFFSEASON'}
   function countdown(g){const t=Date.parse(g?.date),diff=t-Date.now();if(!Number.isFinite(t))return'Time TBD';if(diff<=0)return'Game time';const h=Math.floor(diff/3600000);if(h>=48)return`${Math.floor(h/24)} days`;if(h>=1)return`${h} hours`;return`${Math.max(1,Math.floor(diff/60000))} min`}
 
   function termsModal(){document.querySelector('#v14-terms-modal')?.remove();const el=document.createElement('div');el.id='v14-terms-modal';el.className='v14-modal';el.innerHTML=`<div class="v14-modal-backdrop" data-v14-close></div><section role="dialog" aria-modal="true" aria-labelledby="v14-terms-title"><header><div><small>PLAIN ENGLISH</small><h2 id="v14-terms-title">Football terms, without the homework</h2></div><button type="button" data-v14-close aria-label="Close">×</button></header><div class="v14-term-grid">${Object.entries(TERMS).map(([term,copy])=>`<article><strong>${esc(term)}</strong><p>${esc(copy)}</p></article>`).join('')}</div></section>`;document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target.closest?.('[data-v14-close]'))el.remove()});el.querySelector('section')?.focus?.()}
