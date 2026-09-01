@@ -33,6 +33,21 @@ export function scheduleFocus(games, now = new Date(), windowMs = GAME_FOCUS_WIN
   };
 }
 
+export function latestCompletedGame(games) {
+  const finals = (Array.isArray(games) ? games : [])
+    .map((game, index) => {
+      const raw = String(game?.date || '').trim();
+      return { game, index, kickoff: raw ? new Date(raw).getTime() : Number.NaN };
+    })
+    .filter(row => /final/i.test(String(row.game?.status || '')));
+  if (!finals.length) return null;
+
+  const dated = finals.filter(row => Number.isFinite(row.kickoff));
+  if (!dated.length) return finals.at(-1)?.game || null;
+  dated.sort((a, b) => a.kickoff - b.kickoff || a.index - b.index);
+  return dated.at(-1)?.game || null;
+}
+
 export function filterFeed(items, filters = {}) {
   const query = (filters.query || '').trim().toLowerCase();
   return items.filter(item => {
