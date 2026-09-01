@@ -13,7 +13,8 @@ const browserModules=[
   'src/roster-audit-20260819.mjs',
   'src/roster-audit-20260822.mjs',
   'src/roster-audit-20260824.mjs',
-  'src/roster-audit-20260827.mjs'
+  'src/roster-audit-20260827.mjs',
+  'src/roster-audit-20260831.mjs'
 ];
 
 const isRootStatic=name=>name==='index.html'||name==='manifest.webmanifest'||name==='sw.js'||name==='_headers'||name.endsWith('.css')||name.endsWith('.js');
