@@ -8,7 +8,7 @@
   }
 
   const arr=v=>Array.isArray(v)?v:[];
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const state={data:null,fan:null,loading:null,serial:0};
 
   async function load(){
@@ -26,7 +26,7 @@
   const injuries=()=>arr(state.fan?.injuries);
   const standings=()=>arr(state.fan?.standings);
   const depthChanges=()=>arr(state.fan?.depthChart?.changes);
-  const nextGame=()=>games().find(g=>{const t=Date.parse(g?.date);return Number.isFinite(t)&&t>Date.now()&&!/final|bye/i.test(String(g?.status||''))})||null;
+  const gameFocus=()=>runtime.scheduleFocus(games());
   const latestFinal=()=>[...games()].reverse().find(g=>/final/i.test(String(g?.status||'')))||null;
   const regularFinals=()=>games().filter(g=>Number(g?.week)>=1&&/final/i.test(String(g?.status||''))&&Number.isFinite(Number(g?.score))&&Number.isFinite(Number(g?.opponentScore)));
 
@@ -75,10 +75,13 @@
 
   const fmtDate=value=>runtime.formatTeamKickoff(value);
   function priorityCards(p){
-    const g=nextGame(),last=latestFinal(),move=moves()[0],inj=injuries(),stand=standings().find(x=>x.abbreviation==='TEN'),depth=depthChanges();
+    const focus=gameFocus(),g=focus.game,last=latestFinal(),move=moves()[0],inj=injuries(),stand=standings().find(x=>x.abbreviation==='TEN'),depth=depthChanges();
     const availability=availabilityState(g,inj),division=standingsState(stand);
+    const gameCard=focus.state==='game-window'&&g
+      ?{eyebrow:'GAME WINDOW',title:`${g.homeAway==='home'?'vs':'at'} ${g.opponent||g.opponentAbbr||'Opponent'}`,copy:`Kickoff ${fmtDate(g.date)}. Live status has not been verified yet${g.network?` · ${g.network}`:''}.`,href:'#live'}
+      :{eyebrow:'NEXT GAME',title:g?`${g.homeAway==='home'?'vs':'at'} ${g.opponent||g.opponentAbbr||'Opponent'}`:'Next game TBD',copy:g?`${fmtDate(g.date)}${g.network?` · ${g.network}`:''}`:'The schedule will fill this automatically.',href:'#live'};
     const base={
-      game:{eyebrow:'NEXT GAME',title:g?`${g.homeAway==='home'?'vs':'at'} ${g.opponent||g.opponentAbbr||'Opponent'}`:'Next game TBD',copy:g?`${fmtDate(g.date)}${g.network?` · ${g.network}`:''}`:'The schedule will fill this automatically.',href:'#live'},
+      game:gameCard,
       changes:{eyebrow:'WHAT CHANGED?',title:depth.length?`${depth.length} depth change${depth.length===1?'':'s'} loaded`:'Review team changes',copy:move?.description||'Roster, availability, depth and broadcast changes are compared against your last review.',href:'#command'},
       roster:{eyebrow:'ROSTER',title:move?.type||'Latest roster movement',copy:move?.description||'No new transaction is loaded right now.',href:'#transactions'},
       injury:{eyebrow:'AVAILABILITY',title:availability.title,copy:availability.copy,href:'#fan'},
