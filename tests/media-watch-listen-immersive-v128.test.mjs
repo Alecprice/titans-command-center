@@ -43,6 +43,6 @@ test('immersive treatment remains mobile and motion accessible',()=>{
   assert.match(css,/\.media-page \.media-hero\{min-height:360px/);
   assert.match(css,/@media\(prefers-contrast:more\)/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
-  assert.match(css,/mediaBroadcastSweep[^}]*animation:none/);
+  assert.match(css,/data-phase="live"\]\) \.media-next::before[^}]*animation:none/);
   assert.match(css,/\.media-page \.media-provider::after[^}]*display:none/);
 });
