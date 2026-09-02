@@ -43,13 +43,21 @@ test('social pulse is free-only, cached, and has no X credential dependency',asy
   assert.ok(FREE_SOURCE_LINKS.some(link=>link.label==='YouTube'));
 });
 
-test('Home pulse communicates free sources and remains mobile/PWA packaged',async()=>{
+test('Home pulse is a compact three-item digest with source truth and mobile PWA packaging',async()=>{
   const [client,css,sw,tickets]=await Promise.all([read('titans-social-v49.js'),read('titans-social-v49.css'),read('sw.js'),read('tickets-v47.js')]);
   assert.match(tickets,/import '\.\/titans-social-v49\.js'/);
-  assert.match(client,/Official updates \+ Titans fan conversation/);
-  assert.match(client,/FREE SOURCES/);
+  assert.match(client,/const HOME_ITEM_LIMIT=3/);
+  assert.match(client,/function pulseItems\(\)/);
+  assert.match(client,/\[official\[0\],\.\.\.publicItems,\.\.\.official\.slice\(1\)\]\.slice\(0,HOME_ITEM_LIMIT\)/);
+  assert.match(client,/Around Titans Nation/);
+  assert.match(client,/FAN PULSE · FREE SOURCES/);
+  assert.match(client,/free sources responding/);
+  assert.match(client,/data-social-freshness/);
   assert.match(client,/data-social-refresh/);
-  assert.match(client,/Titans RSS \+ Bluesky public API \+ Reddit RSS/);
+  assert.match(client,/10-minute shared cache/);
+  assert.doesNotMatch(client,/slice\(0,8\)/);
+  assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(css,/grid-auto-flow:column/);
   assert.match(css,/min-height:44px/);
   assert.match(css,/@media\(max-width:390px\)/);
   assert.match(sw,/titans-cc-brand-2026-v\d+/);
