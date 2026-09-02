@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `2f846766499f0c73801678cc8c32bfb6c86bef8e`
+- Source commit: `b8e52a5f47b324462af812e36d8cae358c2207be`
 - Quality gate: failure
 - Cloudflare credentials available: true
 - Source still current main: unknown
@@ -26,7 +26,7 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: existing deployment remains unchanged
-- Recorded: 2026-09-02T15:24:21Z
+- Recorded: 2026-09-02T15:51:44Z
 
 ## Quality gate failure context
 
@@ -71,7 +71,7 @@
   }
 
 test at tests/tenx-ticket-trust-mobile-v129.test.mjs:33:1
-✖ ticket trust layer is loaded and available to installed/offline clients (1.008486ms)
+✖ ticket trust layer is loaded and available to installed/offline clients (0.887513ms)
   AssertionError [ERR_ASSERTION]: The input did not match the regular expression /titans-cc-brand-2026-v80/. Input:
   
   "const CACHE = 'titans-cc-brand-2026-v81';\n" +
