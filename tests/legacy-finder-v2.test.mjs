@@ -10,7 +10,7 @@ test('legacy finder ships through the browser and offline shells',()=>{
   assert.match(html,/legacy-finder-v2\.js\?v=1/);
   assert.match(sw,/\/legacy-finder-v2\.css/);
   assert.match(sw,/\/legacy-finder-v2\.js/);
-  assert.match(sw,/titans-cc-brand-2026-v78/);
+  assert.match(sw,/titans-cc-brand-2026-v79/);
 });
 
 test('legacy finder indexes the rendered museum instead of duplicating history data',()=>{
@@ -40,6 +40,15 @@ test('legacy finder supports shareable route-safe state and resilient native-fil
   assert.match(js,/\.legacy-era-filter,\.archive-filter/);
   assert.match(js,/legacy-finder-filtered/);
   assert.doesNotMatch(js,/location\.hash\s*=/);
+});
+
+test('legacy finder preserves unrelated route params for guided deep links',()=>{
+  const js=read('legacy-finder-v2.js');
+  assert.match(js,/const \[,query=''\]=location\.hash\.replace/);
+  assert.match(js,/const params=new URLSearchParams\(query\)/);
+  assert.match(js,/params\.delete\('q'\)/);
+  assert.match(js,/params\.delete\('scope'\)/);
+  assert.match(js,/ensureLegacyTrails\(page,controller\)/);
 });
 
 test('legacy finder is accessible and keyboard friendly',()=>{

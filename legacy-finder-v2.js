@@ -1,6 +1,7 @@
 import { ensureLegacyHeritage } from './legacy-heritage-v3.js';
+import { ensureLegacyTrails } from './legacy-trails-v4.js';
 
-const FINDER_VERSION='2.1.0';
+const FINDER_VERSION='2.2.0';
 const ROUTE='legacy';
 const SECTION_MAP={
   story:{id:'legacy-story',label:'Story',selectors:['.legacy-story-card']},
@@ -26,12 +27,13 @@ function hashState(){
 
 function writeHashState(q,scope){
   if(route()!==ROUTE)return;
-  const params=new URLSearchParams();
+  const [,query='']=location.hash.replace(/^#/,'').split('?');
+  const params=new URLSearchParams(query);
   const cleanQ=String(q||'').trim();
-  if(cleanQ)params.set('q',cleanQ);
-  if(scope&&scope!=='all'&&SECTION_MAP[scope])params.set('scope',scope);
-  const query=params.toString();
-  const next=`#${ROUTE}${query?`?${query}`:''}`;
+  if(cleanQ)params.set('q',cleanQ);else params.delete('q');
+  if(scope&&scope!=='all'&&SECTION_MAP[scope])params.set('scope',scope);else params.delete('scope');
+  const nextQuery=params.toString();
+  const next=`#${ROUTE}${nextQuery?`?${nextQuery}`:''}`;
   if(location.hash!==next)history.replaceState(history.state,'',`${location.pathname}${location.search}${next}`);
 }
 
@@ -186,6 +188,7 @@ function enhanceLegacy(){
   const finder=page.querySelector('[data-legacy-finder]');
   if(!finder)return;
   const controller=createController(page,finder,index);
+  ensureLegacyTrails(page,controller);
   page.dataset.legacyFinderReady='true';
   page._legacyFinderController=controller;
 }
