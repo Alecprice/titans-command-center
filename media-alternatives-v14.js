@@ -25,6 +25,7 @@ import './media-custom-links-v14.js';
   const HOUR=60*60*1000;
   const DAY=24*HOUR;
   const POSTGAME_WINDOW=8*HOUR;
+  const REFRESH_INTERVAL=60*1000;
 
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const card=(item)=>`<a class="media-alt-card" href="${item.url}" target="_blank" rel="noopener noreferrer"><small>${esc(item.badge)}</small><strong>${esc(item.title)}</strong><span>${esc(item.note)}</span><b>${esc(item.action)} ↗</b></a>`;
@@ -143,7 +144,7 @@ import './media-custom-links-v14.js';
       watchNote='Official Titans live-video page for postgame press conferences. The team lists the podium stream at approximately 10 minutes after the game ends.';
       timeline=`<div><small>~10 MIN AFTER</small><strong>Postgame podium</strong><span>Official live video when available.</span></div><div><small>AFTER FINAL</small><strong>Game highlights</strong><span><a href="${OFFICIAL.titansVideo}" target="_blank" rel="noopener noreferrer">Open Titans video ↗</a></span></div><div><small>NEXT</small><strong>OTP + Titans Radio</strong><span>Official analysis as it is published.</span></div>`;
     }
-    const signature=[current,game?.id||game?.date||'none',phase.key,providerName].join('|');
+    const signature=[current,game?.id||game?.date||'none',phase.key,phase.title,providerName].join('|');
     let section=document.querySelector('.media-quickstart');
     if(section?.dataset.signature===signature)return;
     if(!section){section=document.createElement('section');section.className='media-quickstart';hero.insertAdjacentElement('afterend',section)}
@@ -155,9 +156,26 @@ import './media-custom-links-v14.js';
 
   function render(){renderAlternatives();renderQuickStart()}
 
-  window.addEventListener('hashchange',()=>setTimeout(render,60));
+  let refreshTimer=null;
+  function syncRefreshTimer(){
+    if(route()==='media'){
+      if(refreshTimer===null){
+        refreshTimer=setInterval(()=>{
+          if(route()==='media'&&document.visibilityState!=='hidden')renderQuickStart();
+        },REFRESH_INTERVAL);
+      }
+      return;
+    }
+    if(refreshTimer!==null){clearInterval(refreshTimer);refreshTimer=null}
+  }
+  function routeChanged(){syncRefreshTimer();setTimeout(render,60)}
+
+  window.addEventListener('hashchange',routeChanged);
+  window.addEventListener('popstate',routeChanged);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&route()==='media')renderQuickStart()});
   document.addEventListener('click',event=>{if(event.target instanceof Element&&event.target.closest('[data-media-area]'))setTimeout(render,80)},true);
   const app=document.querySelector('#app');
-  if(app)new MutationObserver(()=>queueMicrotask(render)).observe(app,{childList:true,subtree:true});
+  if(app)new MutationObserver(()=>queueMicrotask(render)).observe(app,{childList:true,subtree:false});
+  syncRefreshTimer();
   setTimeout(render,140);
 })();
