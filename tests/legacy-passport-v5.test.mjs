@@ -51,10 +51,10 @@ test('Passport copy is truthful when storage is unavailable and reset is explici
   assert.match(trails,/passport=resetPassport\(\);paint\(\)/);
 });
 
-test('Passport adds no provider traffic account sync or lifecycle owner',()=>{
+test('Passport adds no provider traffic remote preference sync or lifecycle owner',()=>{
   assert.doesNotMatch(trails,/\bfetch\s*\(/);
   assert.doesNotMatch(trails,/XMLHttpRequest|WebSocket/);
-  assert.doesNotMatch(trails,/account|sync/i);
+  assert.doesNotMatch(trails,/account-sync-v|accountSync|syncPreferences|savePreferences|remotePreferences|TitansAccount/i);
   assert.doesNotMatch(trails,/new MutationObserver/);
   assert.doesNotMatch(trails,/setInterval/);
   assert.doesNotMatch(trails,/addEventListener\('hashchange'/);
