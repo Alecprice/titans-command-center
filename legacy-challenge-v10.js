@@ -1,4 +1,4 @@
-const VERSION='10.2.0';
+const VERSION='10.3.0';
 const ROUND_SIZE=5;
 const OPTION_COUNT=4;
 const MODE_META={
@@ -110,8 +110,17 @@ function ensureStyle(){
     .legacy-challenge-action[hidden]{display:none}
     .legacy-challenge-share{background:#eaf4fb;border-color:#9fc8e4}
     .legacy-challenge-start{min-height:46px;width:min(320px,100%);border:0;background:var(--retro-blue,#4a95ce);color:#fff;padding:11px 14px;font-size:9px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-bottom:4px solid var(--retro-red,#d5272c)}
+    .legacy-challenge[data-legacy-challenge-state="idle"]{gap:10px;padding:18px 20px}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head{grid-template-columns:minmax(0,1fr) minmax(280px,.9fr);gap:14px;align-items:center}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head h2{font-size:clamp(24px,2.5vw,32px)}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head p{font-size:9px;line-height:1.5}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-stage{grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-meta,.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-question,.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-reference,.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-options{display:none}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-feedback{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-actions{justify-content:flex-end}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-start{width:auto;min-width:220px}
     .legacy-challenge button:focus-visible{outline:3px solid var(--titans-red,#c8102e);outline-offset:3px}
-    @media(max-width:760px){.legacy-challenge-head{grid-template-columns:1fr}.legacy-challenge-options{grid-template-columns:1fr}.legacy-challenge-options button,.legacy-challenge-action,.legacy-challenge-start{min-height:48px;font-size:10px}.legacy-challenge-mode{min-height:48px}.legacy-challenge-actions{display:grid;grid-template-columns:1fr}}
+    @media(max-width:760px){.legacy-challenge-head{grid-template-columns:1fr}.legacy-challenge-options{grid-template-columns:1fr}.legacy-challenge-options button,.legacy-challenge-action,.legacy-challenge-start{min-height:48px;font-size:10px}.legacy-challenge-mode{min-height:48px}.legacy-challenge-actions{display:grid;grid-template-columns:1fr}.legacy-challenge[data-legacy-challenge-state="idle"]{padding:16px}.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head{grid-template-columns:1fr;gap:8px}.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head p{font-size:9px;line-height:1.45}.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-stage{grid-template-columns:1fr;padding:12px}.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-actions{display:block}.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-start{width:100%;min-width:0}}
     @media(prefers-reduced-motion:reduce){.legacy-challenge button{transition:none}}
     @media(forced-colors:active){.legacy-challenge,.legacy-challenge-stage,.legacy-challenge-options button,.legacy-challenge-action,.legacy-challenge-start,.legacy-challenge-mode{border:1px solid CanvasText}.legacy-challenge button:focus-visible{outline:3px solid Highlight}}
   `;
@@ -119,7 +128,7 @@ function ensureStyle(){
 }
 
 function shellMarkup(){
-  return `<section class="legacy-challenge" data-legacy-challenge data-version="${VERSION}" aria-labelledby="legacy-challenge-title">
+  return `<section class="legacy-challenge" data-legacy-challenge data-version="${VERSION}" data-legacy-challenge-state="idle" aria-labelledby="legacy-challenge-title">
     <div class="legacy-challenge-head"><div><small>Fan challenge · museum-derived facts only</small><h2 id="legacy-challenge-title">Legacy Challenge</h2></div><p>Choose Fan for standard clues or Diehard to reverse the same museum facts. Both modes are generated from the Record Book and Retired Numbers already on this page.</p></div>
     <div class="legacy-challenge-stage" data-legacy-challenge-stage>
       <div class="legacy-challenge-meta"><span data-legacy-challenge-progress>Ready for kickoff</span><span data-legacy-challenge-score>Score 0</span></div>
@@ -150,6 +159,7 @@ function createGame(page,root,banks){
 
   const current=()=>round[index]||null;
   const modeLabel=value=>MODE_META[value]?.label||MODE_META.fan.label;
+  const setChallengeState=value=>{root.dataset.legacyChallengeState=value;};
 
   function updateModeControls(disabled=false){
     modeButtons.forEach(button=>{
@@ -173,6 +183,7 @@ function createGame(page,root,banks){
   function renderQuestion(){
     const item=current();
     if(!item)return;
+    setChallengeState('active');
     answered=false;
     progress.textContent=`${modeLabel(roundMode)} · Question ${index+1} of ${round.length}`;
     scoreNode.textContent=`Score ${score}`;
@@ -190,6 +201,7 @@ function createGame(page,root,banks){
 
   function finish(){
     completed=true;
+    setChallengeState('complete');
     progress.textContent=`${modeLabel(roundMode)} round complete`;
     scoreNode.textContent=`Final ${score} / ${round.length} · ${modeLabel(roundMode)}`;
     questionNode.textContent=`You scored ${score} out of ${round.length}.`;
