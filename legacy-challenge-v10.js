@@ -92,37 +92,37 @@ function ensureStyle(){
   style.textContent=`
     .legacy-challenge{display:grid;gap:16px;padding:24px;background:#06192e;color:#fff;border-top:5px solid var(--retro-red,#d5272c);box-shadow:0 18px 40px rgba(0,33,68,.14)}
     .legacy-challenge-head{display:grid;grid-template-columns:minmax(0,.8fr) minmax(300px,1.2fr);gap:20px;align-items:end}
-    .legacy-challenge-head small{display:block;margin-bottom:6px;color:#75b7e2;font-size:8px;font-weight:950;letter-spacing:.16em;text-transform:uppercase}
+    .legacy-challenge-head small{display:block;margin-bottom:6px;color:#75b7e2;font-size:10px;font-weight:950;letter-spacing:.16em;text-transform:uppercase}
     .legacy-challenge-head h2{margin:0;color:#fff;font-size:clamp(27px,3vw,40px);line-height:.95;letter-spacing:-.045em;text-transform:uppercase}
-    .legacy-challenge-head p{margin:0;color:#b8ccdc;font-size:10px;line-height:1.65}
+    .legacy-challenge-head p{margin:0;color:#b8ccdc;font-size:12px;line-height:1.65}
     .legacy-challenge-stage{display:grid;gap:14px;padding:18px;background:#fff;color:var(--retro-navy,#002144);border:1px solid rgba(255,255,255,.18)}
-    .legacy-challenge-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#557086;font-size:8px;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
+    .legacy-challenge-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#557086;font-size:10px;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
     .legacy-challenge-modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
     .legacy-challenge-mode{min-height:44px;border:1px solid rgba(0,33,68,.18);background:#f5f8fb;color:var(--retro-navy,#002144);padding:10px 12px;text-align:left;cursor:pointer}
     .legacy-challenge-mode strong,.legacy-challenge-mode span{display:block}
-    .legacy-challenge-mode strong{font-size:10px;letter-spacing:.05em;text-transform:uppercase}
-    .legacy-challenge-mode span{margin-top:3px;color:#617c92;font-size:8px;line-height:1.4}
+    .legacy-challenge-mode strong{font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+    .legacy-challenge-mode span{margin-top:3px;color:#617c92;font-size:10px;line-height:1.4}
     .legacy-challenge-mode[aria-pressed="true"]{background:#06192e;border-color:#06192e;color:#fff}
     .legacy-challenge-mode[aria-pressed="true"] span{color:#b8ccdc}
     .legacy-challenge-mode:disabled{cursor:default;opacity:.62}
     .legacy-challenge-question{margin:0;font-size:clamp(19px,2.2vw,28px);line-height:1.08;letter-spacing:-.03em}
-    .legacy-challenge-reference{margin:-5px 0 0;color:#658098;font-size:9px}
+    .legacy-challenge-reference{margin:-5px 0 0;color:#658098;font-size:11px}
     .legacy-challenge-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-    .legacy-challenge-options button,.legacy-challenge-action{min-height:44px;border:1px solid rgba(0,33,68,.18);background:#f2f7fb;color:var(--retro-navy,#002144);padding:10px 12px;font-size:9px;font-weight:950;letter-spacing:.05em;cursor:pointer}
+    .legacy-challenge-options button,.legacy-challenge-action{min-height:44px;border:1px solid rgba(0,33,68,.18);background:#f2f7fb;color:var(--retro-navy,#002144);padding:10px 12px;font-size:11px;font-weight:950;letter-spacing:.05em;cursor:pointer}
     .legacy-challenge-options button:hover:not(:disabled),.legacy-challenge-action:hover,.legacy-challenge-mode:hover:not(:disabled):not([aria-pressed="true"]){background:var(--retro-navy,#002144);color:#fff}
     .legacy-challenge-options button:disabled{cursor:default;opacity:1}
     .legacy-challenge-options button.is-correct{background:#e4f5e9;border-color:#3f8f59;color:#143d22}
     .legacy-challenge-options button.is-wrong{background:#fff0f1;border-color:#bd4050;color:#731d2a}
-    .legacy-challenge-feedback{min-height:22px;margin:0;color:#49677e;font-size:10px;line-height:1.55}
+    .legacy-challenge-feedback{min-height:22px;margin:0;color:#49677e;font-size:12px;line-height:1.55}
     .legacy-challenge-actions{display:flex;gap:8px;flex-wrap:wrap}
     .legacy-challenge-action{min-width:140px;text-transform:uppercase}
     .legacy-challenge-action[hidden]{display:none}
     .legacy-challenge-share{background:#eaf4fb;border-color:#9fc8e4}
-    .legacy-challenge-start{min-height:46px;width:min(320px,100%);border:0;background:var(--retro-blue,#4a95ce);color:#fff;padding:11px 14px;font-size:9px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-bottom:4px solid var(--retro-red,#d5272c)}
+    .legacy-challenge-start{min-height:46px;width:min(320px,100%);border:0;background:var(--retro-blue,#4a95ce);color:#fff;padding:11px 14px;font-size:11px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-bottom:4px solid var(--retro-red,#d5272c)}
     .legacy-challenge[data-legacy-challenge-state="idle"]{gap:10px;padding:18px 20px}
     .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head{grid-template-columns:minmax(0,1fr) minmax(280px,.9fr);gap:14px;align-items:center}
     .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head h2{font-size:clamp(24px,2.5vw,32px)}
-    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head p{font-size:9px;line-height:1.5}
+    .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-head p{font-size:11px;line-height:1.5}
     .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-stage{grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px}
     .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-meta,.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-question,.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-reference,.legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-options{display:none}
     .legacy-challenge[data-legacy-challenge-state="idle"] .legacy-challenge-feedback{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
