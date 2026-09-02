@@ -1,12 +1,10 @@
 (() => {
   'use strict';
 
-  if(window.__TitansTicketCompareV125)return;
-  window.__TitansTicketCompareV125=true;
-
-  const runtime=window.TitansRuntime;
   const app=document.querySelector('#app');
   if(!app)return;
+  if(window.__TitansTicketCompareV125)return;
+  window.__TitansTicketCompareV125=true;
 
   const SHORTLIST_KEY='titans:tickets-shortlist-v123';
   const SHORTLIST_CHANGE='titans:ticket-shortlist-change';
@@ -15,8 +13,11 @@
   const MAX_FOCUS_SETTLE_FRAMES=18;
   const MAX_SAVED=3;
   let queued=false;
+  let runtimeBound=false;
+  let savedAuthority='unread';
 
-  const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
+  const currentRuntime=()=>window.TitansRuntime;
+  const route=()=>currentRuntime()?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
   const money=value=>Number.isFinite(value)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value):'—';
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
@@ -29,13 +30,36 @@
     document.head.append(link);
   }
 
+  function readJSON(key,fallback){
+    const runtime=currentRuntime();
+    if(typeof runtime?.storage?.getJSON==='function'){
+      return {value:runtime.storage.getJSON(key,fallback),authority:'runtime'};
+    }
+    try{
+      const raw=localStorage.getItem(key);
+      return {value:raw==null?fallback:JSON.parse(raw),authority:'localStorage'};
+    }catch{
+      return {value:fallback,authority:'unavailable'};
+    }
+  }
+
   function readSaved(){
-    const value=runtime?.storage?.getJSON?.(SHORTLIST_KEY,[]);
+    const runtime=currentRuntime();
+    const runtimeValue=runtime?.storage?.getJSON?.(SHORTLIST_KEY,[]);
+    if(Array.isArray(runtimeValue)){
+      savedAuthority='runtime';
+      return runtimeValue.filter(item=>item&&typeof item.key==='string').slice(0,MAX_SAVED);
+    }
+    const read=readJSON(SHORTLIST_KEY,[]);
+    savedAuthority=read.authority;
+    const value=read.value;
     return Array.isArray(value)?value.filter(item=>item&&typeof item.key==='string').slice(0,MAX_SAVED):[];
   }
 
   function readMemory(){
-    const value=runtime?.storage?.getJSON?.(MEMORY_KEY,{events:{}});
+    const runtime=currentRuntime();
+    const runtimeValue=runtime?.storage?.getJSON?.(MEMORY_KEY,{events:{}});
+    const value=runtimeValue&&typeof runtimeValue==='object'?runtimeValue:readJSON(MEMORY_KEY,{events:{}}).value;
     return value&&typeof value==='object'&&value.events&&typeof value.events==='object'?value:{events:{}};
   }
 
@@ -195,6 +219,8 @@
 
   function render(center){
     const saved=readSaved();
+    center.dataset.ticketCompareAuthorityV156=savedAuthority;
+    center.dataset.ticketCompareSavedV156=String(saved.length);
     let panel=center.querySelector('[data-ticket-compare-v125]');
     if(!saved.length){panel?.remove();return;}
     const items=savedRecords(center);
@@ -275,8 +301,17 @@
     requestAnimationFrame(()=>settleReveal(center,key,0,0));
   }
 
+  function bindRuntime(){
+    const runtime=currentRuntime();
+    if(runtimeBound||!runtime)return;
+    runtimeBound=true;
+    runtime?.onRoute?.(schedule,{immediate:true});
+    runtime?.onAppRender?.(schedule,{immediate:true});
+  }
+
   function enhance(){
     queued=false;
+    bindRuntime();
     if(route()!=='tickets')return;
     ensureStyles();
     const center=app.querySelector('[data-ticket-center]');
@@ -304,8 +339,7 @@
   app.addEventListener(SHORTLIST_CHANGE,syncFromShortlist);
   addEventListener('storage',event=>{if(event.key===SHORTLIST_KEY||event.key===MEMORY_KEY)schedule();});
   new MutationObserver(schedule).observe(app,{childList:true,subtree:false});
-  runtime?.onRoute?.(schedule,{immediate:true});
-  runtime?.onAppRender?.(schedule,{immediate:true});
+  bindRuntime();
   addEventListener('hashchange',schedule);
-  schedule();
+  queueMicrotask(()=>{bindRuntime();schedule();});
 })();
