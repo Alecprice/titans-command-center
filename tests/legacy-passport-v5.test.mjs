@@ -72,7 +72,7 @@ test('Passport controls are accessible readable and phone safe',()=>{
 
 test('Passport ships through the existing Trails offline dependency without another shell asset',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v79/);
+  assert.match(sw,/titans-cc-brand-2026-v80/);
   assert.match(sw,/\/legacy-trails-v4\.js/);
   assert.doesNotMatch(sw,/legacy-passport-v5\.js/);
 });
