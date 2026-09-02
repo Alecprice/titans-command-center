@@ -11,7 +11,7 @@ const DEFAULT_LIMIT=18;
 const EARTH_RADIUS_MILES=3958.8;
 
 const text=value=>String(value??'').trim();
-const finite=value=>{const number=Number(value);return Number.isFinite(number)?number:null;};
+const finite=value=>{if(value==null||value==='')return null;const number=Number(value);return Number.isFinite(number)?number:null;};
 const bounded=(value,fallback,min,max)=>{const number=finite(value);return number==null?fallback:Math.max(min,Math.min(max,number));};
 const csv=(value,max=8)=>text(value).split(',').map(item=>item.trim()).filter(Boolean).slice(0,max);
 const dateMs=value=>{const stamp=Date.parse(String(value||''));return Number.isFinite(stamp)?stamp:null;};
