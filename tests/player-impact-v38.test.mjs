@@ -41,6 +41,22 @@ test('My Player Impact uses canonical loaded roster identity for Player Intellig
   assert.match(feature,/What changed for the Titans you follow/);
 });
 
+test('Home Player Impact expands exceptions while Game Day retains the complete followed set',()=>{
+  assert.match(feature,/const home=current==='home'/);
+  assert.match(feature,/const visibleImpacts=home\?impacts\.filter\(impact=>impact\.flagged\):impacts/);
+  assert.match(feature,/const summary=home\?homeSummary\(impacts\):''/);
+  assert.match(feature,/Home expands only followed players with a flagged change or roster-review need/);
+  assert.match(feature,/data-v38-home-summary/);
+});
+
+test('Home quiet-summary separates loaded evidence from unavailable change feeds',()=>{
+  assert.match(feature,/const evidenceAvailable=loadedFeeds\.length>0/);
+  assert.match(feature,/const withEvidence=quiet\.filter\(impact=>impact\.evidenceAvailable\)\.length/);
+  assert.match(feature,/no flagged change in the loaded player-specific feeds/);
+  assert.match(feature,/player-specific change feeds unavailable/);
+  assert.match(feature,/Unavailable feeds are not treated as proof that nothing changed/);
+});
+
 test('My Player Impact is observer-light touch-safe refreshable and offline packaged',()=>{
   assert.match(feature,/runtime\.onRoute\(mount,\{immediate:true\}\)/);
   assert.match(feature,/runtime\.onAppRender\(mount,\{immediate:true\}\)/);
