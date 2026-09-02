@@ -55,6 +55,17 @@ test('heritage controls, source links and stadium rail are accessible and mobile
   assert.match(js,/forced-colors:active/);
 });
 
+test('heritage phone typography lifts metadata above desktop microtype',()=>{
+  const js=read('legacy-heritage-v3.js');
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-now small\{font-size:9px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-venue-index,.legacy-venue-city\{font-size:9px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honors-head small\{font-size:9px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-filters button\{min-height:48px;flex:0 0 auto;font-size:9px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-card p\{font-size:10px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-card small,.legacy-honor-card strong\{font-size:9px\}/);
+  assert.doesNotMatch(js,/\.legacy-heritage-now strong\{margin-top:3px;font-size:9px\}/);
+});
+
 test('Legacy Finder indexes Heritage and coordinates native filters',()=>{
   const js=read('legacy-finder-v2.js');
   assert.match(js,/ensureLegacyHeritage/);
