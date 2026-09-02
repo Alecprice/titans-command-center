@@ -22,7 +22,7 @@ test('TENX favorite UI changes state only after persistence succeeds',()=>{
 });
 
 test('TENX failed favorite persistence stays visibly and accessibly truthful',()=>{
-  assert.match(source,/aria-live=\\"polite\\"/);
+  assert.match(source,/aria-live="polite"/);
   assert.match(source,/★ Favorite still saved · retry/);
   assert.match(source,/☆ Favorite not saved · retry/);
   assert.match(source,/Could not remove favorite\. Favorite is still saved\. Retry\./);
