@@ -65,7 +65,7 @@ test('heritage section keeps route-safe navigation and renumbers Identity',()=>{
 
 test('heritage dependency is part of the offline shell',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v79/);
+  assert.match(sw,/titans-cc-brand-2026-v80/);
   assert.match(sw,/\/legacy-finder-v2\.js/);
   assert.match(sw,/\/legacy-heritage-v3\.js/);
 });
