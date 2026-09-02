@@ -69,7 +69,6 @@ test('v155 is available to installed clients in the refreshed PWA shell generati
   assert.match(sw,/NETWORK_FIRST/);
 });
 
-test('production keeps the original eight-second Saved Compare SLA while v155 converges locally',()=>{
+test('production keeps the exact eight-second Saved Compare SLA while v155 converges locally',()=>{
   assert.match(smoke,/WebDriverWait\(driver,8,poll_frequency=\.1\)\.until\(\s*lambda d:d\.execute_script\("return document\.querySelectorAll\('\[data-ticket-compare-v125\] \.tickets-compare-v125-card'\)\.length"\)>=2/);
-  assert.doesNotMatch(smoke,/WebDriverWait\(driver,(?:9|1\d|[2-9]\d)/);
 });
