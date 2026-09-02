@@ -13,6 +13,7 @@
   const getJSON=(key,fallback)=>runtime?.storage?.getJSON?.(key,fallback)??fallback;
   const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
   const scoringLabel=value=>value==='ppr'?'PPR':value==='standard'?'Standard':'Half PPR';
+  const normalizeName=value=>String(value||'').trim().toLowerCase();
 
   async function loadData(){
     if(data||dataLoading)return dataLoading||data;
@@ -20,11 +21,21 @@
     return dataLoading;
   }
 
+  function favoritePlayer(name){
+    const needle=normalizeName(name);
+    if(!needle)return null;
+    const rows=Array.isArray(data?.roster)?data.roster:[];
+    return rows.find(row=>normalizeName(row?.name||row?.fullName)===needle)||null;
+  }
+
   function favoriteTarget(name){
     if(!name)return '#command';
-    const rows=Array.isArray(data?.roster)?data.roster:[];
-    const player=rows.find(row=>String(row?.name||row?.fullName||'').trim().toLowerCase()===name.trim().toLowerCase());
-    return player?.id?`#player?id=${encodeURIComponent(player.id)}`:'#roster';
+    const player=favoritePlayer(name);
+    if(!player)return '#roster';
+    const id=String(player.id||'').trim();
+    if(id)return `#player?id=${encodeURIComponent(id)}`;
+    const canonical=String(player.name||player.fullName||'').trim();
+    return canonical?`#player?name=${encodeURIComponent(canonical)}`:'#roster';
   }
 
   function injectStyle(){
@@ -51,15 +62,18 @@
     const accountTitle=account?String(account.name||'Signed in'):'Device profile';
     const accountDetail=account?(syncState==='synced'?'Cloud settings synced':'Signed in · sync available'):'Sign in to carry settings across devices';
     const favoriteTitle=favorite||'Choose a favorite player';
-    const favoriteDetail=favorite?'Jump straight back into Player Intelligence':'Set it once in My Titans';
+    const favoriteHref=favoriteTarget(favorite);
+    const favoriteVerified=favoriteHref.startsWith('#player?');
+    const favoriteDetail=!favorite?'Set it once in My Titans':favoriteVerified?'Jump straight back into Player Intelligence':data?'Saved favorite is not on the loaded roster. Review Team Room before opening a player page.':'Checking your favorite against the current roster…';
+    const favoriteAction=!favorite?'Set favorite →':favoriteVerified?'Open player →':'Review roster →';
     const fantasyTitle=savedCount?`${savedCount} saved · ${starterCount} starters`:'Build your fantasy board';
     const fantasyDetail=`${scoringLabel(fantasy.scoring)}${sleeper?` · Sleeper: ${sleeper}`:' · Sleeper optional'}`;
-    const signature=JSON.stringify([favoriteTitle,favoriteDetail,favoriteTarget(favorite),fantasyTitle,fantasyDetail,accountTitle,accountDetail]);
+    const signature=JSON.stringify([favoriteTitle,favoriteDetail,favoriteHref,favoriteAction,fantasyTitle,fantasyDetail,accountTitle,accountDetail]);
     let root=app.querySelector('.my-titans-home-v35');
     if(!root){root=document.createElement('section');root.className='my-titans-home-v35';root.setAttribute('aria-label','My Titans quick access');pulse.parentNode.insertBefore(root,pulse);}
     if(root.dataset.signature===signature)return;
     root.dataset.signature=signature;
-    root.innerHTML=`<div class="my-titans-home-v35-head"><div><small>MY TITANS</small><h2>Your fan command shortcuts</h2></div><span>Personalized from your saved settings</span></div><div class="my-titans-home-v35-grid"><a class="my-titans-home-v35-card" href="${esc(favoriteTarget(favorite))}"><div><small>FAVORITE PLAYER</small><strong>${esc(favoriteTitle)}</strong><span>${esc(favoriteDetail)}</span></div><b>${favorite?'Open player →':'Set favorite →'}</b></a><a class="my-titans-home-v35-card" href="#fantasy"><div><small>FANTASY COMMAND</small><strong>${esc(fantasyTitle)}</strong><span>${esc(fantasyDetail)}</span></div><b>Open Fantasy →</b></a><button class="my-titans-home-v35-card account" type="button" data-my-titans-account><div><small>ACCOUNT</small><strong>${esc(accountTitle)}</strong><span>${esc(accountDetail)}</span></div><b>Manage account →</b></button></div>`;
+    root.innerHTML=`<div class="my-titans-home-v35-head"><div><small>MY TITANS</small><h2>Your fan command shortcuts</h2></div><span>Personalized from your saved settings</span></div><div class="my-titans-home-v35-grid"><a class="my-titans-home-v35-card" href="${esc(favoriteHref)}" data-my-titans-favorite-state="${favoriteVerified?'verified':favorite?'review':'unset'}"><div><small>FAVORITE PLAYER</small><strong>${esc(favoriteTitle)}</strong><span>${esc(favoriteDetail)}</span></div><b>${esc(favoriteAction)}</b></a><a class="my-titans-home-v35-card" href="#fantasy"><div><small>FANTASY COMMAND</small><strong>${esc(fantasyTitle)}</strong><span>${esc(fantasyDetail)}</span></div><b>Open Fantasy →</b></a><button class="my-titans-home-v35-card account" type="button" data-my-titans-account><div><small>ACCOUNT</small><strong>${esc(accountTitle)}</strong><span>${esc(accountDetail)}</span></div><b>Manage account →</b></button></div>`;
   }
 
   document.addEventListener('click',event=>{
