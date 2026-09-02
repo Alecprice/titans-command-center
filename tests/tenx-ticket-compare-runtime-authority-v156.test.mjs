@@ -10,6 +10,7 @@ test('Saved Compare resolves the shared runtime at read time instead of capturin
   assert.doesNotMatch(source,/const runtime=window\.TitansRuntime/);
   assert.match(source,/const runtime=currentRuntime\(\)/);
   assert.match(source,/runtime\.storage\.getJSON\(key,fallback\)/);
+  assert.match(source,/runtime\?\.storage\?\.getJSON\?\.\(SHORTLIST_KEY,\[\]\)/);
 });
 
 test('Saved Compare falls back to the same browser-local shortlist authority when runtime storage is not ready',()=>{
@@ -30,12 +31,16 @@ test('Saved Compare exposes bounded production diagnostics without fan-state dup
 
 test('runtime subscriptions can bind after module evaluation without polling or provider traffic',()=>{
   assert.match(source,/function bindRuntime\(\)/);
-  assert.match(source,/runtime\.onRoute\?\.\(schedule,\{immediate:true\}\)/);
-  assert.match(source,/runtime\.onAppRender\?\.\(schedule,\{immediate:true\}\)/);
+  assert.match(source,/runtime\?\.onRoute\?\.\(schedule,\{immediate:true\}\)/);
+  assert.match(source,/runtime\?\.onAppRender\?\.\(schedule,\{immediate:true\}\)/);
   assert.match(source,/queueMicrotask\(\(\)=>\{bindRuntime\(\);schedule\(\);\}\)/);
   assert.doesNotMatch(source,/setTimeout/);
   assert.doesNotMatch(source,/setInterval/);
   assert.doesNotMatch(source,/\bfetch\s*\(/);
+});
+
+test('same-tab shortlist handoff stays synchronous through the existing enhance path',()=>{
+  assert.match(source,/function syncFromShortlist\(\)\{queued=false;enhance\(\);\}/);
 });
 
 test('compare initialization does not burn its global guard before the app host exists',()=>{
