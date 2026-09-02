@@ -7,7 +7,7 @@ const fanPlatform=fs.readFileSync(new URL('../fan-platform-v10.js',import.meta.u
 
 test('TENX Home detects the existing customizable command deck instead of creating a second preference system',()=>{
   assert.match(home,/const customDeck=\(\)=>app\.querySelector\('\[data-v10-home\]'\)/);
-  assert.match(fanPlatform,/data\.v10Home='1'/);
+  assert.match(fanPlatform,/board\.dataset\.v10Home='1'/);
   assert.match(fanPlatform,/data-customize-home/);
   assert.match(fanPlatform,/homeOrder/);
   assert.match(fanPlatform,/homeHidden/);
