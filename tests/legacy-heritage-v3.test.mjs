@@ -33,7 +33,7 @@ test('heritage is progressive, source-safe and does not add a data fetch',()=>{
   assert.doesNotMatch(js,/\bfetch\s*\(/);
 });
 
-test('heritage controls and source links are accessible and mobile ready',()=>{
+test('heritage controls, source links and stadium rail are accessible and mobile ready',()=>{
   const js=read('legacy-heritage-v3.js');
   assert.match(js,/aria-label="Filter Ring of Honor members"/);
   assert.match(js,/aria-pressed/);
@@ -46,6 +46,10 @@ test('heritage controls and source links are accessible and mobile ready',()=>{
   assert.doesNotMatch(js,/\.legacy-heritage-sources a\{[^}]*font-size:7px/);
   assert.match(js,/\.legacy-heritage-sources a:hover/);
   assert.match(js,/\.legacy-heritage-sources a:focus-visible/);
+  assert.match(js,/class="legacy-venue-grid" role="region" tabindex="0" aria-label="Oilers and Titans home stadium timeline" aria-describedby="legacy-venue-scroll-cue"/);
+  assert.match(js,/id="legacy-venue-scroll-cue">Scroll horizontally to explore all seven home fields/);
+  assert.match(js,/\.legacy-venue-grid:focus-visible\{outline:3px solid/);
+  assert.match(js,/forced-colors:active[\s\S]*\.legacy-venue-grid:focus-visible\{outline:3px solid Highlight/);
   assert.match(js,/max-width:430px/);
   assert.match(js,/prefers-reduced-motion:reduce/);
   assert.match(js,/forced-colors:active/);

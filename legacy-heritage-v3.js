@@ -82,7 +82,9 @@ function injectStyles(){
     .legacy-heritage-now small{color:#6b8092;font-size:7px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
     .legacy-heritage-now strong{margin-top:3px;font-size:9px}
     .legacy-heritage-now strong{margin-top:4px;font-size:16px}
+    .legacy-venue-scroll-cue{margin:0 0 7px;color:#60788d;font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
     .legacy-venue-grid{display:grid;grid-template-columns:repeat(7,minmax(180px,1fr));gap:10px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:2px 1px 10px;scrollbar-width:thin}
+    .legacy-venue-grid:focus-visible{outline:3px solid rgba(74,149,206,.55);outline-offset:3px}
     .legacy-venue-card{min-height:232px;scroll-snap-align:start;position:relative;padding:15px 14px 13px;border:1px solid rgba(0,33,68,.15);background:#fff;box-shadow:0 8px 20px rgba(0,33,68,.06)}
     .legacy-venue-card:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--retro-blue,#4b92db)}
     .legacy-venue-card[data-venue-future="true"]:before{background:linear-gradient(90deg,var(--retro-blue,#4b92db),var(--retro-red,#c8102e))}
@@ -112,10 +114,10 @@ function injectStyles(){
     .legacy-honor-card[hidden]{display:none!important}
     .legacy-honor-filters button:focus-visible,.legacy-heritage-sources a:focus-visible{outline:3px solid rgba(74,149,206,.38);outline-offset:2px}
     @media(max-width:1000px){.legacy-honor-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:760px){.legacy-heritage-intro{grid-template-columns:1fr;padding:14px}.legacy-heritage-now{grid-template-columns:1fr 1fr}.legacy-venue-grid{grid-template-columns:repeat(7,82vw)}.legacy-venue-card{min-height:220px}.legacy-honors-head{display:block}.legacy-honors-head p{margin-top:8px}.legacy-heritage-sources a{min-height:48px;font-size:9px}.legacy-honor-filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px;scrollbar-width:none}.legacy-honor-filters::-webkit-scrollbar{display:none}.legacy-honor-filters button{min-height:48px;flex:0 0 auto}.legacy-honor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:760px){.legacy-heritage-intro{grid-template-columns:1fr;padding:14px}.legacy-heritage-now{grid-template-columns:1fr 1fr}.legacy-venue-scroll-cue{font-size:9px}.legacy-venue-grid{grid-template-columns:repeat(7,82vw)}.legacy-venue-card{min-height:220px}.legacy-honors-head{display:block}.legacy-honors-head p{margin-top:8px}.legacy-heritage-sources a{min-height:48px;font-size:9px}.legacy-honor-filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px;scrollbar-width:none}.legacy-honor-filters::-webkit-scrollbar{display:none}.legacy-honor-filters button{min-height:48px;flex:0 0 auto}.legacy-honor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:430px){.legacy-heritage-now{grid-template-columns:1fr}.legacy-venue-grid{grid-template-columns:repeat(7,86vw)}.legacy-honor-grid{grid-template-columns:1fr}.legacy-honor-card{min-height:104px}}
     @media(prefers-reduced-motion:reduce){.legacy-venue-grid{scroll-behavior:auto}.legacy-heritage-section *{transition:none!important}}
-    @media(forced-colors:active){.legacy-venue-card,.legacy-honor-card,.legacy-heritage-intro,.legacy-honor-filters button,.legacy-heritage-sources a{border:1px solid CanvasText}.legacy-venue-card:before{background:CanvasText}}
+    @media(forced-colors:active){.legacy-venue-card,.legacy-honor-card,.legacy-heritage-intro,.legacy-honor-filters button,.legacy-heritage-sources a{border:1px solid CanvasText}.legacy-venue-card:before{background:CanvasText}.legacy-venue-grid:focus-visible{outline:3px solid Highlight}}
   `;
   document.head.append(style);
 }
@@ -144,7 +146,8 @@ function heritageMarkup(){
       <div><strong>Houston → Memphis → Nashville → the next East Bank home.</strong><p>The venue changes explain more than geography. They mark the AFL titles, Luv Ya Blue, the Tennessee Oilers transition, the Music City Miracle and the next stadium era.</p><div class="legacy-heritage-sources">${sourceLinks(['stadiumHistory','teamHistory'])}</div></div>
       <div class="legacy-heritage-now"><div><small>2026</small><strong>Farewell season</strong></div><div><small>2027</small><strong>New Nissan Stadium</strong></div></div>
     </div>
-    <div class="legacy-venue-grid" aria-label="Oilers and Titans home stadium timeline">${venues.map(venueCard).join('')}</div>
+    <p class="legacy-venue-scroll-cue" id="legacy-venue-scroll-cue">Scroll horizontally to explore all seven home fields →</p>
+    <div class="legacy-venue-grid" role="region" tabindex="0" aria-label="Oilers and Titans home stadium timeline" aria-describedby="legacy-venue-scroll-cue">${venues.map(venueCard).join('')}</div>
     <div class="legacy-honors-wrap">
       <div class="legacy-honors-head"><div><small>Franchise immortals</small><h3>Ring of Honor · 19</h3></div><p>The franchise’s Ring of Honor recognizes players, coaches, executives, its founder and the Voice of the Titans. Mike Keith became the newest member in 2025.</p></div>
       <div class="legacy-honor-filters" role="group" aria-label="Filter Ring of Honor members">
