@@ -25,6 +25,13 @@ test('fantasy prop trend direction is based only on line delta',()=>{
   assert.doesNotMatch(script,/recommend|best bet|edge|lock/i);
 });
 
+test('fantasy prop trend decorator cannot recursively trigger its own observer',()=>{
+  assert.match(script,/observer\?\.disconnect\(\)/);
+  assert.match(script,/finally \{resumeObserver\(\)\}/);
+  assert.match(script,/observer=new MutationObserver\(queue\)/);
+  assert.match(script,/resumeObserver\(\)/);
+});
+
 test('fantasy prop trend UI is wired, mobile safe, and accessible',()=>{
   assert.match(html,/fantasy-prop-trends-v133\.css/);
   assert.match(html,/fantasy-prop-trends-v133\.js/);
