@@ -9,12 +9,24 @@
   let data=null,intel=null,loading=null;
 
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
   const norm=value=>String(value??'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
   const readState=()=>{try{const value=JSON.parse(localStorage.getItem(STORE)||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}catch{return{}}};
   const fantasyPlayer=player=>['QB','RB','FB','WR','TE','K'].includes(String(player?.position||'').toUpperCase());
   const injuryName=row=>row?.playerName||row?.player_name||row?.name||row?.athleteName||row?.athlete_name||'';
   const injuryStatus=row=>row?.reportStatus||row?.practiceStatus||row?.status||row?.designation||row?.primaryInjury||row?.injury||'Report row loaded';
+  const sleeperKey=state=>{const username=String(state?.sleeperUser||'').trim().toLowerCase(),leagueId=String(state?.leagueId||'').trim();return username&&/^\d{6,32}$/.test(leagueId)?`${username}|${leagueId}`:''};
+
+  function rosterContextState(saved){
+    const key=sleeperKey(saved);
+    if(!key)return {status:'none',starters:null,bench:null};
+    const context=window.TitansFantasyRosterContext;
+    if(!context||context.connectionKey!==key)return {status:'pending',starters:null,bench:null};
+    if(context.matched!==true)return {status:'unmatched',starters:null,bench:null};
+    const starters=Number(context.starterCount),bench=Number(context.benchCount);
+    if(!Number.isFinite(starters)||starters<0||!Number.isFinite(bench)||bench<0)return {status:'pending',starters:null,bench:null};
+    return {status:'matched',starters,bench};
+  }
 
   function ensureStyle(){
     if(document.querySelector('style[data-fantasy-weekly-v42]'))return;
@@ -62,19 +74,27 @@
     return rows;
   }
   function stateSummary(){
-    const state=readState(),manual=Array.isArray(state.manual)?state.manual:[];
-    return {week:Number.isInteger(state.week)&&state.week>=1&&state.week<=18?state.week:1,starters:manual.filter(player=>player?.slot==='starter').length,bench:manual.filter(player=>player?.slot==='bench').length,watch:manual.filter(player=>player?.slot==='watch').length,sleeper:Boolean(String(state.sleeperUser||'').trim()&&String(state.leagueId||'').trim())};
+    const saved=readState(),manual=Array.isArray(saved.manual)?saved.manual:[],roster=rosterContextState(saved);
+    return {week:Number.isInteger(saved.week)&&saved.week>=1&&saved.week<=18?saved.week:1,starters:manual.filter(player=>player?.slot==='starter').length,bench:manual.filter(player=>player?.slot==='bench').length,watch:manual.filter(player=>player?.slot==='watch').length,sleeper:Boolean(sleeperKey(saved)),roster};
+  }
+  function workspaceCopy(state,moveText){
+    const latest=`Latest Titans move: ${esc(String(moveText).slice(0,120))}`;
+    if(state.roster.status==='matched')return {title:'Sleeper roster matched',detail:`${state.roster.starters} starters · ${state.roster.bench} bench from Sleeper · ${state.watch} manual watchlist. ${latest}`};
+    if(state.roster.status==='unmatched')return {title:'Sleeper roster not matched',detail:`The connected user is not matched to a roster in the selected league. Manual board: ${state.starters} starters · ${state.bench} bench · ${state.watch} watchlist. ${latest}`};
+    if(state.sleeper)return {title:'Sleeper league connected',detail:`Sleeper roster counts appear after the read-only roster match finishes. Manual board: ${state.starters} starters · ${state.bench} bench · ${state.watch} watchlist. ${latest}`};
+    return {title:'Manual board ready',detail:`${state.starters} starters · ${state.bench} bench · ${state.watch} watchlist. ${latest}`};
   }
   function markup(){
     const game=nextGame(),watch=availabilityWatch(),state=stateSummary(),move=data?.transactions?.[0];
     const gameName=game?`${game.homeAway==='home'?'vs':'at'} ${game.opponent||game.opponentAbbr||'Opponent'}`:'Next game not loaded';
     const moveText=move?.description||'No recent official roster move is loaded.';
+    const workspace=workspaceCopy(state,moveText);
     return `<section class="fantasy-weekly-v42" data-fantasy-weekly-v42>
-      <div class="fw42-head"><div><small>FANTASY THIS WEEK</small><h2>Decisions first. Tools second.</h2><p>Verified Titans context for your lineup workflow. This card does not create projections or pretend an empty feed means a player is cleared.</p></div><span class="fw42-week">Sleeper week ${state.week}</span></div>
+      <div class="fw42-head"><div><small>FANTASY THIS WEEK</small><h2>Decisions first. Tools second.</h2><p>Verified Titans context for your lineup workflow. This card does not create projections or pretend an empty feed means a player is cleared.</p></div><span class="fw42-week">Selected week ${state.week}</span></div>
       <div class="fw42-grid">
         <article class="fw42-card"><small>NEXT TITANS GAME</small><strong>${esc(gameName)}</strong><span>${esc(game?`${gameTime(game)} · ${game.network||'TV TBD'}`:'Schedule context is unavailable right now.')}</span></article>
         <article class="fw42-card"><small>AVAILABILITY WATCH</small><strong>${watch.length?`${watch.length} fantasy-relevant report row${watch.length===1?'':'s'}`:'No matching injury rows loaded'}</strong><span>${watch.length?'Review the exact report statuses before lineup lock.':'No matching row here is not medical clearance.'}</span>${watch.length?`<div class="fw42-watch">${watch.map(item=>`<span>${esc(item.player.name)} · ${esc(item.status)}</span>`).join('')}</div>`:''}</article>
-        <article class="fw42-card"><small>YOUR WORKSPACE</small><strong>${state.sleeper?'Sleeper league connected':'Manual board ready'}</strong><span>${state.starters} starters · ${state.bench} bench · ${state.watch} watchlist. Latest Titans move: ${esc(String(moveText).slice(0,120))}</span></article>
+        <article class="fw42-card"><small>YOUR WORKSPACE</small><strong>${workspace.title}</strong><span>${workspace.detail}</span></article>
       </div>
       <div class="fw42-actions" aria-label="Fantasy quick actions"><button type="button" data-fw42-tab="my">My lineup</button><button type="button" data-fw42-startsit>Start / Sit</button><button type="button" data-fw42-tab="sleeper">Sleeper</button><button type="button" data-fw42-calc>Points calculator</button></div>
     </section>`;
@@ -97,9 +117,11 @@
     if(target.closest('[data-fw42-startsit]')){const decision=document.querySelector('[data-fantasy-decision]');if(decision)decision.scrollIntoView({block:'start',behavior:'smooth'});else{openTab('my');requestAnimationFrame(()=>document.querySelector('[data-fantasy-decision]')?.scrollIntoView({block:'start',behavior:'smooth'}));}}
   });
 
-  const refresh=()=>{data=null;intel=null;loading=null;document.querySelector('[data-fantasy-weekly-v42]')?.remove();queueMicrotask(mount)};
+  const rerender=()=>{document.querySelector('[data-fantasy-weekly-v42]')?.remove();queueMicrotask(mount)};
+  const refresh=()=>{data=null;intel=null;loading=null;rerender()};
   if(runtime){runtime.onRoute(()=>queueMicrotask(mount));runtime.onAppRender(()=>queueMicrotask(mount));runtime.onRefresh(refresh);}
   else {addEventListener('hashchange',()=>queueMicrotask(mount));const app=document.querySelector('#app');if(app)new MutationObserver(()=>queueMicrotask(mount)).observe(app,{childList:true});}
+  addEventListener('titans:fantasy-roster-context',rerender);
   addEventListener('titans:preferences-synced',refresh);
   addEventListener('titans:preferences-imported',refresh);
   queueMicrotask(mount);
