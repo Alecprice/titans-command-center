@@ -36,7 +36,7 @@ test('TENX full watchlist is an explicit no-write state instead of a dead contro
 });
 
 test('TENX Player and Home watch failures use visible polite status regions with safe text insertion',()=>{
-  assert.equal((source.match(/data-v36-watch-status role=\\"status\\" aria-live=\\"polite\\"/g)||[]).length,2);
+  assert.equal((source.match(/data-v36-watch-status role="status" aria-live="polite"/g)||[]).length,2);
   assert.match(source,/const watchStatus=\(button,message\)=>\{[^}]*status\.textContent=String\(message\|\|''\)/);
   assert.match(source,/\.v36-watch-status\{[^}]*font-weight:800/);
   assert.match(source,/\.v36-watch-status:empty\{display:none\}/);
