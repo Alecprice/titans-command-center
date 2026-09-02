@@ -62,3 +62,10 @@ test('heritage section keeps route-safe navigation and renumbers Identity',()=>{
   assert.doesNotMatch(js,/href="#legacy-heritage"/);
   assert.match(js,/06 · Identity vault/);
 });
+
+test('heritage dependency is part of the offline shell',()=>{
+  const sw=read('sw.js');
+  assert.match(sw,/titans-cc-brand-2026-v78/);
+  assert.match(sw,/\/legacy-finder-v2\.js/);
+  assert.match(sw,/\/legacy-heritage-v3\.js/);
+});
