@@ -35,7 +35,7 @@
   const initialArea=savedArea==='outside'?'us':['nashville','us','international'].includes(savedArea)?savedArea:'nashville';
   const state={data:null,loading:null,area:initialArea};
 
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const validDate=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d};
   const fmt=v=>{const d=validDate(v);return d?new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Chicago'}).format(d):'TBD'};
   const safeUrl=v=>{try{const u=new URL(v);return ['https:','http:'].includes(u.protocol)?u.href:'#'}catch{return'#'}};
@@ -44,7 +44,8 @@
   async function load(){
     if(state.data)return state.data;
     if(state.loading)return state.loading;
-    state.loading=fetch('/api/data',{cache:'no-store',headers:{Accept:'application/json'}}).then(async r=>r.ok?r.json():null).catch(()=>null).then(d=>{state.data=d?.ok?d:null;return state.data}).finally(()=>state.loading=null);
+    const runtime=window.TitansRuntime;
+    state.loading=(typeof runtime?.apiJson==='function'?runtime.apiJson('/api/data',{ttl:30000}):fetch('/api/data',{cache:'no-store',headers:{Accept:'application/json'}}).then(async r=>r.ok?r.json():null).catch(()=>null)).then(d=>{state.data=d?.ok?d:null;return state.data}).finally(()=>state.loading=null);
     return state.loading;
   }
 
