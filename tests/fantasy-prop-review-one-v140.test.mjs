@@ -8,13 +8,15 @@ test('one watched prop can be checkpointed without rewriting the whole board',()
   assert.ok(review.includes('function markOneReviewed(row,identity)'));
   assert.ok(review.includes('const store=pruneReview(loadReview(),watchedKeys);'));
   assert.ok(review.includes('store[liveIdentity.key]={reviewedAt:Date.now(),books};'));
-  assert.ok(review.includes('saveReview(store);decorate();return true;'));
+  assert.ok(review.includes("saveReview(store);decorate({kind:'advance',reviewKind:result.kind,key:liveIdentity.key});return true;"));
   assert.equal((review.match(/function markReviewed\(/g)||[]).length,1);
 });
 
 test('per-prop review revalidates live row identity and watch membership before writing',()=>{
   assert.ok(review.includes('const liveIdentity=rowIdentity(row),watchedKeys=new Set(loadWatchlist().map(item=>item.key));'));
   assert.ok(review.includes('if(!liveIdentity||liveIdentity.key!==identity.key||!watchedKeys.has(liveIdentity.key))return false;'));
+  assert.ok(review.includes('const result=compare(row,store[liveIdentity.key]);'));
+  assert.ok(review.includes("if(result.kind!=='changed'&&result.kind!=='unreviewed')return false;"));
 });
 
 test('per-prop checkpoint refuses to invent an empty sportsbook baseline',()=>{

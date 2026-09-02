@@ -1,20 +1,21 @@
 # Cloudflare deployment status
 
-- Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `db1f44acb5434005e08df63aaca4168b37a53713`
-- Quality gate: failure
+- Status: **deployed + Ticket Center browser regression failure**
+- Source commit: `ce28e4a4118418f8632c21a04c4ca09fc36f23f4`
+- Quality gate: success
 - Cloudflare credentials available: true
-- Source still current main: unknown
+- Source still current main: true
+- Main SHA observed before deploy: `ce28e4a4118418f8632c21a04c4ca09fc36f23f4`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers configured: SeatGeek=false, Ticketmaster=false, StubHub=false
-- Deploy outcome: skipped
-- Canonical front door: skipped
-- Production regression: skipped
-- Browser navigation regression: skipped
-- Listen Watch browser regression: skipped
-- Market Pulse browser regression: skipped
-- Ticket Center browser regression: skipped
+- Deploy outcome: success
+- Canonical front door: success
+- Production regression: success
+- Browser navigation regression: success
+- Listen Watch browser regression: success
+- Market Pulse browser regression: success
+- Ticket Center browser regression: failure
 - Command Intelligence browser regression: skipped
 - Player Intelligence / Game Day browser regression: skipped
 - Ask Titans browser regression: skipped
@@ -25,94 +26,835 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
-- Rollback Worker URL: existing deployment remains unchanged
-- Recorded: 2026-09-02T15:13:59Z
+- Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
+- Recorded: 2026-09-02T16:03:15Z
 
-## Quality gate failure context
+## Canonical front door regression
 
-```text
+```json
+{
+  "ok": true,
+  "canonical": "https://titans.alecjprice.com",
+  "origin": "https://titans-command-center.alecjordanprice.workers.dev",
+  "deployedCommit": "efdeaf5ec2d661f3921cbfefdc2b8af2b2c2fd06",
+  "version": "1.0.0",
+  "revisionAttempts": 1,
+  "shellPropagationAttempts": 1,
+  "shellPaths": [
+    "/",
+    "/index.html",
+    "/sw.js",
+    "/app.js",
+    "/tickets-price-fallback-v58.js",
+    "/tickets-tenx-v123.js",
+    "/tickets-compare-v125.js",
+    "/tickets-compare-cache-bridge-v141.js"
+  ],
+  "shellCacheControl": {
+    "/": {
+      "canonical": "no-store, max-age=0, must-revalidate",
+      "origin": "no-store, max-age=0, must-revalidate"
+    },
+    "/index.html": {
+      "canonical": "no-store, max-age=0, must-revalidate",
+      "origin": "no-store, max-age=0, must-revalidate"
+    },
+    "/sw.js": {
+      "canonical": "public, max-age=0, must-revalidate, no-store, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate, no-store, max-age=0, must-revalidate"
+    },
+    "/app.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    },
+    "/tickets-price-fallback-v58.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    },
+    "/tickets-tenx-v123.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    },
+    "/tickets-compare-v125.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    },
+    "/tickets-compare-cache-bridge-v141.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    }
+  },
+  "cloudFront": {
+    "requestId": "gGHW_XFieb5bQtBHrdlC2oRe6d2XX1B5rToURlBy3JACoaceES2x4w==",
+    "pop": "IAD55-P2",
+    "via": "1.1 9b00405a1ff669043791884b75822050.cloudfront.net (CloudFront)",
+    "cache": "Miss from cloudfront"
+  },
+  "canonicalSecurity": {
+    "contentTypeOptions": "nosniff",
+    "frameOptions": "DENY",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com https://i.ytimg.com; connect-src 'self' https://api.sleeper.app; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "robots": "",
+    "csp": true
+  },
+  "originRobots": "noindex, nofollow",
+  "health": {
+    "status": "healthy",
+    "databaseProvider": "cloudflare-d1",
+    "databaseConfigured": true,
+    "snapshotFresh": true
+  },
+  "responseMs": {
+    "canonicalMeta": 650,
+    "originMeta": 313,
+    "canonicalRoot": 178,
+    "originRoot": 68,
+    "health": 604
+  },
+  "testedAt": "2026-09-02T16:01:53.484Z"
+}```
 
---- tail ---
-    'const SHELL = [\n' +
-    "  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/legacy-finder-v2.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fantasy-command-v1.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/media-youtube-v66.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/cutdown-command-v23.css', '/mode-365-v19.css', '/tickets-v47.css', '/tickets-mobile-trust-v129.css', '/tickets-official-v51.css', '/tickets-resilience-v53.css', '/titans-social-v49.css', '/readability-v28.css', '/readability-v34.css',\n" +
-    "  '/app.js', '/legacy-polish.js', '/legacy-finder-v2.js', '/legacy-heritage-v3.js', '/legacy-trails-v4.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/home-command-v123.js', '/fan-events-v145.js', '/team-time-v21.js', '/mode-365-v19.js', '/freshness-truth-v20.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/fantasy-command-v1.js', '/fantasy-sleeper-intelligence-v2.js', '/fantasy-decision-center-v3.js', '/fantasy-weekly-command-v42.js', '/ask-fantasy-bridge-v1.js', '/accessibility-runtime.js', '/continue-command-v35.js', '/my-titans-home-v35.js', '/my-player-watch-v36.js', '/gameday-personal-v37.js', '/my-player-impact-v38.js', '/schedule-calendar-v39.js', '/roster-filter-guard-v40.js', '/team-room-state-repair-v54.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/media-youtube-v66.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/tickets-v47.js', '/tickets-official-v51.js', '/tickets-price-fallback-v58.js', '/tickets-compare-cache-bridge-v141.js', '/titans-social-v49.js', '/player-intelligence-v16.js', '/gameday-v16.js', '/gameday-today-v22.js', '/cutdown-command-v23.js',\n" +
-    "  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/src/roster-audit-20260824.mjs', '/src/roster-audit-20260827.mjs', '/src/roster-audit-20260831.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',\n" +
-    "  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'\n" +
-    '];\n' +
-    'const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));\n' +
-    'const NETWORK_FIRST=/\\.(?:js|mjs|css|webmanifest)$/i;\n' +
-    "const notificationTarget=value=>{const fallback=new URL('/#home',self.location.origin).href;try{const target=new URL(String(value||'/#home'),self.location.origin);return target.origin===self.location.origin?target.href:fallback}catch{return fallback}};\n" +
-    "self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});\n" +
-    "self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});\n" +
-    "self.addEventListener('fetch',event=>{\n" +
-    "  if(event.request.method!=='GET')return;\n" +
-    '  const url=new URL(event.request.url);\n' +
-    '  if(url.origin!==self.location.origin)return;\n' +
-    "  if(url.pathname.startsWith('/api/'))return;\n" +
-    "  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}\n" +
-    '  if(!SHELL_PATHS.has(url.pathname))return;\n' +
-    '  if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}\n' +
-    '  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));\n' +
-    '});\n' +
-    "self.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:notificationTarget(payload.url)},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});\n" +
-    "self.addEventListener('notificationclick',event=>{event.notification.close();const target=notificationTarget(event.notification.data?.url);event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});"
-  
-      at TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/tenx-ticket-cdn-runtime-bridge-v141.test.mjs:12:10)
-      at Test.runInAsyncScope (node:async_hooks:227:14)
-      at Test.run (node:internal/test_runner/test:1382:25)
-      at Test.start (node:internal/test_runner/test:1242:17)
-      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
-    generatedMessage: true,
-    code: 'ERR_ASSERTION',
-    actual: "const CACHE = 'titans-cc-brand-2026-v81';\nconst SHELL = [\n  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/legacy-finder-v2.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fantasy-command-v1.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/media-youtube-v66.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/cutdown-command-v23.css', '/mode-365-v19.css', '/tickets-v47.css', '/tickets-mobile-trust-v129.css', '/tickets-official-v51.css', '/tickets-resilience-v53.css', '/titans-social-v49.css', '/readability-v28.css', '/readability-v34.css',\n  '/app.js', '/legacy-polish.js', '/legacy-finder-v2.js', '/legacy-heritage-v3.js', '/legacy-trails-v4.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/home-command-v123.js', '/fan-events-v145.js', '/team-time-v21.js', '/mode-365-v19.js', '/freshness-truth-v20.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/fantasy-command-v1.js', '/fantasy-sleeper-intelligence-v2.js', '/fantasy-decision-center-v3.js', '/fantasy-weekly-command-v42.js', '/ask-fantasy-bridge-v1.js', '/accessibility-runtime.js', '/continue-command-v35.js', '/my-titans-home-v35.js', '/my-player-watch-v36.js', '/gameday-personal-v37.js', '/my-player-impact-v38.js', '/schedule-calendar-v39.js', '/roster-filter-guard-v40.js', '/team-room-state-repair-v54.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/media-youtube-v66.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/tickets-v47.js', '/tickets-official-v51.js', '/tickets-price-fallback-v58.js', '/tickets-compare-cache-bridge-v141.js', '/titans-social-v49.js', '/player-intelligence-v16.js', '/gameday-v16.js', '/gameday-today-v22.js', '/cutdown-command-v23.js',\n  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/src/roster-audit-20260824.mjs', '/src/roster-audit-20260827.mjs', '/src/roster-audit-20260831.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',\n  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'\n];\nconst SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));\nconst NETWORK_FIRST=/\\.(?:js|mjs|css|webmanifest)$/i;\nconst notificationTarget=value=>{const fallback=new URL('/#home',self.location.origin).href;try{const target=new URL(String(value||'/#home'),self.location.origin);return target.origin===self.location.origin?target.href:fallback}catch{return fallback}};\nself.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});\nself.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});\nself.addEventListener('fetch',event=>{\n  if(event.request.method!=='GET')return;\n  const url=new URL(event.request.url);\n  if(url.origin!==self.location.origin)return;\n  if(url.pathname.startsWith('/api/'))return;\n  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}\n  if(!SHELL_PATHS.has(url.pathname))return;\n  if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}\n  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));\n});\nself.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:notificationTarget(payload.url)},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});\nself.addEventListener('notificationclick',event=>{event.notification.close();const target=notificationTarget(event.notification.data?.url);event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});",
-    expected: /titans-cc-brand-2026-v80/,
-    operator: 'match',
-    diff: 'simple'
-  }
+## Production regression
 
-test at tests/tenx-ticket-trust-mobile-v129.test.mjs:33:1
-✖ ticket trust layer is loaded and available to installed/offline clients (0.994627ms)
-  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /titans-cc-brand-2026-v80/. Input:
-  
-  "const CACHE = 'titans-cc-brand-2026-v81';\n" +
-    'const SHELL = [\n' +
-    "  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/legacy-finder-v2.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fantasy-command-v1.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/media-youtube-v66.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/cutdown-command-v23.css', '/mode-365-v19.css', '/tickets-v47.css', '/tickets-mobile-trust-v129.css', '/tickets-official-v51.css', '/tickets-resilience-v53.css', '/titans-social-v49.css', '/readability-v28.css', '/readability-v34.css',\n" +
-    "  '/app.js', '/legacy-polish.js', '/legacy-finder-v2.js', '/legacy-heritage-v3.js', '/legacy-trails-v4.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/home-command-v123.js', '/fan-events-v145.js', '/team-time-v21.js', '/mode-365-v19.js', '/freshness-truth-v20.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/fantasy-command-v1.js', '/fantasy-sleeper-intelligence-v2.js', '/fantasy-decision-center-v3.js', '/fantasy-weekly-command-v42.js', '/ask-fantasy-bridge-v1.js', '/accessibility-runtime.js', '/continue-command-v35.js', '/my-titans-home-v35.js', '/my-player-watch-v36.js', '/gameday-personal-v37.js', '/my-player-impact-v38.js', '/schedule-calendar-v39.js', '/roster-filter-guard-v40.js', '/team-room-state-repair-v54.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/media-youtube-v66.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/tickets-v47.js', '/tickets-official-v51.js', '/tickets-price-fallback-v58.js', '/tickets-compare-cache-bridge-v141.js', '/titans-social-v49.js', '/player-intelligence-v16.js', '/gameday-v16.js', '/gameday-today-v22.js', '/cutdown-command-v23.js',\n" +
-    "  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/src/roster-audit-20260824.mjs', '/src/roster-audit-20260827.mjs', '/src/roster-audit-20260831.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',\n" +
-    "  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'\n" +
-    '];\n' +
-    'const SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));\n' +
-    'const NETWORK_FIRST=/\\.(?:js|mjs|css|webmanifest)$/i;\n' +
-    "const notificationTarget=value=>{const fallback=new URL('/#home',self.location.origin).href;try{const target=new URL(String(value||'/#home'),self.location.origin);return target.origin===self.location.origin?target.href:fallback}catch{return fallback}};\n" +
-    "self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});\n" +
-    "self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});\n" +
-    "self.addEventListener('fetch',event=>{\n" +
-    "  if(event.request.method!=='GET')return;\n" +
-    '  const url=new URL(event.request.url);\n' +
-    '  if(url.origin!==self.location.origin)return;\n' +
-    "  if(url.pathname.startsWith('/api/'))return;\n" +
-    "  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}\n" +
-    '  if(!SHELL_PATHS.has(url.pathname))return;\n' +
-    '  if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}\n' +
-    '  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));\n' +
-    '});\n' +
-    "self.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:notificationTarget(payload.url)},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});\n" +
-    "self.addEventListener('notificationclick',event=>{event.notification.close();const target=notificationTarget(event.notification.data?.url);event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});"
-  
-      at TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/tenx-ticket-trust-mobile-v129.test.mjs:38:10)
-      at Test.runInAsyncScope (node:async_hooks:227:14)
-      at Test.run (node:internal/test_runner/test:1382:25)
-      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
-      at Test.postRun (node:internal/test_runner/test:1522:19)
-      at Test.run (node:internal/test_runner/test:1447:12)
-      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
-    generatedMessage: true,
-    code: 'ERR_ASSERTION',
-    actual: "const CACHE = 'titans-cc-brand-2026-v81';\nconst SHELL = [\n  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/legacy-finder-v2.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fantasy-command-v1.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/media-youtube-v66.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/cutdown-command-v23.css', '/mode-365-v19.css', '/tickets-v47.css', '/tickets-mobile-trust-v129.css', '/tickets-official-v51.css', '/tickets-resilience-v53.css', '/titans-social-v49.css', '/readability-v28.css', '/readability-v34.css',\n  '/app.js', '/legacy-polish.js', '/legacy-finder-v2.js', '/legacy-heritage-v3.js', '/legacy-trails-v4.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/home-command-v123.js', '/fan-events-v145.js', '/team-time-v21.js', '/mode-365-v19.js', '/freshness-truth-v20.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/fantasy-command-v1.js', '/fantasy-sleeper-intelligence-v2.js', '/fantasy-decision-center-v3.js', '/fantasy-weekly-command-v42.js', '/ask-fantasy-bridge-v1.js', '/accessibility-runtime.js', '/continue-command-v35.js', '/my-titans-home-v35.js', '/my-player-watch-v36.js', '/gameday-personal-v37.js', '/my-player-impact-v38.js', '/schedule-calendar-v39.js', '/roster-filter-guard-v40.js', '/team-room-state-repair-v54.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/media-youtube-v66.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/tickets-v47.js', '/tickets-official-v51.js', '/tickets-price-fallback-v58.js', '/tickets-compare-cache-bridge-v141.js', '/titans-social-v49.js', '/player-intelligence-v16.js', '/gameday-v16.js', '/gameday-today-v22.js', '/cutdown-command-v23.js',\n  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/src/roster-audit-20260824.mjs', '/src/roster-audit-20260827.mjs', '/src/roster-audit-20260831.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',\n  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'\n];\nconst SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));\nconst NETWORK_FIRST=/\\.(?:js|mjs|css|webmanifest)$/i;\nconst notificationTarget=value=>{const fallback=new URL('/#home',self.location.origin).href;try{const target=new URL(String(value||'/#home'),self.location.origin);return target.origin===self.location.origin?target.href:fallback}catch{return fallback}};\nself.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});\nself.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});\nself.addEventListener('fetch',event=>{\n  if(event.request.method!=='GET')return;\n  const url=new URL(event.request.url);\n  if(url.origin!==self.location.origin)return;\n  if(url.pathname.startsWith('/api/'))return;\n  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}\n  if(!SHELL_PATHS.has(url.pathname))return;\n  if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}\n  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));\n});\nself.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:notificationTarget(payload.url)},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});\nself.addEventListener('notificationclick',event=>{event.notification.close();const target=notificationTarget(event.notification.data?.url);event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});",
-    expected: /titans-cc-brand-2026-v80/,
-    operator: 'match',
-    diff: 'simple'
-  }
-```
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "rootStatus": 200,
+  "securityHeaders": {
+    "contentTypeOptions": "nosniff",
+    "frameOptions": "DENY",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com https://i.ytimg.com https://d1plawd8huk6hh.cloudfront.net; connect-src 'self' https://api.sleeper.app; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "robots": "",
+    "csp": true
+  },
+  "manifestStatus": 200,
+  "serviceWorkerStatus": 200,
+  "serviceWorkerCache": "titans-cc-brand-2026-v81",
+  "precachePaths": 139,
+  "pwaIcons": {
+    "icon192": {
+      "width": 192,
+      "height": 192,
+      "bytes": 2854
+    },
+    "icon512": {
+      "width": 512,
+      "height": 512,
+      "bytes": 5724
+    }
+  },
+  "healthStatus": 200,
+  "appStatus": "healthy",
+  "databaseProvider": "cloudflare-d1",
+  "databaseConfigured": true,
+  "databaseOk": true,
+  "snapshotFresh": true,
+  "dataMode": "audited-fallback",
+  "databaseAvailable": false,
+  "dataStatus": 200,
+  "dataRosterCount": 61,
+  "transactionCount": 7,
+  "invalidTransactionDates": 0,
+  "statsStatus": 200,
+  "statsRosterCount": 61,
+  "statsRosterMode": "d1-snapshot",
+  "statsRosterSource": "Tennessee Titans official roster / transaction snapshot · Cloudflare D1",
+  "completedPreseasonGamebooks": 3,
+  "completedPreseasonGames": 3,
+  "completedPreseasonGamesWithPlayerStats": 3,
+  "completedPreseasonGamesMissingPlayerStats": 0,
+  "marketStatus": 200,
+  "marketRows": 0,
+  "marketMode": "no-current-source",
+  "buildMeta": {
+    "app": "titans-command-center",
+    "version": "1.0.0",
+    "commit": "ce28e4a4118418f8632c21a04c4ca09fc36f23f4",
+    "builtAt": "2026-09-02T16:01:35.586Z"
+  },
+  "deploymentPropagationAttempts": 3,
+  "responseMs": {
+    "root": 167,
+    "health": 181,
+    "data": 164,
+    "stats": 439,
+    "market": 3460,
+    "analytics": 943
+  },
+  "testedAt": "2026-09-02T16:02:28.585Z",
+  "healthTruth": {
+    "ok": true,
+    "mode": "d1-snapshot",
+    "status": 200,
+    "healthStatus": "healthy",
+    "contentAudit": "2026-08-31",
+    "dataAudit": "2026-09-02",
+    "databaseProvider": "cloudflare-d1",
+    "snapshotFresh": true,
+    "edgeCacheStatus": "HIT",
+    "responseMs": 433,
+    "testedAt": "2026-09-02T16:02:29.265Z"
+  },
+  "marketEdgeCache": {
+    "ok": true,
+    "base": "https://titans.alecjprice.com",
+    "initialStatus": "MISS",
+    "finalStatus": "HIT",
+    "attempts": 2,
+    "coldOrInitialMs": 6280,
+    "warmHitMs": 67,
+    "rows": 0,
+    "sequence": [
+      {
+        "status": "MISS",
+        "durationMs": 6280,
+        "rows": 0
+      },
+      {
+        "status": "HIT",
+        "durationMs": 67,
+        "rows": 0
+      }
+    ],
+    "testedAt": "2026-09-02T16:02:35.992Z"
+  },
+  "analyticsStatus": 200,
+  "analyticsMode": "cloudflare-d1",
+  "analyticsHealthStatus": "healthy",
+  "analyticsDatabaseAvailable": true,
+  "analyticsStorage": "cloudflare-d1",
+  "analyticsSnapshotSource": "nflreadpy-d1-snapshot",
+  "analyticsSnapshotStale": false,
+  "analyticsDataSeason": 2025,
+  "analyticsSeasonFallback": true,
+  "analyticsWarehousePlays": 48771,
+  "analyticsPersonnelPlays": 45184,
+  "analyticsRecentPlays": 80,
+  "analyticsPersonnelRows": 20,
+  "analyticsOffensiveEpaPerPlay": -0.14842680811935152,
+  "analyticsDefensiveEpaPerPlayAllowed": 0.10385631037224925,
+  "analyticsPaceSecondsPerPlay": 28.914001158972834,
+  "analyticsLatestRestDays": 7
+}```
+
+## Player headshot production regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "season": 2026,
+  "generatedAt": "2026-09-02T15:18:26.534763+00:00",
+  "rosterRows": 94,
+  "headshotCount": 92,
+  "coveragePct": 97.9,
+  "omittedCount": 2,
+  "omissionReasons": {
+    "no-approved-headshot-url": 2
+  },
+  "omittedPlayers": [
+    {
+      "name": "Corey Mayfield Jr.",
+      "number": "13",
+      "position": "DB",
+      "status": "CUT",
+      "reason": "no-approved-headshot-url"
+    },
+    {
+      "name": "Keydrain Calligan",
+      "number": "29",
+      "position": "DB",
+      "status": "CUT",
+      "reason": "no-approved-headshot-url"
+    }
+  ],
+  "allowedHosts": [
+    "static.clubs.nfl.com",
+    "static.www.nfl.com",
+    "static.nfl.com",
+    "a.espncdn.com",
+    "a1.espncdn.com"
+  ],
+  "durationMs": 212,
+  "testedAt": "2026-09-02T16:02:37.214Z"
+}```
+
+## Browser navigation regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "desktopRounds": 3,
+  "transactionChecks": 12,
+  "mobileChecks": 14,
+  "smallPhoneChecks": 2,
+  "smartSearchQuickJump": true,
+  "mobileDrawerInert": true,
+  "fiveActionDock": true,
+  "teamRoomChecks": 4,
+  "rosterFilterReset": true,
+  "rosterTotal": 61,
+  "mobileTargets": [
+    {
+      "height": 56,
+      "label": "Home",
+      "width": 69.796875
+    },
+    {
+      "height": 56,
+      "label": "Roster",
+      "width": 69.796875
+    },
+    {
+      "height": 56,
+      "label": "Game",
+      "width": 69.796875
+    },
+    {
+      "height": 56,
+      "label": "Search",
+      "width": 69.796875
+    },
+    {
+      "height": 56,
+      "label": "More",
+      "width": 69.8125
+    }
+  ],
+  "maxLongTaskMs": 114,
+  "longTasksOver250ms": 0,
+  "browserWarnings": [],
+  "durationSeconds": 14.56,
+  "testedAt": "2026-09-02T16:02:56Z"
+}```
+
+## Listen Watch browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "shellLoadRetries": 0,
+  "transientShellAssetFailures": 0,
+  "territoryChecks": [
+    "Elsewhere in U.S.",
+    "International",
+    "Nashville / Middle Tennessee"
+  ],
+  "quickStart": {
+    "cards": 2,
+    "labels": [
+      "Watch Titans coverage: Set up your stream",
+      "Listen to Titans coverage: Listen to Titans Radio"
+    ],
+    "listenHref": "https://www.tennesseetitans.com/broadcast/titans-radio/live-game-day-audio",
+    "phase": "upcoming",
+    "present": true,
+    "result": "",
+    "watchHref": "https://www.paramountplus.com/shows/nfl-on-cbs/"
+  },
+  "officialTitansAudio": true,
+  "official1045Player": true,
+  "rawEmbeddedAudio": false,
+  "youtube": {
+    "configured": true,
+    "available": true,
+    "videos": 10,
+    "liveRightsExcluded": true,
+    "lazyBeforePlay": true,
+    "iframeAfterPlay": {
+      "attempted": true,
+      "fallback": false,
+      "fallbackText": "",
+      "iframe": true,
+      "iframeApiScript": true,
+      "iframeSrc": "https://www.youtube.com/embed/EWczYsCDuQ4?autoplay=0&playsinline=1&rel=0&origin=https%3A%2F%2Ftitans.alecjprice.com&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Ftitans.alecjprice.com%2F%23media&aoriginsup=1&vf=1",
+      "videoId": "EWczYsCDuQ4"
+    }
+  },
+  "mobileAreaTargets": [
+    {
+      "h": 44,
+      "label": "Nashville / Middle Tennessee"
+    },
+    {
+      "h": 44,
+      "label": "Elsewhere in U.S."
+    },
+    {
+      "h": 44,
+      "label": "International"
+    }
+  ],
+  "mobileTimeRows": 4,
+  "mobileQuickStart": {
+    "phase": "upcoming",
+    "cards": 2,
+    "targets": [
+      186.34375,
+      258.34375
+    ],
+    "labels": [
+      "Watch Titans coverage: Set up your stream",
+      "Listen to Titans coverage: Listen to Titans Radio"
+    ]
+  },
+  "mobileYoutubeCards": 12,
+  "browserWarnings": [
+    {
+      "level": "WARNING",
+      "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
+      "source": "other",
+      "timestamp": 1788364980213
+    }
+  ],
+  "durationSeconds": 4.25,
+  "testedAt": "2026-09-02T16:03:00Z"
+}```
+
+## Market Pulse browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "desktop": {
+    "initial": {
+      "state": {
+        "quality": "Unavailable",
+        "provider": "No verified current market source",
+        "shown": null,
+        "total": 0,
+        "renderedRows": 0
+      },
+      "summary": {
+        "controls": [],
+        "empty": "No market rows match these filters. Try another game or sportsbook, show alternate lines, or switch the market type.",
+        "errorVisible": false,
+        "overflow": false,
+        "provider": "No verified current market source",
+        "quality": "Unavailable",
+        "referenceNotice": "",
+        "refreshHeight": 44,
+        "result": "",
+        "resultTotal": null,
+        "rowCount": 0,
+        "rowSample": [],
+        "scrollWidth": 1265,
+        "shown": null,
+        "title": "Titans market status",
+        "total": 0,
+        "viewport": 1265
+      }
+    },
+    "refresh": {
+      "state": {
+        "quality": "Unavailable",
+        "provider": "No verified current market source",
+        "shown": null,
+        "total": 0,
+        "renderedRows": 0
+      },
+      "summary": {
+        "controls": [],
+        "empty": "No market rows match these filters. Try another game or sportsbook, show alternate lines, or switch the market type.",
+        "errorVisible": false,
+        "overflow": false,
+        "provider": "No verified current market source",
+        "quality": "Unavailable",
+        "referenceNotice": "",
+        "refreshHeight": 44,
+        "result": "",
+        "resultTotal": null,
+        "rowCount": 0,
+        "rowSample": [],
+        "scrollWidth": 1265,
+        "shown": null,
+        "title": "Titans market status",
+        "total": 0,
+        "viewport": 1265
+      }
+    }
+  },
+  "mobile": {
+    "state": {
+      "quality": "Unavailable",
+      "provider": "No verified current market source",
+      "shown": null,
+      "total": 0,
+      "renderedRows": 0
+    },
+    "summary": {
+      "controls": [],
+      "empty": "No market rows match these filters. Try another game or sportsbook, show alternate lines, or switch the market type.",
+      "errorVisible": false,
+      "overflow": false,
+      "provider": "No verified current market source",
+      "quality": "Unavailable",
+      "referenceNotice": "",
+      "refreshHeight": 44,
+      "result": "",
+      "resultTotal": null,
+      "rowCount": 0,
+      "rowSample": [],
+      "scrollWidth": 375,
+      "shown": null,
+      "title": "Titans market status",
+      "total": 0,
+      "viewport": 375
+    },
+    "rowGeometry": []
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.89,
+  "testedAt": "2026-09-02T16:03:04Z"
+}```
+
+## Ticket Center browser regression
+
+```json
+{
+  "ok": false,
+  "base": "https://titans.alecjprice.com",
+  "desktop": {
+    "state": {
+      "mode": "comparison",
+      "fallbackCards": 0,
+      "comparisonCards": 16
+    },
+    "summary": {
+      "comparison": [
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/tennessee-titans-vs-new-york-jets-nashville-tennessee-09-13-2026/event/1B006470D213F665"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST TITANS TICKET NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. New York Jets Sun, Sep 13, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 MARKETPLACE AVAILABLEVERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/tennessee-titans-vs-philadelphia-eagles-nashville-tennessee-09-20-2026/event/1B006470D219F66B"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Philadelphia Eagles Sun, Sep 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/new-york-giants-vs-tennessee-titans-east-rutherford-new-jersey-09-27-2026/event/00006491C2E8E049"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS New York Giants vs. Tennessee Titans Sun, Sep 27, 1:00 PMMetLife Stadium \u00b7 East Rutherford \u00b7 NJ TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/baltimore-ravens-v-tennessee-titans-baltimore-maryland-10-04-2026/event/1500648DB7AD9D7D"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace TITANS1 SOURCE WITH OFFERS Baltimore Ravens v Tennessee Titans Sun, Oct 4, 1:00 PMM&T Bank Stadium \u00b7 Baltimore \u00b7 MD TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/tennessee-titans-vs-houston-texans-nashville-tennessee-10-11-2026/event/1B006470D200F645"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Houston Texans Sun, Oct 11, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/indianapolis-colts-vs-tennessee-titans-indianapolis-indiana-10-18-2026/event/05006474BEDEA72C"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Indianapolis Colts vs. Tennessee Titans Sun, Oct 18, 1:00 PMLucas Oil Stadium \u00b7 Indianapolis \u00b7 IN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/tennessee-titans-vs-cleveland-browns-nashville-tennessee-10-25-2026/event/1B006470D1F8F636"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Cleveland Browns Sun, Oct 25, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/cincinnati-bengals-vs-tennessee-titans-cincinnati-ohio-11-01-2026/event/16006469BBD893F2"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Cincinnati Bengals vs. Tennessee Titans Sun, Nov 1, 1:00 PMPaycor Stadium \u00b7 Cincinnati \u00b7 OH TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/tennessee-titans-vs-jacksonville-jaguars-nashville-tennessee-11-15-2026/event/1B006470D20DF658"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Jacksonville Jaguars Sun, Nov 15, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/dallas-cowboys-vs-tennessee-titans-arlington-texas-11-22-2026/event/0C00646CBC939043"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Dallas Cowboys vs. Tennessee Titans Sun, Nov 22, 12:00 PMAT&T Stadium \u00b7 Arlington \u00b7 TX TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/jacksonville-jaguars-vs-tennessee-titans-jacksonville-florida-11-29-2026/event/2200646A920D4DA3"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Jacksonville Jaguars vs. Tennessee Titans Sun, Nov 29, 4:05 PMEverBank Stadium \u00b7 Jacksonville \u00b7 FL TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/tennessee-titans-vs-washington-commanders-nashville-tennessee-12-06-2026/event/1B006470D232F684"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Washington Commanders Sun, Dec 6, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/detroit-lions-vs-tennessee-titans-detroit-michigan-12-13-2026/event/080064718D7239E3"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Detroit Lions vs. Tennessee Titans Sun, Dec 13, 1:00 PMFord Field \u00b7 Detroit \u00b7 MI TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/tennessee-titans-vs-indianapolis-colts-nashville-tennessee-12-20-2026/event/1B006470D206F655"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Indianapolis Colts Sun, Dec 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/las-vegas-raiders-vs-tennessee-titans-las-vegas-nevada-12-27-2026/event/1700646CC3A0C3A4"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Las Vegas Raiders vs. Tennessee Titans Sun, Dec 27, 1:05 PMAllegiant Stadium \u00b7 Las Vegas \u00b7 NV TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        },
+        {
+          "left": 292,
+          "offers": [
+            "https://www.ticketmaster.com/tennessee-titans-vs-pittsburgh-steelers-nashville-tennessee-01-03-2027/event/1B006470D21FF66E"
+          ],
+          "right": 1217,
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Pittsburgh Steelers Sun, Jan 3, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+        }
+      ],
+      "fallback": [],
+      "filters": [
+        {
+          "height": 44,
+          "pressed": "true",
+          "value": "all",
+          "width": 86.703125
+        },
+        {
+          "height": 44,
+          "pressed": "false",
+          "value": "home",
+          "width": 63.34375
+        },
+        {
+          "height": 44,
+          "pressed": "false",
+          "value": "away",
+          "width": 61.140625
+        }
+      ],
+      "heading": "Titans Ticket Finder",
+      "mode": "comparison",
+      "offline": false,
+      "overflow": false,
+      "refreshHeight": 44,
+      "scrollWidth": 1265,
+      "upcoming": false,
+      "viewport": 1265
+    }
+  },
+  "mobile": {},
+  "browserWarnings": [],
+  "stage": "desktop:tenx-compare",
+  "error": "TimeoutException: Message: \n",
+  "state": {
+    "comparison": [
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/tennessee-titans-vs-new-york-jets-nashville-tennessee-09-13-2026/event/1B006470D213F665"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST TITANS TICKET NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. New York Jets Sun, Sep 13, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 MARKETPLACE AVAILABLEVERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySaved \u2713"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/tennessee-titans-vs-philadelphia-eagles-nashville-tennessee-09-20-2026/event/1B006470D219F66B"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Philadelphia Eagles Sun, Sep 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySaved \u2713"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/new-york-giants-vs-tennessee-titans-east-rutherford-new-jersey-09-27-2026/event/00006491C2E8E049"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS New York Giants vs. Tennessee Titans Sun, Sep 27, 1:00 PMMetLife Stadium \u00b7 East Rutherford \u00b7 NJ TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/baltimore-ravens-v-tennessee-titans-baltimore-maryland-10-04-2026/event/1500648DB7AD9D7D"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace TITANS1 SOURCE WITH OFFERS Baltimore Ravens v Tennessee Titans Sun, Oct 4, 1:00 PMM&T Bank Stadium \u00b7 Baltimore \u00b7 MD TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/tennessee-titans-vs-houston-texans-nashville-tennessee-10-11-2026/event/1B006470D200F645"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Houston Texans Sun, Oct 11, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/indianapolis-colts-vs-tennessee-titans-indianapolis-indiana-10-18-2026/event/05006474BEDEA72C"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Indianapolis Colts vs. Tennessee Titans Sun, Oct 18, 1:00 PMLucas Oil Stadium \u00b7 Indianapolis \u00b7 IN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/tennessee-titans-vs-cleveland-browns-nashville-tennessee-10-25-2026/event/1B006470D1F8F636"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Cleveland Browns Sun, Oct 25, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/cincinnati-bengals-vs-tennessee-titans-cincinnati-ohio-11-01-2026/event/16006469BBD893F2"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Cincinnati Bengals vs. Tennessee Titans Sun, Nov 1, 1:00 PMPaycor Stadium \u00b7 Cincinnati \u00b7 OH TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/tennessee-titans-vs-jacksonville-jaguars-nashville-tennessee-11-15-2026/event/1B006470D20DF658"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Jacksonville Jaguars Sun, Nov 15, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/dallas-cowboys-vs-tennessee-titans-arlington-texas-11-22-2026/event/0C00646CBC939043"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Dallas Cowboys vs. Tennessee Titans Sun, Nov 22, 12:00 PMAT&T Stadium \u00b7 Arlington \u00b7 TX TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/jacksonville-jaguars-vs-tennessee-titans-jacksonville-florida-11-29-2026/event/2200646A920D4DA3"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Jacksonville Jaguars vs. Tennessee Titans Sun, Nov 29, 4:05 PMEverBank Stadium \u00b7 Jacksonville \u00b7 FL TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/tennessee-titans-vs-washington-commanders-nashville-tennessee-12-06-2026/event/1B006470D232F684"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Washington Commanders Sun, Dec 6, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/detroit-lions-vs-tennessee-titans-detroit-michigan-12-13-2026/event/080064718D7239E3"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Detroit Lions vs. Tennessee Titans Sun, Dec 13, 1:00 PMFord Field \u00b7 Detroit \u00b7 MI TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/tennessee-titans-vs-indianapolis-colts-nashville-tennessee-12-20-2026/event/1B006470D206F655"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Indianapolis Colts Sun, Dec 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/las-vegas-raiders-vs-tennessee-titans-las-vegas-nevada-12-27-2026/event/1700646CC3A0C3A4"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Las Vegas Raiders vs. Tennessee Titans Sun, Dec 27, 1:05 PMAllegiant Stadium \u00b7 Las Vegas \u00b7 NV TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      },
+      {
+        "left": 292,
+        "offers": [
+          "https://www.ticketmaster.com/tennessee-titans-vs-pittsburgh-steelers-nashville-tennessee-01-03-2027/event/1B006470D21FF66E"
+        ],
+        "right": 1217,
+        "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Pittsburgh Steelers Sun, Jan 3, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
+      }
+    ],
+    "fallback": [],
+    "filters": [
+      {
+        "height": 44,
+        "pressed": "true",
+        "value": "all",
+        "width": 86.703125
+      },
+      {
+        "height": 44,
+        "pressed": "false",
+        "value": "home",
+        "width": 63.34375
+      },
+      {
+        "height": 44,
+        "pressed": "false",
+        "value": "away",
+        "width": 61.140625
+      }
+    ],
+    "heading": "Titans Ticket Finder",
+    "mode": "comparison",
+    "offline": false,
+    "overflow": false,
+    "refreshHeight": 44,
+    "scrollWidth": 1265,
+    "upcoming": false,
+    "viewport": 1265
+  },
+  "durationSeconds": 10.71,
+  "testedAt": "2026-09-02T16:03:15Z"
+}```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.

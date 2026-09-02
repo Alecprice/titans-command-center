@@ -35,6 +35,6 @@ test('ticket trust layer is loaded and available to installed/offline clients',(
   const trust=html.indexOf('/tickets-mobile-trust-v129.css');
   assert.ok(base>=0,'primary tickets stylesheet should be present');
   assert.ok(trust>base,'ticket trust stylesheet should load after primary ticket styles');
-  assert.match(sw,/titans-cc-brand-2026-v80/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/'\/tickets-mobile-trust-v129\.css'/);
 });

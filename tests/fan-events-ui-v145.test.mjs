@@ -5,14 +5,15 @@ import fs from 'node:fs';
 const ui=fs.readFileSync(new URL('../fan-events-v145.js',import.meta.url),'utf8');
 const runtime=fs.readFileSync(new URL('../runtime-v19.js',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
+const headers=fs.readFileSync(new URL('../_headers',import.meta.url),'utf8');
 
  test('Fan Event Radar loads only through shared same-origin runtime API',()=>{
   assert.match(runtime,/import\('\.\/fan-events-v145\.js'\)/);
   assert.match(ui,/const API='\/api\/fan-events'/);
   assert.match(ui,/runtime\.apiJson\(API,\{ttl:600000,force\}\)/);
   assert.doesNotMatch(ui,/\bfetch\s*\(/);
-  assert.doesNotMatch(ui,/eventbriteapi\.com|skiddle\.com\/api|rest\.bandsintown\.com|app\.ticketmaster\.com/);
-  for(const key of ['EVENTBRITE_PRIVATE_TOKEN','EVENTBRITE_OAUTH_TOKEN','SKIDDLE_API_KEY','BANDSINTOWN_API_KEY','TICKETMASTER_API_KEY'])assert.doesNotMatch(ui,new RegExp(key));
+  assert.doesNotMatch(ui,/eventbriteapi\.com|skiddle\.com\/api|app\.ticketmaster\.com/);
+  for(const key of ['EVENTBRITE_PRIVATE_TOKEN','EVENTBRITE_OAUTH_TOKEN','SKIDDLE_API_KEY','TICKETMASTER_API_KEY'])assert.doesNotMatch(ui,new RegExp(key));
 });
 
  test('event radar reuses shared route/render/refresh lifecycle without another observer or poller',()=>{
@@ -26,11 +27,21 @@ const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
 });
 
  test('fan event links preserve provider identity and external-link safety',()=>{
-  for(const provider of ['Skiddle','Bandsintown','Eventbrite','Ticketmaster'])assert.match(ui,new RegExp(provider));
-  assert.match(ui,/target=\\"_blank\\" rel=\\"noopener noreferrer\\"/);
+  for(const provider of ['Skiddle','Eventbrite','Ticketmaster'])assert.match(ui,new RegExp(provider));
+  assert.doesNotMatch(ui,/Bandsintown/i);
+  assert.match(ui,/target="_blank" rel="noopener noreferrer"/);
   assert.match(ui,/data-fan-events-source/);
   assert.match(ui,/Listings are discovery links, not Titans-affiliated events/);
   assert.match(ui,/source availability can differ by provider/);
+});
+
+ test('Skiddle results carry required official logo attribution and direct source action',()=>{
+  assert.match(ui,/https:\/\/d1plawd8huk6hh\.cloudfront\.net\/assets\/logo\/png\/skiddle-logo-white-landscape\.png/);
+  assert.match(ui,/<img src="\$\{SKIDDLE_LOGO\}" alt="Skiddle"/);
+  assert.match(ui,/View on Skiddle ↗/);
+  assert.match(ui,/aria-label="View this event on Skiddle"/);
+  assert.match(ui,/fan-event-skiddle-logo-space\{[^}]*padding:19px/);
+  assert.match(headers,/img-src[^\n]*https:\/\/d1plawd8huk6hh\.cloudfront\.net/);
 });
 
  test('Fan Hub surface is compact, mobile touch safe, and horizontally browseable',()=>{
@@ -53,7 +64,7 @@ const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
   assert.match(ui,/temporarily unavailable|Unavailable/);
 });
 
- test('new runtime dependency is packaged by the network-first PWA shell',()=>{
+ test('runtime dependency remains packaged by the network-first PWA shell',()=>{
   assert.match(sw,/titans-cc-brand-2026-v81/);
   assert.match(sw,/['"]\/fan-events-v145\.js['"]/);
   assert.match(sw,/NETWORK_FIRST/);

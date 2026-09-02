@@ -6,7 +6,6 @@ import {
   fanEventsConfig,
   fanEventsRoute,
   groupFanEvents,
-  normalizeBandsintownEvents,
   normalizeEventbriteEvents,
   normalizeSkiddleEvents,
   normalizeTicketmasterEvents,
@@ -48,13 +47,9 @@ test('provider normalizers keep only provider-owned HTTPS destinations',()=>{
   assert.equal(eventbrite[0].provider,'Eventbrite');
   assert.equal(eventbrite[0].coordinates.lat,36.16);
 
-  const skiddle=normalizeSkiddleEvents([{id:'3',eventname:'Gig',startdate:'2026-09-05',link:'https://www.skiddle.com/whats-on/example',venue:{name:'Room',town:'Town'}}]);
+  const skiddle=normalizeSkiddleEvents([{id:'3',eventname:'Gig',startdate:'2026-09-05',link:'https://www.skiddle.com/whats-on/example',venue:{name:'Room',town:'Nashville',county:'TN'}}]);
   assert.equal(skiddle.length,1);
   assert.equal(skiddle[0].provider,'Skiddle');
-
-  const bands=normalizeBandsintownEvents([{id:'4',datetime:'2026-09-06T20:00:00',url:'https://www.bandsintown.com/e/4',venue:{name:'Club',city:'Nashville',region:'TN',latitude:'36.17',longitude:'-86.77'}}],'Approved Artist');
-  assert.equal(bands.length,1);
-  assert.equal(bands[0].artist,'Approved Artist');
 
   const ticketmaster=normalizeTicketmasterEvents([{id:'5',name:'Local event',url:'https://www.ticketmaster.com/event/5',dates:{start:{dateTime:'2026-09-07T01:00:00Z'}},_embedded:{venues:[{name:'Arena',city:{name:'Nashville'},state:{stateCode:'TN'},location:{latitude:'36.16',longitude:'-86.77'}}]}}]);
   assert.equal(ticketmaster.length,1);
@@ -69,7 +64,7 @@ test('every provider result must independently pass Nashville-region verificatio
   assert.equal(eventInRegion({coordinates:{lat:null,lon:null},venue:{city:'Los Angeles',state:'CA'}},config),false);
 
   const grouped=groupFanEvents([
-    {id:'local',provider:'Bandsintown',title:'Local Show',start:'2026-09-10T01:00:00Z',url:'https://www.bandsintown.com/e/local',venue:{name:'Local',city:'Nashville',state:'TN'},coordinates:{lat:null,lon:null}},
+    {id:'local',provider:'Skiddle',title:'Local Show',start:'2026-09-10T01:00:00Z',url:'https://www.skiddle.com/whats-on/local',venue:{name:'Local',city:'Nashville',state:'TN'},coordinates:{lat:null,lon:null}},
     {id:'away',provider:'Eventbrite',title:'Away Show',start:'2026-09-11T01:00:00Z',url:'https://www.eventbrite.com/e/away',venue:{name:'Away',city:'New York',state:'NY'},coordinates:{lat:null,lon:null}},
   ],config);
   assert.deepEqual(grouped.map(event=>event.id),['local']);
@@ -80,11 +75,11 @@ test('dedupe preserves source attribution instead of hiding provider provenance'
   const base={title:'Same Show',start:'2026-09-10T01:00:00Z',venue:{name:'Same Venue',city:'Nashville',state:'TN'},coordinates:{lat:null,lon:null}};
   const grouped=groupFanEvents([
     {...base,id:'a',provider:'Ticketmaster',url:'https://www.ticketmaster.com/event/a'},
-    {...base,id:'b',provider:'Eventbrite',url:'https://www.eventbrite.com/e/b'},
+    {...base,id:'b',provider:'Skiddle',url:'https://www.skiddle.com/whats-on/b'},
   ],config);
   assert.equal(grouped.length,1);
   assert.equal(grouped[0].providerCount,2);
-  assert.deepEqual(grouped[0].sources.map(source=>source.provider).sort(),['Eventbrite','Ticketmaster']);
+  assert.deepEqual(grouped[0].sources.map(source=>source.provider).sort(),['Skiddle','Ticketmaster']);
 });
 
 test('Eventbrite uses authenticated organization inventory, never the retired public Event Search API',()=>{
@@ -92,29 +87,48 @@ test('Eventbrite uses authenticated organization inventory, never the retired pu
   assert.match(source,/\/organizations\/\$\{encodeURIComponent\(id\)\}\/events\//);
   assert.match(source,/Authorization:`Bearer \$\{token\}`/);
   assert.doesNotMatch(source,/EVENTBRITE_BASE\}\/events\/search/);
-  assert.match(source,/retired public Event Search endpoint/);
+  assert.match(source,/retired public Event Search API is not used/);
   assert.match(source,/only events verified inside the configured Nashville region are displayed/);
   assert.match(envExample,/EVENTBRITE_PRIVATE_TOKEN=/);
 });
 
-test('Bandsintown is bounded to configured artists and Nashville-verified results',()=>{
-  assert.match(source,/BANDSINTOWN_ARTISTS/);
-  assert.match(source,/csv\(env\.BANDSINTOWN_ARTISTS,6\)/);
-  assert.match(source,/artists\/\$\{encodeURIComponent\(artist\)\}\/events/);
-  assert.doesNotMatch(source,/artists\/search/);
-  assert.match(source,/configured artists; only returned events verified inside the configured Nashville region/);
-  assert.match(setup,/exact approved\/canonical artist names/);
+test('Bandsintown hook is removed from server config and setup surface',()=>{
+  assert.doesNotMatch(source,/Bandsintown|BANDSINTOWN|bandsintown/i);
+  assert.doesNotMatch(envExample,/Bandsintown|BANDSINTOWN|bandsintown/i);
+  assert.match(setup,/Bandsintown is no longer queried/);
 });
 
-test('Skiddle adapter is staged but cannot issue production requests in this release',()=>{
+test('Skiddle API key activates the bounded production provider',async()=>{
   assert.match(source,/SKIDDLE_API_KEY/);
   assert.match(source,/getdistance/);
-  assert.match(source,/provider:'Skiddle'/);
-  assert.match(source,/skiddle:false/);
-  assert.doesNotMatch(source,/jobs\.push\(runProvider\('Skiddle'/);
-  assert.match(setup,/do not add `SKIDDLE_API_KEY` to production yet/i);
+  assert.match(source,/jobs\.push\(runProvider\('Skiddle'/);
+  assert.match(setup,/secret put SKIDDLE_API_KEY/);
   assert.match(setup,/brand logo/i);
-  assert.doesNotMatch(setup,/secret put SKIDDLE_API_KEY/);
+  assert.match(setup,/direct event link/i);
+
+  const originalFetch=globalThis.fetch;
+  let requested='';
+  globalThis.fetch=async input=>{
+    requested=String(input);
+    return {ok:true,status:200,json:async()=>({results:[]})};
+  };
+  try{
+    const capture=responseRecorder();
+    await fanEventsRoute({method:'GET',query:{route:'fan-events'}},capture.res,{SKIDDLE_API_KEY:'test-only'});
+    assert.equal(capture.state.status,200);
+    assert.equal(capture.state.payload.configuredProviders.skiddle,true);
+    assert.equal(capture.state.payload.providersConfigured,1);
+    assert.equal(capture.state.payload.providerResults[0].provider,'Skiddle');
+    const url=new URL(requested);
+    assert.equal(url.hostname,'www.skiddle.com');
+    assert.equal(url.pathname,'/api/v1/events/search/');
+    assert.equal(url.searchParams.get('api_key'),'test-only');
+    assert.equal(url.searchParams.get('latitude'),'36.1665');
+    assert.equal(url.searchParams.get('longitude'),'-86.7713');
+    assert.equal(url.searchParams.get('radius'),'25');
+  }finally{
+    globalThis.fetch=originalFetch;
+  }
 });
 
 test('public route rejects arbitrary query proxying and exposes provider health without secrets',async()=>{
@@ -137,5 +151,5 @@ test('public route rejects arbitrary query proxying and exposes provider health 
 test('gateway exposes fan-events while preserving server-only credential ownership',()=>{
   assert.match(gateway,/fanEventsRoute/);
   assert.match(gateway,/\['fan-events',\(req,res,env\)=>fanEventsRoute/);
-  for(const key of ['EVENTBRITE_PRIVATE_TOKEN','SKIDDLE_API_KEY','BANDSINTOWN_API_KEY'])assert.doesNotMatch(gateway,new RegExp(`${key}\\s*=`));
+  for(const key of ['EVENTBRITE_PRIVATE_TOKEN','SKIDDLE_API_KEY'])assert.doesNotMatch(gateway,new RegExp(`${key}\\s*=`));
 });

@@ -22,7 +22,7 @@ test('review rerenders capture only active review controls for focus continuity'
 });
 
 test('focus restoration happens after the review DOM settles and before observer ownership resumes',()=>{
-  assert.ok(review.includes('const focusRequest=reviewFocusRequest(root);'));
+  assert.ok(review.includes('const focusRequest=preferredFocusRequest||reviewFocusRequest(root);'));
   const restore=review.indexOf('restoreReviewFocus(root,focusRequest)');
   const resume=review.indexOf('resumeObserver()',restore);
   assert.ok(restore>=0,'missing focus restore');
