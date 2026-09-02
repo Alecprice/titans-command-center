@@ -6,6 +6,7 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const script=read('fantasy-prop-trends-v133.js');
 const css=read('fantasy-prop-trends-v133.css');
 const html=read('index.html');
+const sw=read('sw.js');
 
 test('fantasy prop trend memory is observed-only and bounded',()=>{
   assert.match(script,/localStorage\.getItem\(STORE\)/);
@@ -41,4 +42,11 @@ test('fantasy prop trend UI is wired, mobile safe, and accessible',()=>{
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(css,/@media\(forced-colors:active\)/);
   assert.match(css,/min-height:48px/);
+});
+
+test('installed PWA precaches the complete live Fantasy prop experience',()=>{
+  assert.match(sw,/titans-cc-brand-2026-v78/);
+  for(const asset of ['fantasy-props-v122.css','fantasy-prop-trends-v133.css','fantasy-props-v122.js','fantasy-prop-trends-v133.js']){
+    assert.match(sw,new RegExp(asset.replaceAll('.','\\.')));
+  }
 });
