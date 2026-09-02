@@ -50,7 +50,8 @@
       lastUser=id;
       status('synced','Your Titans settings are synced.');
       window.dispatchEvent(new CustomEvent('titans:preferences-synced',{detail:{keys:Object.keys(merged)}}));
-      if(refreshV10||refreshFantasy||refreshPropWatchlist)setTimeout(()=>location.reload(),120);
+      if(refreshV10||refreshFantasy)setTimeout(()=>location.reload(),120);
+      else if(refreshPropWatchlist)setTimeout(()=>location.reload(),120);
     }catch(err){reportFailure(err);}
     finally{syncing=false;}
   }
@@ -88,8 +89,7 @@
       if(value===undefined||typeof value==='function'||typeof value==='symbol')throw new Error(`Invalid setting value: ${key}`);
       JSON.stringify(value);
     }
-    const normalized=Object.fromEntries(keys.map(key=>[key,key===PROP_WATCHLIST_KEY?normalizePropWatchlist(preferences[key]):preferences[key]]));
-    return {preferences:normalized,keys,exportedAt:String(payload.exportedAt||''),scope:String(payload.scope||'unknown'),accountEmail:String(payload.account?.email||'')};
+    return {preferences:Object.fromEntries(keys.map(key=>[key,key===PROP_WATCHLIST_KEY?normalizePropWatchlist(preferences[key]):preferences[key]])),keys,exportedAt:String(payload.exportedAt||''),scope:String(payload.scope||'unknown'),accountEmail:String(payload.account?.email||'')};
   }
   async function importSettings(payload){
     const prepared=prepareImport(payload);
