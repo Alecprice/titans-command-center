@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 BASE = os.environ.get('WORKER_URL', 'https://titans.alecjprice.com').rstrip('/')
 REPORT = Path('/tmp/media-affiliate-browser-smoke.json')
 FAVORITE_KEY = 'titans:favoriteRadioAffiliate'
+AREA_KEY = 'titans:v14MediaArea'
 
 
 def wait_for(driver, predicate, timeout=14):
@@ -23,6 +24,8 @@ def finder_state(driver):
       const root=document.querySelector('.media-affiliate-finder');
       const visible=[...root?.querySelectorAll('[data-affiliate-station]:not([hidden])')||[]];
       const favoriteButton=root?.querySelector('[data-affiliate-station]:not([hidden]) [data-affiliate-favorite]');
+      const quickSaved=document.querySelector('[data-media-saved-radio]');
+      const quickListen=document.querySelector('.media-quick-listen');
       return {
         present:Boolean(root),
         open:Boolean(root?.open),
@@ -38,7 +41,10 @@ def finder_state(driver):
         source:root?.querySelector('.media-affiliate-source a')?.href||'',
         inputHeight:root?.querySelector('[data-affiliate-search-input]')?.getBoundingClientRect().height||0,
         clearHeight:root?.querySelector('[data-affiliate-clear]')?.getBoundingClientRect().height||0,
-        favoriteHeight:favoriteButton?.getBoundingClientRect().height||0
+        favoriteHeight:favoriteButton?.getBoundingClientRect().height||0,
+        quickSavedText:quickSaved?.textContent?.replace(/\s+/g,' ')?.trim()||'',
+        quickSavedLabel:quickSaved?.getAttribute('aria-label')||'',
+        quickListenHref:quickListen?.href||''
       };
     """)
 
@@ -77,9 +83,9 @@ try:
     stage='desktop:load'
     driver.get(f'{BASE}/#media')
     wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-affiliate-finder')")
-    driver.execute_script("localStorage.removeItem(arguments[0])", FAVORITE_KEY)
+    driver.execute_script("localStorage.removeItem(arguments[0]);localStorage.removeItem(arguments[1])", FAVORITE_KEY, AREA_KEY)
     driver.refresh()
-    wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-affiliate-finder')")
+    wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-affiliate-finder') && document.querySelector('.media-quick-listen')")
     driver.execute_script("document.querySelector('.media-affiliate-finder').open=true")
     wait_for(driver, "document.querySelectorAll('[data-affiliate-station]').length===39")
     initial=finder_state(driver)
@@ -87,8 +93,10 @@ try:
         raise RuntimeError(f'Expected 39 official 2026 stations: {initial}')
     if 'tennesseetitans.com/broadcast/titans-radio/titans-radio-affiliates' not in initial['source']:
         raise RuntimeError(f'Official affiliate source link missing: {initial}')
-    if initial['favoritePressed'] != 0:
+    if initial['favoritePressed'] != 0 or initial['quickSavedText']:
         raise RuntimeError(f'Favorite state was not clean at test start: {initial}')
+    if 'tennesseetitans.com/broadcast/titans-radio/live-game-day-audio' not in initial['quickListenHref']:
+        raise RuntimeError(f'Default Nashville quick Listen route is not official Titans game audio: {initial}')
     no_overflow(driver,'desktop affiliate finder')
 
     stage='desktop:greeneville'
@@ -98,27 +106,35 @@ try:
 
     stage='desktop:favorite-save'
     driver.execute_script("document.querySelector('[data-affiliate-station]:not([hidden]) [data-affiliate-favorite]').click()")
-    wait_for(driver, "document.querySelector('[data-affiliate-summary]')?.textContent?.includes('Saved WIKQ') && document.querySelectorAll('[data-affiliate-favorite][aria-pressed=\"true\"]').length===1")
+    wait_for(driver, "document.querySelector('[data-affiliate-summary]')?.textContent?.includes('Saved WIKQ') && document.querySelectorAll('[data-affiliate-favorite][aria-pressed=\"true\"]').length===1 && document.querySelector('[data-media-saved-radio]')?.textContent?.includes('WIKQ')")
     favoriteSaved=finder_state(driver)
     stored=driver.execute_script("return localStorage.getItem(arguments[0])", FAVORITE_KEY) or ''
     if 'WIKQ' not in favoriteSaved['summary'] or 'WIKQ' not in favoriteSaved['savedText'] or 'WIKQ' not in stored:
         raise RuntimeError(f'WIKQ favorite did not persist to device storage: state={favoriteSaved}, storage={stored}')
+    if 'WIKQ' not in favoriteSaved['quickSavedText'] or '103.1 FM' not in favoriteSaved['quickSavedText'] or 'Greeneville' not in favoriteSaved['quickSavedText']:
+        raise RuntimeError(f'Quick Start did not surface the saved AM/FM station: {favoriteSaved}')
+    if 'Saved AM/FM station WIKQ 103.1 FM in Greeneville' not in favoriteSaved['quickSavedLabel']:
+        raise RuntimeError(f'Quick Start saved-station accessibility label is incomplete: {favoriteSaved}')
+    if 'tennesseetitans.com/broadcast/titans-radio/live-game-day-audio' not in favoriteSaved['quickListenHref'] or 'WIKQ' in favoriteSaved['quickListenHref']:
+        raise RuntimeError(f'Saved AM/FM reminder changed the authorized digital Listen route: {favoriteSaved}')
 
     stage='desktop:favorite-reload'
     driver.refresh()
-    wait_for(driver, "document.querySelector('.media-affiliate-finder') && document.querySelector('[data-affiliate-summary]')?.textContent?.includes('Saved WIKQ')")
+    wait_for(driver, "document.querySelector('.media-affiliate-finder') && document.querySelector('[data-affiliate-summary]')?.textContent?.includes('Saved WIKQ') && document.querySelector('[data-media-saved-radio]')?.textContent?.includes('WIKQ')")
     driver.execute_script("document.querySelector('.media-affiliate-finder').open=true")
     wait_for(driver, "document.querySelectorAll('[data-affiliate-station]').length===39")
     favoriteReloaded=finder_state(driver)
-    if favoriteReloaded['favoritePressed'] != 1 or 'WIKQ' not in favoriteReloaded['savedText']:
-        raise RuntimeError(f'Favorite did not survive reload: {favoriteReloaded}')
+    if favoriteReloaded['favoritePressed'] != 1 or 'WIKQ' not in favoriteReloaded['savedText'] or 'WIKQ' not in favoriteReloaded['quickSavedText']:
+        raise RuntimeError(f'Favorite did not survive reload in finder and Quick Start: {favoriteReloaded}')
+    if 'tennesseetitans.com/broadcast/titans-radio/live-game-day-audio' not in favoriteReloaded['quickListenHref']:
+        raise RuntimeError(f'Reload changed the official digital Listen route: {favoriteReloaded}')
 
     stage='desktop:favorite-remove'
     driver.execute_script("document.querySelector('[data-affiliate-unfavorite]').click()")
-    wait_for(driver, "document.querySelectorAll('[data-affiliate-favorite][aria-pressed=\"true\"]').length===0 && document.querySelector('[data-affiliate-summary]')?.textContent?.includes('39 stations')")
+    wait_for(driver, "document.querySelectorAll('[data-affiliate-favorite][aria-pressed=\"true\"]').length===0 && document.querySelector('[data-affiliate-summary]')?.textContent?.includes('39 stations') && !document.querySelector('[data-media-saved-radio]')")
     favoriteRemoved=finder_state(driver)
-    if favoriteRemoved['favoritePressed'] != 0 or 'No station saved yet' not in favoriteRemoved['savedText']:
-        raise RuntimeError(f'Favorite removal mismatch: {favoriteRemoved}')
+    if favoriteRemoved['favoritePressed'] != 0 or 'No station saved yet' not in favoriteRemoved['savedText'] or favoriteRemoved['quickSavedText']:
+        raise RuntimeError(f'Favorite removal mismatch across finder and Quick Start: {favoriteRemoved}')
     if driver.execute_script("return localStorage.getItem(arguments[0])", FAVORITE_KEY) is not None:
         raise RuntimeError('Favorite storage key remained after removal')
 
@@ -179,6 +195,8 @@ try:
         'favoriteSaved':favoriteSaved['summary'],
         'favoriteReloaded':favoriteReloaded['summary'],
         'favoriteRemoved':favoriteRemoved['summary'],
+        'quickStartSaved':favoriteSaved['quickSavedText'],
+        'quickStartListen':favoriteSaved['quickListenHref'],
         'columbia':columbia['calls'],
         'frequency1023':frequency['calls'],
         'mobileTargets':{'input':mobile['inputHeight'],'clear':mobile['clearHeight'],'favorite':mobile_greeneville['favoriteHeight']},

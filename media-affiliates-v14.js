@@ -54,6 +54,10 @@
   ].map((station,index)=>({...station,index,key:`${station.state}|${station.call}|${station.frequency}|${station.city}`,search:normalize(`${station.call} ${station.frequency} ${station.city} ${station.state}`)}));
 
   const STATES=['Tennessee','Alabama','Kentucky'];
+  let pageObserver=null;
+  let observedPage=null;
+  let quickstartObserver=null;
+  let observedQuickstart=null;
 
   function readFavorite(){
     try{
@@ -94,6 +98,70 @@
     return `<summary>Find a Titans Radio affiliate <span data-affiliate-summary>${esc(summary)}</span></summary><div class="media-affiliate-panel"><div class="media-affiliate-tools"><label><span>Search city, station or frequency</span><input type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Greeneville, WIKQ, 103.1…" data-affiliate-search-input aria-controls="titans-affiliate-results" /></label><button type="button" data-affiliate-clear aria-label="Clear affiliate search">Clear</button></div><p class="media-affiliate-count" data-affiliate-count role="status" aria-live="polite">${STATIONS.length} stations across Tennessee, Alabama and Kentucky.</p><div class="media-affiliate-saved" data-affiliate-saved>${favoriteHtml(favorite)}</div><div id="titans-affiliate-results" class="media-affiliate-results">${STATES.map(state=>stateGroup(state,favorite)).join('')}</div><div class="media-affiliate-source"><div><strong>Official Titans Radio Network</strong><span>Station list transcribed from the team’s page marked “Updated for 2026.” Broadcast availability can change.</span></div><a href="${OFFICIAL_AFFILIATES}" target="_blank" rel="noopener noreferrer">Verify official list ↗</a></div><p class="media-affiliate-note">Saved stations are AM/FM reminders only. Use an AM/FM radio when you are in a station’s coverage area. Digital game audio remains subject to NFL geographic and device restrictions.</p></div>`;
   }
 
+  function syncQuickstartFavorite(){
+    if(route()!=='media')return;
+    const listen=document.querySelector('.media-quick-listen');
+    if(!listen)return;
+    const favorite=readFavorite();
+    const existing=listen.querySelector('[data-media-saved-radio]');
+    if(!favorite){
+      existing?.remove();
+      listen.removeAttribute('data-saved-affiliate');
+      return;
+    }
+    if(existing?.dataset.signature===favorite.key)return;
+    existing?.remove();
+    const badge=document.createElement('span');
+    badge.className='media-quick-saved-radio';
+    badge.dataset.mediaSavedRadio='true';
+    badge.dataset.signature=favorite.key;
+    badge.setAttribute('role','note');
+    badge.setAttribute('aria-label',`Saved AM/FM station ${favorite.call} ${favorite.frequency} in ${favorite.city}. Tune a radio when in range.`);
+    const label=document.createElement('small');label.textContent='SAVED AM/FM';
+    const station=document.createElement('strong');station.textContent=`${favorite.call} · ${favorite.frequency}`;
+    const city=document.createElement('em');city.textContent=`${favorite.city} · tune a radio when in range`;
+    badge.append(label,station,city);
+    const action=listen.querySelector('b');
+    if(action)action.before(badge);else listen.append(badge);
+    listen.dataset.savedAffiliate=favorite.key;
+  }
+
+  function bindQuickstart(){
+    const quickstart=document.querySelector('.media-quickstart');
+    if(quickstart===observedQuickstart){syncQuickstartFavorite();return}
+    quickstartObserver?.disconnect();
+    observedQuickstart=quickstart||null;
+    quickstartObserver=null;
+    if(!quickstart)return;
+    quickstartObserver=new MutationObserver(()=>queueMicrotask(syncQuickstartFavorite));
+    quickstartObserver.observe(quickstart,{childList:true,subtree:false});
+    syncQuickstartFavorite();
+  }
+
+  function bindMediaPage(){
+    const page=document.querySelector('.media-page');
+    if(page===observedPage){bindQuickstart();return}
+    pageObserver?.disconnect();
+    observedPage=page||null;
+    pageObserver=null;
+    quickstartObserver?.disconnect();
+    observedQuickstart=null;
+    quickstartObserver=null;
+    if(!page)return;
+    pageObserver=new MutationObserver(()=>queueMicrotask(bindQuickstart));
+    pageObserver.observe(page,{childList:true,subtree:false});
+    bindQuickstart();
+  }
+
+  function resetMediaObservers(){
+    pageObserver?.disconnect();
+    quickstartObserver?.disconnect();
+    pageObserver=null;
+    quickstartObserver=null;
+    observedPage=null;
+    observedQuickstart=null;
+  }
+
   function syncFavorite(details){
     if(!details)return;
     const favorite=readFavorite();
@@ -109,6 +177,7 @@
     if(saved)saved.innerHTML=favoriteHtml(favorite);
     const summary=details.querySelector('[data-affiliate-summary]');
     if(summary)summary.textContent=favorite?`Saved ${favorite.call} · ${favorite.frequency}`:`${STATIONS.length} stations · official 2026 network`;
+    syncQuickstartFavorite();
   }
 
   function applyFilter(details,value){
@@ -128,12 +197,16 @@
   }
 
   function enhance(){
-    if(route()!=='media')return;
+    if(route()!=='media'){resetMediaObservers();return}
     const details=document.querySelector('.media-affiliates');
-    if(!details||details.dataset.affiliateFinder==='2026')return;
-    details.dataset.affiliateFinder='2026';
-    details.classList.add('media-affiliate-finder');
-    details.innerHTML=finderHtml();
+    if(!details){bindMediaPage();return}
+    if(details.dataset.affiliateFinder!=='2026'){
+      details.dataset.affiliateFinder='2026';
+      details.classList.add('media-affiliate-finder');
+      details.innerHTML=finderHtml();
+    }
+    bindMediaPage();
+    syncQuickstartFavorite();
   }
 
   document.addEventListener('input',event=>{
@@ -177,7 +250,7 @@
   if(!document.querySelector('link[data-media-affiliates-css]')){
     const style=document.createElement('link');
     style.rel='stylesheet';
-    style.href='/media-affiliates-v14.css?v=2';
+    style.href='/media-affiliates-v14.css?v=3';
     style.dataset.mediaAffiliatesCss='true';
     document.head.append(style);
   }
