@@ -15,19 +15,24 @@ test('My Player Impact reuses the synced favorite and watchlist profile without 
   assert.doesNotMatch(feature,/localStorage\.setItem/);
 });
 
-test('My Player Impact derives signals from loaded roster injury transaction and depth data',()=>{
+test('My Player Impact derives signals only after current roster identity is verified',()=>{
   assert.match(feature,/apiJson\?\.\('\/api\/data',\{ttl:30000\}\)/);
   assert.match(feature,/apiJson\?\.\('\/api\/fan-intel',\{ttl:30000\}\)/);
-  assert.match(feature,/fan\?\.injuries/);
-  assert.match(feature,/data\?\.transactions/);
-  assert.match(feature,/fan\?\.depthChart\?\.changes/);
-  assert.match(feature,/Roster status unavailable/);
-  assert.match(feature,/No flagged change in the loaded injury, transaction, or depth feeds/);
+  assert.match(feature,/const verified=Boolean\(rosterRow&&canonicalName\)/);
+  assert.match(feature,/const injuryRows=verified&&Array\.isArray\(fan\?\.injuries\)\?fan\.injuries:\[\]/);
+  assert.match(feature,/const transactionRows=verified&&Array\.isArray\(data\?\.transactions\)\?data\.transactions:\[\]/);
+  assert.match(feature,/const depthRows=verified&&Array\.isArray\(fan\?\.depthChart\?\.changes\)\?fan\.depthChart\.changes:\[\]/);
+  assert.match(feature,/Player-specific signals are withheld until current roster identity is verified/);
+  assert.match(feature,/Unavailable feeds are excluded/);
 });
 
-test('My Player Impact uses verified roster ids and renders on Home plus Game Day',()=>{
-  assert.match(feature,/rosterRow\?\.id\|\|item\.id/);
+test('My Player Impact uses canonical loaded roster identity for Player Intelligence and renders on Home plus Game Day',()=>{
+  assert.match(feature,/const id=verified\?String\(rosterRow\?\.id\|\|''\)\.trim\(\):''/);
   assert.match(feature,/#player\?id=\$\{encodeURIComponent\(id\)\}/);
+  assert.match(feature,/#player\?name=\$\{encodeURIComponent\(canonicalName\)\}/);
+  assert.doesNotMatch(feature,/rosterRow\?\.id\|\|item\.id/);
+  assert.match(feature,/routeState=verified\?'verified':'review'/);
+  assert.match(feature,/Review roster →/);
   assert.match(feature,/current==='home'/);
   assert.match(feature,/current==='live'/);
   assert.match(feature,/\.v36-watch-home/);
