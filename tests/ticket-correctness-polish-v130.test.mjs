@@ -6,8 +6,8 @@ const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('Ticket Decision Center parses only the explicit next-source currency gap',async()=>{
   const source=await read('tickets-tenx-v123.js');
-  assert.match(source,/Next best is \(\\\$\\s\*\[0-9\]\+\(\?:\\\.\[0-9\]\+\)\?\)/);
-  assert.doesNotMatch(source,/Next best is \(\[\^ \]\+\(\?: \[\^ \]\+\)\*\) more/);
+  assert.ok(source.includes("insight.match(/Next best is (\\$\\s*[0-9]+(?:\\.[0-9]+)?)/i)"));
+  assert.ok(!source.includes('Next best is ([^ ]+(?: [^ ]+)*) more'));
 });
 
 test('strong cross-check copy reports the real current source count',async()=>{
@@ -18,8 +18,8 @@ test('strong cross-check copy reports the real current source count',async()=>{
 
 test('price-memory escaping uses a complete quote entity',async()=>{
   const source=await read('tickets-trend-v124.js');
-  assert.match(source,/'"':'&quot;'/);
-  assert.doesNotMatch(source,/'"':'&quot'/);
+  assert.ok(source.includes("'\\"':'&quot;'"));
+  assert.ok(!source.includes("'\\"':'&quot',"));
   assert.match(source,/&#39;/);
 });
 
