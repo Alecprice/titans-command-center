@@ -32,27 +32,30 @@ test('fast pass stays official and supports home and road games',()=>{
 test('Game Day bridge preserves the kickoff matchup without inventing a live scoreboard',()=>{
   assert.match(brief,/runtime\.scheduleFocus\(games\)/);
   assert.match(brief,/focus\.state!=='game-window'/);
-  assert.match(brief,/GAME WINDOW/);
-  assert.match(brief,/Verification pending/);
-  assert.match(brief,/trustworthy live scoreboard has not confirmed game state yet/);
-  assert.match(brief,/No live score, clock, drive, or result is inferred from kickoff time alone/);
+  assert.match(brief,/GAME WINDOW · VERIFICATION PENDING/);
+  assert.match(brief,/Kickoff has passed, but Command Center will not infer a live score, clock, drive, or result until the scoreboard provider confirms game state/);
   assert.match(brief,/root\.dataset\.phase==='live'/);
   assert.doesNotMatch(brief,/root\.dataset\.phase==='postgame'/);
-  assert.doesNotMatch(brief,/<small>LIVE<\/small>.*Verification pending/s);
+  assert.doesNotMatch(brief,/<small>LIVE<\/small>.*VERIFICATION PENDING/s);
+  assert.doesNotMatch(brief,/root\.dataset\.phase='game-window'/);
 });
 
-test('final-week kickoff window can replace a stale prior postgame while final schedule truth still wins',()=>{
-  assert.match(brief,/if\(!root\|\|root\.dataset\.phase==='live'\)return false/);
+test('final-week kickoff window annotates the current matchup without replacing stable Game Day',()=>{
+  assert.match(brief,/const existing=root\.querySelector\('\.v22-verification-note'\)/);
+  assert.match(brief,/if\(root\.dataset\.phase==='live'\)\{existing\?\.remove\(\);return false;\}/);
   assert.match(brief,/const focus=runtime\.scheduleFocus\(games\)/);
-  assert.match(brief,/if\(focus\.state!=='game-window'\|\|!focus\.current\)return false/);
+  assert.match(brief,/if\(focus\.state!=='game-window'\|\|!focus\.current\)\{existing\?\.remove\(\);return false;\}/);
+  assert.match(brief,/phase\.insertAdjacentHTML\('beforebegin',verificationMarkup\(game\)\)/);
+  assert.doesNotMatch(brief,/root\.innerHTML\s*=/);
 });
 
-test('game-window refresh hands control back to stable Game Day for scoreboard re-verification',()=>{
+test('game-window refresh rechecks the bridge without destroying stable Game Day',()=>{
   assert.match(brief,/function refreshGameDay\(\)/);
-  assert.match(brief,/v16-gameday\[data-v92-game-window\]/);
-  assert.match(brief,/root\.remove\(\)/);
-  assert.match(brief,/new HashChangeEvent\('hashchange'\)/);
+  assert.match(brief,/queueMicrotask\(mount\)/);
   assert.match(brief,/runtime\.onRefresh\(refreshGameDay\)/);
+  assert.doesNotMatch(brief,/v16-gameday\[data-v92-game-window\]/);
+  assert.doesNotMatch(brief,/root\.remove\(\)/);
+  assert.doesNotMatch(brief,/new HashChangeEvent\('hashchange'\)/);
 });
 
 test('fast pass mounts only inside a confirmed pregame phase',()=>{
