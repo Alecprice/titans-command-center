@@ -129,13 +129,14 @@
     if(!app||!['home','live'].includes(route()))return;
     const current=route(),host=hostFor(current);if(!host)return;
     const list=followed();
+    const home=current==='home';
+    let root=app.querySelector(`.v38-impact[data-surface="${current}"]`);
+    if(home&&!list.length){root?.remove();return;}
     if(list.length&&(!data||!fan)&&!loading){load();return;}
     const impacts=list.map(impactFor);
-    const home=current==='home';
     const visibleImpacts=home?impacts.filter(impact=>impact.flagged):impacts;
     const summary=home?homeSummary(impacts):'';
     const signature=JSON.stringify([current,visibleImpacts.map(x=>[x.resolvedName,x.href,x.routeState,x.rosterStatus,x.injuryLabel,x.transactionLabel,x.depthLabel,x.noSignalLabel,x.evidenceAvailable]),summary]);
-    let root=app.querySelector(`.v38-impact[data-surface="${current}"]`);
     if(!root){root=document.createElement('section');root.className='v38-impact';root.dataset.surface=current;root.setAttribute('aria-label','My Player Impact');host.insertAdjacentElement('afterend',root);}
     if(root.dataset.signature===signature)return;
     root.dataset.signature=signature;
