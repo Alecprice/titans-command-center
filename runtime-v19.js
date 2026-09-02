@@ -102,4 +102,6 @@ import {scheduleFocus,latestCompletedGame,GAME_FOCUS_WINDOW_MS} from './src/core
     refreshInfo:()=>({epoch:refreshEpoch,last:lastRefresh}),
     apiCacheInfo:()=>[...apiCache.entries()].map(([url,x])=>({url,hasValue:Boolean(x.value),inflight:Boolean(x.inflight),expiresAt:x.expiresAt,updatedAt:x.updatedAt}))
   };
+
+  import('./home-command-v123.js').catch(error=>console.warn('[titans-home-command]',error));
 })();
