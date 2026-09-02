@@ -2,12 +2,26 @@
   'use strict';
   const V10_PREF_KEY='titans:v10Prefs';
   const FANTASY_PREF_KEY='titans-fantasy-v1';
-  const KEYS=['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY,FANTASY_PREF_KEY];
-  const MAX_IMPORT_BYTES=32000;
+  const PROP_WATCHLIST_KEY='titans-fantasy-prop-watchlist-v1';
+  const KEYS=['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY,FANTASY_PREF_KEY,PROP_WATCHLIST_KEY];
+  const MAX_IMPORT_BYTES=32000,MAX_PROP_WATCHLIST=32;
   let syncing=false,timer=0,lastUser='';
+  const clean=value=>String(value??'').trim();
+  const slug=value=>clean(value).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  const propKey=(player,market)=>`${slug(player)}|${slug(market)}`;
+  const normalizePropWatchlist=value=>{
+    if(!Array.isArray(value))return [];
+    return value.filter(item=>item&&typeof item==='object'&&clean(item.player)&&clean(item.market))
+      .map(item=>{const player=clean(item.player).slice(0,80),market=clean(item.market).slice(0,80),savedAt=Number(item.savedAt);return {key:propKey(player,market),player,market,savedAt:Number.isFinite(savedAt)&&savedAt>0?Math.floor(savedAt):0}})
+      .filter(item=>item.key!=='|')
+      .sort((a,b)=>b.savedAt-a.savedAt)
+      .filter((item,index,list)=>list.findIndex(candidate=>candidate.key===item.key)===index)
+      .slice(0,MAX_PROP_WATCHLIST);
+  };
+  const mergePropWatchlists=(local,remote)=>normalizePropWatchlist([...normalizePropWatchlist(local),...normalizePropWatchlist(remote)]);
   const parse=key=>{try{const raw=localStorage.getItem(key);return raw==null?undefined:JSON.parse(raw)}catch{return undefined}};
-  const snapshot=()=>Object.fromEntries(KEYS.map(key=>[key,parse(key)]).filter(([,value])=>value!==undefined));
-  const apply=values=>{if(!values||typeof values!=='object')return;for(const key of KEYS){if(!(key in values))continue;try{localStorage.setItem(key,JSON.stringify(values[key]))}catch{}}};
+  const snapshot=()=>Object.fromEntries(KEYS.map(key=>{const value=parse(key);return [key,key===PROP_WATCHLIST_KEY&&value!==undefined?normalizePropWatchlist(value):value]}).filter(([,value])=>value!==undefined));
+  const apply=values=>{if(!values||typeof values!=='object')return;for(const key of KEYS){if(!(key in values))continue;try{const value=key===PROP_WATCHLIST_KEY?normalizePropWatchlist(values[key]):values[key];localStorage.setItem(key,JSON.stringify(value))}catch{}}};
   const clearLocal=()=>{for(const key of KEYS){try{localStorage.removeItem(key)}catch{}}};
   const same=(a,b)=>{try{return JSON.stringify(a)===JSON.stringify(b)}catch{return false}};
   const status=(state,message)=>window.dispatchEvent(new CustomEvent('titans:sync-status',{detail:{state,message,at:new Date().toISOString()}}));
@@ -27,14 +41,16 @@
       const remote=await request('GET');
       const remotePreferences=remote?.preferences&&typeof remote.preferences==='object'?remote.preferences:{};
       const merged={...local,...remotePreferences};
+      if(PROP_WATCHLIST_KEY in local||PROP_WATCHLIST_KEY in remotePreferences)merged[PROP_WATCHLIST_KEY]=mergePropWatchlists(local[PROP_WATCHLIST_KEY],remotePreferences[PROP_WATCHLIST_KEY]);
       const refreshV10=V10_PREF_KEY in remotePreferences&&!same(local[V10_PREF_KEY],merged[V10_PREF_KEY]);
       const refreshFantasy=FANTASY_PREF_KEY in remotePreferences&&!same(local[FANTASY_PREF_KEY],merged[FANTASY_PREF_KEY]);
+      const refreshPropWatchlist=PROP_WATCHLIST_KEY in merged&&!same(normalizePropWatchlist(local[PROP_WATCHLIST_KEY]),merged[PROP_WATCHLIST_KEY]);
       apply(merged);
       await request('PUT',merged);
       lastUser=id;
       status('synced','Your Titans settings are synced.');
       window.dispatchEvent(new CustomEvent('titans:preferences-synced',{detail:{keys:Object.keys(merged)}}));
-      if(refreshV10||refreshFantasy)setTimeout(()=>location.reload(),120);
+      if(refreshV10||refreshFantasy||refreshPropWatchlist)setTimeout(()=>location.reload(),120);
     }catch(err){reportFailure(err);}
     finally{syncing=false;}
   }
@@ -72,7 +88,8 @@
       if(value===undefined||typeof value==='function'||typeof value==='symbol')throw new Error(`Invalid setting value: ${key}`);
       JSON.stringify(value);
     }
-    return {preferences:Object.fromEntries(keys.map(key=>[key,preferences[key]])),keys,exportedAt:String(payload.exportedAt||''),scope:String(payload.scope||'unknown'),accountEmail:String(payload.account?.email||'')};
+    const normalized=Object.fromEntries(keys.map(key=>[key,key===PROP_WATCHLIST_KEY?normalizePropWatchlist(preferences[key]):preferences[key]]));
+    return {preferences:normalized,keys,exportedAt:String(payload.exportedAt||''),scope:String(payload.scope||'unknown'),accountEmail:String(payload.account?.email||'')};
   }
   async function importSettings(payload){
     const prepared=prepareImport(payload);
@@ -106,7 +123,7 @@
   function schedule(){clearTimeout(timer);timer=setTimeout(push,500);}
   addEventListener('titans:account',event=>{const user=event.detail?.user;if(user)initialSync(user);else{lastUser='';status('guest','Guest settings stay on this device.')}});
   addEventListener('storage',event=>{if(KEYS.includes(event.key))schedule();});
-  document.addEventListener('click',event=>{const el=event.target instanceof Element?event.target:null;if(!el)return;if(el.closest('[data-v15-profile-save],[data-v15-alert-save],[data-v16-favorite],[data-custom-remove],[data-save-settings],[data-scoring],[data-ftab],[data-remove-player]'))setTimeout(schedule,0);});
+  document.addEventListener('click',event=>{const el=event.target instanceof Element?event.target:null;if(!el)return;if(el.closest('[data-v15-profile-save],[data-v15-alert-save],[data-v16-favorite],[data-custom-remove],[data-save-settings],[data-scoring],[data-ftab],[data-remove-player],.fpw-watch-button'))setTimeout(schedule,0);});
   document.addEventListener('submit',event=>{const form=event.target;if(form instanceof Element&&form.matches('[data-custom-form],.fantasy-add,.fantasy-connect'))setTimeout(schedule,0);});
   document.addEventListener('change',event=>{const el=event.target instanceof Element?event.target:null;if(el?.matches('#sleeper-league,#sleeper-week'))setTimeout(schedule,0);});
   window.TitansAccountSync={sync:push,exportSettings,resetSettings,exportPayload,prepareImport,importSettings,keys:[...KEYS]};
