@@ -33,7 +33,7 @@
   const storageSet=(key,value)=>{try{localStorage.setItem(key,value);return true}catch{return false}};
   const savedArea=storageGet(AREA_KEY);
   const initialArea=savedArea==='outside'?'us':['nashville','us','international'].includes(savedArea)?savedArea:'nashville';
-  const state={data:null,loading:null,area:initialArea};
+  const state={data:null,loading:null,area:initialArea,loadEpoch:0};
 
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const validDate=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d};
@@ -44,9 +44,15 @@
   async function load(){
     if(state.data)return state.data;
     if(state.loading)return state.loading;
-    const runtime=window.TitansRuntime;
-    state.loading=(typeof runtime?.apiJson==='function'?runtime.apiJson('/api/data',{ttl:30000}):fetch('/api/data',{cache:'no-store',headers:{Accept:'application/json'}}).then(async r=>r.ok?r.json():null).catch(()=>null)).then(d=>{state.data=d?.ok?d:null;return state.data}).finally(()=>state.loading=null);
-    return state.loading;
+    const runtime=window.TitansRuntime,epoch=state.loadEpoch;
+    let pending;
+    pending=(typeof runtime?.apiJson==='function'?runtime.apiJson('/api/data',{ttl:30000}):fetch('/api/data',{cache:'no-store',headers:{Accept:'application/json'}}).then(async r=>r.ok?r.json():null).catch(()=>null)).then(d=>{
+      if(epoch!==state.loadEpoch)return state.data;
+      state.data=d?.ok?d:null;
+      return state.data;
+    }).finally(()=>{if(state.loading===pending)state.loading=null});
+    state.loading=pending;
+    return pending;
   }
 
   function focusedGame(){
@@ -139,6 +145,15 @@
   },true);
 
   async function render(){await load();if(route()==='media')mediaPage();else homeCard()}
+  const runtime=window.TitansRuntime;
+  if(typeof runtime?.onRefresh==='function')runtime.onRefresh(event=>{
+    const urls=event?.urls;
+    if(Array.isArray(urls)&&urls.length&&!urls.includes('/api/data'))return;
+    state.loadEpoch+=1;
+    state.data=null;
+    state.loading=null;
+    if(route()==='media')queueMicrotask(render);
+  });
   window.addEventListener('hashchange',()=>setTimeout(render,0));
   window.addEventListener('popstate',()=>setTimeout(render,0));
   if(app)new MutationObserver(()=>queueMicrotask(()=>{if(route()==='media'){if(!app.querySelector('.media-page')){if(state.data)mediaPage();else render()}}else homeCard()})).observe(app,{childList:true,subtree:false});
