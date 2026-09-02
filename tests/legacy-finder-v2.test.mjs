@@ -10,7 +10,7 @@ test('legacy finder ships through the browser and offline shells',()=>{
   assert.match(html,/legacy-finder-v2\.js\?v=1/);
   assert.match(sw,/\/legacy-finder-v2\.css/);
   assert.match(sw,/\/legacy-finder-v2\.js/);
-  assert.match(sw,/titans-cc-brand-2026-v77/);
+  assert.match(sw,/titans-cc-brand-2026-v78/);
 });
 
 test('legacy finder indexes the rendered museum instead of duplicating history data',()=>{

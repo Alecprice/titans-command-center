@@ -1,10 +1,13 @@
-const FINDER_VERSION='2.0.0';
+import { ensureLegacyHeritage } from './legacy-heritage-v3.js';
+
+const FINDER_VERSION='2.1.0';
 const ROUTE='legacy';
 const SECTION_MAP={
   story:{id:'legacy-story',label:'Story',selectors:['.legacy-story-card']},
   moments:{id:'legacy-moments',label:'Moments',selectors:['.legacy-moment-card']},
   legends:{id:'legacy-legends',label:'Legends',selectors:['.legacy-legend-card']},
   records:{id:'legacy-records',label:'Records',selectors:['.legacy-record-card','.legacy-retired-card']},
+  heritage:{id:'legacy-heritage',label:'Heritage',selectors:['.legacy-venue-card','.legacy-honor-card']},
   identity:{id:'legacy-identity',label:'Identity',selectors:['.legacy-era','.archive-card','.visual-gap-card']}
 };
 const ITEM_SELECTOR=Object.values(SECTION_MAP).flatMap(section=>section.selectors).join(',');
@@ -36,23 +39,24 @@ function finderMarkup(counts){
   const tabs=[['all','All'],...Object.entries(SECTION_MAP).map(([key,value])=>[key,value.label])];
   return `<section class="legacy-finder" data-legacy-finder data-version="${FINDER_VERSION}" aria-labelledby="legacy-finder-title">
     <div class="legacy-finder-head">
-      <div><small>Fast path through franchise history</small><h2 id="legacy-finder-title">Legacy Finder</h2><p>Search names, years, games, records, eras, retired numbers and identity history without digging through the full museum.</p></div>
+      <div><small>Fast path through franchise history</small><h2 id="legacy-finder-title">Legacy Finder</h2><p>Search names, years, games, records, venues, honors, retired numbers and identity history without digging through the full museum.</p></div>
       <div class="legacy-finder-audit"><span>History pass</span><strong>Source-backed · Sep. 1, 2026</strong></div>
     </div>
     <div class="legacy-finder-controls">
-      <label class="legacy-finder-search" for="legacy-finder-input"><span>Search Legacy</span><div><span aria-hidden="true">⌕</span><input id="legacy-finder-input" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="Try McNair, Oilers, 1999, Henry, #34…"><kbd>/</kbd></div></label>
+      <label class="legacy-finder-search" for="legacy-finder-input"><span>Search Legacy</span><div><span aria-hidden="true">⌕</span><input id="legacy-finder-input" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="Try McNair, Astrodome, 1999, Mike Keith, #34…"><kbd>/</kbd></div></label>
       <button type="button" class="legacy-finder-clear" data-legacy-finder-clear hidden>Clear</button>
       <button type="button" class="legacy-finder-share" data-legacy-finder-share>Share view</button>
     </div>
     <div class="legacy-finder-scopes" role="group" aria-label="Limit Legacy Finder to a museum section">${tabs.map(([key,label])=>`<button type="button" data-legacy-finder-scope="${key}" aria-pressed="${key==='all'}">${label}<span>${key==='all'?counts.total:counts[key]}</span></button>`).join('')}</div>
     <div class="legacy-finder-feedback"><span id="legacy-finder-count" role="status" aria-live="polite"></span><span id="legacy-finder-action" role="status" aria-live="polite"></span></div>
-    <div class="legacy-finder-empty" data-legacy-finder-empty hidden><strong>No museum entries match.</strong><span>Try a player name, season, team era or a broader section.</span><button type="button" data-legacy-finder-clear>Reset Legacy Finder</button></div>
+    <div class="legacy-finder-empty" data-legacy-finder-empty hidden><strong>No museum entries match.</strong><span>Try a player, venue, season, team era or a broader section.</span><button type="button" data-legacy-finder-clear>Reset Legacy Finder</button></div>
   </section>`;
 }
 
 function searchableText(item){
   const clone=item.cloneNode(true);
   clone.querySelectorAll('.legacy-history-sources,.archive-source-list,.archive-inline-sources,.visual-audit-source-chips').forEach(node=>node.remove());
+  clone.querySelectorAll('.legacy-heritage-sources').forEach(node=>node.remove());
   return normalize(clone.textContent);
 }
 
@@ -63,7 +67,7 @@ function indexMuseum(page){
     item.dataset.legacyFinderScope=scopeForItem(item);
     item.dataset.legacyFinderText=searchableText(item);
   });
-  const counts={total:items.length,story:0,moments:0,legends:0,records:0,identity:0};
+  const counts={total:items.length,story:0,moments:0,legends:0,records:0,heritage:0,identity:0};
   items.forEach(item=>{const scope=item.dataset.legacyFinderScope;if(scope in counts)counts[scope]+=1;});
   return {items,counts};
 }
@@ -86,6 +90,11 @@ function resetMuseumNativeFilters(page){
       button.setAttribute('aria-pressed',String(active));
     });
     page.querySelectorAll('.archive-card').forEach(card=>{card.hidden=false;});
+  }
+  const heritageAll=page.querySelector('[data-heritage-honor-filter="all"]');
+  if(heritageAll){
+    page.querySelectorAll('[data-heritage-honor-filter]').forEach(button=>button.setAttribute('aria-pressed',String(button===heritageAll)));
+    page.querySelectorAll('.legacy-honor-card').forEach(card=>{card.hidden=false;});
   }
 }
 
@@ -155,7 +164,7 @@ function createController(page,finder,index){
 
   page.addEventListener('click',event=>{
     const jump=event.target.closest('[data-legacy-scroll]');
-    const nativeFilter=event.target.closest('.legacy-era-filter,.archive-filter');
+    const nativeFilter=event.target.closest('.legacy-era-filter,.archive-filter,[data-heritage-honor-filter]');
     if((jump||nativeFilter)&&(state.q||state.scope!=='all'))apply({q:'',scope:'all'});
   },true);
 
@@ -171,6 +180,7 @@ function enhanceLegacy(){
   if(!page||page.querySelector('[data-legacy-finder]'))return;
   const jump=page.querySelector('.legacy-museum-jump');
   if(!jump)return;
+  ensureLegacyHeritage(page);
   const index=indexMuseum(page);
   jump.insertAdjacentHTML('afterend',finderMarkup(index.counts));
   const finder=page.querySelector('[data-legacy-finder]');
