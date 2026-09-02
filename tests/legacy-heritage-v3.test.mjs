@@ -33,7 +33,7 @@ test('heritage is progressive, source-safe and does not add a data fetch',()=>{
   assert.doesNotMatch(js,/\bfetch\s*\(/);
 });
 
-test('heritage honors filter is accessible and mobile ready',()=>{
+test('heritage controls and source links are accessible and mobile ready',()=>{
   const js=read('legacy-heritage-v3.js');
   assert.match(js,/aria-label="Filter Ring of Honor members"/);
   assert.match(js,/aria-pressed/);
@@ -41,6 +41,11 @@ test('heritage honors filter is accessible and mobile ready',()=>{
   assert.match(js,/\.legacy-honor-filters button\{min-height:44px/);
   assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-filters button\{min-height:48px/);
   assert.doesNotMatch(js,/\.legacy-honor-filters button\{min-height:(?:4[0-3]|4[5-7])px/);
+  assert.match(js,/\.legacy-heritage-sources a\{display:inline-flex;align-items:center;min-height:44px/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-sources a\{min-height:48px;font-size:9px/);
+  assert.doesNotMatch(js,/\.legacy-heritage-sources a\{[^}]*font-size:7px/);
+  assert.match(js,/\.legacy-heritage-sources a:hover/);
+  assert.match(js,/\.legacy-heritage-sources a:focus-visible/);
   assert.match(js,/max-width:430px/);
   assert.match(js,/prefers-reduced-motion:reduce/);
   assert.match(js,/forced-colors:active/);
