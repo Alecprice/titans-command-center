@@ -100,7 +100,7 @@ function injectStyles(){
     .legacy-honors-head h3{margin:5px 0 0;color:var(--retro-navy,#002144);font-size:24px;line-height:1;text-transform:uppercase}
     .legacy-honors-head p{max-width:560px;margin:0;color:#607487;font-size:10px;line-height:1.5}
     .legacy-honor-filters{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0}
-    .legacy-honor-filters button{min-height:42px;padding:0 12px;border:1px solid rgba(0,33,68,.16);background:#fff;color:var(--retro-navy,#002144);font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.06em;cursor:pointer}
+    .legacy-honor-filters button{min-height:44px;padding:0 12px;border:1px solid rgba(0,33,68,.16);background:#fff;color:var(--retro-navy,#002144);font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.06em;cursor:pointer}
     .legacy-honor-filters button[aria-pressed="true"]{background:var(--retro-navy,#002144);border-color:var(--retro-navy,#002144);color:#fff}
     .legacy-honor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
     .legacy-honor-card{display:grid;grid-template-columns:46px 1fr;gap:10px;min-height:112px;padding:12px;border:1px solid rgba(0,33,68,.13);background:#fff}
@@ -111,7 +111,7 @@ function injectStyles(){
     .legacy-honor-card[hidden]{display:none!important}
     .legacy-honor-filters button:focus-visible,.legacy-heritage-sources a:focus-visible{outline:3px solid rgba(74,149,206,.38);outline-offset:2px}
     @media(max-width:1000px){.legacy-honor-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:760px){.legacy-heritage-intro{grid-template-columns:1fr;padding:14px}.legacy-heritage-now{grid-template-columns:1fr 1fr}.legacy-venue-grid{grid-template-columns:repeat(7,82vw)}.legacy-venue-card{min-height:220px}.legacy-honors-head{display:block}.legacy-honors-head p{margin-top:8px}.legacy-honor-filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px;scrollbar-width:none}.legacy-honor-filters::-webkit-scrollbar{display:none}.legacy-honor-filters button{min-height:46px;flex:0 0 auto}.legacy-honor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:760px){.legacy-heritage-intro{grid-template-columns:1fr;padding:14px}.legacy-heritage-now{grid-template-columns:1fr 1fr}.legacy-venue-grid{grid-template-columns:repeat(7,82vw)}.legacy-venue-card{min-height:220px}.legacy-honors-head{display:block}.legacy-honors-head p{margin-top:8px}.legacy-honor-filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px;scrollbar-width:none}.legacy-honor-filters::-webkit-scrollbar{display:none}.legacy-honor-filters button{min-height:48px;flex:0 0 auto}.legacy-honor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:430px){.legacy-heritage-now{grid-template-columns:1fr}.legacy-venue-grid{grid-template-columns:repeat(7,86vw)}.legacy-honor-grid{grid-template-columns:1fr}.legacy-honor-card{min-height:104px}}
     @media(prefers-reduced-motion:reduce){.legacy-venue-grid{scroll-behavior:auto}.legacy-heritage-section *{transition:none!important}}
     @media(forced-colors:active){.legacy-venue-card,.legacy-honor-card,.legacy-heritage-intro,.legacy-honor-filters button{border:1px solid CanvasText}.legacy-venue-card:before{background:CanvasText}}
