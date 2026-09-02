@@ -212,3 +212,35 @@
   .mobile-nav,.sidebar{border-width:2px!important}
   .mobile-nav a,.mobile-nav button,.sidebar .nav a{font-weight:900!important}
 }
+
+/* Home topbar refresh control: keep the action unmistakable against the navy shell. */
+#refresh-button{
+  background:#4b92db!important;
+  border-color:#9edcff!important;
+  color:#061421!important;
+  box-shadow:0 0 0 1px rgba(158,220,255,.18),0 8px 18px rgba(75,146,219,.22);
+  font-weight:900;
+}
+#refresh-button:hover{
+  background:#79bdf4!important;
+  border-color:#d6f2ff!important;
+  color:#061421!important;
+}
+#refresh-button:active{
+  background:#86d2ff!important;
+  border-color:#fff!important;
+  color:#061421!important;
+}
+#refresh-button:focus-visible{
+  outline:3px solid #fff!important;
+  outline-offset:3px!important;
+  box-shadow:0 0 0 5px rgba(75,146,219,.36)!important;
+}
+@media(prefers-contrast:more){
+  #refresh-button{
+    background:#86d2ff!important;
+    border-color:#fff!important;
+    border-width:2px!important;
+    color:#061421!important;
+  }
+}
