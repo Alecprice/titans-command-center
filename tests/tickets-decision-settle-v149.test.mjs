@@ -21,8 +21,8 @@ test('same-tab shortlist reconciliation verifies compare keys and derived panels
   assert.match(settle,/dataset\.ticketCompareKey/);
   assert.match(settle,/data-ticket-finalists-v127/);
   assert.match(settle,/data-ticket-signal-lens-v128/);
-  assert.match(settle,/data-ticket-tenx-price/);
-  assert.match(settle,/data-ticket-tenx-sources/);
+  assert.match(settle,/dataset\.ticketTenxPrice/);
+  assert.match(settle,/dataset\.ticketTenxSources/);
 });
 
 test('settle repair is bounded to one frame and one storage wake-up without polling or network',()=>{
