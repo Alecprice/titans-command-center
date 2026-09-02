@@ -1,4 +1,5 @@
 import('./fantasy-roster-props-v134.js').catch(()=>{});
+import('./fantasy-prop-movers-v135.js').catch(()=>{});
 (() => {
   'use strict';
   const ROUTE='fantasy',ROOT='#fantasy-live-props-v122',STORE='titans-fantasy-prop-observations-v1',MAX_KEYS=120,MAX_POINTS=8,MIN_CAPTURE_MS=120000;
