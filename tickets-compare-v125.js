@@ -44,6 +44,12 @@
   }
 
   function readSaved(){
+    const runtime=currentRuntime();
+    const runtimeValue=runtime?.storage?.getJSON?.(SHORTLIST_KEY,[]);
+    if(Array.isArray(runtimeValue)){
+      savedAuthority='runtime';
+      return runtimeValue.filter(item=>item&&typeof item.key==='string').slice(0,MAX_SAVED);
+    }
     const read=readJSON(SHORTLIST_KEY,[]);
     savedAuthority=read.authority;
     const value=read.value;
@@ -297,8 +303,8 @@
     const runtime=currentRuntime();
     if(runtimeBound||!runtime)return;
     runtimeBound=true;
-    runtime.onRoute?.(schedule,{immediate:true});
-    runtime.onAppRender?.(schedule,{immediate:true});
+    runtime?.onRoute?.(schedule,{immediate:true});
+    runtime?.onAppRender?.(schedule,{immediate:true});
   }
 
   function enhance(){
@@ -314,7 +320,7 @@
   }
 
   function schedule(){if(queued)return;queued=true;queueMicrotask(enhance);}
-  function syncFromShortlist(){queued=false;bindRuntime();enhance();}
+  function syncFromShortlist(){queued=false;enhance();}
 
   app.addEventListener('click',event=>{
     const target=event.target instanceof Element?event.target:null;
