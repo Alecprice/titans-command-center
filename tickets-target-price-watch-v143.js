@@ -45,10 +45,11 @@
     const source=raw&&typeof raw==='object'&&raw.targets&&typeof raw.targets==='object'?raw.targets:{};
     const allowed=new Set(saved.map(item=>item.key));
     const targets={};
-    for(const [key,value] of Object.entries(source).slice(0,MAX_TARGETS)){
+    for(const [key,value] of Object.entries(source)){
       if(!allowed.has(key))continue;
       const parsed=targetAmount(value);
       if(parsed!=null)targets[key]=parsed;
+      if(Object.keys(targets).length>=MAX_TARGETS)break;
     }
     return {targets};
   }
@@ -77,13 +78,13 @@
   }
 
   function stateFor(target,current){
-    if(target==null)return {kind:'unset',badge:'NO TARGET',detail:'Set a threshold to compare when a current reported starting price is available.'};
-    if(current==null)return {kind:'unavailable',badge:'PRICE UNAVAILABLE',detail:`Target ${money(target)} saved. Current reported starting price is unavailable.`};
+    if(target==null)return {kind:'unset',badge:'NO TARGET',detail:'Set a per-ticket threshold to compare when a current reported starting price is available.'};
+    if(current==null)return {kind:'unavailable',badge:'PRICE UNAVAILABLE',detail:`Target ${money(target)} per ticket saved. Current reported starting price is unavailable.`};
     if(current<=target){
       const difference=target-current;
-      return {kind:'met',badge:'TARGET MET',detail:`Current reported start ${money(current)} is ${difference>0?`${money(difference)} below`:'at'} your ${money(target)} target.`};
+      return {kind:'met',badge:'TARGET MET',detail:`Current reported start ${money(current)} per ticket is ${difference>0?`${money(difference)} below`:'at'} your ${money(target)} target.`};
     }
-    return {kind:'above',badge:'ABOVE TARGET',detail:`Current reported start ${money(current)} is ${money(current-target)} above your ${money(target)} target.`};
+    return {kind:'above',badge:'ABOVE TARGET',detail:`Current reported start ${money(current)} per ticket is ${money(current-target)} above your ${money(target)} target.`};
   }
 
   function rows(center,saved,store){
@@ -103,11 +104,11 @@
   }
 
   function cardMarkup(item){
-    const current=item.current==null?'Current start unavailable':`${money(item.current)} current reported start`;
+    const current=item.current==null?'Current start unavailable':`${money(item.current)} current reported start per ticket`;
     return `<article class="tickets-target-v143-card is-${esc(item.state.kind)}" data-ticket-target-key="${esc(item.key)}" data-ticket-target-state="${esc(item.state.kind)}">
       <header><div><small>${esc(item.state.badge)}</small><h3>${esc(item.title)}</h3><p>${esc(item.date)}</p></div><strong>${esc(current)}</strong></header>
       <p class="tickets-target-v143-detail">${esc(item.state.detail)}</p>
-      <label><span>Target starting price</span><span class="tickets-target-v143-money">$ <input type="number" min="1" max="${MAX_AMOUNT}" step="0.01" inputmode="decimal" autocomplete="off" data-ticket-target-input="${esc(item.key)}" value="${item.target==null?'':esc(String(item.target))}" aria-label="Target reported starting price for ${esc(item.title)}" placeholder="0.00"></span></label>
+      <label><span>Target starting price per ticket</span><span class="tickets-target-v143-money">$ <input type="number" min="1" max="${MAX_AMOUNT}" step="0.01" inputmode="decimal" autocomplete="off" data-ticket-target-input="${esc(item.key)}" value="${item.target==null?'':esc(String(item.target))}" aria-label="Target reported starting price per ticket for ${esc(item.title)}" placeholder="0.00"></span></label>
     </article>`;
   }
 
@@ -117,9 +118,9 @@
     const metCount=items.filter(item=>item.state.kind==='met').length;
     const summary=setCount?`${setCount}/${items.length} targets set · ${metCount} currently met`:`0/${items.length} targets set`;
     return `<section class="tickets-target-v143" data-ticket-target-v143 aria-label="Saved game target price watch">
-      <header><div><small>TENX · TARGET PRICE WATCH</small><h2>Set the starting price that gets your attention.</h2><p>Targets are checked only while Ticket Center is open or refreshed. This browser does not monitor prices or send background alerts while closed.</p></div><span>${esc(summary)}</span></header>
+      <header><div><small>TENX · TARGET PRICE WATCH</small><h2>Set the per-ticket starting price that gets your attention.</h2><p>Targets are checked only while Ticket Center is open or refreshed. This browser does not monitor prices or send background alerts while closed.</p></div><span>${esc(summary)}</span></header>
       <div class="tickets-target-v143-grid">${items.map(cardMarkup).join('')}</div>
-      <footer><span>Targets compare current reported starting prices only. Checkout fees, seat quality, and future prices are not inferred.</span><button type="button" data-ticket-target-clear ${setCount?'':'disabled'}>Clear all targets</button></footer>
+      <footer><span>Targets compare current reported starting prices per ticket only. Checkout fees, seat quality, and future prices are not inferred.</span><button type="button" data-ticket-target-clear ${setCount?'':'disabled'}>Clear all targets</button></footer>
       <p class="tickets-target-v143-status" data-ticket-target-status role="status" aria-live="polite">${esc(notice)}</p>
     </section>`;
   }
@@ -155,7 +156,7 @@
     const parsed=targetAmount(raw);
     if(raw!==''&&parsed==null){
       input.setAttribute('aria-invalid','true');
-      notice=`Enter a target from $1 to ${money(MAX_AMOUNT)}.`;
+      notice=`Enter a per-ticket target from $1 to ${money(MAX_AMOUNT)}.`;
       const status=input.closest('[data-ticket-target-v143]')?.querySelector('[data-ticket-target-status]');
       if(status)status.textContent=notice;
       return;
@@ -163,7 +164,7 @@
     input.removeAttribute('aria-invalid');
     const store=readStore(saved);
     if(parsed==null){delete store.targets[key];notice='Target cleared for this saved matchup.';}
-    else{store.targets[key]=parsed;notice=`Target saved at ${money(parsed)}. It will be checked only when Ticket Center is open or refreshed.`;}
+    else{store.targets[key]=parsed;notice=`Target saved at ${money(parsed)} per ticket. It will be checked only when Ticket Center is open or refreshed.`;}
     writeStore(store);
     schedule();
   }
