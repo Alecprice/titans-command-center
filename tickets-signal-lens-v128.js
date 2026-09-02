@@ -9,6 +9,8 @@
   if(!app)return;
 
   const MEMORY_KEY='titans:tickets-price-memory-v124';
+  const FOCUS_COMPLETE_EVENT='titans:ticket-signal-focus-complete';
+  const MAX_FOCUS_SETTLE_FRAMES=18;
   let queued=false;
 
   const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
@@ -150,20 +152,66 @@
     if(node)node.textContent=message;
   }
 
+  function findCard(center,key){
+    return [...center.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')].find(node=>node.dataset.ticketTenxKey===key)||null;
+  }
+
+  function requestCanonicalFilters(center){
+    const selectors=[
+      '[data-ticket-filter="all"]',
+      '[data-ticket-tenx-budget="all"]',
+      '[data-ticket-finalists-view="all"]',
+      '[data-ticket-finalists-budget="all"]'
+    ];
+    for(const selector of selectors){
+      const control=center.querySelector(selector);
+      if(control&&!control.disabled&&control.getAttribute('aria-pressed')!=='true')control.click();
+    }
+  }
+
+  function focusState(center,key){
+    const all=center.querySelector('[data-ticket-filter="all"]')?.getAttribute('aria-pressed')==='true';
+    const ticketBudget=center.querySelector('[data-ticket-tenx-budget="all"]')?.getAttribute('aria-pressed')==='true';
+    const allGames=center.querySelector('[data-ticket-finalists-view="all"]')?.getAttribute('aria-pressed')==='true';
+    const groupBudget=center.querySelector('[data-ticket-finalists-budget="all"]')?.getAttribute('aria-pressed')==='true';
+    const card=findCard(center,key);
+    return {settled:Boolean(all&&ticketBudget&&allGames&&groupBudget&&card&&!card.hidden),card};
+  }
+
+  function settleReveal(center,key,reduce,frame=0,stableFrames=0){
+    if(route()!=='tickets'||!center.isConnected)return;
+    requestCanonicalFilters(center);
+    const current=focusState(center,key);
+    if(current.settled&&current.card){
+      const focusTarget=current.card.querySelector('.tickets-offer-row a,[data-ticket-tenx-save],button,a');
+      if(focusTarget&&!current.card.contains(document.activeElement))focusTarget.focus({preventScroll:true});
+      const focused=current.card.contains(document.activeElement);
+      if(focused&&stableFrames>=1){
+        current.card.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
+        center.dataset.ticketSignalFocusComplete=key;
+        center.dispatchEvent(new CustomEvent(FOCUS_COMPLETE_EVENT,{bubbles:true,detail:{key}}));
+        setStatus(center,'Showing the matchup behind that factual ticket signal.');
+        return;
+      }
+      if(frame<MAX_FOCUS_SETTLE_FRAMES){
+        requestAnimationFrame(()=>settleReveal(center,key,reduce,frame+1,focused?stableFrames+1:0));
+        return;
+      }
+    }else if(frame<MAX_FOCUS_SETTLE_FRAMES){
+      requestAnimationFrame(()=>settleReveal(center,key,reduce,frame+1,0));
+      return;
+    }
+    delete center.dataset.ticketSignalFocusComplete;
+    setStatus(center,'Could not settle that matchup view. Try Show matchup again.');
+  }
+
   function reveal(center,key){
-    center.querySelector('[data-ticket-filter="all"]')?.click();
-    center.querySelector('[data-ticket-tenx-budget="all"]')?.click();
-    center.querySelector('[data-ticket-finalists-view="all"]')?.click();
-    center.querySelector('[data-ticket-finalists-budget="all"]')?.click();
+    if(!key)return;
+    delete center.dataset.ticketSignalFocusComplete;
     const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      const card=[...center.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')].find(node=>node.dataset.ticketTenxKey===key);
-      if(!card){setStatus(center,'That matchup is not in the current live ticket board.');return;}
-      card.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
-      const focusTarget=card.querySelector('.tickets-offer-row a,[data-ticket-tenx-save],button,a');
-      focusTarget?.focus?.({preventScroll:true});
-      setStatus(center,'Showing the matchup behind that factual ticket signal.');
-    }));
+    setStatus(center,'Opening that matchup and clearing conflicting ticket filters…');
+    requestCanonicalFilters(center);
+    requestAnimationFrame(()=>settleReveal(center,key,reduce,0,0));
   }
 
   function decorateCards(center){

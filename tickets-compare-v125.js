@@ -10,6 +10,8 @@
 
   const SHORTLIST_KEY='titans:tickets-shortlist-v123';
   const MEMORY_KEY='titans:tickets-price-memory-v124';
+  const FOCUS_COMPLETE_EVENT='titans:ticket-compare-focus-complete';
+  const MAX_FOCUS_SETTLE_FRAMES=18;
   const MAX_SAVED=3;
   let queued=false;
 
@@ -211,17 +213,65 @@
     if(node)node.textContent=message;
   }
 
+  function findCard(center,key){
+    return [...center.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')].find(node=>node.dataset.ticketTenxKey===key)||null;
+  }
+
+  function requestCanonicalFilters(center){
+    const selectors=[
+      '[data-ticket-filter="all"]',
+      '[data-ticket-tenx-budget="all"]',
+      '[data-ticket-finalists-view="all"]',
+      '[data-ticket-finalists-budget="all"]'
+    ];
+    for(const selector of selectors){
+      const control=center.querySelector(selector);
+      if(control&&!control.disabled&&control.getAttribute('aria-pressed')!=='true')control.click();
+    }
+  }
+
+  function focusState(center,key){
+    const all=center.querySelector('[data-ticket-filter="all"]')?.getAttribute('aria-pressed')==='true';
+    const ticketBudget=center.querySelector('[data-ticket-tenx-budget="all"]')?.getAttribute('aria-pressed')==='true';
+    const allGames=center.querySelector('[data-ticket-finalists-view="all"]')?.getAttribute('aria-pressed')==='true';
+    const groupBudget=center.querySelector('[data-ticket-finalists-budget="all"]')?.getAttribute('aria-pressed')==='true';
+    const card=findCard(center,key);
+    return {settled:Boolean(all&&ticketBudget&&allGames&&groupBudget&&card&&!card.hidden),card};
+  }
+
+  function settleReveal(center,key,frame=0,stableFrames=0){
+    if(route()!=='tickets'||!center.isConnected)return;
+    requestCanonicalFilters(center);
+    const current=focusState(center,key);
+    if(current.settled&&current.card){
+      const focusTarget=current.card.querySelector('.tickets-offer-row a,[data-ticket-tenx-save],button,a');
+      if(focusTarget&&!current.card.contains(document.activeElement))focusTarget.focus({preventScroll:true});
+      const focused=current.card.contains(document.activeElement);
+      if(focused&&stableFrames>=1){
+        current.card.scrollIntoView({behavior:'smooth',block:'center'});
+        center.dataset.ticketCompareFocusComplete=key;
+        center.dispatchEvent(new CustomEvent(FOCUS_COMPLETE_EVENT,{bubbles:true,detail:{key}}));
+        setStatus(center,'Showing the saved matchup and its current marketplace offers.');
+        return;
+      }
+      if(frame<MAX_FOCUS_SETTLE_FRAMES){
+        requestAnimationFrame(()=>settleReveal(center,key,frame+1,focused?stableFrames+1:0));
+        return;
+      }
+    }else if(frame<MAX_FOCUS_SETTLE_FRAMES){
+      requestAnimationFrame(()=>settleReveal(center,key,frame+1,0));
+      return;
+    }
+    delete center.dataset.ticketCompareFocusComplete;
+    setStatus(center,'Could not settle that saved matchup view. Try View offers again.');
+  }
+
   function reveal(center,key){
-    center.querySelector('[data-ticket-filter="all"]')?.click();
-    center.querySelector('[data-ticket-tenx-budget="all"]')?.click();
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      const card=[...center.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')].find(node=>node.dataset.ticketTenxKey===key);
-      if(!card){setStatus(center,'That saved matchup is not in the current ticket board.');return;}
-      card.scrollIntoView({behavior:'smooth',block:'center'});
-      const focusTarget=card.querySelector('[data-ticket-tenx-save],a,button');
-      focusTarget?.focus?.({preventScroll:true});
-      setStatus(center,'Showing the saved matchup and its current marketplace offers.');
-    }));
+    if(!key)return;
+    delete center.dataset.ticketCompareFocusComplete;
+    setStatus(center,'Opening that saved matchup and clearing conflicting ticket filters…');
+    requestCanonicalFilters(center);
+    requestAnimationFrame(()=>settleReveal(center,key,0,0));
   }
 
   function enhance(){
