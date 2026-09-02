@@ -49,7 +49,8 @@ test('each share action sends only its semantic label and exact app URL with saf
   assert.match(finder,/title:`Titans Legacy · \$\{label\}`/);
   assert.match(finder,/text:`Tennessee Titans Legacy exhibit: \$\{label\}`/);
   assert.match(finder,/if\(navigator\.share\)\{await navigator\.share\(payload\)/);
-  assert.match(finder,/navigator\.clipboard\?\.writeText\(url\)/);
+  assert.match(finder,/navigator\.clipboard\?\.writeText/);
+  assert.match(finder,/navigator\.clipboard\.writeText\(url\)/);
   assert.match(finder,/error\?\.name!=='AbortError'/);
 });
 
