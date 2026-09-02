@@ -57,7 +57,7 @@ test('TENX home screen escapes dynamic API-backed strings before HTML insertion'
 });
 
 test('TENX home command ships with the offline PWA shell and a refreshed cache generation',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v79/);
+  assert.match(sw,/titans-cc-brand-2026-v80/);
   assert.match(sw,/'\/runtime-v19\.js', '\/home-command-v123\.js'/);
   assert.match(sw,/'\/legacy-heritage-v3\.js'/);
 });
