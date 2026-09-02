@@ -57,7 +57,9 @@
   }
 
   function readMemory(){
-    const value=readJSON(MEMORY_KEY,{events:{}}).value;
+    const runtime=currentRuntime();
+    const runtimeValue=runtime?.storage?.getJSON?.(MEMORY_KEY,{events:{}});
+    const value=runtimeValue&&typeof runtimeValue==='object'?runtimeValue:readJSON(MEMORY_KEY,{events:{}}).value;
     return value&&typeof value==='object'&&value.events&&typeof value.events==='object'?value:{events:{}};
   }
 
