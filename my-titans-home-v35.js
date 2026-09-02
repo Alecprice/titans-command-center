@@ -50,7 +50,7 @@
     const host=pulse?.parentNode;
     if(!root||!host)return;
     const watch=app.querySelector('.v36-watch-home');
-    const impact=app.querySelector('.v38-impact-home');
+    const impact=app.querySelector('.v38-impact[data-surface="home"]');
     const watchOrdered=!watch||(watch.parentNode===host&&watch.previousElementSibling===root);
     const impactAnchor=watch||root;
     const impactOrdered=!impact||(impact.parentNode===host&&impact.previousElementSibling===impactAnchor);
