@@ -16,8 +16,9 @@ test('Watch Listen adds a first-screen game-day quick start',()=>{
   assert.match(js,/POSTGAME/);
 });
 
-test('quick start changes language for live, countdown, game-day and upcoming windows',()=>{
+test('quick start changes language for live, game-window, countdown, game-day and upcoming states',()=>{
   assert.match(js,/key:'live'/);
+  assert.match(js,/key:'game-window'/);
   assert.match(js,/key:'pregame'/);
   assert.match(js,/key:'today'/);
   assert.match(js,/key:'upcoming'/);
@@ -25,6 +26,14 @@ test('quick start changes language for live, countdown, game-day and upcoming wi
   assert.match(js,/diff>0&&diff<=DAY/);
   assert.match(js,/gameFocusWindowMs/);
   assert.match(js,/Titans Countdown begins one hour before kickoff/);
+});
+
+test('kickoff time alone never claims the Titans game is live',()=>{
+  assert.match(js,/if\(\/live\/i\.test\(String\(game\.status\|\|''\)\)\)return\{key:'live',eyebrow:'LIVE'/);
+  assert.match(js,/if\(diff<=0&&diff>=-windowMs\)return\{key:'game-window',eyebrow:'GAME WINDOW'/);
+  assert.match(js,/live status is not yet confirmed/);
+  assert.match(js,/phase\.key==='game-window'\?'Check the broadcast'/);
+  assert.doesNotMatch(js,/\/live\/i\.test\(String\(game\.status\|\|''\)\)\|\|\(diff<=0/);
 });
 
 test('quick start reuses the rendered authorized watch route and changes audio by territory',()=>{
