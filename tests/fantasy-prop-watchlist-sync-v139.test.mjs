@@ -59,12 +59,13 @@ test('server sanitizes watch targets instead of trusting client keys',()=>{
 
 test('initial sync refreshes the live Fantasy surface when merged watch targets changed',()=>{
   assert.ok(sync.includes('const refreshPropWatchlist=PROP_WATCHLIST_KEY in merged'));
-  assert.ok(sync.includes('refreshV10||refreshFantasy||refreshPropWatchlist'));
+  assert.ok(sync.includes('if(refreshV10||refreshFantasy)setTimeout(()=>location.reload(),120)'));
+  assert.ok(sync.includes('else if(refreshPropWatchlist)setTimeout(()=>location.reload(),120)'));
 });
 
 test('backup import normalizes synced watch targets through the same bounded contract',()=>{
+  assert.ok(sync.includes('preferences:Object.fromEntries(keys.map'));
   assert.ok(sync.includes('key===PROP_WATCHLIST_KEY?normalizePropWatchlist(preferences[key]):preferences[key]'));
-  assert.ok(sync.includes('preferences:normalized'));
 });
 
 test('watchlist UI explains sync availability versus device-local evidence',()=>{
