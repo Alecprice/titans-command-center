@@ -5,21 +5,20 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const js=read('media-custom-links-v14.js');
 const css=read('media-custom-links-v14.css');
 
-test('saved media priority uses authenticated account identity without publishing an email address',()=>{
-  assert.match(js,/window\.TitansAccount\?\.user\?\.email/);
-  assert.match(js,/crypto\.subtle\.digest\('SHA-256'/);
-  assert.match(js,/PRIORITY_ACCOUNT_HASH='[a-f0-9]{64}'/);
-  assert.doesNotMatch(js,/@gmail\.com/i);
-  assert.match(js,/UI-order preference only, never authorization/);
+test('saved media bookmarks no longer inspect account identity for presentation order',()=>{
+  assert.doesNotMatch(js,/window\.TitansAccount\?\.user\?\.email/);
+  assert.doesNotMatch(js,/crypto\.subtle\.digest\('SHA-256'/);
+  assert.doesNotMatch(js,/PRIORITY_ACCOUNT_HASH/);
+  assert.doesNotMatch(js,/priorityAccount/);
+  assert.doesNotMatch(js,/titans:account/);
 });
 
-test('saved links move above Listen and Watch content only when the priority account has links',()=>{
-  assert.match(js,/const priority=priorityAccount&&links\.length>0/);
-  assert.match(js,/page\?\.querySelector\('\.media-hero'\)/);
-  assert.match(js,/hero\.insertAdjacentElement\('afterend',section\)/);
-  assert.match(js,/else watch\.append\(section\)/);
-  assert.match(js,/media-custom-links-priority/);
-  assert.match(css,/\.media-custom-links-priority\{[^}]*margin:0 0 18px/);
+test('saved bookmarks remain below the authorized Watch content for every user',()=>{
+  assert.match(js,/watch\.append\(section\)/);
+  assert.doesNotMatch(js,/page\?\.querySelector\('\.media-hero'\)/);
+  assert.doesNotMatch(js,/hero\.insertAdjacentElement\('afterend',section\)/);
+  assert.doesNotMatch(js,/media-custom-links-priority/);
+  assert.doesNotMatch(css,/media-custom-links-priority/);
 });
 
 test('permanent saved-link storage mirrors the existing account-sync alias and adopts remote changes',()=>{
@@ -32,8 +31,8 @@ test('permanent saved-link storage mirrors the existing account-sync alias and a
   assert.match(js,/titans:preferences-reset/);
 });
 
-test('account-specific reordering remains presentation-only and URL safety is unchanged',()=>{
-  assert.match(js,/\['https:','http:'\]\.includes\(u\.protocol\)/);
+test('bookmark safety is HTTPS-only and remains presentation plus preference storage only',()=>{
+  assert.match(js,/u\.protocol==='https:'\?u\.href:null/);
   assert.match(js,/rel="noopener noreferrer"/);
   assert.match(js,/MAX_LINKS=12/);
   assert.doesNotMatch(js,/fetch\(/);
