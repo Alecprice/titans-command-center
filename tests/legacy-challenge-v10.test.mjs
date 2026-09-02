@@ -78,11 +78,21 @@ test('dynamic museum-derived content is escaped before option HTML insertion',()
   assert.match(source,/>\$\{esc\(option\)\}<\/button>/);
 });
 
-test('mobile and accessibility contracts keep quiz controls usable',()=>{
+test('mobile and accessibility contracts keep quiz controls and copy readable',()=>{
   const oneLine=compact(source);
   assert.match(oneLine,/\.legacy-challenge-options button,.legacy-challenge-action\{min-height:44px/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-head small\{font-size:12px;line-height:1\.35\}/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-head p\{font-size:14px;line-height:1\.6\}/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-meta\{font-size:12px;line-height:1\.35\}/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-mode strong\{font-size:12px;line-height:1\.25\}/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-mode span\{font-size:12px;line-height:1\.4\}/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-reference\{font-size:13px;line-height:1\.5\}/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-feedback\{font-size:13px;line-height:1\.5\}/);
   assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-options\{grid-template-columns:1fr\}/);
-  assert.match(oneLine,/@media\(max-width:760px\).*min-height:48px/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-options button,.legacy-challenge-action,.legacy-challenge-start\{min-height:48px;font-size:12px;line-height:1\.25\}/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-mode\{min-height:48px\}/);
+  assert.match(oneLine,/@media\(max-width:760px\).*\.legacy-challenge\[data-legacy-challenge-state="idle"\] \.legacy-challenge-head p\{font-size:13px;line-height:1\.5\}/);
+  assert.doesNotMatch(oneLine,/@media\(max-width:760px\).*\.legacy-challenge-options button,.legacy-challenge-action,.legacy-challenge-start\{min-height:48px;font-size:10px\}/);
   assert.match(oneLine,/button:focus-visible\{outline:3px/);
   assert.match(oneLine,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(oneLine,/@media\(forced-colors:active\)/);
