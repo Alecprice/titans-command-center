@@ -22,11 +22,12 @@ test('Ticket shortlist owner publishes semantic same-tab state after its DOM sta
   assert.ok(decorateIndex>=0&&trayIndex>decorateIndex&&announceIndex>trayIndex,'semantic event must follow card and shortlist DOM synchronization');
 });
 
-test('Saved Compare, Finalists, and Game Night Budget consume the semantic shortlist event',()=>{
-  for(const [label,source] of [['Saved Compare',compare],['Finalists',finalists]]){
-    assert.match(source,/const SHORTLIST_CHANGE='titans:ticket-shortlist-change'/,`${label} must share the owner event name`);
-    assert.match(source,/app\.addEventListener\(SHORTLIST_CHANGE,schedule\)/,`${label} must schedule from the owner event`);
-  }
+test('Saved Compare renders directly from settled same-tab shortlist state while other consumers retain their contracts',()=>{
+  assert.match(compare,/const SHORTLIST_CHANGE='titans:ticket-shortlist-change'/);
+  assert.match(compare,/function syncFromShortlist\(\)\{queued=false;enhance\(\);\}/);
+  assert.match(compare,/app\.addEventListener\(SHORTLIST_CHANGE,syncFromShortlist\)/);
+  assert.match(finalists,/const SHORTLIST_CHANGE='titans:ticket-shortlist-change'/);
+  assert.match(finalists,/app\.addEventListener\(SHORTLIST_CHANGE,schedule\)/);
   assert.match(outing,/app\.addEventListener\('titans:ticket-shortlist-change',schedule\)/);
 });
 

@@ -287,6 +287,7 @@
   }
 
   function schedule(){if(queued)return;queued=true;queueMicrotask(enhance);}
+  function syncFromShortlist(){queued=false;enhance();}
 
   app.addEventListener('click',event=>{
     const target=event.target instanceof Element?event.target:null;
@@ -300,7 +301,7 @@
     if(target.closest('[data-ticket-tenx-save],[data-ticket-tenx-clear],[data-ticket-tenx-party],[data-ticket-tenx-budget],[data-ticket-tenx-sort],[data-ticket-trend-clear],[data-ticket-refresh],[data-ticket-filter]'))schedule();
   });
 
-  app.addEventListener(SHORTLIST_CHANGE,schedule);
+  app.addEventListener(SHORTLIST_CHANGE,syncFromShortlist);
   addEventListener('storage',event=>{if(event.key===SHORTLIST_KEY||event.key===MEMORY_KEY)schedule();});
   new MutationObserver(schedule).observe(app,{childList:true,subtree:false});
   runtime?.onRoute?.(schedule,{immediate:true});
