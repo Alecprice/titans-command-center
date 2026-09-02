@@ -5,7 +5,7 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('Alternative Viewing is loaded and available offline',()=>{
   const html=read('index.html'),sw=read('sw.js');
-  assert.match(html,/media-alternatives-v14\.css\?v=1/);
+  assert.match(html,/media-alternatives-v14\.css\?v=2/);
   assert.match(html,/media-alternatives-v14\.js\?v=1/);
   assert.match(sw,/const CACHE = 'titans-cc-brand-2026-v\d+'/);
   assert.match(sw,/media-alternatives-v14\.css/);
