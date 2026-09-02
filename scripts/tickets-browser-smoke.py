@@ -214,6 +214,7 @@ def compare_snapshot(driver):
       if(!center)return null;
       const panel=center.querySelector('[data-ticket-compare-v125]');
       const cards=panel?[...panel.querySelectorAll('.tickets-compare-v125-card')]:[];
+      const share=panel?.querySelector('[data-ticket-compare-share]');
       const viewport=document.documentElement.clientWidth;
       return {
         panel:Boolean(panel),
@@ -221,6 +222,13 @@ def compare_snapshot(driver):
         text:(panel?.textContent||'').replace(/\s+/g,' ').trim(),
         viewport,
         overflow:document.documentElement.scrollWidth>viewport+3,
+        share:share?{
+          text:share.textContent.trim(),
+          label:share.getAttribute('aria-label')||'',
+          height:share.getBoundingClientRect().height,
+          left:share.getBoundingClientRect().left,
+          right:share.getBoundingClientRect().right
+        }:null,
         cards:cards.map(card=>({
           key:card.dataset.ticketCompareKey||'',
           left:card.getBoundingClientRect().left,
@@ -280,6 +288,69 @@ def saved_count(driver):
     """,SHORTLIST_KEY)
 
 
+def exercise_share_plan(driver,label,mobile=False):
+    before=saved_count(driver)
+    if before<1:raise RuntimeError(f'{label}: no saved matchups available for Share plan')
+    mode='clipboard' if mobile else 'native'
+    prepared=driver.execute_script("""
+      window.__ticketShareCapture=null;
+      try{
+        if(arguments[0]==='native'){
+          Object.defineProperty(navigator,'share',{configurable:true,value:async payload=>{
+            window.__ticketShareCapture={
+              mode:'native',
+              title:String(payload?.title||''),
+              text:String(payload?.text||''),
+              url:String(payload?.url||'')
+            };
+          }});
+        }else{
+          Object.defineProperty(navigator,'share',{configurable:true,value:undefined});
+          Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{
+            window.__ticketShareCapture={mode:'clipboard',text:String(text||'')};
+          }}});
+        }
+        return true;
+      }catch(error){return String(error?.message||error||'share stub failed');}
+    """,mode)
+    if prepared is not True:raise RuntimeError(f'{label}: could not install safe share capture: {prepared}')
+    clicked=driver.execute_script("""
+      const button=document.querySelector('[data-ticket-center] [data-ticket-compare-share]');
+      if(!button)return false;
+      button.click();
+      return true;
+    """)
+    if not clicked:raise RuntimeError(f'{label}: Share plan control missing')
+    WebDriverWait(driver,8,poll_frequency=.1).until(
+        lambda d:d.execute_script("return Boolean(window.__ticketShareCapture)")
+    )
+    capture=driver.execute_script("return window.__ticketShareCapture")
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:d.execute_script("""
+      return Boolean((document.querySelector('[data-ticket-compare-status]')?.textContent||'').trim());
+    """))
+    status=driver.execute_script("return (document.querySelector('[data-ticket-compare-status]')?.textContent||'').trim()")
+    after=saved_count(driver)
+    if after!=before:raise RuntimeError(f'{label}: Share plan mutated shortlist count: before={before} after={after}')
+    text=str(capture.get('text') or '')
+    required=('Tennessee Titans ticket shortlist','3 tickets:','before fees','Browser-observed movement:','Seat quality and checkout fees are not inferred.')
+    missing=[value for value in required if value not in text]
+    if missing:raise RuntimeError(f'{label}: Share plan payload lost truthful fields {missing}: {capture}')
+    lowered=text.lower()
+    forbidden=('deal score','buy now','wait to buy','guaranteed deal')
+    leaked=[value for value in forbidden if value in lowered]
+    if leaked:raise RuntimeError(f'{label}: Share plan introduced unsupported recommendation copy {leaked}: {capture}')
+    if mobile:
+        if capture.get('mode')!='clipboard':raise RuntimeError(f'{label}: mobile fallback did not use clipboard capture: {capture}')
+        if 'Open Ticket Center:' not in text or '#tickets' not in text:raise RuntimeError(f'{label}: clipboard plan lost Ticket Center destination: {capture}')
+        if 'copied to your clipboard' not in status.lower():raise RuntimeError(f'{label}: clipboard fallback status is unclear: {status}')
+    else:
+        if capture.get('mode')!='native':raise RuntimeError(f'{label}: desktop share did not use native share capture: {capture}')
+        if capture.get('title')!='Titans ticket shortlist':raise RuntimeError(f'{label}: native share title changed unexpectedly: {capture}')
+        if not str(capture.get('url') or '').endswith('#tickets'):raise RuntimeError(f'{label}: native share lost Ticket Center destination: {capture}')
+        if 'shared your saved ticket center plan' not in status.lower():raise RuntimeError(f'{label}: native share success status is unclear: {status}')
+    return {'mode':mode,'shortlistCount':after,'status':status,'destinationVerified':True}
+
+
 def exercise_saved_compare(driver,label,mobile=False):
     WebDriverWait(driver,10,poll_frequency=.1).until(
         lambda d:d.execute_script("return Boolean(document.querySelector('[data-ticket-center] [data-ticket-tenx-command]'))")
@@ -320,6 +391,9 @@ def exercise_saved_compare(driver,label,mobile=False):
     if any(not card['beforeFees'] for card in state['cards']):raise RuntimeError(f'{label}: compare party totals lost before-fees disclosure: {state}')
     short_actions=[action for card in state['cards'] for action in card['actions'] if action['height']<44]
     if short_actions:raise RuntimeError(f'{label}: compare actions below 44px: {short_actions}')
+    if not state['share'] or state['share']['height']<44:raise RuntimeError(f'{label}: Share plan action missing or below 44px: {state}')
+    if mobile and (state['share']['left']<-1 or state['share']['right']>state['viewport']+1):
+        raise RuntimeError(f'{label}: Share plan action escapes mobile viewport: {state}')
     if mobile and any(card['left']<-1 or card['right']>state['viewport']+1 for card in state['cards']):
         raise RuntimeError(f'{label}: compare card escapes mobile viewport: {state}')
 
@@ -402,6 +476,7 @@ def exercise_saved_compare(driver,label,mobile=False):
     """))
     party_state=compare_snapshot(driver)
     if 'before fees' not in party_state['text'].lower():raise RuntimeError(f'{label}: party-size compare lost before-fees copy: {party_state}')
+    share_result=exercise_share_plan(driver,label,mobile=mobile)
 
     focus_key=keys[0]
     focused=driver.execute_script("""
@@ -461,6 +536,9 @@ def exercise_saved_compare(driver,label,mobile=False):
         'signalLensVerified':True,
         'signalFocusKey':signal_key,
         'partySize':3,
+        'sharePlanVerified':True,
+        'shareMode':share_result['mode'],
+        'shareDestinationVerified':share_result['destinationVerified'],
         'viewOffersFocused':True,
         'removeLifecycle':True,
         'clearLifecycle':True,
