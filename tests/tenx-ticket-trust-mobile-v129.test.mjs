@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const css = fs.readFileSync('tickets-mobile-trust-v129.css','utf8');
 const js = fs.readFileSync('tickets-v47.js','utf8');
 const html = fs.readFileSync('index.html','utf8');
+const sw = fs.readFileSync('sw.js','utf8');
 
 test('TENX ticket trust states have dedicated visual treatment',()=>{
   assert.match(js,/tickets-provider-health/);
@@ -29,9 +30,11 @@ test('TENX ticket phone layout keeps comparison text readable and sources scanna
   assert.match(css,/\.tickets-offer-row\{grid-template-columns:1fr\}/);
 });
 
-test('ticket trust layer is loaded after the primary ticket stylesheet',()=>{
+test('ticket trust layer is loaded and available to installed/offline clients',()=>{
   const base=html.indexOf('/tickets-v47.css');
   const trust=html.indexOf('/tickets-mobile-trust-v129.css');
   assert.ok(base>=0,'primary tickets stylesheet should be present');
   assert.ok(trust>base,'ticket trust stylesheet should load after primary ticket styles');
+  assert.match(sw,/titans-cc-brand-2026-v79/);
+  assert.match(sw,/'\/tickets-mobile-trust-v129\.css'/);
 });
