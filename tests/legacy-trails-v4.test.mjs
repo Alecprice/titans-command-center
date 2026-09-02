@@ -48,9 +48,9 @@ test('Trail controls remain accessible and phone safe',()=>{
   assert.match(js,/font-size:12px/);
 });
 
-test('Trail dependency ships through the v79 offline shell',()=>{
+test('Trail dependency ships through the v80 offline shell',()=>{
   const sw=read('sw.js');
-  assert.match(sw,/titans-cc-brand-2026-v79/);
+  assert.match(sw,/titans-cc-brand-2026-v80/);
   assert.match(sw,/\/legacy-trails-v4\.js/);
   assert.match(sw,/\/legacy-finder-v2\.js/);
 });
