@@ -1,4 +1,4 @@
-const VERSION='10.3.0';
+const VERSION='10.4.0';
 const ROUND_SIZE=5;
 const OPTION_COUNT=4;
 const MODE_META={
@@ -18,6 +18,15 @@ function shuffle(values){
     [copy[i],copy[j]]=[copy[j],copy[i]];
   }
   return copy;
+}
+
+const questionIdentity=item=>item?.key||`${item?.kind||'question'}:${clean(item?.prompt)}`;
+
+function selectRound(bank,previousKeys=[]){
+  const previous=new Set(previousKeys);
+  const fresh=shuffle(bank.filter(item=>!previous.has(questionIdentity(item))));
+  const repeats=shuffle(bank.filter(item=>previous.has(questionIdentity(item))));
+  return [...fresh,...repeats].slice(0,Math.min(ROUND_SIZE,bank.length));
 }
 
 function collectQuestionBank(page){
@@ -156,6 +165,7 @@ function createGame(page,root,banks){
   const modeButtons=[...root.querySelectorAll('[data-legacy-challenge-mode]')];
   let round=[],index=0,score=0,answered=false,completed=false;
   let mode='fan',roundMode='fan';
+  const lastRoundKeysByMode={fan:[],diehard:[]};
 
   const current=()=>round[index]||null;
   const modeLabel=value=>MODE_META[value]?.label||MODE_META.fan.label;
@@ -207,7 +217,7 @@ function createGame(page,root,banks){
     questionNode.textContent=`You scored ${score} out of ${round.length}.`;
     referenceNode.textContent='Every question came from the museum currently rendered on this page.';
     optionsNode.innerHTML='';
-    feedback.textContent=score===round.length?'Perfect round. Titan Up.':'Run it back for a different mix.';
+    feedback.textContent=score===round.length?'Perfect round. Titan Up.':'Run it back for another mix.';
     revealButton.hidden=true;
     nextButton.hidden=true;
     shareButton.hidden=false;
@@ -218,7 +228,8 @@ function createGame(page,root,banks){
 
   function start(){
     const bank=banks[mode]||banks.fan;
-    round=shuffle(bank).slice(0,Math.min(ROUND_SIZE,bank.length));
+    round=selectRound(bank,lastRoundKeysByMode[mode]||[]);
+    lastRoundKeysByMode[mode]=round.map(questionIdentity);
     index=0;score=0;completed=false;
     roundMode=mode;
     shareButton.hidden=true;
