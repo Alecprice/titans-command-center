@@ -11,15 +11,18 @@
   const state={
     loaded:true,
     version:'v156',
+    revision:'v158',
     checks:0,
     repairs:0,
     centerRebinds:0,
+    childReconciles:0,
     semanticDispatches:0,
     legacyWakeups:0,
     last:null
   };
   window[MARKER]=state;
   window.__TitansTicketCompareConvergenceV156=state;
+  window.__TitansTicketCompareChildInvariantV158=state;
 
   const app=document.querySelector('#app');
   const runtime=window.TitansRuntime;
@@ -211,9 +214,12 @@
     if(!boundCenter)return;
     state.centerRebinds+=1;
     centerObserver=new MutationObserver(mutations=>{
-      if(mutations.some(mutation=>mutation.type==='attributes'&&mutation.attributeName==='data-ticket-tenx-saved-count'))schedule('saved-count');
+      const savedChanged=mutations.some(mutation=>mutation.type==='attributes'&&mutation.attributeName==='data-ticket-tenx-saved-count');
+      const childChanged=saved().length>0&&mutations.some(mutation=>mutation.type==='childList');
+      if(childChanged)state.childReconciles+=1;
+      if(savedChanged||childChanged)schedule(savedChanged?'saved-count':'center-child');
     });
-    centerObserver.observe(boundCenter,{attributes:true,attributeFilter:['data-ticket-tenx-saved-count']});
+    centerObserver.observe(boundCenter,{attributes:true,attributeFilter:['data-ticket-tenx-saved-count'],childList:true,subtree:false});
   }
 
   function wakeLegacy(center,items){
