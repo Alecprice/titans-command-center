@@ -11,6 +11,7 @@ import {scheduleFocus,latestCompletedGame,sortTransactionsLatestFirst,latestTran
   const renderListeners=new Set();
   const refreshListeners=new Set();
   const apiCache=new Map();
+  const apiGeneration=new Map();
   let refreshEpoch=0;
   let lastRefresh=null;
 
@@ -23,6 +24,8 @@ import {scheduleFocus,latestCompletedGame,sortTransactionsLatestFirst,latestTran
     setJSON(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}},
     remove(key){try{localStorage.removeItem(key);return true}catch{return false}}
   };
+  const apiGenerationFor=key=>apiGeneration.get(key)||0;
+  const bumpApiGeneration=key=>{const next=apiGenerationFor(key)+1;apiGeneration.set(key,next);return next};
 
   async function apiJson(url,{ttl=30000,force=false}={}){
     const key=String(url||'');
@@ -30,14 +33,20 @@ import {scheduleFocus,latestCompletedGame,sortTransactionsLatestFirst,latestTran
     const now=Date.now(),entry=apiCache.get(key);
     if(!force&&entry?.value&&now<entry.expiresAt)return entry.value;
     if(entry?.inflight)return entry.inflight;
+    const generation=apiGenerationFor(key);
     let pending;
     pending=fetch(key,{cache:'no-store'}).then(async response=>{
       if(!response.ok)throw new Error(`${key} returned ${response.status}`);
       const value=await response.json();
+      if(apiGenerationFor(key)!==generation){
+        const current=apiCache.get(key);
+        return current?.value||null;
+      }
       apiCache.set(key,{value,expiresAt:Date.now()+Math.max(0,Number(ttl)||0),inflight:null,updatedAt:Date.now()});
       return value;
     }).catch(error=>{
       const current=apiCache.get(key);
+      if(apiGenerationFor(key)!==generation)return current?.value||null;
       if(current?.value)return current.value;
       console.warn('[titans-runtime-api]',key,error);
       return null;
@@ -50,8 +59,15 @@ import {scheduleFocus,latestCompletedGame,sortTransactionsLatestFirst,latestTran
   }
 
   function invalidateApi(url){
-    if(url)apiCache.delete(String(url));
-    else apiCache.clear();
+    if(url){
+      const key=String(url);
+      bumpApiGeneration(key);
+      apiCache.delete(key);
+      return;
+    }
+    const keys=new Set([...apiCache.keys(),...apiGeneration.keys()]);
+    for(const key of keys)bumpApiGeneration(key);
+    apiCache.clear();
   }
   function onRoute(listener,{immediate=false}={}){
     routeListeners.add(listener);
@@ -70,7 +86,7 @@ import {scheduleFocus,latestCompletedGame,sortTransactionsLatestFirst,latestTran
   }
   function refresh({reason='manual',urls=null}={}){
     const targets=Array.isArray(urls)?urls.filter(url=>String(url).startsWith('/api/')).map(String):null;
-    if(targets?.length)for(const url of targets)apiCache.delete(url);else apiCache.clear();
+    if(targets?.length)for(const url of targets)invalidateApi(url);else invalidateApi();
     const event=Object.freeze({reason:String(reason||'manual'),urls:targets,epoch:++refreshEpoch,at:new Date().toISOString()});
     lastRefresh=event;
     for(const listener of [...refreshListeners])safeCall(listener,event);
