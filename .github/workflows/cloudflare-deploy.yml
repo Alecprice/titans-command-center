@@ -26,6 +26,9 @@ jobs:
       TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       STUBHUB_CLIENT_ID: ${{ secrets.STUBHUB_CLIENT_ID }}
       STUBHUB_CLIENT_SECRET: ${{ secrets.STUBHUB_CLIENT_SECRET }}
+      EVENTBRITE_PRIVATE_TOKEN: ${{ secrets.EVENTBRITE_PRIVATE_TOKEN }}
+      EVENTBRITE_ORGANIZATION_IDS: ${{ secrets.EVENTBRITE_ORGANIZATION_IDS }}
+      SKIDDLE_API_KEY: ${{ secrets.SKIDDLE_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -59,6 +62,8 @@ jobs:
           [[ -n "$SEATGEEK_CLIENT_ID" ]] && echo "seatgeek=true" >> "$GITHUB_OUTPUT" || echo "seatgeek=false" >> "$GITHUB_OUTPUT"
           [[ -n "$TICKETMASTER_API_KEY" ]] && echo "ticketmaster=true" >> "$GITHUB_OUTPUT" || echo "ticketmaster=false" >> "$GITHUB_OUTPUT"
           [[ -n "$STUBHUB_CLIENT_ID" && -n "$STUBHUB_CLIENT_SECRET" ]] && echo "stubhub=true" >> "$GITHUB_OUTPUT" || echo "stubhub=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$EVENTBRITE_PRIVATE_TOKEN" ]] && echo "eventbrite=true" >> "$GITHUB_OUTPUT" || echo "eventbrite=false" >> "$GITHUB_OUTPUT"
+          [[ -n "$SKIDDLE_API_KEY" ]] && echo "skiddle=true" >> "$GITHUB_OUTPUT" || echo "skiddle=false" >> "$GITHUB_OUTPUT"
 
       - name: Verify deployment source is current main
         id: source_guard
@@ -89,6 +94,9 @@ jobs:
             'TICKETMASTER_API_KEY',
             'STUBHUB_CLIENT_ID',
             'STUBHUB_CLIENT_SECRET',
+            'EVENTBRITE_PRIVATE_TOKEN',
+            'EVENTBRITE_ORGANIZATION_IDS',
+            'SKIDDLE_API_KEY',
           ];
           const secrets = {};
           for (const key of keys) {
@@ -125,13 +133,23 @@ jobs:
           EXPECTED_SHA: ${{ github.sha }}
         run: npm run audit:production && node scripts/advanced-analytics-regression.mjs && node scripts/headshot-production-regression.mjs
 
-      - name: Install Selenium for browser regressions
+      - name: Run Fan Event Radar production regression
+        id: fan_events_smoke
         if: steps.smoke.outcome == 'success'
+        shell: bash
+        env:
+          PRODUCTION_URL: ${{ env.PRODUCTION_URL }}
+        run: |
+          set -o pipefail
+          node scripts/fan-events-production-regression.mjs | tee /tmp/fan-events-production-smoke.json
+
+      - name: Install Selenium for browser regressions
+        if: steps.fan_events_smoke.outcome == 'success'
         run: python -m pip install --disable-pip-version-check 'selenium>=4.25,<5'
 
       - name: Run browser navigation stress test
         id: browser
-        if: steps.smoke.outcome == 'success'
+        if: steps.fan_events_smoke.outcome == 'success'
         env:
           WORKER_URL: ${{ env.PRODUCTION_URL }}
         run: python scripts/browser-navigation-smoke.py
@@ -232,9 +250,12 @@ jobs:
           SEATGEEK_READY: ${{ steps.creds.outputs.seatgeek }}
           TICKETMASTER_READY: ${{ steps.creds.outputs.ticketmaster }}
           STUBHUB_READY: ${{ steps.creds.outputs.stubhub }}
+          EVENTBRITE_READY: ${{ steps.creds.outputs.eventbrite }}
+          SKIDDLE_READY: ${{ steps.creds.outputs.skiddle }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
           FRONTDOOR_OUTCOME: ${{ steps.frontdoor.outcome }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          FAN_EVENTS_SMOKE_OUTCOME: ${{ steps.fan_events_smoke.outcome }}
           BROWSER_OUTCOME: ${{ steps.browser.outcome }}
           MEDIA_BROWSER_OUTCOME: ${{ steps.media_browser.outcome }}
           MARKET_BROWSER_OUTCOME: ${{ steps.market_browser.outcome }}
@@ -257,6 +278,7 @@ jobs:
           elif [[ "$DEPLOY_OUTCOME" != "success" ]]; then STATUS='Cloudflare deploy failed';
           elif [[ "$FRONTDOOR_OUTCOME" != "success" ]]; then STATUS="deployed + canonical front door ${FRONTDOOR_OUTCOME:-not-run}";
           elif [[ "$SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}";
+          elif [[ "$FAN_EVENTS_SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + Fan Event Radar production regression ${FAN_EVENTS_SMOKE_OUTCOME:-not-run}";
           elif [[ "$BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + browser navigation regression ${BROWSER_OUTCOME:-not-run}";
           elif [[ "$MEDIA_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Listen Watch browser regression ${MEDIA_BROWSER_OUTCOME:-not-run}";
           elif [[ "$MARKET_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Market Pulse browser regression ${MARKET_BROWSER_OUTCOME:-not-run}";
@@ -269,7 +291,7 @@ jobs:
           elif [[ "$FRESHNESS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + data freshness browser regression ${FRESHNESS_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ACCOUNT_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Account / Guest browser regression ${ACCOUNT_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ANALYTICS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + advanced analytics browser regression ${ANALYTICS_BROWSER_OUTCOME:-not-run}";
-          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + canonical front door + full production + browser + media + market + tickets + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
+          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + canonical front door + full production + fan events + browser + media + market + tickets + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
           else STATUS="deployed + player headshot browser regression ${HEADSHOT_BROWSER_OUTCOME:-not-run}"; fi
 
           git config user.name 'github-actions[bot]'
@@ -293,9 +315,11 @@ jobs:
             echo '- Neon warehouse deployment secret required: false (D1 primary)'
             echo "- YouTube Data API configured: ${YOUTUBE_READY:-false}"
             echo "- Ticket providers configured: SeatGeek=${SEATGEEK_READY:-false}, Ticketmaster=${TICKETMASTER_READY:-false}, StubHub=${STUBHUB_READY:-false}"
+            echo "- Fan event GitHub-managed secrets available: Eventbrite=${EVENTBRITE_READY:-false}, Skiddle=${SKIDDLE_READY:-false}"
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
             echo "- Canonical front door: ${FRONTDOOR_OUTCOME:-not-run}"
             echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"
+            echo "- Fan Event Radar production regression: ${FAN_EVENTS_SMOKE_OUTCOME:-not-run}"
             echo "- Browser navigation regression: ${BROWSER_OUTCOME:-not-run}"
             echo "- Listen Watch browser regression: ${MEDIA_BROWSER_OUTCOME:-not-run}"
             echo "- Market Pulse browser regression: ${MARKET_BROWSER_OUTCOME:-not-run}"
@@ -320,6 +344,7 @@ jobs:
             fi
             if [[ -f /tmp/custom-domain-smoke.json ]]; then echo; echo '## Canonical front door regression'; echo; echo '```json'; cat /tmp/custom-domain-smoke.json; echo '```'; fi
             if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Production regression'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
+            if [[ -f /tmp/fan-events-production-smoke.json ]]; then echo; echo '## Fan Event Radar production regression'; echo; echo '```json'; cat /tmp/fan-events-production-smoke.json; echo '```'; fi
             if [[ -f /tmp/headshot-production-smoke.json ]]; then echo; echo '## Player headshot production regression'; echo; echo '```json'; cat /tmp/headshot-production-smoke.json; echo '```'; fi
             if [[ -f /tmp/browser-nav-smoke.json ]]; then echo; echo '## Browser navigation regression'; echo; echo '```json'; cat /tmp/browser-nav-smoke.json; echo '```'; fi
             if [[ -f /tmp/media-browser-smoke.json ]]; then echo; echo '## Listen Watch browser regression'; echo; echo '```json'; cat /tmp/media-browser-smoke.json; echo '```'; fi
