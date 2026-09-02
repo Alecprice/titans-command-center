@@ -93,7 +93,7 @@ test('Game Day live state is sourced and model labels are transparent',()=>{
   assert.match(js,/sharedJson\('\/api\/data',\{ttl:BOOTSTRAP_TTL_MS\}\)/);
   assert.match(js,/EPA\/WPA are model-derived football metrics/);
   assert.match(js,/No live leader is guessed/);
-  assert.match(js,/No trustworthy turning-point rows are loaded yet/);
+  assert.match(js,/No trustworthy turning-point data is available yet/);
   assert.doesNotMatch(js,/fetch\(['"]https:\/\/site\.api\.espn\.com/);
 });
 

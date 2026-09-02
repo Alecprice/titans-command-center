@@ -23,7 +23,7 @@ test('Game Day refresh preserves the last known good snapshot when either live s
   assert.match(js,/const readHealthy=read=>read\?\.fresh!==false&&available\(read\?\.value\)/);
   assert.match(js,/if\(available\(fan\)\)state\.fan=fan/);
   assert.match(js,/if\(available\(espn\)\)state\.espn=espn/);
-  assert.match(js,/Fan intel retrying · showing last good snapshot/);
+  assert.match(js,/Fan intel retrying · showing the last confirmed update/);
   assert.match(js,/Live scoreboard delayed/);
 });
 
