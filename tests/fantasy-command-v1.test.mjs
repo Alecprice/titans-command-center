@@ -50,7 +50,9 @@ test('Sleeper integration is read-only bounded and season-scoped',()=>{
   assert.match(js,/SEASON='2026'/);
   assert.match(js,/setTimeout\(\(\)=>controller\.abort\(\),6500\)/);
   assert.match(js,/\/user\/\$\{encodeURIComponent\(user\.user_id\)\}\/leagues\/nfl\/\$\{SEASON\}/);
-  assert.match(js,/\/league\/\$\{leagueId\}\/matchups\/\$\{state\.week\}/);
+  assert.match(js,/const requestWeek=state\.week,serial=\+\+leagueLoadSerial/);
+  assert.match(js,/\/league\/\$\{leagueId\}\/matchups\/\$\{requestWeek\}/);
+  assert.doesNotMatch(js,/\/league\/\$\{leagueId\}\/matchups\/\$\{state\.week\}/);
   assert.match(js,/\/draft\/\$\{encodeURIComponent\(draft\.draft_id\)\}\/picks/);
   assert.ok(js.includes("if(!/^\\d{6,32}$/.test(leagueId))"));
   assert.doesNotMatch(js,/fetch\([^\n]*(?:POST|PUT|PATCH|DELETE)/i);
