@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 
 const css=await readFile(new URL('../media-alternatives-v14.css',import.meta.url),'utf8');
 const media=await readFile(new URL('../media-alternatives-v14.js',import.meta.url),'utf8');
+const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
 
 test('postgame result styling covers win loss and tie states',()=>{
   for(const result of ['WIN','LOSS','TIE']){
@@ -30,4 +31,9 @@ test('outcome treatment stays restrained and accessibility-friendly',()=>{
   assert.doesNotMatch(outcomeCss,/transform:/);
   assert.match(css,/@media\(prefers-contrast:more\)/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+});
+
+test('production shell cache-busts the changed outcome stylesheet',()=>{
+  assert.match(index,/media-alternatives-v14\.css\?v=2/);
+  assert.doesNotMatch(index,/media-alternatives-v14\.css\?v=1/);
 });
