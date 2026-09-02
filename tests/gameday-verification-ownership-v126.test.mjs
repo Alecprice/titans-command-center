@@ -8,7 +8,7 @@ test('Game Day Today keeps kickoff verification inside the Game Day 3.1 shell',(
   const bridge=read('gameday-today-v22.js');
   const stable=read('gameday-v16.js');
 
-  assert.match(stable,/Game Day 3\.1 · source-aware/);
+  assert.match(stable,/Game Day 3\.1 · verified updates/);
   assert.match(stable,/\$\{feedBar\(mode\)\}/);
   assert.match(stable,/data-gameday-refresh/);
 
