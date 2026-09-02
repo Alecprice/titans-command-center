@@ -18,9 +18,10 @@ test('TENX mobile pass prevents iOS form zoom and keeps thumb targets readable',
   assert.match(runtime,/font-size:16px!important/);
   assert.match(runtime,/min-width:44px!important/);
   assert.match(runtime,/min-height:44px!important/);
-  assert.match(runtime,/\.mobile-nav a,\.mobile-nav button\{font-size:9px!important\}/);
+  assert.match(runtime,/\.mobile-nav a,\.mobile-nav button\{font-size:11px!important;line-height:1\.15!important;min-height:52px!important\}/);
 });
 
 test('TENX small-phone navigation stays compact instead of becoming a long one-column sheet',()=>{
   assert.match(runtime,/\.sidebar \.nav\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important\}/);
+  assert.match(runtime,/\.sidebar \.nav a\{font-size:14px!important;line-height:1\.25!important;min-height:48px!important\}/);
 });
