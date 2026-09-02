@@ -39,7 +39,8 @@ test('individual review action is not a one-shot dead control after a stale-row 
 test('individual review keeps the board-wide checkpoint control intact',()=>{
   assert.ok(review.includes('function markReviewed(root,watchedKeys)'));
   assert.ok(review.includes('Mark board reviewed'));
-  assert.ok(review.includes("panel.querySelector('.fpr-mark')?.addEventListener('click',()=>markReviewed(root,watchedKeys)"));
+  assert.ok(review.includes("const mark=panel.querySelector('.fpr-mark');if(mark)mark.onclick=()=>markReviewed(root,watchedKeys);"));
+  assert.doesNotMatch(review,/panel\.querySelector\('\.fpr-mark'\)\?\.addEventListener/);
 });
 
 test('per-book direction has plain-language screen reader labels',()=>{
