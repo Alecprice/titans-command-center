@@ -46,8 +46,13 @@
       .v22-today-actions a{min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 13px;border:1px solid rgba(75,146,219,.4);border-radius:999px;color:#8fc8ff;font-weight:900;text-decoration:none}
       .v22-today-actions a:first-child{background:#4b92db;color:#071629;border-color:#4b92db}
       .v22-today-source{margin-left:auto;color:var(--muted,#a8b8c8);font-size:.76rem}
-      @media(max-width:759px){.v22-today-head{flex-direction:column}.v22-today-facts{grid-template-columns:1fr}.v22-today-actions{display:grid;grid-template-columns:1fr}.v22-today-actions a{min-height:48px;width:100%}.v22-today-source{margin-left:0;text-align:center}}
-      @media(prefers-reduced-motion:reduce){.v22-today-brief *{animation:none!important;transition:none!important}}
+      .v22-verification-note{margin:14px 0;padding:14px 16px;border:1px solid rgba(75,146,219,.4);border-radius:14px;background:rgba(75,146,219,.09);display:grid;gap:7px}
+      .v22-verification-note small{font-size:.7rem;letter-spacing:.11em;text-transform:uppercase;color:#8fc8ff;font-weight:900}
+      .v22-verification-note strong{font-size:1rem}
+      .v22-verification-note p{margin:0;color:var(--muted,#a8b8c8);line-height:1.5}
+      .v22-verification-note a{width:max-content;min-height:44px;display:inline-flex;align-items:center;color:#8fc8ff;font-weight:900;text-decoration:none}
+      @media(max-width:759px){.v22-today-head{flex-direction:column}.v22-today-facts{grid-template-columns:1fr}.v22-today-actions{display:grid;grid-template-columns:1fr}.v22-today-actions a{min-height:48px;width:100%}.v22-today-source{margin-left:0;text-align:center}.v22-verification-note a{width:100%;justify-content:center}}
+      @media(prefers-reduced-motion:reduce){.v22-today-brief *,.v22-verification-note *{animation:none!important;transition:none!important}}
     `;
     document.head.append(style);
   }
@@ -60,24 +65,28 @@
     return `<section class="v22-today-brief" aria-label="Next Titans game fast pass" data-game-id="${esc(game.id||'')}"><div class="v22-today-head"><div><small>${gameDay?gameDayLabel:'NEXT GAME FAST PASS'}</small><h3>${esc(matchup(game))}</h3></div><span class="v22-today-live${gameDay?' game-day':''}">${esc(weekLabel(game))}</span></div><div class="v22-today-facts"><div class="v22-today-fact"><small>WHEN</small><span>${esc(kickoff)} · ${esc(countdown(game.date))}</span></div><div class="v22-today-fact"><small>WATCH / LISTEN</small><span>${esc(game.network||'Network TBD')} · ${esc(TITANS_RADIO)}</span></div><div class="v22-today-fact"><small>WHERE</small><span>${esc(where)}</span></div></div><div class="v22-today-actions"><a href="#media">Open Listen / Watch</a><a href="${OFFICIAL_SCHEDULE}" target="_blank" rel="noopener noreferrer">Official schedule ↗</a>${game.homeAway==='home'?`<a href="${HOME_GAMEDAY}" target="_blank" rel="noopener noreferrer">Stadium guide ↗</a>`:''}<span class="v22-today-source">Schedule facts: TennesseeTitans.com</span></div></section>`;
   }
 
-  function gameWindowMarkup(game){
+  function verificationMarkup(game){
     const kickoff=runtime.formatTeamKickoff?runtime.formatTeamKickoff(game.date):new Date(game.date).toLocaleString();
     const where=game.homeAway==='home'?`Home · ${game.venue||'Nissan Stadium'}`:`Road · ${game.venue||'Venue TBD'}`;
-    return `<div class="v16-gd-mode"><span class="active">Game window</span><small>Game Day 3.0 · source-aware</small></div><section class="v16-gd-phase window"><header><div><small>GAME WINDOW</small><h2>${esc(matchup(game))}</h2><p>${esc(kickoff)} · ${esc(where)}</p></div><div class="v16-gd-countdown"><small>STATUS</small><strong>Verification pending</strong></div></header><section class="v16-gd-tune"><div><small>TUNE IN</small><strong>${esc(game.network||'Network TBD')}</strong><span>${esc(TITANS_RADIO)}</span></div><a href="#media">Listen / Watch →</a></section><div class="v16-gd-grid two"><article class="v16-gd-panel"><small>LIVE STATUS</small><h3>Scoreboard verification pending</h3><p>Kickoff has passed, but a trustworthy live scoreboard has not confirmed game state yet. Command Center is keeping this matchup in focus instead of jumping ahead.</p></article><article class="v16-gd-panel"><small>WHAT YOU CAN TRUST</small><h3>${esc(weekLabel(game))} schedule facts</h3><p>${esc(game.network||'Network TBD')} · ${esc(where)}. No live score, clock, drive, or result is inferred from kickoff time alone.</p><a href="${OFFICIAL_SCHEDULE}" target="_blank" rel="noopener noreferrer">Official schedule ↗</a></article></div></section>`;
+    return `<aside class="v22-verification-note" aria-label="Game status verification pending" data-game-id="${esc(game.id||game.date||'game-window')}"><small>GAME WINDOW · VERIFICATION PENDING</small><strong>${esc(matchup(game))}</strong><p>${esc(kickoff)} · ${esc(where)} · ${esc(game.network||'Network TBD')}. Kickoff has passed, but Command Center will not infer a live score, clock, drive, or result until the scoreboard provider confirms game state.</p><a href="${OFFICIAL_SCHEDULE}" target="_blank" rel="noopener noreferrer">Official schedule ↗</a></aside>`;
   }
 
   function applyGameWindow(data){
     if(runtime.route()!=='live')return false;
     const root=app.querySelector('.v16-gameday');
-    if(!root||root.dataset.phase==='live')return false;
+    if(!root)return false;
+    const existing=root.querySelector('.v22-verification-note');
+    if(root.dataset.phase==='live'){existing?.remove();return false;}
     const games=Array.isArray(data?.games)?data.games:[];
     const focus=runtime.scheduleFocus(games);
-    if(focus.state!=='game-window'||!focus.current)return false;
+    if(focus.state!=='game-window'||!focus.current){existing?.remove();return false;}
     const game=focus.current,id=String(game.id||game.date||'game-window');
-    if(root.dataset.v92GameWindow===id)return true;
-    root.dataset.phase='game-window';
-    root.dataset.v92GameWindow=id;
-    root.innerHTML=gameWindowMarkup(game);
+    if(existing?.dataset.gameId===id)return true;
+    existing?.remove();
+    ensureStyle();
+    const phase=root.querySelector('.v16-gd-phase');
+    if(!phase)return false;
+    phase.insertAdjacentHTML('beforebegin',verificationMarkup(game));
     return true;
   }
 
@@ -98,6 +107,7 @@
       app.querySelector('.v22-today-brief')?.remove();
       return;
     }
+    root.querySelector('.v22-verification-note')?.remove();
     const phase=tagPregamePhase();
     if(!phase)return;
     const existing=phase.querySelector('.v22-today-brief');
@@ -113,12 +123,6 @@
 
   function refreshGameDay(){
     if(runtime.route()!=='live')return;
-    const root=app.querySelector('.v16-gameday[data-v92-game-window]');
-    if(root){
-      root.remove();
-      queueMicrotask(()=>window.dispatchEvent(new HashChangeEvent('hashchange')));
-      return;
-    }
     queueMicrotask(mount);
   }
 
