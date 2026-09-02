@@ -18,13 +18,15 @@ const TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request';
 let teamRoomQueued=false;
 
 function installMobileReadabilityFloor(){
-  if(document.querySelector('#tcc-mobile-type-floor-v44'))return;
+  if(document.querySelector('#tcc-mobile-type-floor-v45'))return;
   const style=document.createElement('style');
-  style.id='tcc-mobile-type-floor-v44';
+  style.id='tcc-mobile-type-floor-v45';
   style.textContent=`
     @media (max-width:760px){
-      #app small{font-size:10px!important;line-height:1.35!important}
-      #app .tcc-mobile-readable-micro{font-size:10px!important;line-height:1.35!important}
+      #app{font-size:16px;line-height:1.5}
+      #app p,#app li{line-height:1.5}
+      #app small{font-size:12px!important;line-height:1.45!important}
+      #app .tcc-mobile-readable-micro{font-size:12px!important;line-height:1.45!important}
       #app .pulse-item small,
       #app .fan-tile .tile-label,
       #app .fan-hero-brand .era-chip,
@@ -38,16 +40,20 @@ function installMobileReadabilityFloor(){
       #app .warehouse-health-head>span,
       #app .warehouse-health-card span,
       #app .source-quality-meta span{
-        font-size:10px!important;
-        line-height:1.35!important;
+        font-size:12px!important;
+        line-height:1.45!important;
       }
       #app button,
       #app select,
       #app input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
-      #app [role="button"]{
+      #app [role="button"],
+      #app a.button,
+      #app a[role="button"]{
         min-width:44px!important;
         min-height:44px!important;
       }
+      #app button,#app .button,#app [role="button"]{font-size:14px!important;line-height:1.25!important}
+      #app a:not(.button):not([role="button"]){text-underline-offset:3px}
       #app input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
       #app select,
       #app textarea,
@@ -56,8 +62,15 @@ function installMobileReadabilityFloor(){
       }
       .menu-button{display:none!important}
       .topbar{padding-left:12px!important}
-      .mobile-nav a,.mobile-nav button{font-size:9px!important}
+      .mobile-nav a,.mobile-nav button{font-size:11px!important;line-height:1.15!important;min-height:52px!important}
       .sidebar .nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+      .sidebar .nav a{font-size:14px!important;line-height:1.25!important;min-height:48px!important}
+      .content{padding-left:14px!important;padding-right:14px!important}
+      .panel-body{padding-left:14px!important;padding-right:14px!important}
+    }
+    @media (max-width:390px){
+      .content{padding-left:12px!important;padding-right:12px!important}
+      .mobile-nav a,.mobile-nav button{font-size:10px!important}
     }
   `;
   document.head.appendChild(style);
@@ -84,7 +97,7 @@ function dedupeHomeEnhancements(){
 
 function enforceMobileComputedTextFloor(){
   if(!app)return;
-  const candidates=[...app.querySelectorAll('small,p,li,span')];
+  const candidates=[...app.querySelectorAll('small,p,li,span,a,label,time')];
   if(!mobileTypeFloor.matches){
     candidates.forEach(element=>element.classList.remove('tcc-mobile-readable-micro'));
     return;
@@ -93,7 +106,7 @@ function enforceMobileComputedTextFloor(){
     if(element.classList.contains('tcc-mobile-readable-micro'))return;
     if(!String(element.textContent||'').trim())return;
     const size=Number.parseFloat(getComputedStyle(element).fontSize);
-    if(Number.isFinite(size)&&size<10)element.classList.add('tcc-mobile-readable-micro');
+    if(Number.isFinite(size)&&size<12)element.classList.add('tcc-mobile-readable-micro');
   });
 }
 
