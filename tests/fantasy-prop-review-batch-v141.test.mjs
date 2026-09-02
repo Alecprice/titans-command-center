@@ -33,8 +33,8 @@ test('batch review action is explicit, scoped, and disabled without capturable c
   assert.ok(review.includes('class=\"fpr-mark-changed\"${batchCapturable?\'\':\' disabled\'}'));
   assert.ok(review.includes('Mark changed reviewed'));
   assert.ok(review.includes('Mark currently changed watched props with reporting lines reviewed'));
-  assert.ok(review.includes("panel.querySelector('.fpr-mark-changed')?.addEventListener('click',()=>markChangedReviewed(changed,watchedKeys));"));
-  assert.doesNotMatch(review,/fpr-mark-changed[^\n]*once:true/);
+  assert.ok(review.includes("const markChanged=panel.querySelector('.fpr-mark-changed');if(markChanged)markChanged.onclick=()=>markChangedReviewed(changed,watchedKeys);"));
+  assert.doesNotMatch(review,/panel\.querySelector\('\.fpr-mark-changed'\)\?\.addEventListener/);
 });
 
 test('batch acknowledgement keeps individual and board-wide review controls intact',()=>{
