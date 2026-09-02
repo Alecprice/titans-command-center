@@ -24,8 +24,9 @@ test('clear emits the same semantic handoff as save and remove',()=>{
   assert.match(tenx,/const saved=\[\];writeSaved\(saved\);decorate\(records\(center\)\);savedTray\(center,records\(center\)\);announceSaved\(center,saved\);/);
 });
 
-test('same-tab semantic signal reaches compare and finalists while storage remains cross-tab',()=>{
-  assert.match(compare,/app\.addEventListener\(SHORTLIST_CHANGE,schedule\)/);
+test('same-tab semantic signal renders compare immediately while finalists remains scheduled',()=>{
+  assert.match(compare,/function syncFromShortlist\(\)\{queued=false;enhance\(\);\}/);
+  assert.match(compare,/app\.addEventListener\(SHORTLIST_CHANGE,syncFromShortlist\)/);
   assert.match(finalists,/app\.addEventListener\(SHORTLIST_CHANGE,schedule\)/);
   assert.match(compare,/addEventListener\('storage',event=>\{if\(event\.key===SHORTLIST_KEY\|\|event\.key===MEMORY_KEY\)schedule\(\);\}\)/);
   assert.match(finalists,/addEventListener\('storage',event=>\{if\(event\.key===SHORTLIST_KEY\)schedule\(\);\}\)/);
