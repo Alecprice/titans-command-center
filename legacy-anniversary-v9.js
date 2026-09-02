@@ -56,16 +56,16 @@ function ensureStyle(){
   style.textContent=`
     .legacy-anniversary-lens{display:grid;gap:16px;padding:22px 24px;background:linear-gradient(135deg,#eef7fd,#fff 58%,#f7f3ea);border:1px solid rgba(0,33,68,.14);border-left:6px solid var(--retro-blue,#4a95ce);box-shadow:0 10px 28px rgba(0,33,68,.07)}
     .legacy-anniversary-head{display:grid;grid-template-columns:minmax(0,.72fr) minmax(300px,1.28fr);gap:20px;align-items:end}
-    .legacy-anniversary-head small{display:block;margin-bottom:5px;color:var(--retro-red,#d5272c);font-size:8px;font-weight:950;letter-spacing:.16em;text-transform:uppercase}
+    .legacy-anniversary-head small{display:block;margin-bottom:5px;color:var(--retro-red,#d5272c);font-size:10px;font-weight:950;letter-spacing:.16em;text-transform:uppercase}
     .legacy-anniversary-head h2{margin:0;color:var(--retro-navy,#002144);font-size:clamp(25px,2.7vw,36px);line-height:.98;letter-spacing:-.04em;text-transform:uppercase}
-    .legacy-anniversary-head p{margin:0;color:#5e768b;font-size:10px;line-height:1.62}
+    .legacy-anniversary-head p{margin:0;color:#5e768b;font-size:12px;line-height:1.62}
     .legacy-anniversary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
     .legacy-anniversary-card{display:grid;grid-template-rows:auto auto 1fr auto;gap:6px;min-width:0;padding:15px;background:#fff;border:1px solid rgba(0,33,68,.12);border-top:4px solid var(--retro-blue,#4a95ce)}
     .legacy-anniversary-card:first-child{border-top-color:var(--retro-red,#d5272c)}
-    .legacy-anniversary-card>small{color:#2f76ad;font-size:8px;font-weight:950;letter-spacing:.1em;text-transform:uppercase}
+    .legacy-anniversary-card>small{color:#2f76ad;font-size:10px;font-weight:950;letter-spacing:.1em;text-transform:uppercase}
     .legacy-anniversary-card strong{color:var(--retro-navy,#002144);font-size:15px;line-height:1.14}
-    .legacy-anniversary-card span{color:#667d91;font-size:9px;line-height:1.5}
-    .legacy-anniversary-card button{min-height:44px;width:100%;border:1px solid rgba(0,33,68,.18);background:#f2f7fb;color:var(--retro-navy,#002144);padding:9px 11px;font-size:8px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+    .legacy-anniversary-card span{color:#667d91;font-size:11px;line-height:1.5}
+    .legacy-anniversary-card button{min-height:44px;width:100%;border:1px solid rgba(0,33,68,.18);background:#f2f7fb;color:var(--retro-navy,#002144);padding:9px 11px;font-size:11px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
     .legacy-anniversary-card button:hover{background:var(--retro-navy,#002144);color:#fff}
     .legacy-anniversary-card button:focus-visible{outline:3px solid var(--titans-red,#c8102e);outline-offset:3px}
     @media(max-width:760px){.legacy-anniversary-head{grid-template-columns:1fr}.legacy-anniversary-head small{font-size:12px;line-height:1.35}.legacy-anniversary-head p{font-size:14px;line-height:1.6}.legacy-anniversary-grid{grid-template-columns:1fr}.legacy-anniversary-card>small{font-size:12px;line-height:1.35}.legacy-anniversary-card strong{font-size:16px;line-height:1.2}.legacy-anniversary-card span{font-size:13px;line-height:1.5}.legacy-anniversary-card button{min-height:48px;font-size:12px;line-height:1.25}}
