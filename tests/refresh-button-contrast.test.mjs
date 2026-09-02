@@ -7,7 +7,7 @@ const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
 function ruleBodies(selector) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return [...css.matchAll(new RegExp(`${escaped}\\s*\\{([^}]]+)\\}`, 'g'))].map((match) => match[1]);
+  return [...css.matchAll(new RegExp(`${escaped}\\s*\\{([^}]+)\\}`, 'g'))].map((match) => match[1]);
 }
 
 function finalRule(selector) {
