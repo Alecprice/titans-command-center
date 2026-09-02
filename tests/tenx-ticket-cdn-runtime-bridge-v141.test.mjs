@@ -32,9 +32,11 @@ test('legacy CDN wake-up is bounded behind semantic reconciliation',()=>{
   assert.doesNotMatch(bridge,/\bfetch\s*\(|setInterval\s*\(|setTimeout\s*\(/);
 });
 
-test('v156 recovery observers are narrow state and root-replacement guards',()=>{
+test('v158 recovery observers are narrow saved-state and direct-child guards',()=>{
   assert.equal((bridge.match(/new MutationObserver/g)||[]).length,2);
-  assert.match(bridge,/centerObserver\.observe\(boundCenter,\{attributes:true,attributeFilter:\['data-ticket-tenx-saved-count'\]\}\)/);
+  assert.match(bridge,/centerObserver\.observe\(boundCenter,\{attributes:true,attributeFilter:\['data-ticket-tenx-saved-count'\],childList:true,subtree:false\}\)/);
+  assert.match(bridge,/saved\(\)\.length>0&&mutations\.some\(mutation=>mutation\.type==='childList'\)/);
+  assert.match(bridge,/schedule\(savedChanged\?'saved-count':'center-child'\)/);
   assert.match(bridge,/new MutationObserver\(\(\)=>schedule\('app-replaced'\)\)\.observe\(app,\{childList:true,subtree:false\}\)/);
   assert.doesNotMatch(bridge,/subtree:true/);
   assert.doesNotMatch(bridge,/characterData:true/);
