@@ -24,6 +24,7 @@ def prepare_returning_user(driver):
           {name:'Decision Smoke B',position:'RB',team:'IND',slot:'bench'}
         ]
       }));
+      localStorage.setItem('titans-fantasy-pending-question-v1','Should I start Decision Smoke B?');
       document.querySelector('#v10-onboarding [data-v10-close]')?.click();
     """)
 
@@ -39,13 +40,28 @@ def decision_state(driver):
       return {
         ready:root.dataset.fantasyDecision,
         title:root.querySelector('h2')?.textContent||'',
-        selects:sels.map(s=>({height:s.getBoundingClientRect().height,options:s.options.length,value:s.value})),
+        selects:sels.map(s=>({height:s.getBoundingClientRect().height,options:s.options.length,value:s.value,disabled:[...s.options].filter(o=>o.disabled).map(o=>o.value)})),
         cards:cards.map(c=>c.textContent.trim()),
         verdict:verdict?.textContent?.trim()||'',
         overflow:document.documentElement.scrollWidth>innerWidth+1,
         left:rr.left,right:rr.right,viewport:innerWidth
       };
     """)
+
+def force_duplicate_then_read(driver):
+    driver.execute_script("""
+      const root=document.querySelector('[data-fantasy-decision]');
+      const a=root?.querySelector('[data-fdc-a]'),b=root?.querySelector('[data-fdc-b]');
+      if(a&&b){a.value=b.value;a.dispatchEvent(new Event('change',{bubbles:true}));}
+    """)
+    wait_for(driver,"const s=[...document.querySelectorAll('[data-fantasy-decision] select')];return s.length===2&&s[0].value!==s[1].value")
+    return decision_state(driver)
+
+def assert_distinct(state,label):
+    if len(state['selects'])!=2: raise RuntimeError(f'{label} select count mismatch: {state}')
+    a,b=state['selects']
+    if a['value']==b['value']: raise RuntimeError(f'{label} compared the same player twice: {state}')
+    if b['value'] not in a['disabled'] or a['value'] not in b['disabled']: raise RuntimeError(f'{label} opposite-player options are not disabled: {state}')
 
 def run(width,height):
     d=driver_for(width,height)
@@ -57,12 +73,16 @@ def run(width,height):
         if state['title']!='Start / Sit Compare': raise RuntimeError(f'Decision title mismatch: {state}')
         if len(state['selects'])!=2 or any(s['options']<2 for s in state['selects']): raise RuntimeError(f'Decision controls incomplete: {state}')
         if any(s['height']<44 for s in state['selects']): raise RuntimeError(f'Decision controls below 44px: {state}')
+        assert_distinct(state,'Ask handoff')
         if len(state['cards'])!=2: raise RuntimeError(f'Decision cards missing: {state}')
         if 'Decision Smoke A' not in ' '.join(state['cards']) or 'Decision Smoke B' not in ' '.join(state['cards']): raise RuntimeError(f'Manual candidates not rendered: {state}')
         if not state['verdict'] or ('Evidence leans' not in state['verdict'] and 'Too close to call' not in state['verdict']): raise RuntimeError(f'Decision verdict missing or misleading: {state}')
+        recovered=force_duplicate_then_read(d);assert_distinct(recovered,'Duplicate recovery')
+        if len(recovered['cards'])!=2 or recovered['cards'][0]==recovered['cards'][1]: raise RuntimeError(f'Duplicate recovery rendered duplicate cards: {recovered}')
         if state['overflow'] or state['left']<-1 or state['right']>state['viewport']+1: raise RuntimeError(f'Decision Center overflow: {state}')
         warnings=severe_logs(d)
         if warnings: raise RuntimeError(f'Browser console errors: {warnings[:5]}')
+        state['duplicateRecovery']=recovered
         state['browserWarnings']=warnings
         return state
     finally:

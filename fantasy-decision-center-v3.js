@@ -60,16 +60,28 @@ import('./ask-fantasy-bridge-v1.js').catch(()=>{});
   function option(p){return `<option value="${esc(p.id)}">${esc(p.name)}${p.position?` · ${esc(p.position)}`:''}${p.team?` · ${esc(p.team)}`:''}</option>`}
   function card(player,ev){return `<div class="fdc-player"><strong>${esc(player.name)}</strong><span>${esc([player.position,player.team,player.slot].filter(Boolean).join(' · '))}</span><b>${ev.score>0?'+':''}${ev.score} evidence</b><ul>${ev.reasons.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`}
   function verdict(a,b,ea,eb){const diff=ea.score-eb.score;if(Math.abs(diff)<2)return 'Too close to call from the loaded evidence. Check late availability and your league rules.';const lead=diff>0?a:b;return `Evidence leans ${lead.name}, but this is not a point projection or guarantee.`}
+  function syncDistinctSelects(a,b,prefer='a'){
+    for(const opt of [...a.options,...b.options])opt.disabled=false;
+    if(a.value&&a.value===b.value){
+      const keeper=prefer==='b'?b:a,mover=prefer==='b'?a:b;
+      const next=[...mover.options].find(opt=>opt.value!==keeper.value);
+      if(next)mover.value=next.value;
+    }
+    const av=a.value,bv=b.value;
+    for(const opt of a.options)opt.disabled=Boolean(bv&&opt.value===bv);
+    for(const opt of b.options)opt.disabled=Boolean(av&&opt.value===av);
+    return Boolean(av&&bv&&av!==bv);
+  }
   async function mount(){
     if(route()!==ROUTE)return;const host=app()?.querySelector('.fantasy-content');if(!host||host.querySelector('[data-fantasy-decision]'))return;
     const ctx=await loadContext();if(route()!==ROUTE||!host.isConnected||host.querySelector('[data-fantasy-decision]'))return;
     const candidates=ctx.candidates;if(candidates.length<2)return;
     const section=document.createElement('section');section.dataset.fantasyDecision='ready';section.className='fdc';
-    section.innerHTML=`<div class="fdc-head"><div><small>DECISION CENTER</small><h2>Start / Sit Compare</h2><p>Compare transparent evidence—not invented projections.</p></div></div><div class="fdc-controls"><label>Player A<select data-fdc-a>${candidates.map(option).join('')}</select></label><label>Player B<select data-fdc-b>${candidates.map(option).join('')}</select></label></div><div data-fdc-result></div><p class="fdc-note">Signals can include starter/bench status, current availability flags, Titans roster status and Sleeper 24-hour add/drop trends. Always confirm late news and your league scoring.</p>`;
+    section.innerHTML=`<div class="fdc-head"><div><small>DECISION CENTER</small><h2>Start / Sit Compare</h2><p>Compare transparent evidence—not invented projections. Choose two different players.</p></div></div><div class="fdc-controls"><label>Player A<select data-fdc-a>${candidates.map(option).join('')}</select></label><label>Player B<select data-fdc-b>${candidates.map(option).join('')}</select></label></div><div data-fdc-result></div><p class="fdc-note">Signals can include starter/bench status, current availability flags, Titans roster status and Sleeper 24-hour add/drop trends. Always confirm late news and your league scoring.</p>`;
     const style=document.createElement('style');style.textContent='.fdc{margin-top:18px;padding:18px;border:1px solid rgba(120,180,255,.22);border-radius:18px;background:rgba(7,20,38,.72)}.fdc h2{margin:.2rem 0}.fdc p{margin:.3rem 0 .8rem}.fdc-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fdc-controls label{display:grid;gap:6px}.fdc select{min-height:44px;border-radius:10px;padding:8px}.fdc-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.fdc-player{padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:12px}.fdc-player span,.fdc-player b{display:block;margin-top:4px}.fdc-player ul{padding-left:18px}.fdc-verdict{grid-column:1/-1;padding:12px;border-radius:12px;background:rgba(80,160,220,.12);font-weight:700}.fdc-note{font-size:.9rem;opacity:.78}@media(max-width:560px){.fdc-controls,.fdc-compare{grid-template-columns:1fr}.fdc-verdict{grid-column:auto}}';section.appendChild(style);host.appendChild(section);
     const a=section.querySelector('[data-fdc-a]'),b=section.querySelector('[data-fdc-b]'),out=section.querySelector('[data-fdc-result]');if(candidates[1])b.selectedIndex=1;
-    const pending=pendingMatches(candidates);if(pending[0])a.value=pending[0].id;if(pending[1])b.value=pending[1].id;
-    const draw=()=>{const pa=candidates.find(p=>p.id===a.value),pb=candidates.find(p=>p.id===b.value);if(!pa||!pb)return;const ea=evidence(pa,ctx),eb=evidence(pb,ctx);out.innerHTML=`<div class="fdc-compare">${card(pa,ea)}${card(pb,eb)}<div class="fdc-verdict">${esc(verdict(pa,pb,ea,eb))}</div></div>`};a.addEventListener('change',draw);b.addEventListener('change',draw);draw();
+    const pending=pendingMatches(candidates);if(pending[0])a.value=pending[0].id;if(pending[1])b.value=pending[1].id;syncDistinctSelects(a,b,'a');
+    const draw=()=>{const pa=candidates.find(p=>p.id===a.value),pb=candidates.find(p=>p.id===b.value);if(!pa||!pb)return;if(pa.id===pb.id){out.innerHTML='<div class="fdc-compare"><div class="fdc-verdict">Choose two different players to compare loaded evidence.</div></div>';return}const ea=evidence(pa,ctx),eb=evidence(pb,ctx);out.innerHTML=`<div class="fdc-compare">${card(pa,ea)}${card(pb,eb)}<div class="fdc-verdict">${esc(verdict(pa,pb,ea,eb))}</div></div>`};a.addEventListener('change',()=>{syncDistinctSelects(a,b,'a');draw()});b.addEventListener('change',()=>{syncDistinctSelects(a,b,'b');draw()});draw();
   }
   const observer=new MutationObserver(()=>{if(route()===ROUTE)queueMicrotask(mount)});if(app())observer.observe(app(),{childList:true,subtree:true});addEventListener('hashchange',()=>{contextKey='';context=null;if(route()===ROUTE)queueMicrotask(mount)});queueMicrotask(mount);
 })();
