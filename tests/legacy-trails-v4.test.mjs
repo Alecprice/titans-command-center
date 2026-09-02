@@ -41,7 +41,8 @@ test('Trail controls remain accessible and phone safe',()=>{
   assert.match(js,/aria-pressed="false"/);
   assert.match(js,/aria-live="polite"/);
   assert.match(js,/min-height:44px/);
-  assert.match(js,/min-height:46px/);
+  assert.match(js,/@media\(max-width:760px\)[^\n]*\.legacy-passport-actions button\{min-height:48px;font-size:12px\}[^\n]*\.legacy-trail-actions button\{min-height:48px;font-size:12px\}/);
+  assert.doesNotMatch(js,/@media\(max-width:760px\)[^\n]*\.legacy-trail-actions button\{min-height:46px/);
   assert.match(js,/max-width:430px/);
   assert.match(js,/prefers-reduced-motion:reduce/);
   assert.match(js,/forced-colors:active/);
