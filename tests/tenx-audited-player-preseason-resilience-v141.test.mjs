@@ -33,7 +33,7 @@ test('TENX audited Player retains truthful missing-stat states when optional det
 });
 
 test('TENX UUID Player keeps the same fail-soft optional preseason boundary',()=>{
-  assert.match(uuid,/fetch\(PRESEASON_URL,\{cache:'no-store'\}\)\.then\(r=>r\.ok\?r\.json\(\):null\)\.catch\(\(\)=>null\)/);
+  assert.match(uuid,/fetch\('\/api\/preseason-stats',\{cache:'no-store'\}\)\.then\(r=>r\.ok\?r\.json\(\):null\)\.catch\(\(\)=>null\)/);
 });
 
 test('TENX audited Player still fails closed when required roster truth is unavailable',()=>{
