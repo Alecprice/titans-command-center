@@ -27,7 +27,7 @@ test('TENX Legacy heritage cards and filters keep the effective mobile floors',(
   assert.match(css,/\.legacy-page \.legacy-venue-index,[^}]*font-size:12px!important/);
   assert.match(css,/\.legacy-page \.legacy-venue-card p,[^}]*font-size:13px!important/);
   assert.match(css,/\.legacy-page \.legacy-heritage-sources a\{[^}]*font-size:12px!important/);
-  assert.match(heritage,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-sources a\{min-height:48px!important;font-size:9px/);
+  assert.match(heritage,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-sources a\{min-height:48px!important;font-size:12px/);
   assert.doesNotMatch(heritage,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-sources a\{min-height:(?:4[0-7])px!important/);
   assert.match(css,/\.legacy-page \.legacy-honor-filters button\{min-height:48px!important;font-size:13px!important;scroll-snap-align:start\}/);
   assert.match(css,/\.legacy-page \.legacy-honor-card h4\{font-size:15px!important/);
