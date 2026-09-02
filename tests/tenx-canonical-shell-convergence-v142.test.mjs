@@ -6,6 +6,7 @@ const headers=fs.readFileSync(new URL('../_headers',import.meta.url),'utf8');
 const audit=fs.readFileSync(new URL('../scripts/custom-domain-regression.mjs',import.meta.url),'utf8');
 const workflow=fs.readFileSync(new URL('../.github/workflows/cloudflare-deploy.yml',import.meta.url),'utf8');
 
+// Keep this contract merge-context sensitive: release ordering must be validated against current main.
 test('canonical shell HTML and service worker cannot be retained across releases',()=>{
   assert.match(headers,/\n\/\n  Cache-Control: no-store, max-age=0, must-revalidate/);
   assert.match(headers,/\/index\.html\n  Cache-Control: no-store, max-age=0, must-revalidate/);
