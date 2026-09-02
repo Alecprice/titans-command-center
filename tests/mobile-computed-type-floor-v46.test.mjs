@@ -5,14 +5,14 @@ import fs from 'node:fs';
 const runtime=fs.readFileSync(new URL('../accessibility-runtime.js',import.meta.url),'utf8');
 const matrix=fs.readFileSync(new URL('../scripts/responsive-matrix-smoke.py',import.meta.url),'utf8');
 
-test('mobile runtime promotes only rendered microcopy below 10px',()=>{
+test('mobile runtime promotes rendered supporting text below 12px',()=>{
   assert.match(runtime,/const mobileTypeFloor=matchMedia\('\(max-width:760px\)'\)/);
   assert.match(runtime,/function enforceMobileComputedTextFloor\(\)/);
-  assert.match(runtime,/querySelectorAll\('small,p,li,span'\)/);
+  assert.match(runtime,/querySelectorAll\('small,p,li,span,a,label,time'\)/);
   assert.match(runtime,/Number\.parseFloat\(getComputedStyle\(element\)\.fontSize\)/);
-  assert.match(runtime,/size<10/);
+  assert.match(runtime,/size<12/);
   assert.match(runtime,/classList\.add\('tcc-mobile-readable-micro'\)/);
-  assert.match(runtime,/\.tcc-mobile-readable-micro\{font-size:10px!important/);
+  assert.match(runtime,/\.tcc-mobile-readable-micro\{font-size:12px!important/);
 });
 
 test('desktop removes the computed mobile floor instead of changing desktop typography',()=>{

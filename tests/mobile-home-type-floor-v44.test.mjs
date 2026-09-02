@@ -4,11 +4,11 @@ import fs from 'node:fs';
 
 const source=fs.readFileSync(new URL('../accessibility-runtime.js',import.meta.url),'utf8');
 
-test('mobile app microcopy has a 10px readability floor',()=>{
+test('mobile app microcopy has a 12px readability floor',()=>{
   assert.match(source,/function installMobileReadabilityFloor\(\)/);
-  assert.match(source,/#tcc-mobile-type-floor-v44/);
+  assert.match(source,/#tcc-mobile-type-floor-v46/);
   assert.match(source,/@media \(max-width:760px\)/);
-  assert.match(source,/#app small\{font-size:10px!important/);
+  assert.match(source,/#app small\{font-size:12px!important/);
 });
 
 test('home KPI and visual-history labels are included in the mobile floor',()=>{

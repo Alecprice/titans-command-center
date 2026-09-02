@@ -1,3 +1,7 @@
+import './tickets-tenx-v123.js';
+import './tickets-trend-v124.js';
+import './tickets-compare-v125.js';
+
 (() => {
   'use strict';
   if(window.__TitansTicketPriceFallbackV58)return;
