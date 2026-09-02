@@ -87,12 +87,16 @@
     });
   }
 
-  function cardMarkup(item,readyCount,party){
-    const badge=item.ready?(readyCount>=2&&item.total!=null?'ACTUAL TOTAL ENTERED':'CHECKOUT ENTERED'):'NEEDS CHECKOUT';
+  function cardMarkup(item,readyCount,party,lowestTotal){
+    const badge=!item.ready
+      ?'NEEDS CHECKOUT'
+      :readyCount>=2&&item.total===lowestTotal
+        ?'LOWEST ENTERED OUTING'
+        :readyCount>=2?'ACTUAL TOTAL ENTERED':'CHECKOUT ENTERED';
     const detail=item.ready
       ?`<dl><div><dt>Actual checkout</dt><dd>${esc(money(item.checkout))}</dd></div><div><dt>Extras entered</dt><dd>${esc(money(item.extras))}</dd></div><div><dt>Outing total</dt><dd>${esc(money(item.total))}</dd></div><div><dt>Per person</dt><dd>${esc(money(item.perPerson))}</dd></div></dl>`
       :'<p class="tickets-cost-v135-missing">Enter the actual ticket checkout total in Game Night Budget before this matchup can be ranked by cost.</p>';
-    return `<article class="tickets-cost-v135-card ${item.ready?'is-ready':'is-missing'}" data-ticket-cost-key="${esc(item.key)}">
+    return `<article class="tickets-cost-v135-card ${item.ready?'is-ready':'is-missing'}" data-ticket-cost-key="${esc(item.key)}" data-ticket-cost-ready="${item.ready}">
       <header><div><small>${esc(badge)}</small><h3>${esc(item.title)}</h3><p>${esc(item.date)}</p></div>${item.ready?`<strong>${esc(money(item.total))}</strong>`:'<strong>—</strong>'}</header>
       ${detail}
       <footer><span>${item.ready?`${party} ticket${party===1?'':'s'} selected · user-entered amounts only`:'Starting prices are not substituted for checkout.'}</span><button type="button" data-ticket-cost-edit="${esc(item.key)}" aria-label="Edit Game Night Budget for ${esc(item.title)}">${item.ready?'Edit budget':'Enter checkout'}</button></footer>
@@ -103,10 +107,13 @@
     const party=partySize(center);
     const items=rows(center,saved,plans);
     const ready=items.filter(item=>item.ready);
-    const cheapest=ready.length>=2?ready[0]:null;
-    const cards=items.map(item=>cardMarkup(item,ready.length,party)).join('');
+    const lowestTotal=ready.length>=2?ready[0].total:null;
+    const tiedLowest=lowestTotal==null?[]:ready.filter(item=>item.total===lowestTotal);
+    const cards=items.map(item=>cardMarkup(item,ready.length,party,lowestTotal)).join('');
     const lead=ready.length>=2
-      ?`Lowest entered outing total: ${money(cheapest.total)} for ${cheapest.title}. This compares only amounts entered in this browser.`
+      ?tiedLowest.length>1
+        ?`Lowest entered outing total: ${money(lowestTotal)}, shared by ${tiedLowest.length} saved games. This compares only amounts entered in this browser.`
+        :`Lowest entered outing total: ${money(lowestTotal)} for ${tiedLowest[0].title}. This compares only amounts entered in this browser.`
       :ready.length===1
         ?'One saved matchup has an actual checkout total. Enter checkout for another saved game to compare real outing costs.'
         :'Enter an actual checkout total for at least one saved game to start building a real-cost comparison.';
