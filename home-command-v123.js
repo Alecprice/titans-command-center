@@ -179,7 +179,7 @@
   ];
 
   function launchMarkup(){
-    return `<nav class="home-command-v123-launch" aria-label="Fan launchpad quick routes">${launchLinks.map(([eyebrow,title,detail,href])=>`<a class="home-command-v123-link" href="${href}"><div><small>${esc(eyebrow)}</small><strong>${esc(title)}</strong><span>${esc(detail)}</span></div><b>Open →</b></a>`).join('')}</nav>`;
+    return `<nav class="home-command-v123-launch" aria-label="Fan launchpad">${launchLinks.map(([eyebrow,title,detail,href])=>`<a class="home-command-v123-link" href="${href}"><div><small>${esc(eyebrow)}</small><strong>${esc(title)}</strong><span>${esc(detail)}</span></div><b>Open →</b></a>`).join('')}</nav>`;
   }
 
   function signature(compact){
