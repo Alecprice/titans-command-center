@@ -47,7 +47,7 @@ test('TENX Watchlist copy tells the fan when Favorite Player is already pinned',
 
 test('TENX Player Impact continues to dedupe favorite and watch intent independently',()=>{
   assert.match(impact,/const add=item=>\{if\(!item\.name\|\|result\.some\(x=>norm\(x\.name\)===norm\(item\.name\)\)\)return;result\.push\(item\);\}/);
-  assert.match(impact,/if\(favorite\)add\(\{id:'',name:favorite,favorite:true\}\\?\)/);
+  assert.match(impact,/if\(favorite\)add\(\{id:'',name:favorite,favorite:true\}\);/);
   assert.match(impact,/watched\.forEach\(add\)/);
   assert.match(impact,/return result\.slice\(0,MAX_FOLLOWED\)/);
 });
