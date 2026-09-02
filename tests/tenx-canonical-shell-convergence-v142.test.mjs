@@ -35,9 +35,9 @@ test('front-door gate proves shell cache policy before browser regressions',()=>
   assert.match(audit,/cacheControl\(canonicalSw\)\.includes\('no-store'\)/);
   assert.match(audit,/cacheControl\(canonicalTicketCompare\)\.includes\('max-age=0'\)/);
   assert.match(audit,/shellPropagationAttempts/);
-  const frontDoor=workflow.indexOf('Canonical front door regression');
-  const tickets=workflow.indexOf('Ticket Center browser regression');
-  assert.ok(frontDoor>=0&&tickets>frontDoor,'Ticket browser gate must remain downstream of canonical front-door convergence');
+  const frontDoor=workflow.indexOf('node scripts/custom-domain-regression.mjs');
+  const tickets=workflow.indexOf('python scripts/tickets-browser-smoke.py');
+  assert.ok(frontDoor>=0&&tickets>frontDoor,'Ticket browser command must remain downstream of canonical front-door convergence');
 });
 
 test('shell convergence remains bounded and adds no cache-busting URL ownership',()=>{
