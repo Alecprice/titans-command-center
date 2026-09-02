@@ -3,7 +3,7 @@ const playerRoute=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
 const playerParams=()=>new URLSearchParams(location.hash.split('?')[1]||'');
 const playerId=()=>playerParams().get('id')||'';
 const playerName=()=>playerParams().get('name')||'';
-const playerEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const playerEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const playerDate=v=>{if(!v)return 'Not available';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}).format(d)};
 const american=v=>v==null?'—':Number(v)>0?`+${Number(v)}`:String(Number(v));
 const playerNorm=v=>String(v||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,' ').trim();
