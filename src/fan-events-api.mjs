@@ -1,6 +1,7 @@
 const EVENTBRITE_BASE='https://www.eventbriteapi.com/v3';
 const SKIDDLE_SEARCH='https://www.skiddle.com/api/v1/events/search/';
 const TICKETMASTER_EVENTS='https://app.ticketmaster.com/discovery/v2/events.json';
+const SEATGEEK_EVENTS='https://api.seatgeek.com/2/events';
 const USER_AGENT='TitansCommandCenter/1.0 fan-events';
 const DEFAULT_LAT=36.1665;
 const DEFAULT_LON=-86.7713;
@@ -17,6 +18,7 @@ const dateMs=value=>{const stamp=Date.parse(String(value||''));return Number.isF
 const isoDay=value=>{const stamp=dateMs(value);return stamp==null?'':new Date(stamp).toISOString().slice(0,10);};
 const normalize=value=>text(value).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const queryOf=req=>Object.fromEntries(Object.entries(req?.query||{}).filter(([key])=>key!=='route'));
+const seatGeekUtc=value=>{const raw=text(value);if(!raw)return'';return /(?:Z|[+-]\d\d:\d\d)$/i.test(raw)?raw:`${raw}Z`;};
 
 export function fanEventsConfig(env={}){
   const lookaheadDays=Math.round(bounded(env.FAN_EVENTS_LOOKAHEAD_DAYS,DEFAULT_LOOKAHEAD_DAYS,7,60));
@@ -36,6 +38,7 @@ function safeUrl(value,provider){
     const host=url.hostname.toLowerCase();
     const allowed=provider==='Eventbrite'?(host==='eventbrite.com'||host.endsWith('.eventbrite.com'))
       :provider==='Skiddle'?(host==='skiddle.com'||host.endsWith('.skiddle.com'))
+      :provider==='SeatGeek'?(host==='seatgeek.com'||host.endsWith('.seatgeek.com'))
       :provider==='Ticketmaster'?(host==='ticketmaster.com'||host.endsWith('.ticketmaster.com'))
       :false;
     return allowed?url.href:'';
@@ -76,6 +79,20 @@ export function normalizeSkiddleEvents(events=[]){
       lat:event?.latitude??venue?.latitude,lon:event?.longitude??venue?.longitude
     });
   }).filter(event=>event.id!=='sk:'&&event.start&&event.url);
+}
+
+export function normalizeSeatGeekEvents(events=[]){
+  return (Array.isArray(events)?events:[]).map(event=>{
+    const venue=event?.venue||{};
+    const taxonomy=Array.isArray(event?.taxonomies)?event.taxonomies[0]||{}:{};
+    return eventShape({
+      id:`sg-event:${text(event?.id)}`,provider:'SeatGeek',title:event?.title,
+      start:seatGeekUtc(event?.datetime_utc)||event?.datetime_local,
+      venue:{name:venue?.name||venue?.name_v2,city:venue?.city,state:venue?.state,country:venue?.country},
+      url:event?.url,category:taxonomy?.name||event?.type,
+      lat:venue?.location?.lat??venue?.location?.latitude,lon:venue?.location?.lon??venue?.location?.longitude
+    });
+  }).filter(event=>event.id!=='sg-event:'&&event.start&&event.url);
 }
 
 export function normalizeTicketmasterEvents(events=[]){
@@ -181,6 +198,21 @@ async function fetchSkiddle(apiKey,config){
   return {events:normalizeSkiddleEvents(payload?.results||payload?.events||[]),scope:'nashville-radius',message:'Skiddle provides geographic event discovery for the configured Nashville radius. Every displayed Skiddle result keeps the direct Skiddle event link and required Skiddle source attribution.'};
 }
 
+async function fetchSeatGeek(clientId,aid,config){
+  const url=new URL(SEATGEEK_EVENTS);
+  url.searchParams.set('client_id',clientId);
+  if(aid)url.searchParams.set('aid',aid);
+  url.searchParams.set('lat',String(config.lat));
+  url.searchParams.set('lon',String(config.lon));
+  url.searchParams.set('range',`${config.radiusMiles}mi`);
+  url.searchParams.set('datetime_utc.gte',config.start.toISOString().slice(0,19));
+  url.searchParams.set('datetime_utc.lte',config.end.toISOString().slice(0,19));
+  url.searchParams.set('per_page',String(Math.min(24,config.limit)));
+  url.searchParams.set('sort','datetime_utc.asc');
+  const payload=await getJson(url,{label:'SeatGeek'});
+  return {events:normalizeSeatGeekEvents(payload?.events||[]),scope:'nashville-radius',message:'SeatGeek provides live-event discovery around the same bounded Nashville radius using the existing server-side SeatGeek client ID.'};
+}
+
 async function fetchTicketmaster(apiKey,config){
   const url=new URL(TICKETMASTER_EVENTS);
   url.searchParams.set('apikey',apiKey);
@@ -215,18 +247,23 @@ export async function fanEventsRoute(req,res,env=process.env){
   const config=fanEventsConfig(env);
   const eventbriteToken=text(env.EVENTBRITE_PRIVATE_TOKEN||env.EVENTBRITE_OAUTH_TOKEN);
   const skiddleKey=text(env.SKIDDLE_API_KEY);
+  const seatGeekClientId=text(env.SEATGEEK_CLIENT_ID);
+  const seatGeekAid=text(env.SEATGEEK_AID);
   const ticketmasterKey=text(env.TICKETMASTER_API_KEY);
   const configuredProviders={
     ticketmaster:Boolean(ticketmasterKey),
+    seatgeek:Boolean(seatGeekClientId),
     eventbrite:Boolean(eventbriteToken),
     skiddle:Boolean(skiddleKey),
   };
   const jobs=[];
   if(ticketmasterKey)jobs.push(runProvider('Ticketmaster',()=>fetchTicketmaster(ticketmasterKey,config)));
+  if(seatGeekClientId)jobs.push(runProvider('SeatGeek',()=>fetchSeatGeek(seatGeekClientId,seatGeekAid,config)));
   if(eventbriteToken)jobs.push(runProvider('Eventbrite',()=>fetchEventbrite(eventbriteToken,config,env)));
   if(skiddleKey)jobs.push(runProvider('Skiddle',()=>fetchSkiddle(skiddleKey,config)));
   const providerCatalog=[
     {provider:'Ticketmaster',key:'ticketmaster',scope:'broad Nashville-radius discovery',terms:'Existing Discovery API integration.'},
+    {provider:'SeatGeek',key:'seatgeek',scope:'broad Nashville-radius discovery',terms:'Existing SeatGeek client ID is reused server-side for event discovery.'},
     {provider:'Eventbrite',key:'eventbrite',scope:'authorized-organization events that also pass Nashville-region verification',terms:'Public Event Search was retired; this integration does not call it.'},
     {provider:'Skiddle',key:'skiddle',scope:'geographic search around the configured Nashville radius',terms:'Skiddle results retain the direct event link and are displayed with Skiddle name and official brand-logo attribution.'},
   ];
@@ -235,16 +272,25 @@ export async function fanEventsRoute(req,res,env=process.env){
     window:{start:config.start.toISOString(),end:config.end.toISOString(),lookaheadDays:config.lookaheadDays},
     configuredProviders,providerCatalog,fetchedAt:new Date().toISOString()
   };
-  if(!jobs.length)return res.status(200).json({...base,configured:false,available:false,events:[],count:0,providersConfigured:0,providersAvailable:0,providerFailures:0,providerResults:[],message:'No fan-event providers are configured yet. Server-side credentials can be added without exposing API keys to the browser.'});
+  if(!jobs.length)return res.status(200).json({...base,configured:false,available:false,events:[],count:0,providersConfigured:0,providersAvailable:0,providersContributing:0,providerFailures:0,providerResults:[],message:'No fan-event providers are configured yet. Server-side credentials can be added without exposing API keys to the browser.'});
 
   const providerResults=await Promise.all(jobs);
   const successful=providerResults.filter(result=>result.ok);
   const failed=providerResults.filter(result=>!result.ok);
   const events=groupFanEvents(providerResults.flatMap(result=>result.events),config);
+  const displayedCounts=new Map();
+  for(const event of events){
+    for(const source of Array.isArray(event?.sources)?event.sources:[]){
+      displayedCounts.set(source.provider,(displayedCounts.get(source.provider)||0)+1);
+    }
+  }
+  const providersContributing=displayedCounts.size;
+  const contributingLabel=`${providersContributing} contributing provider${providersContributing===1?'':'s'}`;
+  const respondingLabel=`${successful.length} connected provider${successful.length===1?'':'s'} responded`;
   return res.status(200).json({
     ...base,configured:true,available:Boolean(events.length),events,count:events.length,providersConfigured:jobs.length,
-    providersAvailable:successful.length,providerFailures:failed.length,
-    providerResults:providerResults.map(({events:rows,...result})=>({...result,count:rows.length})),
-    message:events.length?`Showing ${events.length} upcoming event${events.length===1?'':'s'} from ${successful.length} connected source${successful.length===1?'':'s'} around ${config.regionLabel}.`:`Connected event sources did not return an upcoming event verified inside the current ${config.radiusMiles}-mile ${config.regionLabel} window.`
+    providersAvailable:successful.length,providersContributing,providerFailures:failed.length,
+    providerResults:providerResults.map(({events:rows,...result})=>({...result,count:rows.length,events:displayedCounts.get(result.provider)||0,displayedCount:displayedCounts.get(result.provider)||0})),
+    message:events.length?`Showing ${events.length} upcoming event${events.length===1?'':'s'} from ${contributingLabel}; ${respondingLabel} around ${config.regionLabel}.`:`${respondingLabel}, but none returned an upcoming event verified inside the current ${config.radiusMiles}-mile ${config.regionLabel} window.`
   });
 }
