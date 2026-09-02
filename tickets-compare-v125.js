@@ -9,6 +9,7 @@
   if(!app)return;
 
   const SHORTLIST_KEY='titans:tickets-shortlist-v123';
+  const SHORTLIST_CHANGE='titans:ticket-shortlist-change';
   const MEMORY_KEY='titans:tickets-price-memory-v124';
   const FOCUS_COMPLETE_EVENT='titans:ticket-compare-focus-complete';
   const MAX_FOCUS_SETTLE_FRAMES=18;
@@ -299,6 +300,7 @@
     if(target.closest('[data-ticket-tenx-save],[data-ticket-tenx-clear],[data-ticket-tenx-party],[data-ticket-tenx-budget],[data-ticket-tenx-sort],[data-ticket-trend-clear],[data-ticket-refresh],[data-ticket-filter]'))schedule();
   });
 
+  app.addEventListener(SHORTLIST_CHANGE,schedule);
   addEventListener('storage',event=>{if(event.key===SHORTLIST_KEY||event.key===MEMORY_KEY)schedule();});
   new MutationObserver(schedule).observe(app,{childList:true,subtree:false});
   runtime?.onRoute?.(schedule,{immediate:true});
