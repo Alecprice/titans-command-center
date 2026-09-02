@@ -14,17 +14,9 @@ Titans Command Center keeps event-provider credentials on the server. Never past
 
 The endpoint normalizes provider payloads into one event shape and isolates provider failures so one unavailable service does not break Fan Hub.
 
-## Cloudflare Worker secrets
+## Active provider stack
 
-From a local checkout authenticated to the correct Cloudflare account:
-
-```bash
-npx wrangler@4 secret put EVENTBRITE_PRIVATE_TOKEN
-npx wrangler@4 secret put BANDSINTOWN_API_KEY
-npx wrangler@4 secret put BANDSINTOWN_ARTISTS
-```
-
-`BANDSINTOWN_ARTISTS` is a comma-separated list of exact approved/canonical artist names. Keep this list small and tied to the access granted for the key.
+### Ticketmaster
 
 The existing `TICKETMASTER_API_KEY`, when configured, is automatically reused as the broad Nashville-radius discovery source. No second Ticketmaster key is required.
 
@@ -40,23 +32,38 @@ npx wrangler@4 secret put EVENTBRITE_ORGANIZATION_IDS
 
 The value is a comma-separated list of up to four organization IDs. If omitted, the server asks Eventbrite which organizations the token can access.
 
-### Bandsintown
+### Skiddle
 
-Standard Bandsintown API access is artist-scoped unless Bandsintown explicitly authorizes broader use. Configure only the exact artist name(s) covered by your access. The app does not perform broad artist sweeps and does not accept public artist query parameters.
+Skiddle replaces the removed Bandsintown provider in Fan Event Radar.
 
-### Skiddle — adapter staged, do not enable yet
+The server performs a fixed geographic search around the configured Nashville radius and does not expose an arbitrary Skiddle proxy to browsers. Add the production key with:
 
-The Skiddle adapter is implemented and bounded, but **do not add `SKIDDLE_API_KEY` to production yet**.
+```bash
+npx wrangler@4 secret put SKIDDLE_API_KEY
+```
 
-Current Skiddle API terms require displays of Skiddle data to:
+Current Skiddle API guidance says the API is for non-commercial use unless commercial use is approved in writing. Do not rely on Skiddle data in a commercialized version of the site without that approval.
+
+Skiddle's API terms also require every use of Skiddle data to:
 
 1. credit Skiddle by name,
 2. display the Skiddle brand logo, and
-3. link to Skiddle using the event link returned by the API.
+3. link to Skiddle using the direct event link returned by the API.
 
-The current Fan Event Radar preserves the provider name and direct event link, but this branch does not bundle an official Skiddle logo asset. Add the official approved logo asset and a regression that requires it before enabling the production secret.
+Fan Event Radar satisfies those display requirements by using Skiddle's official unmodified white-on-transparent landscape logo from the official Skiddle brand asset host and by making each Skiddle source action link directly to the event URL returned by Skiddle.
 
-Skiddle is also primarily a UK events source, so a Nashville-radius query may legitimately return zero events even after it is enabled.
+Skiddle is primarily a UK events source, so a Nashville-radius query may legitimately return zero events even when the API key is valid.
+
+## Bandsintown removal
+
+Bandsintown is no longer queried or exposed by the Fan Event Radar provider catalog. If its Worker secrets were previously added, remove them:
+
+```bash
+npx wrangler@4 secret delete BANDSINTOWN_API_KEY
+npx wrangler@4 secret delete BANDSINTOWN_ARTISTS
+```
+
+If Wrangler reports that either binding does not exist, no cleanup is required for that name.
 
 ## Optional fixed scope tuning
 
@@ -77,23 +84,23 @@ Server bounds remain enforced even if environment values are changed:
 - lookahead: 7–60 days
 - returned cards: 6–24
 - Eventbrite organizations: at most 4
-- Bandsintown artists: at most 6
 
 ## Verification after secrets are added
 
 Deploy normally, then check:
 
 ```bash
-curl -sS https://titans.alecjprice.com/api/fan-events
+curl -sS https://titans.alecjprice.com/api/fan-events | python3 -m json.tool
 ```
 
 Expected response traits:
 
 - `ok: true`
 - no API keys/tokens in the response
-- `configuredProviders` shows which providers are wired
+- `configuredProviders.skiddle` is `true` when `SKIDDLE_API_KEY` is bound
 - `providerResults` reports per-provider success/failure and scope
 - `events` contains only normalized HTTPS source links
 - a failed provider does not turn the whole endpoint into a 5xx response
+- no Bandsintown provider appears in `configuredProviders`, `providerCatalog`, or `providerResults`
 
-Then open `https://titans.alecjprice.com/#fan` and verify the **Nashville Event Radar** surface on desktop and mobile.
+Then open `https://titans.alecjprice.com/#fan` and verify the **Nashville Event Radar** surface on desktop and mobile. Any Skiddle result must show the Skiddle logo/name and its direct event link.
