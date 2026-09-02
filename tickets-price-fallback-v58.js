@@ -1,6 +1,7 @@
 import './tickets-tenx-v123.js';
 import './tickets-trend-v124.js';
 import './tickets-compare-v125.js';
+import './tickets-finalists-v127.js';
 
 (() => {
   'use strict';
