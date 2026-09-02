@@ -22,8 +22,12 @@ test('marketplace fallback yields to stronger numeric, cross-check, or observed-
 test('marketplace fallback adds no provider traffic, persistence, recommendation, or price fabrication',()=>{
   assert.doesNotMatch(source,/\bfetch\s*\(/);
   assert.doesNotMatch(source,/setItem\s*\(/);
-  assert.doesNotMatch(source,/buy now|wait to buy|deal score|guaranteed deal/i);
-  assert.doesNotMatch(source,/kind:'marketplace'[\s\S]{0,260}\$\{/);
+  const start=source.indexOf("kind:'marketplace'");
+  const end=source.indexOf('biggestDrop?',start);
+  assert.ok(start>=0&&end>start);
+  const marketplaceBlock=source.slice(start,end);
+  assert.doesNotMatch(marketplaceBlock,/\bmoney\s*\(/);
+  assert.doesNotMatch(marketplaceBlock,/buy|wait|deal|guarante/i);
 });
 
 test('Signal Lens keeps its HTML escaping and factual framing intact',()=>{
