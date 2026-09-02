@@ -22,16 +22,17 @@ test('row detail reports exact observed before and current lines without recomme
   assert.doesNotMatch(review,/\bbest bet\b|\block\b|\bedge score\b|\brecommend(?:ation|ed)?\b|projection/i);
 });
 
-test('changed row detail uses safe DOM text rather than dynamic innerHTML',()=>{
+test('row detail uses safe DOM text and accessible per-book labels',()=>{
   assert.ok(review.includes("detail=document.createElement('div')"));
-  assert.ok(review.includes("detail.setAttribute('aria-label',`Changes since review for ${identity.player} ${identity.market}`)"));
-  assert.ok(review.includes('lead.textContent=`Since review · ${formatTime(baseline.reviewedAt)}`'));
+  assert.ok(review.includes("detail.setAttribute('aria-label',result.kind==='changed'?"));
+  assert.ok(review.includes("lead.textContent=result.kind==='changed'?"));
   assert.ok(review.includes('chip.textContent=bookStateLabel(item)'));
+  assert.ok(review.includes("chip.setAttribute('aria-label',bookStateAria(item))"));
   assert.ok(review.includes('detail.replaceChildren()'));
 });
 
-test('row detail exists only for a real changed checkpoint and cleans up otherwise',()=>{
-  assert.ok(review.includes("if(result?.kind!=='changed'||!baseline){"));
+test('row detail supports changed and unreviewed watched props and cleans up same or unwatched rows',()=>{
+  assert.ok(review.includes("if(!result||result.kind==='same'){"));
   assert.ok(review.includes("detail?.remove();lastQuote?.classList.remove('fpr-before-detail');return;"));
   assert.ok(review.includes('renderRowDetail(row,identity,result,baseline)'));
   assert.ok(review.includes("row.querySelector(':scope > .fpr-row-detail')?.remove()"));
@@ -48,7 +49,7 @@ test('per-book review detail remains phone readable and forced-colors compatible
   assert.ok(review.includes('.fpr-book-state{display:inline-flex'));
   assert.ok(review.includes('min-height:36px'));
   assert.ok(review.includes('flex-basis:100%'));
-  assert.ok(review.includes('.fpr-row-detail,.fpr-book-state{border:1px solid CanvasText}'));
+  assert.ok(review.includes('.fpr-row-detail,.fpr-book-state,.fpr-row-mark{border:1px solid CanvasText}'));
 });
 
 test('detail stays inside the existing review lifecycle with no new traffic or persistence silo',()=>{
