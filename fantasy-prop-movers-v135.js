@@ -1,3 +1,4 @@
+import('./fantasy-prop-history-v136.js').catch(()=>{});
 (() => {
   'use strict';
   const ROUTE='fantasy',ROOT='#fantasy-live-props-v122';
