@@ -1,11 +1,11 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Ticket Center browser regression failure**
-- Source commit: `25b7ad49efe6100e541ff2258750801d32d79461`
+- Source commit: `f1aa7a24cd48a4ab23e1bfc7c285218ffcb15ec8`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `25b7ad49efe6100e541ff2258750801d32d79461`
+- Main SHA observed before deploy: `f1aa7a24cd48a4ab23e1bfc7c285218ffcb15ec8`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers configured: SeatGeek=false, Ticketmaster=false, StubHub=false
@@ -27,7 +27,7 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-02T16:36:39Z
+- Recorded: 2026-09-02T16:49:59Z
 
 ## Canonical front door regression
 
@@ -36,7 +36,7 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "deployedCommit": "fa69a4ad74e91d11abd9504f5d8e9fcc027d3476",
+  "deployedCommit": "70355fe4533232ff458c0f43ebbd5899acb74d0e",
   "version": "1.0.0",
   "revisionAttempts": 1,
   "shellPropagationAttempts": 1,
@@ -85,9 +85,9 @@
     }
   },
   "cloudFront": {
-    "requestId": "Bd_PXujKxuRBjppknkJFxIsF06PbHuL_3uQqkaDcjyz5Ug0bfVOr3A==",
-    "pop": "DFW57-P1",
-    "via": "1.1 b3ac893abff0a2c3dda216fe4cd9157a.cloudfront.net (CloudFront)",
+    "requestId": "8gU5zc9HWz7QpglWI6D767OXxXfH3DlK9t9ZkXWXBoToDuQttiRNfQ==",
+    "pop": "SFO5-P1",
+    "via": "1.1 eb9d64413a6e94ad0c833eaa78fca8fa.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -106,13 +106,13 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 219,
-    "originMeta": 164,
-    "canonicalRoot": 67,
-    "originRoot": 61,
-    "health": 335
+    "canonicalMeta": 736,
+    "originMeta": 514,
+    "canonicalRoot": 310,
+    "originRoot": 178,
+    "health": 133
   },
-  "testedAt": "2026-09-02T16:35:47.481Z"
+  "testedAt": "2026-09-02T16:48:34.121Z"
 }```
 
 ## Production regression
@@ -172,19 +172,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "25b7ad49efe6100e541ff2258750801d32d79461",
-    "builtAt": "2026-09-02T16:35:27.927Z"
+    "commit": "f1aa7a24cd48a4ab23e1bfc7c285218ffcb15ec8",
+    "builtAt": "2026-09-02T16:48:17.869Z"
   },
   "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 98,
-    "health": 260,
-    "data": 175,
-    "stats": 418,
-    "market": 280,
-    "analytics": 250
+    "root": 187,
+    "health": 385,
+    "data": 144,
+    "stats": 271,
+    "market": 340,
+    "analytics": 373
   },
-  "testedAt": "2026-09-02T16:36:06.847Z",
+  "testedAt": "2026-09-02T16:49:15.109Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-snapshot",
@@ -195,8 +195,8 @@
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 463,
-    "testedAt": "2026-09-02T16:36:07.667Z"
+    "responseMs": 467,
+    "testedAt": "2026-09-02T16:49:15.983Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -204,17 +204,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 210,
-    "warmHitMs": 210,
+    "coldOrInitialMs": 333,
+    "warmHitMs": 333,
     "rows": 0,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 210,
+        "durationMs": 333,
         "rows": 0
       }
     ],
-    "testedAt": "2026-09-02T16:36:07.907Z"
+    "testedAt": "2026-09-02T16:49:16.348Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -273,8 +273,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 271,
-  "testedAt": "2026-09-02T16:36:08.550Z"
+  "durationMs": 232,
+  "testedAt": "2026-09-02T16:49:17.079Z"
 }```
 
 ## Browser navigation regression
@@ -320,11 +320,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 190,
+  "maxLongTaskMs": 138,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 9.52,
-  "testedAt": "2026-09-02T16:36:22Z"
+  "durationSeconds": 18.62,
+  "testedAt": "2026-09-02T16:49:40Z"
 }```
 
 ## Listen Watch browser regression
@@ -367,8 +367,8 @@
       "fallbackText": "",
       "iframe": true,
       "iframeApiScript": true,
-      "iframeSrc": "https://www.youtube.com/embed/pY9ff0HmKJQ?autoplay=0&playsinline=1&rel=0&origin=https%3A%2F%2Ftitans.alecjprice.com&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Ftitans.alecjprice.com%2F%23media&aoriginsup=1&vf=1",
-      "videoId": "pY9ff0HmKJQ"
+      "iframeSrc": "https://www.youtube.com/embed/Cy9JY9m264c?autoplay=0&playsinline=1&rel=0&origin=https%3A%2F%2Ftitans.alecjprice.com&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Ftitans.alecjprice.com%2F%23media&aoriginsup=1&vf=1",
+      "videoId": "Cy9JY9m264c"
     }
   },
   "mobileAreaTargets": [
@@ -404,11 +404,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788366985029
+      "timestamp": 1788367783744
     }
   ],
-  "durationSeconds": 2.89,
-  "testedAt": "2026-09-02T16:36:25Z"
+  "durationSeconds": 3.52,
+  "testedAt": "2026-09-02T16:49:44Z"
 }```
 
 ## Market Pulse browser regression
@@ -505,8 +505,8 @@
     "rowGeometry": []
   },
   "browserWarnings": [],
-  "durationSeconds": 2.02,
-  "testedAt": "2026-09-02T16:36:28Z"
+  "durationSeconds": 2.75,
+  "testedAt": "2026-09-02T16:49:47Z"
 }```
 
 ## Ticket Center browser regression
@@ -529,7 +529,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-new-york-jets-nashville-tennessee-09-13-2026/event/1B006470D213F665"
           ],
           "right": 1217,
-          "text": "CHEAPEST TITANS TICKET NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. New York Jets Sun, Sep 13, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 MARKETPLACE AVAILABLEVERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST TITANS TICKET NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. New York Jets Sun, Sep 13, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 MARKETPLACE AVAILABLEVERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -537,7 +537,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-philadelphia-eagles-nashville-tennessee-09-20-2026/event/1B006470D219F66B"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Philadelphia Eagles Sun, Sep 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Philadelphia Eagles Sun, Sep 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -545,7 +545,7 @@
             "https://www.ticketmaster.com/new-york-giants-vs-tennessee-titans-east-rutherford-new-jersey-09-27-2026/event/00006491C2E8E049"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS New York Giants vs. Tennessee Titans Sun, Sep 27, 1:00 PMMetLife Stadium \u00b7 East Rutherford \u00b7 NJ TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS New York Giants vs. Tennessee Titans Sun, Sep 27, 1:00 PMMetLife Stadium \u00b7 East Rutherford \u00b7 NJ TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -553,7 +553,7 @@
             "https://www.ticketmaster.com/baltimore-ravens-v-tennessee-titans-baltimore-maryland-10-04-2026/event/1500648DB7AD9D7D"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace TITANS1 SOURCE WITH OFFERS Baltimore Ravens v Tennessee Titans Sun, Oct 4, 1:00 PMM&T Bank Stadium \u00b7 Baltimore \u00b7 MD TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace TITANS1 SOURCE WITH OFFERS Baltimore Ravens v Tennessee Titans Sun, Oct 4, 1:00 PMM&T Bank Stadium \u00b7 Baltimore \u00b7 MD TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -561,7 +561,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-houston-texans-nashville-tennessee-10-11-2026/event/1B006470D200F645"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Houston Texans Sun, Oct 11, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Houston Texans Sun, Oct 11, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -569,7 +569,7 @@
             "https://www.ticketmaster.com/indianapolis-colts-vs-tennessee-titans-indianapolis-indiana-10-18-2026/event/05006474BEDEA72C"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Indianapolis Colts vs. Tennessee Titans Sun, Oct 18, 1:00 PMLucas Oil Stadium \u00b7 Indianapolis \u00b7 IN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Indianapolis Colts vs. Tennessee Titans Sun, Oct 18, 1:00 PMLucas Oil Stadium \u00b7 Indianapolis \u00b7 IN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -577,7 +577,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-cleveland-browns-nashville-tennessee-10-25-2026/event/1B006470D1F8F636"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Cleveland Browns Sun, Oct 25, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Cleveland Browns Sun, Oct 25, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -585,7 +585,7 @@
             "https://www.ticketmaster.com/cincinnati-bengals-vs-tennessee-titans-cincinnati-ohio-11-01-2026/event/16006469BBD893F2"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Cincinnati Bengals vs. Tennessee Titans Sun, Nov 1, 1:00 PMPaycor Stadium \u00b7 Cincinnati \u00b7 OH TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Cincinnati Bengals vs. Tennessee Titans Sun, Nov 1, 1:00 PMPaycor Stadium \u00b7 Cincinnati \u00b7 OH TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -593,7 +593,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-jacksonville-jaguars-nashville-tennessee-11-15-2026/event/1B006470D20DF658"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Jacksonville Jaguars Sun, Nov 15, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Jacksonville Jaguars Sun, Nov 15, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -601,7 +601,7 @@
             "https://www.ticketmaster.com/dallas-cowboys-vs-tennessee-titans-arlington-texas-11-22-2026/event/0C00646CBC939043"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Dallas Cowboys vs. Tennessee Titans Sun, Nov 22, 12:00 PMAT&T Stadium \u00b7 Arlington \u00b7 TX TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Dallas Cowboys vs. Tennessee Titans Sun, Nov 22, 12:00 PMAT&T Stadium \u00b7 Arlington \u00b7 TX TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -609,7 +609,7 @@
             "https://www.ticketmaster.com/jacksonville-jaguars-vs-tennessee-titans-jacksonville-florida-11-29-2026/event/2200646A920D4DA3"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Jacksonville Jaguars vs. Tennessee Titans Sun, Nov 29, 4:05 PMEverBank Stadium \u00b7 Jacksonville \u00b7 FL TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Jacksonville Jaguars vs. Tennessee Titans Sun, Nov 29, 4:05 PMEverBank Stadium \u00b7 Jacksonville \u00b7 FL TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -617,7 +617,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-washington-commanders-nashville-tennessee-12-06-2026/event/1B006470D232F684"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Washington Commanders Sun, Dec 6, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Washington Commanders Sun, Dec 6, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -625,7 +625,7 @@
             "https://www.ticketmaster.com/detroit-lions-vs-tennessee-titans-detroit-michigan-12-13-2026/event/080064718D7239E3"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Detroit Lions vs. Tennessee Titans Sun, Dec 13, 1:00 PMFord Field \u00b7 Detroit \u00b7 MI TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Detroit Lions vs. Tennessee Titans Sun, Dec 13, 1:00 PMFord Field \u00b7 Detroit \u00b7 MI TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -633,7 +633,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-indianapolis-colts-nashville-tennessee-12-20-2026/event/1B006470D206F655"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Indianapolis Colts Sun, Dec 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Indianapolis Colts Sun, Dec 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -641,7 +641,7 @@
             "https://www.ticketmaster.com/las-vegas-raiders-vs-tennessee-titans-las-vegas-nevada-12-27-2026/event/1700646CC3A0C3A4"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Las Vegas Raiders vs. Tennessee Titans Sun, Dec 27, 1:05 PMAllegiant Stadium \u00b7 Las Vegas \u00b7 NV TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Las Vegas Raiders vs. Tennessee Titans Sun, Dec 27, 1:05 PMAllegiant Stadium \u00b7 Las Vegas \u00b7 NV TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -649,7 +649,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-pittsburgh-steelers-nashville-tennessee-01-03-2027/event/1B006470D21FF66E"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Pittsburgh Steelers Sun, Jan 3, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Pittsburgh Steelers Sun, Jan 3, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         }
       ],
       "fallback": [],
@@ -848,8 +848,8 @@
     "upcoming": false,
     "viewport": 1265
   },
-  "durationSeconds": 10.12,
-  "testedAt": "2026-09-02T16:36:38Z"
+  "durationSeconds": 10.8,
+  "testedAt": "2026-09-02T16:49:58Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
