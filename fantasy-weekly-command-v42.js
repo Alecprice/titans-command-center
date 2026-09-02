@@ -60,8 +60,10 @@
   }
 
   function nextGame(){
+    const games=data?.games||[];
+    if(typeof runtime?.scheduleFocus==='function')return runtime.scheduleFocus(games,new Date())?.next||null;
     const now=Date.now();
-    return (data?.games||[]).find(game=>{const at=Date.parse(game.date);return Number.isFinite(at)&&at>now&&!/final|bye/i.test(String(game.status||''))})||null;
+    return games.map(game=>({game,at:Date.parse(game?.date)})).filter(row=>Number.isFinite(row.at)&&row.at>now&&!/final|bye/i.test(String(row.game?.status||''))).sort((a,b)=>a.at-b.at)[0]?.game||null;
   }
   function gameTime(game){
     const date=new Date(game?.date);if(Number.isNaN(date.getTime()))return 'Kickoff TBD';

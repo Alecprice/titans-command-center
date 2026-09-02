@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {scheduleFocus} from '../src/core.mjs';
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const js=read('fantasy-weekly-command-v42.js');
 const runtime=read('accessibility-runtime.js');
@@ -20,6 +21,30 @@ test('Fantasy weekly context is source-backed and does not invent projections',(
   assert.match(js,/data\?\.transactions/);
   assert.match(js,/does not create projections/i);
   assert.doesNotMatch(js,/projectedPoints|projection\s*[:=]\s*\d|predictedPoints/i);
+});
+
+test('Fantasy weekly next game uses shared chronological future-only schedule truth',()=>{
+  assert.match(js,/runtime\.scheduleFocus\(games,new Date\(\)\)\?\.next\|\|null/);
+  assert.doesNotMatch(js,/runtime\.scheduleFocus\(games,new Date\(\)\)\?\.game/);
+  const current={id:'current',date:'2026-09-02T11:00:00Z',status:'scheduled'};
+  const next={id:'next',date:'2026-09-10T17:00:00Z',status:'scheduled'};
+  const later={id:'later',date:'2026-09-20T17:00:00Z',status:'scheduled'};
+  const focus=scheduleFocus([
+    later,
+    {id:'bye',date:'2026-09-06T17:00:00Z',status:'bye'},
+    current,
+    {id:'final',date:'2026-09-05T17:00:00Z',status:'final'},
+    next
+  ],new Date('2026-09-02T12:00:00Z'));
+  assert.equal(focus.game,current);
+  assert.equal(focus.next,next);
+});
+
+test('Fantasy weekly no-runtime fallback still sorts future schedule rows instead of trusting provider order',()=>{
+  assert.match(js,/games\.map\(game=>\(\{game,at:Date\.parse\(game\?\.date\)\}\)\)/);
+  assert.match(js,/row\.at>now&&!\/final\|bye\/i\.test\(String\(row\.game\?\.status\|\|''\)\)/);
+  assert.match(js,/\.sort\(\(a,b\)=>a\.at-b\.at\)\[0\]\?\.game\|\|null/);
+  assert.doesNotMatch(js,/\(data\?\.games\|\|\[\]\)\.find\(/);
 });
 
 test('Fantasy weekly command reuses existing Fantasy state instead of another preference silo',()=>{
