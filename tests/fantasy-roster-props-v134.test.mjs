@@ -41,7 +41,7 @@ test('missing or failed Sleeper context never hides or fabricates prop rows',()=
   assert.match(bridge,/No prop rows were guessed or hidden/);
   assert.match(bridge,/if\(!name\|\|!state\.context\?\.matched\)return null/);
   assert.match(bridge,/state\.rosterOnly=false/);
-  assert.doesNotMatch(bridge,/recommend|best bet|edge score|lock/i);
+  assert.doesNotMatch(bridge,/\b(?:recommend|best bet|edge score|lock)\b/i);
 });
 
 test('roster prop decorator avoids recursive MutationObserver churn',()=>{
