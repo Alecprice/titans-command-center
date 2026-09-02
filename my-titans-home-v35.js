@@ -64,7 +64,7 @@
     const favoriteTitle=favorite||'Choose a favorite player';
     const favoriteHref=favoriteTarget(favorite);
     const favoriteVerified=favoriteHref.startsWith('#player?');
-    const favoriteDetail=!favorite?'Set your player identity in My Titans':favoriteVerified?'Open verified Player Intelligence':data?'Saved favorite is not on the loaded roster. Review Team Room.':'Checking against the current roster…';
+    const favoriteDetail=!favorite?'Set your player identity in My Titans':favoriteVerified?'Open verified Player Intelligence':data?'Saved favorite is not on the loaded roster. Review Team Room before opening a player page.':'Checking your favorite against the current roster…';
     const favoriteAction=!favorite?'Set favorite →':favoriteVerified?'Open player →':'Review roster →';
     const fantasyTitle=savedCount?`${savedCount} saved · ${starterCount} starters`:'Build your board';
     const fantasyDetail=`${scoringLabel(fantasy.scoring)}${sleeper?' · Sleeper linked':' · Sleeper optional'}`;
