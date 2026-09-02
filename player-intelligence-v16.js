@@ -6,7 +6,7 @@
   let serial=0,fanPromise=null,dataPromise=null,preseasonPromise=null;
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const playerId=()=>new URLSearchParams(location.hash.split('?')[1]||'').get('id')||'';
-  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const arr=value=>Array.isArray(value)?value:[];
   const getJson=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback}};
   const setJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
