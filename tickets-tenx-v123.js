@@ -14,7 +14,7 @@
   const MAX_SAVED=3;
   const state={budget:'all',sort:'price',party:2,queued:false};
   const money=value=>Number.isFinite(value)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value):'—';
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
 
   function ensureStyles(){
