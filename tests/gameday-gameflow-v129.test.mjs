@@ -25,8 +25,8 @@ test('Game Flow mounts only for confirmed live Game Day and never promotes sched
 test('Game Flow renders recent drives and plays truthfully with explicit empty states',()=>{
   assert.match(js,/How the game got here/);
   assert.match(js,/CURRENT \/ LATEST DRIVE/);
-  assert.match(js,/Drive sequence is not loaded yet\. Gameday will not manufacture drive results\./);
-  assert.match(js,/Play-by-play sequence is awaiting structured data\. No play description is guessed\./);
+  assert.match(js,/Drive sequence is not available yet\. Gameday will not manufacture drive results\./);
+  assert.match(js,/Play-by-play is not available yet\. No play description is guessed\./);
   assert.match(js,/Math\.abs\(wpa\|\|0\)>=\.08\|\|play\.explosive/);
   assert.match(js,/WPA \$\{wpa>=0\?'\+':''\}/);
   assert.match(js,/EPA \$\{epa>=0\?'\+':''\}/);
