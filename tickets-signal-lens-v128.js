@@ -15,7 +15,7 @@
 
   const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
   const money=value=>Number.isFinite(value)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value):'—';
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 
   function ensureStyles(){
     if(document.querySelector('link[data-tickets-signal-lens-v128]'))return;
@@ -152,6 +152,10 @@
     if(node)node.textContent=message;
   }
 
+  function liveCenter(){
+    return app.querySelector('[data-ticket-center]');
+  }
+
   function findCard(center,key){
     return [...center.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')].find(node=>node.dataset.ticketTenxKey===key)||null;
   }
@@ -164,24 +168,35 @@
       '[data-ticket-finalists-budget="all"]'
     ];
     for(const selector of selectors){
+      center=liveCenter()||center;
+      if(!center||!center.isConnected)return liveCenter();
       const control=center.querySelector(selector);
       if(control&&!control.disabled&&control.getAttribute('aria-pressed')!=='true')control.click();
     }
+    return liveCenter()||center;
   }
 
   function focusState(center,key){
+    center=liveCenter()||center;
+    if(!center||!center.isConnected)return {settled:false,card:null,center:null};
     const all=center.querySelector('[data-ticket-filter="all"]')?.getAttribute('aria-pressed')==='true';
     const ticketBudget=center.querySelector('[data-ticket-tenx-budget="all"]')?.getAttribute('aria-pressed')==='true';
     const allGames=center.querySelector('[data-ticket-finalists-view="all"]')?.getAttribute('aria-pressed')==='true';
     const groupBudget=center.querySelector('[data-ticket-finalists-budget="all"]')?.getAttribute('aria-pressed')==='true';
     const card=findCard(center,key);
-    return {settled:Boolean(all&&ticketBudget&&allGames&&groupBudget&&card&&!card.hidden),card};
+    return {settled:Boolean(all&&ticketBudget&&allGames&&groupBudget&&card&&!card.hidden),card,center};
   }
 
   function settleReveal(center,key,reduce,frame=0,stableFrames=0){
-    if(route()!=='tickets'||!center.isConnected)return;
-    requestCanonicalFilters(center);
+    if(route()!=='tickets')return;
+    center=liveCenter()||center;
+    if(!center||!center.isConnected){
+      if(frame<MAX_FOCUS_SETTLE_FRAMES)requestAnimationFrame(()=>settleReveal(center,key,reduce,frame+1,0));
+      return;
+    }
+    center=requestCanonicalFilters(center)||liveCenter()||center;
     const current=focusState(center,key);
+    center=current.center||liveCenter()||center;
     if(current.settled&&current.card){
       const focusTarget=current.card.querySelector('.tickets-offer-row a,[data-ticket-tenx-save],button,a');
       if(focusTarget&&!current.card.contains(document.activeElement))focusTarget.focus({preventScroll:true});
@@ -201,16 +216,21 @@
       requestAnimationFrame(()=>settleReveal(center,key,reduce,frame+1,0));
       return;
     }
-    delete center.dataset.ticketSignalFocusComplete;
-    setStatus(center,'Could not settle that matchup view. Try Show matchup again.');
+    center=liveCenter()||center;
+    if(center){
+      delete center.dataset.ticketSignalFocusComplete;
+      setStatus(center,'Could not settle that matchup view. Try Show matchup again.');
+    }
   }
 
   function reveal(center,key){
     if(!key)return;
+    center=liveCenter()||center;
+    if(!center)return;
     delete center.dataset.ticketSignalFocusComplete;
     const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     setStatus(center,'Opening that matchup and clearing conflicting ticket filters…');
-    requestCanonicalFilters(center);
+    center=requestCanonicalFilters(center)||liveCenter()||center;
     requestAnimationFrame(()=>settleReveal(center,key,reduce,0,0));
   }
 
