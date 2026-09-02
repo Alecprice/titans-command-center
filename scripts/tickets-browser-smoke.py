@@ -14,6 +14,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 REPORT=Path('/tmp/tickets-browser-smoke.json')
 SAFE_ROOTS=('seatgeek.com','ticketmaster.com','stubhub.com','tennesseetitans.com')
+SHORTLIST_KEY='titans:tickets-shortlist-v123'
+MEMORY_KEY='titans:tickets-price-memory-v124'
 
 
 def driver_for(width=1280,height=900):
@@ -72,6 +74,13 @@ def load_route(driver,route,attempts=2):
     raise last
 
 
+def clear_tenx_state(driver):
+    driver.execute_script("""
+      localStorage.removeItem(arguments[0]);
+      localStorage.removeItem(arguments[1]);
+    """,SHORTLIST_KEY,MEMORY_KEY)
+
+
 def prepare_returning_user(driver):
     try:driver.get(f'{BASE}/')
     except TimeoutException:
@@ -79,8 +88,10 @@ def prepare_returning_user(driver):
         except Exception:pass
     driver.execute_script("""
       localStorage.setItem('titans:v10Onboarded','1');
+      localStorage.removeItem(arguments[0]);
+      localStorage.removeItem(arguments[1]);
       document.querySelector('#v10-onboarding [data-v10-close]')?.click();
-    """)
+    """,SHORTLIST_KEY,MEMORY_KEY)
     load_route(driver,'tickets')
 
 
@@ -197,6 +208,150 @@ def exercise_fallback_filters(driver,initial):
     return result
 
 
+def compare_snapshot(driver):
+    return driver.execute_script(r"""
+      const center=document.querySelector('[data-ticket-center]');
+      if(!center)return null;
+      const panel=center.querySelector('[data-ticket-compare-v125]');
+      const cards=panel?[...panel.querySelectorAll('.tickets-compare-v125-card')]:[];
+      const viewport=document.documentElement.clientWidth;
+      return {
+        panel:Boolean(panel),
+        count:cards.length,
+        text:(panel?.textContent||'').replace(/\s+/g,' ').trim(),
+        viewport,
+        overflow:document.documentElement.scrollWidth>viewport+3,
+        cards:cards.map(card=>({
+          key:card.dataset.ticketCompareKey||'',
+          left:card.getBoundingClientRect().left,
+          right:card.getBoundingClientRect().right,
+          beforeFees:(card.textContent||'').includes('before fees'),
+          actions:[...card.querySelectorAll('button')].map(button=>({
+            text:button.textContent.trim(),
+            height:button.getBoundingClientRect().height
+          }))
+        }))
+      };
+    """)
+
+
+def saved_count(driver):
+    return driver.execute_script("""
+      try{
+        const value=JSON.parse(localStorage.getItem(arguments[0])||'[]');
+        return Array.isArray(value)?value.length:0;
+      }catch{return 0;}
+    """,SHORTLIST_KEY)
+
+
+def exercise_saved_compare(driver,label,mobile=False):
+    WebDriverWait(driver,10,poll_frequency=.1).until(
+        lambda d:d.execute_script("return Boolean(document.querySelector('[data-ticket-center] [data-ticket-tenx-command]'))")
+    )
+    card_count=driver.execute_script("return document.querySelectorAll('[data-ticket-center] .tickets-compare-card[data-ticket-tenx-key]').length")
+    if card_count<2:
+        return {'skipped':'need at least 2 live comparison cards','availableCards':card_count}
+
+    keys=driver.execute_script("""
+      return [...document.querySelectorAll('[data-ticket-center] .tickets-compare-card[data-ticket-tenx-key]')]
+        .slice(0,2).map(card=>card.dataset.ticketTenxKey).filter(Boolean);
+    """)
+    if len(keys)<2 or len(set(keys))<2:
+        raise RuntimeError(f'{label}: could not identify two distinct live matchup keys: {keys}')
+
+    for expected_count,key in enumerate(keys,start=1):
+        clicked=driver.execute_script("""
+          const center=document.querySelector('[data-ticket-center]');
+          const card=[...center.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')]
+            .find(node=>node.dataset.ticketTenxKey===arguments[0]);
+          const button=card?.querySelector('[data-ticket-tenx-save]');
+          if(!button)return false;
+          button.click();
+          return true;
+        """,key)
+        if not clicked:raise RuntimeError(f'{label}: save control missing for {key}')
+        WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:saved_count(d)==expected_count)
+
+    WebDriverWait(driver,8,poll_frequency=.1).until(
+        lambda d:d.execute_script("return document.querySelectorAll('[data-ticket-compare-v125] .tickets-compare-v125-card').length")>=2
+    )
+    state=compare_snapshot(driver)
+    if not state or state['count']!=2:raise RuntimeError(f'{label}: saved compare did not render two cards: {state}')
+    if state['overflow']:raise RuntimeError(f'{label}: compare flow created horizontal page overflow: {state}')
+    if any(not card['beforeFees'] for card in state['cards']):raise RuntimeError(f'{label}: compare party totals lost before-fees disclosure: {state}')
+    short_actions=[action for card in state['cards'] for action in card['actions'] if action['height']<44]
+    if short_actions:raise RuntimeError(f'{label}: compare actions below 44px: {short_actions}')
+    if mobile and any(card['left']<-1 or card['right']>state['viewport']+1 for card in state['cards']):
+        raise RuntimeError(f'{label}: compare card escapes mobile viewport: {state}')
+
+    party_clicked=driver.execute_script("""
+      const button=document.querySelector('[data-ticket-center] [data-ticket-tenx-party="3"]');
+      if(!button)return false;
+      button.click();
+      return true;
+    """)
+    if not party_clicked:raise RuntimeError(f'{label}: party-size 3 control missing')
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:d.execute_script("""
+      return document.querySelector('[data-ticket-tenx-party="3"]')?.getAttribute('aria-pressed')==='true'
+        && (document.querySelector('[data-ticket-compare-v125]')?.textContent||'').includes('3 tickets');
+    """))
+    party_state=compare_snapshot(driver)
+    if 'before fees' not in party_state['text'].lower():raise RuntimeError(f'{label}: party-size compare lost before-fees copy: {party_state}')
+
+    focus_key=keys[0]
+    focused=driver.execute_script("""
+      const card=document.querySelector(`[data-ticket-compare-v125] [data-ticket-compare-key="${arguments[0]}"]`);
+      const button=card?.querySelector('[data-ticket-compare-focus]');
+      if(!button)return false;
+      button.click();
+      return true;
+    """,focus_key)
+    if not focused:raise RuntimeError(f'{label}: View offers control missing for saved matchup')
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const center=document.querySelector('[data-ticket-center]');
+      const all=center?.querySelector('[data-ticket-filter="all"]')?.getAttribute('aria-pressed')==='true';
+      const budget=center?.querySelector('[data-ticket-tenx-budget="all"]')?.getAttribute('aria-pressed')==='true';
+      const card=[...center?.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')||[]]
+        .find(node=>node.dataset.ticketTenxKey===arguments[0]);
+      return Boolean(all&&budget&&card&&card.contains(document.activeElement));
+    """,focus_key))
+
+    removed=driver.execute_script("""
+      const card=document.querySelector(`[data-ticket-compare-v125] [data-ticket-compare-key="${arguments[0]}"]`);
+      const button=card?.querySelector('[data-ticket-tenx-save]');
+      if(!button)return false;
+      button.click();
+      return true;
+    """,focus_key)
+    if not removed:raise RuntimeError(f'{label}: compare remove control missing')
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:saved_count(d)==1)
+    WebDriverWait(driver,8,poll_frequency=.1).until(
+        lambda d:d.execute_script("return document.querySelectorAll('[data-ticket-compare-v125] .tickets-compare-v125-card').length")==1
+    )
+
+    cleared=driver.execute_script("""
+      const button=document.querySelector('[data-ticket-center] [data-ticket-tenx-clear]');
+      if(!button)return false;
+      button.click();
+      return true;
+    """)
+    if not cleared:raise RuntimeError(f'{label}: shortlist clear control missing after compare removal')
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:saved_count(d)==0)
+    WebDriverWait(driver,8,poll_frequency=.1).until(
+        lambda d:not d.execute_script("return Boolean(document.querySelector('[data-ticket-compare-v125]'))")
+    )
+
+    return {
+        'savedKeys':keys,
+        'initialCompareCards':state['count'],
+        'partySize':3,
+        'viewOffersFocused':True,
+        'removeLifecycle':True,
+        'clearLifecycle':True,
+        'mobileViewportChecked':bool(mobile)
+    }
+
+
 def severe_logs(driver):
     rows=[]
     for entry in driver.get_log('browser'):
@@ -215,7 +370,10 @@ try:
     result['desktop']={'state':desktop_state,'summary':state}
     if mode=='fallback' and state['fallback']:
         stage='desktop:filters';result['desktop']['filters']=exercise_fallback_filters(driver,state)
+    elif mode=='comparison':
+        stage='desktop:tenx-compare';result['desktop']['savedCompare']=exercise_saved_compare(driver,'desktop')
 
+    stage='mobile:reset';clear_tenx_state(driver)
     stage='mobile:reload';driver.set_window_size(390,844);load_route(driver,'tickets');wait_ticket_center(driver,len(expected),timeout=22);mobile=summary(driver)
     stage='mobile:truth';mobile_state=assert_base_state(mobile,'mobile',expected)
     short=[control for control in mobile['filters'] if control['height']<44]
@@ -224,6 +382,8 @@ try:
     if any(card['left']<-1 or card['right']>391 for card in visible_cards):raise RuntimeError(f'mobile fallback card escapes viewport: {visible_cards[:4]}')
     if any(card['left']<-1 or card['right']>391 for card in mobile['comparison']):raise RuntimeError(f'mobile comparison card escapes viewport: {mobile["comparison"][:4]}')
     result['mobile']={'state':mobile_state,'summary':mobile}
+    if mobile_state['mode']=='comparison':
+        stage='mobile:tenx-compare';result['mobile']['savedCompare']=exercise_saved_compare(driver,'mobile',mobile=True)
 
     stage='console';result['browserWarnings']=severe_logs(driver)
     if result['browserWarnings']:raise RuntimeError(f'Ticket Center browser console errors: {result["browserWarnings"][:5]}')
