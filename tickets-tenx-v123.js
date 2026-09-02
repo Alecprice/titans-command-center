@@ -10,10 +10,11 @@
 
   const VERSION='123';
   const STORAGE_KEY='titans:tickets-shortlist-v123';
+  const SHORTLIST_CHANGE='titans:ticket-shortlist-change';
   const MAX_SAVED=3;
   const state={budget:'all',sort:'price',party:2,queued:false};
   const money=value=>Number.isFinite(value)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value):'—';
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
   const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
 
   function ensureStyles(){
@@ -45,6 +46,17 @@
   }
 
   function writeSaved(value){runtime?.storage?.setJSON?.(STORAGE_KEY,value.slice(0,MAX_SAVED));}
+
+  function announceSaved(center,saved=readSaved()){
+    const items=Array.isArray(saved)?saved.filter(item=>item&&typeof item.key==='string').slice(0,MAX_SAVED):[];
+    const keys=items.map(item=>item.key);
+    const count=keys.length;
+    center.dataset.ticketTenxSavedCount=String(count);
+    const tray=center.querySelector('[data-ticket-tenx-shortlist]');
+    if(tray)tray.dataset.ticketTenxSavedCount=String(count);
+    center.dispatchEvent(new CustomEvent(SHORTLIST_CHANGE,{bubbles:true,detail:{count,keys:[...keys]}}));
+    window.dispatchEvent(new StorageEvent('storage',{key:STORAGE_KEY,newValue:JSON.stringify(items)}));
+  }
 
   function recordFor(card,index){
     const title=card.querySelector('.tickets-event-copy h3')?.textContent?.trim()||'Titans matchup';
@@ -109,7 +121,7 @@
         <fieldset><legend>Sort games</legend><button type="button" data-ticket-tenx-sort="price" aria-pressed="${state.sort==='price'}">Cheapest</button><button type="button" data-ticket-tenx-sort="sources" aria-pressed="${state.sort==='sources'}">Most sources</button></fieldset>
         <fieldset><legend>Party size</legend>${[1,2,3,4].map(size=>`<button type="button" data-ticket-tenx-party="${size}" aria-pressed="${state.party===size}">${size}</button>`).join('')}</fieldset>
       </div>
-      <div class="tickets-tenx-shortlist" data-ticket-tenx-shortlist><div><strong>Compare shortlist</strong><span>Save up to ${MAX_SAVED} matchups. Prices refresh from the live cards when available.</span></div><div data-ticket-tenx-saved>${saved.length?`${saved.length}/${MAX_SAVED} saved`:'Nothing saved yet'}</div>${saved.length?'<button type="button" data-ticket-tenx-clear>Clear</button>':''}</div>
+      <div class="tickets-tenx-shortlist" data-ticket-tenx-shortlist data-ticket-tenx-saved-count="${saved.length}"><div><strong>Compare shortlist</strong><span>Save up to ${MAX_SAVED} matchups. Prices refresh from the live cards when available.</span></div><div data-ticket-tenx-saved>${saved.length?`${saved.length}/${MAX_SAVED} saved`:'Nothing saved yet'}</div>${saved.length?'<button type="button" data-ticket-tenx-clear>Clear</button>':''}</div>
       <p class="tickets-tenx-status" data-ticket-tenx-status role="status" aria-live="polite"></p>
     </section>`;
   }
@@ -160,6 +172,8 @@
       return `<article><span><strong>${esc(title)}</strong><small>${esc(date)}</small></span><b>${price!=null?`${esc(money(price))} from`:'Price not in current filter'}</b><button type="button" data-ticket-tenx-save="${esc(savedItem.key)}" aria-label="Remove ${esc(title)} from shortlist">×</button></article>`;
     }).join('');
     tray.classList.toggle('has-saved',Boolean(saved.length));
+    tray.dataset.ticketTenxSavedCount=String(saved.length);
+    center.dataset.ticketTenxSavedCount=String(saved.length);
     tray.innerHTML=`<div><strong>Compare shortlist</strong><span>${saved.length?`${saved.length}/${MAX_SAVED} saved · current prices shown when this filter includes the matchup`:`Save up to ${MAX_SAVED} matchups to keep your finalists together.`}</span></div><div class="tickets-tenx-saved-cards">${content||'<em>Nothing saved yet</em>'}</div>${saved.length?'<button type="button" data-ticket-tenx-clear>Clear</button>':''}`;
   }
 
@@ -205,6 +219,7 @@
     }
     decorate(items);
     savedTray(center,items);
+    announceSaved(center,saved);
   }
 
   function enhance(){
@@ -237,7 +252,7 @@
     if(party){state.party=Math.min(4,Math.max(1,Number(party.dataset.ticketTenxParty)||2));decorate(records(center));apply(center,records(center));setStatus(center,`Showing simple starting-price totals for ${state.party} ticket${state.party===1?'':'s'} before fees.`);return;}
     const save=target.closest('[data-ticket-tenx-save]');
     if(save){toggleSaved(center,save.dataset.ticketTenxSave||'');return;}
-    if(target.closest('[data-ticket-tenx-clear]')){writeSaved([]);decorate(records(center));savedTray(center,records(center));setStatus(center,'Compare shortlist cleared.');}
+    if(target.closest('[data-ticket-tenx-clear]')){const saved=[];writeSaved(saved);decorate(records(center));savedTray(center,records(center));announceSaved(center,saved);setStatus(center,'Compare shortlist cleared.');}
   });
 
   new MutationObserver(schedule).observe(app,{childList:true,subtree:false});
