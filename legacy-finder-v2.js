@@ -1,8 +1,10 @@
 import { ensureLegacyHeritage } from './legacy-heritage-v3.js';
 import { ensureLegacyTrails } from './legacy-trails-v4.js';
 
-const FINDER_VERSION='2.3.0';
+const FINDER_VERSION='2.4.0';
 const ROUTE='legacy';
+const MY_MUSEUM_KEY='titans:legacy-my-museum-v1';
+const MY_MUSEUM_MAX=12;
 const SECTION_MAP={
   story:{id:'legacy-story',label:'Story',selectors:['.legacy-story-card']},
   moments:{id:'legacy-moments',label:'Moments',selectors:['.legacy-moment-card']},
@@ -21,6 +23,8 @@ const EXHIBIT_RULES=[
   {type:'venue',selector:'.legacy-venue-card',label:item=>item.querySelector('h3')?.textContent||''},
   {type:'honor',selector:'.legacy-honor-card',label:item=>item.querySelector('h4')?.textContent||''}
 ];
+const EXHIBIT_TYPE_LABEL={story:'Story',moment:'Moment',legend:'Legend',record:'Record',retired:'Retired number',venue:'Stadium',honor:'Ring of Honor'};
+let volatileMyMuseum=[];
 
 const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
 const normalize=value=>String(value||'').toLocaleLowerCase('en-US').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
@@ -28,6 +32,8 @@ const tokens=value=>normalize(value).split(' ').filter(Boolean);
 const scopeForItem=item=>Object.entries(SECTION_MAP).find(([,section])=>section.selectors.some(selector=>item.matches(selector)))?.[0]||'all';
 const slug=value=>normalize(value).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,72);
 const exhibitRuleFor=item=>EXHIBIT_RULES.find(rule=>item.matches(rule.selector))||null;
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const exhibitType=key=>String(key||'').split('-',1)[0]||'';
 
 function hashState(){
   const [,query='']=location.hash.replace(/^#/,'').split('?');
@@ -65,6 +71,31 @@ function exactExhibitUrl(key){
   return `${location.origin}${location.pathname}${location.search}#${ROUTE}?exhibit=${encodeURIComponent(clean)}`;
 }
 
+function normalizeMyMuseum(value,index){
+  const source=Array.isArray(value)?value:Array.isArray(value?.keys)?value.keys:[];
+  return [...new Set(source.map(key=>String(key||'').trim()).filter(key=>key.length<=96&&index.byExhibit.has(key)))].slice(0,MY_MUSEUM_MAX);
+}
+
+function readMyMuseum(index){
+  try{
+    const raw=localStorage.getItem(MY_MUSEUM_KEY);
+    let parsed={};
+    try{parsed=raw?JSON.parse(raw):{};}catch{parsed={};}
+    const keys=normalizeMyMuseum(parsed,index);
+    volatileMyMuseum=keys;
+    return {keys,available:true};
+  }catch{return {keys:normalizeMyMuseum({keys:volatileMyMuseum},index),available:false};}
+}
+
+function persistMyMuseum(keys,index){
+  const normalized=normalizeMyMuseum({keys},index);
+  volatileMyMuseum=normalized;
+  try{
+    localStorage.setItem(MY_MUSEUM_KEY,JSON.stringify({version:1,keys:normalized}));
+    return {keys:normalized,available:true};
+  }catch{return {keys:normalized,available:false};}
+}
+
 function finderMarkup(counts){
   const tabs=[['all','All'],...Object.entries(SECTION_MAP).map(([key,value])=>[key,value.label])];
   return `<section class="legacy-finder" data-legacy-finder data-version="${FINDER_VERSION}" aria-labelledby="legacy-finder-title">
@@ -80,6 +111,14 @@ function finderMarkup(counts){
     <div class="legacy-finder-scopes" role="group" aria-label="Limit Legacy Finder to a museum section">${tabs.map(([key,label])=>`<button type="button" data-legacy-finder-scope="${key}" aria-pressed="${key==='all'}">${label}<span>${key==='all'?counts.total:counts[key]}</span></button>`).join('')}</div>
     <div class="legacy-finder-feedback"><span id="legacy-finder-count" role="status" aria-live="polite"></span><span id="legacy-finder-action" role="status" aria-live="polite"></span><button type="button" class="legacy-exhibit-clear" data-legacy-exhibit-clear hidden>Back to full museum</button></div>
     <div class="legacy-finder-empty" data-legacy-finder-empty hidden><strong>No museum entries match.</strong><span>Try a player, venue, season, team era or a broader section.</span><button type="button" data-legacy-finder-clear>Reset Legacy Finder</button></div>
+  </section>`;
+}
+
+function myMuseumMarkup(){
+  return `<section class="legacy-my-museum" data-legacy-my-museum aria-labelledby="legacy-my-museum-title">
+    <div class="legacy-my-museum-head"><div><small>Your personal Legacy shelf</small><h2 id="legacy-my-museum-title">My Museum</h2><p>Save up to ${MY_MUSEUM_MAX} exhibits from Finder results or exact exhibit links. Saved items stay on this browser and never change Museum Passport progress.</p></div><strong data-legacy-my-museum-count>0 / ${MY_MUSEUM_MAX} saved</strong></div>
+    <div class="legacy-my-museum-list" data-legacy-my-museum-list></div>
+    <div class="legacy-my-museum-note" data-legacy-my-museum-note role="status" aria-live="polite"></div>
   </section>`;
 }
 
@@ -103,7 +142,7 @@ function decorateExhibit(item,usedKeys){
   item.dataset.legacyExhibitKey=key;
   item.dataset.legacyExhibitLabel=label;
   item.setAttribute('tabindex','-1');
-  if(!item.querySelector('[data-legacy-exhibit-share]'))item.insertAdjacentHTML('beforeend',`<div class="legacy-exhibit-actions"><button type="button" data-legacy-exhibit-share="${key}" aria-label="Share Legacy exhibit: ${label.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}">Share exhibit</button></div>`);
+  if(!item.querySelector('[data-legacy-exhibit-share]'))item.insertAdjacentHTML('beforeend',`<div class="legacy-exhibit-actions"><button type="button" data-legacy-exhibit-save="${key}" aria-pressed="false" aria-label="Save Legacy exhibit: ${esc(label)}">Save exhibit</button><button type="button" data-legacy-exhibit-share="${key}" aria-label="Share Legacy exhibit: ${esc(label)}">Share exhibit</button></div>`);
   return key;
 }
 
@@ -155,7 +194,7 @@ function createController(page,finder,index){
   const empty=finder.querySelector('[data-legacy-finder-empty]');
   const exhibitClear=finder.querySelector('[data-legacy-exhibit-clear]');
   const sectionNodes=Object.fromEntries(Object.entries(SECTION_MAP).map(([key,section])=>[key,page.querySelector(`#${CSS.escape(section.id)}`)]));
-  let state={q:'',scope:'all'},spotlight=null;
+  let state={q:'',scope:'all'},spotlight=null,myMuseum=readMyMuseum(index),myMuseumRoot=null;
 
   function updateSections(active){
     Object.entries(sectionNodes).forEach(([key,section])=>{
@@ -229,6 +268,87 @@ function createController(page,finder,index){
     if(syncUrl)writeHashState(state.q,state.scope);
   }
 
+  function updateSaveButtons(){
+    const saved=new Set(myMuseum.keys);
+    page.querySelectorAll('[data-legacy-exhibit-save]').forEach(button=>{
+      const key=button.dataset.legacyExhibitSave||'';
+      const isSaved=saved.has(key);
+      const label=index.byExhibit.get(key)?.dataset.legacyExhibitLabel||'Legacy exhibit';
+      button.setAttribute('aria-pressed',String(isSaved));
+      button.textContent=isSaved?'Saved exhibit':'Save exhibit';
+      button.setAttribute('aria-label',`${isSaved?'Remove saved':'Save'} Legacy exhibit: ${label}`);
+    });
+  }
+
+  function renderMyMuseum(){
+    if(!myMuseumRoot)return;
+    const list=myMuseumRoot.querySelector('[data-legacy-my-museum-list]');
+    const total=myMuseumRoot.querySelector('[data-legacy-my-museum-count]');
+    const note=myMuseumRoot.querySelector('[data-legacy-my-museum-note]');
+    total.textContent=`${myMuseum.keys.length} / ${MY_MUSEUM_MAX} saved`;
+    if(!myMuseum.keys.length){
+      list.innerHTML='<div class="legacy-my-museum-empty"><strong>Start your shelf</strong><span>Use Legacy Finder or open an exact exhibit link, then choose Save exhibit. Your shelf does not award Passport stamps.</span></div>';
+    }else{
+      list.innerHTML=myMuseum.keys.map(key=>{
+        const item=index.byExhibit.get(key);
+        if(!item)return'';
+        const label=item.dataset.legacyExhibitLabel||'Legacy exhibit';
+        const type=EXHIBIT_TYPE_LABEL[exhibitType(key)]||'Exhibit';
+        return `<article class="legacy-my-museum-card" data-legacy-my-museum-item="${esc(key)}"><small>${esc(type)}</small><strong>${esc(label)}</strong><div><button type="button" data-legacy-my-museum-open="${esc(key)}">Open exhibit</button><button type="button" data-legacy-my-museum-remove="${esc(key)}" aria-label="Remove ${esc(label)} from My Museum">Remove</button></div></article>`;
+      }).join('');
+    }
+    note.textContent=myMuseum.available?'Saved only on this browser. No account sync or Passport changes.':'Browser storage is unavailable here. My Museum saves last for this visit only.';
+    updateSaveButtons();
+  }
+
+  function ensureMyMuseum(){
+    if(!myMuseumRoot){
+      finder.insertAdjacentHTML('afterend',myMuseumMarkup());
+      myMuseumRoot=page.querySelector('[data-legacy-my-museum]');
+    }
+    renderMyMuseum();
+    page.dataset.legacyMyMuseumReady='true';
+    return myMuseumRoot;
+  }
+
+  function saveMyMuseum(keys,message){
+    myMuseum=persistMyMuseum(keys,index);
+    renderMyMuseum();
+    const suffix=myMuseum.available?'':' · this visit only';
+    action.textContent=`${message}${suffix}`;
+  }
+
+  function toggleSaved(button){
+    const key=button?.dataset.legacyExhibitSave||'';
+    const item=index.byExhibit.get(key);
+    if(!item)return;
+    const label=item.dataset.legacyExhibitLabel||'Legacy exhibit';
+    if(myMuseum.keys.includes(key)){
+      saveMyMuseum(myMuseum.keys.filter(saved=>saved!==key),`Removed from My Museum · ${label}`);
+      return;
+    }
+    if(myMuseum.keys.length>=MY_MUSEUM_MAX){
+      action.textContent=`My Museum is full at ${MY_MUSEUM_MAX} exhibits. Remove one before saving another.`;
+      return;
+    }
+    saveMyMuseum([key,...myMuseum.keys],`Saved to My Museum · ${label}`);
+  }
+
+  function removeSaved(button){
+    const key=button?.dataset.legacyMyMuseumRemove||'';
+    const item=index.byExhibit.get(key);
+    if(!item||!myMuseum.keys.includes(key))return;
+    const label=item.dataset.legacyExhibitLabel||'Legacy exhibit';
+    saveMyMuseum(myMuseum.keys.filter(saved=>saved!==key),`Removed from My Museum · ${label}`);
+  }
+
+  function openSaved(button){
+    const key=button?.dataset.legacyMyMuseumOpen||'';
+    const item=index.byExhibit.get(key);
+    if(!item)return;
+    if(focusExhibit(key,{syncUrl:true,scroll:true}))action.textContent=`Opened from My Museum · ${item.dataset.legacyExhibitLabel||'Legacy exhibit'}`;
+  }
+
   async function shareView(){
     const payload={title:'Titans Legacy Finder',text:state.q?`Titans Legacy: ${state.q}`:'Titans franchise legacy museum',url:location.href};
     try{
@@ -264,8 +384,14 @@ function createController(page,finder,index){
   });
 
   page.addEventListener('click',event=>{
+    const exhibitSave=event.target.closest('[data-legacy-exhibit-save]');
+    if(exhibitSave){event.preventDefault();event.stopPropagation();toggleSaved(exhibitSave);return;}
     const exhibitShare=event.target.closest('[data-legacy-exhibit-share]');
     if(exhibitShare){event.preventDefault();event.stopPropagation();void shareExhibit(exhibitShare);return;}
+    const museumOpen=event.target.closest('[data-legacy-my-museum-open]');
+    if(museumOpen){event.preventDefault();event.stopPropagation();openSaved(museumOpen);return;}
+    const museumRemove=event.target.closest('[data-legacy-my-museum-remove]');
+    if(museumRemove){event.preventDefault();event.stopPropagation();removeSaved(museumRemove);return;}
     const jump=event.target.closest('[data-legacy-scroll]');
     const nativeFilter=event.target.closest('.legacy-era-filter,.archive-filter,[data-heritage-honor-filter]');
     if(jump||nativeFilter){
@@ -281,7 +407,7 @@ function createController(page,finder,index){
     writeExhibitState('');
   }
 
-  return {apply,input,focusExhibit,clearSpotlight,getState:()=>({...state}),getSpotlight:()=>spotlight?.dataset.legacyExhibitKey||''};
+  return {apply,input,focusExhibit,clearSpotlight,ensureMyMuseum,getState:()=>({...state}),getSpotlight:()=>spotlight?.dataset.legacyExhibitKey||'',getMyMuseum:()=>({keys:[...myMuseum.keys],available:myMuseum.available})};
 }
 
 function enhanceLegacy(){
@@ -297,6 +423,7 @@ function enhanceLegacy(){
   if(!finder)return;
   const controller=createController(page,finder,index);
   ensureLegacyTrails(page,controller);
+  controller.ensureMyMuseum();
   page.dataset.legacyFinderReady='true';
   page.dataset.legacyExhibitLinksReady='true';
   page._legacyFinderController=controller;
