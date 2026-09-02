@@ -81,6 +81,9 @@ test('runtime 365 browser smoke uses returning-user setup and current five-actio
   assert.match(smoke,/prepare_returning_user\(m\)/);
   assert.match(smoke,/len\(mobile\['dockTargets'\]\)!=5/);
   assert.match(smoke,/\{'Home','Roster','Game','Search','More'\}/);
+  assert.match(smoke,/m\.find_element\(By\.ID,'mobile-more-button'\)\.click\(\)/);
+  assert.doesNotMatch(smoke,/document\.querySelector\('#menu-button'\)/);
+  assert.doesNotMatch(smoke,/Mobile menu unreachable/);
   assert.doesNotMatch(smoke,/len\(mobile\['dockTargets'\]\)!=6/);
 });
 
