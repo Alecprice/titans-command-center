@@ -1,4 +1,7 @@
+import { team as auditedTeam } from './data.mjs';
+
 const jsonColumns=new Set(['preferences','payload','metadata']);
+const BOOTSTRAP_SNAPSHOT_KEY='bootstrap:v1';
 
 export function hasD1(env={}){
   return Boolean(env?.TITANS_DB&&typeof env.TITANS_DB.prepare==='function');
@@ -15,6 +18,31 @@ function normalizeRow(row){
   const out={...row};
   for(const key of jsonColumns){if(key in out)out[key]=parseJson(out[key],key==='payload'?null:{});}
   return out;
+}
+
+function dateFloor(value){
+  if(!value)return null;
+  const text=String(value).slice(0,10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(text)?text:null;
+}
+
+function snapshotContentAudit(row){
+  const payload=row?.payload;
+  if(!payload||typeof payload!=='object')return null;
+  return dateFloor(payload?.dataQuality?.contentAuditAt||payload?.meta?.content_audit_at||payload?.meta?.contentAuditAt||payload?.contentAudit||payload?.fallback?.auditedAt||null);
+}
+
+function bundledContentAudit(){
+  return dateFloor(auditedTeam?.rosterCoverage?.asOf||auditedTeam?.auditedAt||null);
+}
+
+export function snapshotMeetsBundledAudit(row,key){
+  if(String(key)!==BOOTSTRAP_SNAPSHOT_KEY)return true;
+  const required=bundledContentAudit();
+  if(!required)return true;
+  const actual=snapshotContentAudit(row);
+  if(!actual)return false;
+  return actual>=required;
 }
 
 export async function d1Health(env={}){
@@ -57,7 +85,9 @@ export async function getD1Snapshot(env,key,{allowExpired=false}={}){
       and (?=1 or expires_at is null or datetime(expires_at)>CURRENT_TIMESTAMP)
     limit 1
   `).bind(String(key),allowExpired?1:0).first();
-  return normalizeRow(row);
+  const normalized=normalizeRow(row);
+  if(!snapshotMeetsBundledAudit(normalized,key))return null;
+  return normalized;
 }
 
 export async function putD1Snapshot(env,key,payload,{source='titans-command-center',fetchedAt=new Date(),ttlSeconds=900}={}){
