@@ -104,4 +104,5 @@ import {scheduleFocus,latestCompletedGame,GAME_FOCUS_WINDOW_MS} from './src/core
   };
 
   import('./home-command-v123.js').catch(error=>console.warn('[titans-home-command]',error));
+  import('./fan-events-v145.js').catch(error=>console.warn('[titans-fan-events]',error));
 })();
