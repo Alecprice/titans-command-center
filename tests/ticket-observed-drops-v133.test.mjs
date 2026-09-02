@@ -42,5 +42,5 @@ test('Observed drops remains touch-safe and readable on phones',()=>{
 test('memory changes refresh after v124 capture windows',()=>{
   assert.match(js,/function scheduleAfterMemoryCapture\(\)\{schedule\(\);requestAnimationFrame\(schedule\);\}/);
   assert.match(js,/if\(target\.closest\('\[data-ticket-refresh\],\[data-ticket-trend-clear\]'\)\)requestAnimationFrame\(schedule\)/);
-  assert.match(js,/if\(event\.key===PRICE_MEMORY_KEY\)schedule\(\)/);
+  assert.match(js,/event\.key===STORAGE_KEY\|\|event\.key===PRICE_MEMORY_KEY/);
 });
