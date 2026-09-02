@@ -290,7 +290,7 @@ jobs:
           elif [[ "$FRESHNESS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + data freshness browser regression ${FRESHNESS_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ACCOUNT_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Account / Guest browser regression ${ACCOUNT_BROWSER_OUTCOME:-not-run}";
           elif [[ "$ANALYTICS_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + advanced analytics browser regression ${ANALYTICS_BROWSER_OUTCOME:-not-run}";
-          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + canonical front door + full production + fan events + browser + media + market + tickets + command intelligence + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
+          elif [[ "$HEADSHOT_BROWSER_OUTCOME" == "success" ]]; then STATUS='deployed + canonical front door + full production + browser + media + market + tickets + command intelligence + fan events + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed';
           else STATUS="deployed + player headshot browser regression ${HEADSHOT_BROWSER_OUTCOME:-not-run}"; fi
 
           git config user.name 'github-actions[bot]'
