@@ -5,10 +5,14 @@ import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const impact=read('my-player-impact-v38.js');
 const watch=read('my-player-watch-v36.js');
+const home=read('my-titans-home-v35.js');
 
-test('TENX Home keeps Watchlist as the sole zero-follow player onboarding owner',()=>{
-  assert.match(watch,/Your Titans watchlist/);
-  assert.match(watch,/Open any player from the roster and tap <strong>Watch player<\/strong>/);
+test('TENX Home assigns first-player onboarding to My Titans while keeping Watchlist secondary',()=>{
+  assert.match(home,/Choose a favorite player/);
+  assert.match(home,/Open a roster player and tap Make favorite/);
+  assert.match(watch,/const favorite=String\(profile\.favorite\|\|''\)\.trim\(\)/);
+  assert.match(watch,/if\(!list\.length&&!favorite\)\{root\?\.remove\(\);return;\}/);
+  assert.match(watch,/Your favorite player is set\. Open another roster player and tap <strong>Watch player<\/strong>/);
   assert.match(impact,/const list=followed\(\)/);
   assert.match(impact,/const home=current==='home'/);
   assert.match(impact,/let root=app\.querySelector\(`\.v38-impact\[data-surface="\$\{current\}"\]`\)/);

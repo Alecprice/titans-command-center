@@ -82,14 +82,18 @@
     if(!app||route()!=='home')return;
     const anchor=app.querySelector('.my-titans-home-v35')||app.querySelector('.pulse-ribbon');
     if(!anchor)return;
-    const list=watched(getProfile());
-    if(list.length)ensureRoster();
+    const profile=getProfile()||{};
+    const list=watched(profile);
+    const favorite=String(profile.favorite||'').trim();
     let root=app.querySelector('.v36-watch-home');
+    if(!list.length&&!favorite){root?.remove();return;}
+    if(list.length)ensureRoster();
     if(!root){root=document.createElement('section');root.className='v36-watch-home';root.setAttribute('aria-label','Watched Titans players');root.dataset.homeLayout='rail';anchor.insertAdjacentElement('afterend',root);}
-    const signature=JSON.stringify([list,rosterSettled]);
+    const signature=JSON.stringify([list,Boolean(favorite),rosterSettled]);
     if(root.dataset.signature===signature)return;
     root.dataset.signature=signature;
-    root.innerHTML=`<header><div><small>PLAYER WATCH · QUICK ACCESS</small><h2>Your Titans watchlist</h2></div><span>${list.length}/${MAX_WATCHED} tracked · swipe or scroll</span></header>${list.length?`<div class="v36-watch-grid" aria-label="Watched player quick access">${list.map(item=>{const target=watchRouteState(item);return `<article class="v36-watch-card" data-v36-state="${target.state}"><a href="${target.href}"><strong>${esc(item.name)}</strong><span>${target.copy}</span></a><button class="v36-watch-remove" type="button" data-v36-remove data-v15-profile-save data-player-id="${esc(item.id)}" data-player-name="${esc(item.name)}" aria-label="Remove ${esc(item.name)} from watchlist">×</button></article>`;}).join('')}</div>`:'<div class="v36-watch-empty">Open any player from the roster and tap <strong>Watch player</strong>. Signed-in accounts carry this list across devices.</div>'}`;
+    const meta=list.length?`${list.length}/${MAX_WATCHED} tracked · swipe or scroll`:`0/${MAX_WATCHED} tracked · add players`;
+    root.innerHTML=`<header><div><small>PLAYER WATCH · QUICK ACCESS</small><h2>Your Titans watchlist</h2></div><span>${meta}</span></header>${list.length?`<div class="v36-watch-grid" aria-label="Watched player quick access">${list.map(item=>{const target=watchRouteState(item);return `<article class="v36-watch-card" data-v36-state="${target.state}"><a href="${target.href}"><strong>${esc(item.name)}</strong><span>${target.copy}</span></a><button class="v36-watch-remove" type="button" data-v36-remove data-v15-profile-save data-player-id="${esc(item.id)}" data-player-name="${esc(item.name)}" aria-label="Remove ${esc(item.name)} from watchlist">×</button></article>`;}).join('')}</div>`:'<div class="v36-watch-empty">Your favorite player is set. Open another roster player and tap <strong>Watch player</strong> to build quick access beyond your favorite.</div>'}`;
   }
 
   function mount(){mountPlayer();mountHome();}
