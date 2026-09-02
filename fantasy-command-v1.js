@@ -6,7 +6,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safeJson=(raw,fallback)=>{try{return JSON.parse(raw)}catch{return fallback}};
   const loadState=()=>{const parsed=safeJson(localStorage.getItem(STORE),{}),raw=parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:{};return {scoring:['standard','half','ppr'].includes(raw.scoring)?raw.scoring:'half',manual:Array.isArray(raw.manual)?raw.manual.slice(0,40):[],sleeperUser:String(raw.sleeperUser||'').slice(0,64),leagueId:String(raw.leagueId||'').slice(0,32),week:Number.isInteger(raw.week)&&raw.week>=1&&raw.week<=18?raw.week:1,tab:['lab','my','sleeper','draft'].includes(raw.tab)?raw.tab:'lab'};};
-  let state=loadState(),data=null,renderSerial=0,connectSerial=0,leagueLoadSerial=0,sleeper={user:null,leagues:[],league:null,rosters:[],users:[],matchups:[],drafts:[],picks:[],error:'',connecting:false,loading:false};
+  let state=loadState(),data=null,renderSerial=0,connectSerial=0,leagueLoadSerial=0,sleeper={user:null,leagues:[],league:null,rosters:[],users:[],matchups:[],drafts:[],picks:[],error:'',draftError:'',connecting:false,loading:false};
   const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(state))}catch{}};
   const clearLeagueData=()=>{sleeper.league=null;sleeper.rosters=[];sleeper.users=[];sleeper.matchups=[];sleeper.drafts=[];sleeper.picks=[];};
   const leagueRequestCurrent=(serial,leagueId,week)=>serial===leagueLoadSerial&&state.leagueId===leagueId&&state.week===week;
@@ -59,16 +59,24 @@
     const leagueId=String(id||'');
     if(!/^\d{6,32}$/.test(leagueId)){leagueLoadSerial++;sleeper.loading=false;clearLeagueData();sleeper.error='Invalid Sleeper league id.';render();return;}
     const requestWeek=state.week,serial=++leagueLoadSerial;
-    state.leagueId=leagueId;save();sleeper.error='';sleeper.loading=true;clearLeagueData();render();
+    state.leagueId=leagueId;save();sleeper.error='';sleeper.draftError='';sleeper.loading=true;clearLeagueData();render();
     try{
-      const [league,rosters,users,matchups,drafts]=await Promise.all([
-        sleeperFetch(`/league/${leagueId}`),sleeperFetch(`/league/${leagueId}/rosters`),sleeperFetch(`/league/${leagueId}/users`),sleeperFetch(`/league/${leagueId}/matchups/${requestWeek}`),sleeperFetch(`/league/${leagueId}/drafts`)
+      const [league,rosters,users,matchups]=await Promise.all([
+        sleeperFetch(`/league/${leagueId}`),sleeperFetch(`/league/${leagueId}/rosters`),sleeperFetch(`/league/${leagueId}/users`),sleeperFetch(`/league/${leagueId}/matchups/${requestWeek}`)
       ]);
       if(!leagueRequestCurrent(serial,leagueId,requestWeek))return;
-      const safeDrafts=Array.isArray(drafts)?drafts:[],draft=safeDrafts[0];
-      const picks=draft?.draft_id?await sleeperFetch(`/draft/${encodeURIComponent(draft.draft_id)}/picks`):[];
+      sleeper.league=league;sleeper.rosters=Array.isArray(rosters)?rosters:[];sleeper.users=Array.isArray(users)?users:[];sleeper.matchups=Array.isArray(matchups)?matchups:[];
+      let safeDrafts=[];
+      try{
+        const drafts=await sleeperFetch(`/league/${leagueId}/drafts`);if(!leagueRequestCurrent(serial,leagueId,requestWeek))return;
+        safeDrafts=Array.isArray(drafts)?drafts:[];sleeper.drafts=safeDrafts;
+      }catch(e){if(!leagueRequestCurrent(serial,leagueId,requestWeek))return;sleeper.drafts=[];sleeper.picks=[];sleeper.draftError=e?.name==='AbortError'?'Sleeper drafts request timed out.':String(e?.message||'Sleeper draft data unavailable');return;}
+      const draft=safeDrafts[0];
+      if(draft?.draft_id){
+        try{const picks=await sleeperFetch(`/draft/${encodeURIComponent(draft.draft_id)}/picks`);if(!leagueRequestCurrent(serial,leagueId,requestWeek))return;sleeper.picks=Array.isArray(picks)?picks:[];}
+        catch(e){if(!leagueRequestCurrent(serial,leagueId,requestWeek))return;sleeper.picks=[];sleeper.draftError=e?.name==='AbortError'?'Sleeper draft-picks request timed out.':String(e?.message||'Sleeper draft picks unavailable');}
+      }
       if(!leagueRequestCurrent(serial,leagueId,requestWeek))return;
-      sleeper.league=league;sleeper.rosters=Array.isArray(rosters)?rosters:[];sleeper.users=Array.isArray(users)?users:[];sleeper.matchups=Array.isArray(matchups)?matchups:[];sleeper.drafts=safeDrafts;sleeper.picks=Array.isArray(picks)?picks:[];
     }catch(e){if(!leagueRequestCurrent(serial,leagueId,requestWeek))return;clearLeagueData();sleeper.error=e?.name==='AbortError'?'Sleeper request timed out.':String(e?.message||'Sleeper league unavailable');}
     finally{if(leagueRequestCurrent(serial,leagueId,requestWeek)){sleeper.loading=false;render();}}
   }
@@ -97,7 +105,7 @@
   function draftTab(){
     const draft=sleeper.drafts?.[0],picks=sleeper.picks||[],hasConnection=Boolean(state.sleeperUser&&/^\d{6,32}$/.test(state.leagueId));
     if(sleeper.loading)return `<section class="fantasy-grid"><article class="fantasy-panel fantasy-span-2" role="status" aria-live="polite"><small>DRAFT COMMAND</small><h2>Loading selected Sleeper league…</h2><p>Previous draft data stays hidden until the current league request finishes.</p></article></section>`;
-    return `<section class="fantasy-grid"><article class="fantasy-panel fantasy-span-2"><div class="fantasy-panel-head"><div><small>DRAFT COMMAND</small><h2>${draft?esc(draft.metadata?.name||draft.type||'Sleeper draft'):hasConnection?'Draft data unavailable':'Connect a Sleeper league first'}</h2></div>${draft?`<span>${esc(draft.status||'')}</span>`:''}</div>${draft?`<div class="fantasy-draft-summary"><span><b>${esc(draft.settings?.teams||'—')}</b> teams</span><span><b>${esc(draft.settings?.rounds||'—')}</b> rounds</span><span><b>${esc(draft.settings?.pick_timer||'—')}</b> sec/pick</span><span><b>${picks.length}</b> picks loaded</span></div><div class="fantasy-draft-board">${picks.slice(-36).reverse().map(p=>{const m=p.metadata||{},name=[m.first_name,m.last_name].filter(Boolean).join(' ')||m.player_name||`Player ${p.player_id||''}`;return `<div><span>${esc(p.round)}.${esc(p.draft_slot||p.pick_no||'')}</span><strong>${esc(name)}</strong><small>${esc(m.position||'')} ${m.team?`· ${esc(m.team)}`:''}</small></div>`}).join('')||'<div class="fantasy-empty">No picks have been recorded yet.</div>'}</div>`:hasConnection?`<p>${esc(sleeper.error||'Sleeper has not returned draft data for the selected league.')}</p>`:'<p>Once Sleeper is connected, Draft Command loads the league draft and recent picks. It stays read-only: no drafting or roster mutations are sent from this app.</p>'}</article><article class="fantasy-panel"><small>DRAFT ASSIST</small><h2>Roster-construction checks</h2><p>Use the live pick board beside your league roster settings. The next iteration can add ADP/value data only from a licensed or clearly permitted source; this release does not scrape rankings.</p>${draft?.roster_positions?`<div class="fantasy-positions">${draft.roster_positions.map(p=>`<span>${esc(p)}</span>`).join('')}</div>`:''}</article></section>`;
+    return `<section class="fantasy-grid"><article class="fantasy-panel fantasy-span-2"><div class="fantasy-panel-head"><div><small>DRAFT COMMAND</small><h2>${draft?esc(draft.metadata?.name||draft.type||'Sleeper draft'):hasConnection?'Draft data unavailable':'Connect a Sleeper league first'}</h2></div>${draft?`<span>${esc(draft.status||'')}</span>`:''}</div>${draft?`<div class="fantasy-draft-summary"><span><b>${esc(draft.settings?.teams||'—')}</b> teams</span><span><b>${esc(draft.settings?.rounds||'—')}</b> rounds</span><span><b>${esc(draft.settings?.pick_timer||'—')}</b> sec/pick</span><span><b>${sleeper.draftError?'—':picks.length}</b> ${sleeper.draftError?'picks unavailable':'picks loaded'}</span></div><div class="fantasy-draft-board">${sleeper.draftError?`<div class="fantasy-empty" role="status">Draft metadata loaded, but picks are unavailable right now. ${esc(sleeper.draftError)}</div>`:picks.slice(-36).reverse().map(p=>{const m=p.metadata||{},name=[m.first_name,m.last_name].filter(Boolean).join(' ')||m.player_name||`Player ${p.player_id||''}`;return `<div><span>${esc(p.round)}.${esc(p.draft_slot||p.pick_no||'')}</span><strong>${esc(name)}</strong><small>${esc(m.position||'')} ${m.team?`· ${esc(m.team)}`:''}</small></div>`}).join('')||'<div class="fantasy-empty">No picks have been recorded yet.</div>'}</div>`:hasConnection?`<p>${esc(sleeper.draftError||sleeper.error||'Sleeper has not returned draft data for the selected league.')}</p>`:'<p>Once Sleeper is connected, Draft Command loads the league draft and recent picks. It stays read-only: no drafting or roster mutations are sent from this app.</p>'}</article><article class="fantasy-panel"><small>DRAFT ASSIST</small><h2>Roster-construction checks</h2><p>Use the live pick board beside your league roster settings. The next iteration can add ADP/value data only from a licensed or clearly permitted source; this release does not scrape rankings.</p>${draft?.roster_positions?`<div class="fantasy-positions">${draft.roster_positions.map(p=>`<span>${esc(p)}</span>`).join('')}</div>`:''}</article></section>`;
   }
   function bind(root){
     root.querySelectorAll('[data-ftab]').forEach(b=>b.addEventListener('click',()=>{state.tab=b.dataset.ftab;save();render()}));
