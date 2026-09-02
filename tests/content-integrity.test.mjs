@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { team, games, roster, feed } from '../src/data.mjs';
+import { auditedPracticeSquad20260902, ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260831.mjs';
 import { gameStatus, mergeLiveGames } from '../src/core.mjs';
 
 test('current team metadata matches audited official facts',()=>{
@@ -8,6 +9,11 @@ test('current team metadata matches audited official facts',()=>{
   assert.equal(team.generalManager,'Mike Borgonzi');
   assert.equal(team.owner,'Amy Adams Strunk');
   assert.equal(team.president,'Burke Nihill');
+  assert.equal(team.presidentTitle,'President and Chief Executive Officer');
+  assert.equal(team.offensiveCoordinator,'Brian Daboll');
+  assert.equal(team.defensiveCoordinator,'Gus Bradley');
+  assert.equal(team.specialTeamsCoordinator,'John Fassel');
+  assert.equal(team.specialTeamsCoordinatorTitle,'Assistant Head Coach/Special Teams Coordinator');
   assert.deepEqual(team.colors,['Titans blue','red','white','navy blue']);
   assert.equal(team.primaryLogo,'The Shield');
   assert.equal(team.phase,'Regular Season');
@@ -25,6 +31,7 @@ test('Week 9 is a bye and Week 18 is TBD',()=>{
   const week18=games.find(g=>g.week===18);
   assert.equal(week18?.date,null);
   assert.equal(week18?.dateTbd,true);
+  assert.equal(week18?.venue,'Reliant Stadium');
   assert.equal(gameStatus(week18),'TBD');
 });
 
@@ -43,47 +50,61 @@ test('preseason is final at 2-1 and the Jets are next',()=>{
   assert.equal(next?.network,'CBS');
 });
 
-test('fallback roster matches the Aug 31 official post-cutdown audit',()=>{
+test('fallback roster matches the Sept 2 current-team audit',()=>{
+  assert.equal(ROSTER_AUDIT_DATE,'2026-09-02');
   assert.equal(team.rosterCoverage.fallbackType,'cross-source-audited-snapshot');
   assert.equal(team.rosterCoverage.fallbackPlayers,roster.length);
-  assert.equal(roster.length,61);
+  assert.equal(roster.length,60);
   assert.equal(team.rosterCoverage.officialActivePlayersAtAudit,53);
-  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,8);
+  assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,7);
+  assert.equal(team.rosterCoverage.practiceSquadPlayersAtAudit,17);
   assert.equal(roster.filter(p=>p.status==='Active').length,53);
-  assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,6);
+  assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,5);
   assert.equal(roster.filter(p=>p.status==='Reserve/Injured; Designated for Return').length,2);
-  assert.equal(team.rosterCoverage.asOf,'2026-08-31');
-  assert.equal(team.rosterCoverage.sourceConflict,'');
-  assert.ok(roster.some(p=>p.name==='Owen Pappoe'&&p.status==='Active'));
-  assert.ok(roster.some(p=>p.name==='Nazir Stackhouse'&&p.status==='Active'));
-  assert.ok(roster.some(p=>p.name==='Terrell Burgess'&&p.status==='Active'));
-  assert.ok(roster.some(p=>p.name==='James Hudson'&&p.status==='Active'));
-  assert.ok(roster.some(p=>p.name==='Melvin Smith Jr.'&&p.status==='Active'));
+  assert.equal(team.rosterCoverage.asOf,'2026-09-02');
+  assert.match(ROSTER_SOURCE_CONFLICT,/transactions log is newer/i);
+  assert.equal(team.rosterCoverage.sourceConflict,ROSTER_SOURCE_CONFLICT);
+
+  const verifiedNumbers={
+    'Tony Adams':'29','Terrell Burgess':'38','James Hudson III':'59','Owen Pappoe':'40','Melvin Smith Jr.':'39','Nazir Stackhouse':'93'
+  };
+  for(const [name,number] of Object.entries(verifiedNumbers)){
+    assert.ok(roster.some(p=>p.name===name&&p.number===number&&p.status==='Active'),`${name} should be active as #${number}`);
+  }
+  assert.equal(roster.some(p=>p.name==='Andre James'),false,'Andre James was waived from IR with an injury settlement on Sept. 1');
   assert.ok(roster.some(p=>p.name==='Dorian Mausi'&&p.status==='Reserve/Injured; Designated for Return'));
   assert.ok(roster.some(p=>p.name==='Joshua Williams'&&p.status==='Reserve/Injured; Designated for Return'));
-  for(const removed of ['Will Levis','Hendon Hooker','Kalel Mullings','Cordell Volson','Austin Deculus','Xavier Restrepo','Jerrick Reed II','Erick Hallett II','Mohamoud Diabate']){
-    assert.equal(roster.some(p=>p.name===removed),false,`${removed} should not remain in the current fallback roster`);
+  assert.equal(new Set(roster.map(p=>p.name)).size,60);
+});
+
+test('practice squad is tracked separately from the 53-man roster',()=>{
+  assert.equal(auditedPracticeSquad20260902.length,17);
+  for(const name of ['Shemar Bartholomew','Mohamoud Diabate','Erick Hallett II','Xavier Restrepo','Jerrick Reed II','Hendon Hooker','Kalel Mullings','Laki Tasi']){
+    assert.ok(auditedPracticeSquad20260902.some(p=>p.name===name),`${name} should be in the Sept. 2 practice-squad snapshot`);
   }
-  assert.equal(new Set(roster.map(p=>p.name)).size,61);
+  for(const removed of ['Hank Beatty','Derrick Canteen','Mani Powell','Mario Goodrich III']){
+    assert.equal(auditedPracticeSquad20260902.some(p=>p.name===removed),false,`${removed} should not remain on the current practice squad`);
+  }
+  assert.equal(roster.some(p=>auditedPracticeSquad20260902.some(ps=>ps.name===p.name)),false,'practice squad must not be folded into current 53/reserve roster');
 });
 
 test('fallback roster does not use unsourced opinion tags',()=>{
   assert.equal(roster.some(p=>'tag' in p),false);
 });
 
-test('fallback feed is source-linked and leads with current post-cutdown facts',()=>{
+test('fallback feed leads with the latest official Sept 2 transactions',()=>{
   for(const item of feed)assert.match(item.url,/^https:\/\//);
+  assert.match(feed[0]?.title||'',/add four to practice squad/i);
+  assert.match(feed[0]?.summary||'',/Xavier Restrepo/);
+  const sept1=feed.find(item=>/Sept\. 1 roster transactions/i.test(item.title));
+  assert.equal(sept1?.tier,'official');
+  assert.match(sept1?.summary||'',/Andre James/);
   const rosterUpdate=feed.find(item=>/Updated 53-man roster/i.test(item.title));
   assert.equal(rosterUpdate?.tier,'official');
   assert.match(rosterUpdate?.summary||'',/Owen Pappoe/);
-  const cutdown=feed.find(item=>/trim roster to 53/i.test(item.title));
-  assert.equal(cutdown?.tier,'official');
   const bears=feed.find(item=>/Bears 24, Titans 15/i.test(item.title));
   assert.equal(bears?.tier,'official');
   assert.match(bears?.summary||'',/2-1/);
-  const practice=feed.find(item=>/practice squad/i.test(item.title));
-  assert.equal(practice?.tier,'official');
-  assert.match(practice?.summary||'',/separate from the 53-player Active roster/i);
 });
 
 test('live merge leaves null-date schedule rows alone',()=>{

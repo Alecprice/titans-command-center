@@ -1,4 +1,5 @@
-export const VISUAL_AUDIT_DATE='2026-08-19';
+export const VISUAL_AUDIT_DATE='2026-09-02';
+export const VISUAL_DATE_RULE='Current-era dates come from Tennessee Titans official brand/reveal materials. Specialist logo archives are secondary chronology cross-checks and cannot move the Shield launch earlier than the Titans official March 12, 2026 reveal.';
 
 export const visualSources={
   titansBrand:{
@@ -24,7 +25,7 @@ export const visualSources={
   sportsLogos:{
     label:'SportsLogos.net — Titans logo chronology',
     url:'https://www.sportslogos.net/logos/list_by_team/160/Tennessee-Titans-Logos/',
-    role:'Specialist visual-history cross-check for primary, alternate and wordmark year ranges.'
+    role:'Specialist visual-history cross-check for primary, alternate and wordmark year ranges. Official Titans reveal dates override conflicting current-era metadata.'
   },
   sportsLogosSword1999:{
     label:'SportsLogos.net — sword alternate, 1999–2001',
