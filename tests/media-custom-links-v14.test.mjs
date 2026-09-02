@@ -13,7 +13,7 @@ test('custom media links use a stable device key and migrate legacy versioned ke
   assert.match(js,/localStorage\.key/);
   assert.match(js,/localStorage\.removeItem/);
   assert.match(js,/version:STORAGE_VERSION,links/);
-  assert.match(js,/Guest links stay on this device through normal app and PWA updates/);
+  assert.match(js,/Guest bookmarks stay on this device through normal app and PWA updates/);
   assert.match(js,/when account sync is available/);
   assert.doesNotMatch(js,/localStorage\.clear/);
   assert.doesNotMatch(js,/fetch\(/);
@@ -26,9 +26,10 @@ test('custom media module is idempotent even when imported and loaded directly',
   assert.match(js,/if\(globalThis\.__titansCustomMediaLinksLoaded\)return/);
 });
 
-test('custom media links accept only normal web protocols and remain removable',()=>{
+test('custom media bookmarks accept secure HTTPS only and remain removable',()=>{
   const js=read('media-custom-links-v14.js');
-  assert.match(js,/\['https:','http:'\]\.includes\(u\.protocol\)/);
+  assert.match(js,/u\.protocol==='https:'\?u\.href:null/);
+  assert.doesNotMatch(js,/\['https:','http:'\]\.includes\(u\.protocol\)/);
   assert.match(js,/data-custom-remove/);
   assert.match(js,/links\.splice\(index,1\)/);
   assert.match(js,/MAX_LINKS=12/);
