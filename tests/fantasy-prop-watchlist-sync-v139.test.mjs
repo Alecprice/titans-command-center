@@ -67,10 +67,11 @@ test('backup import normalizes synced watch targets through the same bounded con
   assert.ok(sync.includes('preferences:normalized'));
 });
 
-test('watchlist UI explains cross-device targets versus device-local evidence',()=>{
-  assert.ok(watch.includes('Watch targets sync with your Titans account. Observed line history and review checkpoints stay on this browser.'));
+test('watchlist UI explains sync availability versus device-local evidence',()=>{
+  assert.ok(watch.includes('Watch targets are included in your Titans account settings when account sync is available. Observed line history and review checkpoints stay on this browser.'));
   assert.ok(watch.includes('Watch targets stay on this browser until you sign in. Observed line history and review checkpoints always stay browser-local.'));
-  assert.ok(watch.includes("signedIn?'in your synced watchlist':'saved on this browser'"));
+  assert.ok(watch.includes("signedIn?'saved in your watchlist':'saved on this browser'"));
+  assert.doesNotMatch(watch,/in your synced watchlist|Watch targets sync with your Titans account/);
 });
 
 test('watchlist rerenders when account or preference-sync state changes without adding network work',()=>{
