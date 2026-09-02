@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `51c58ff3e52a853bc1aa90e90b564c8926468c02`
+- Source commit: `5b0a70c5a683877a8279c4b7200be218a246dc29`
 - Quality gate: failure
 - Cloudflare credentials available: true
 - Source still current main: unknown
@@ -26,7 +26,7 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: existing deployment remains unchanged
-- Recorded: 2026-09-02T15:05:45Z
+- Recorded: 2026-09-02T15:08:48Z
 
 ## Quality gate failure context
 
@@ -59,8 +59,8 @@
   
       at TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/tenx-ticket-cdn-runtime-bridge-v141.test.mjs:12:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
-      at Test.run (node:internal/test_runner/test:1397:25)
-      at Test.start (node:internal/test_runner/test:1257:17)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
       at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
     generatedMessage: true,
     code: 'ERR_ASSERTION',
@@ -71,7 +71,7 @@
   }
 
 test at tests/tenx-ticket-trust-mobile-v129.test.mjs:33:1
-✖ ticket trust layer is loaded and available to installed/offline clients (1.419748ms)
+✖ ticket trust layer is loaded and available to installed/offline clients (1.489697ms)
   AssertionError [ERR_ASSERTION]: The input did not match the regular expression /titans-cc-brand-2026-v80/. Input:
   
   "const CACHE = 'titans-cc-brand-2026-v81';\n" +
@@ -101,11 +101,11 @@ test at tests/tenx-ticket-trust-mobile-v129.test.mjs:33:1
   
       at TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/tenx-ticket-trust-mobile-v129.test.mjs:38:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
-      at Test.run (node:internal/test_runner/test:1397:25)
-      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
-      at Test.postRun (node:internal/test_runner/test:1537:19)
-      at Test.run (node:internal/test_runner/test:1462:12)
-      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
     generatedMessage: true,
     code: 'ERR_ASSERTION',
     actual: "const CACHE = 'titans-cc-brand-2026-v81';\nconst SHELL = [\n  '/', '/index.html', '/styles.css', '/brand.css', '/legacy-polish.css', '/legacy-finder-v2.css', '/fact-polish.css', '/ux-polish.css', '/player-polish.css', '/headshot-polish.css', '/fan-polish.css', '/team-room.css', '/audit-responsive.css', '/usability-runtime.css', '/smart-search-v111.css', '/mobile-navigation-v112.css', '/account-v112.css', '/account-import-v116.css', '/source-activity.css', '/stats-hub.css', '/analytics-hub.css', '/market-hub.css', '/fantasy-command-v1.css', '/fan-experience-v09.css', '/fan-platform-v10.css', '/fan-enrichment-v13.css', '/fan-enrichment-addons-v13.css', '/ask-titans-v17.css', '/media-center-v14.css', '/media-timecodes-v14.css', '/media-interaction-hotfix-v14.css', '/media-alternatives-v14.css', '/media-custom-links-v14.css', '/media-youtube-v66.css', '/premium-experience-v14.css', '/market-fast-v14.css', '/command-intelligence-v15.css', '/command-intelligence-addons-v15.css', '/change-intelligence-v18.css', '/player-intelligence-v16.css', '/gameday-v16.css', '/cutdown-command-v23.css', '/mode-365-v19.css', '/tickets-v47.css', '/tickets-mobile-trust-v129.css', '/tickets-official-v51.css', '/tickets-resilience-v53.css', '/titans-social-v49.css', '/readability-v28.css', '/readability-v34.css',\n  '/app.js', '/legacy-polish.js', '/legacy-finder-v2.js', '/legacy-heritage-v3.js', '/legacy-trails-v4.js', '/fact-polish.js', '/ux-polish.js', '/player-polish.js', '/headshot-polish.js', '/fan-polish.js', '/team-room.js', '/usability-runtime.js', '/runtime-v19.js', '/home-command-v123.js', '/fan-events-v145.js', '/team-time-v21.js', '/mode-365-v19.js', '/freshness-truth-v20.js', '/smart-search-v111.js', '/mobile-navigation-v112.js', '/account-sync-v112.js', '/account-v112.js', '/account-import-v116.js', '/source-activity.js', '/transactions-hub.js', '/stats-hub.js', '/analytics-hub.js', '/market-hub.js', '/fantasy-command-v1.js', '/fantasy-sleeper-intelligence-v2.js', '/fantasy-decision-center-v3.js', '/fantasy-weekly-command-v42.js', '/ask-fantasy-bridge-v1.js', '/accessibility-runtime.js', '/continue-command-v35.js', '/my-titans-home-v35.js', '/my-player-watch-v36.js', '/gameday-personal-v37.js', '/my-player-impact-v38.js', '/schedule-calendar-v39.js', '/roster-filter-guard-v40.js', '/team-room-state-repair-v54.js', '/fan-experience-v09.js', '/fan-platform-v10.js', '/fan-enrichment-v13.js', '/fan-enrichment-addons-v13.js', '/ask-titans-v17.js', '/fan-enrichment-tabfix-v13.js', '/ios-home-screen.js', '/media-center-v14.js', '/media-timecodes-v14.js', '/media-alternatives-v14.js', '/media-custom-links-v14.js', '/media-search-v14.js', '/media-youtube-v66.js', '/premium-experience-v14.js', '/market-fast-v14.js', '/command-intelligence-v15.js', '/command-intelligence-addons-v15.js', '/change-intelligence-v18.js', '/change-intelligence-loadfix-v18.js', '/command-search-v15.js', '/command-route-guard-v15.js', '/tickets-v47.js', '/tickets-official-v51.js', '/tickets-price-fallback-v58.js', '/tickets-compare-cache-bridge-v141.js', '/titans-social-v49.js', '/player-intelligence-v16.js', '/gameday-v16.js', '/gameday-today-v22.js', '/cutdown-command-v23.js',\n  '/src/core.mjs', '/src/data.mjs', '/src/odds.mjs', '/src/visual-audit.mjs', '/src/roster-audit-20260819.mjs', '/src/roster-audit-20260822.mjs', '/src/roster-audit-20260824.mjs', '/src/roster-audit-20260827.mjs', '/src/roster-audit-20260831.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png',\n  '/assets/brand/current-lockup.webp', '/assets/archive/current-shield-primary.webp', '/assets/archive/logo-transition-shield-fireball.webp', '/assets/archive/fireball-wordmark.webp', '/assets/archive/fireball-on-navy.webp'\n];\nconst SHELL_PATHS=new Set(SHELL.map(path=>new URL(path,self.location.origin).pathname));\nconst NETWORK_FIRST=/\\.(?:js|mjs|css|webmanifest)$/i;\nconst notificationTarget=value=>{const fallback=new URL('/#home',self.location.origin).href;try{const target=new URL(String(value||'/#home'),self.location.origin);return target.origin===self.location.origin?target.href:fallback}catch{return fallback}};\nself.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});\nself.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});\nself.addEventListener('fetch',event=>{\n  if(event.request.method!=='GET')return;\n  const url=new URL(event.request.url);\n  if(url.origin!==self.location.origin)return;\n  if(url.pathname.startsWith('/api/'))return;\n  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).catch(()=>caches.match('/index.html')));return;}\n  if(!SHELL_PATHS.has(url.pathname))return;\n  if(NETWORK_FIRST.test(url.pathname)){event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match(event.request).then(cached=>cached||caches.match(url.pathname))));return;}\n  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;})));\n});\nself.addEventListener('push',event=>{let payload={};try{payload=event.data?.json?.()||{body:event.data?.text?.()||''}}catch{payload={body:event.data?.text?.()||''}}const title=String(payload.title||'Titans Command Center');const options={body:String(payload.body||'A Titans update is available.'),tag:String(payload.tag||'titans-update'),icon:'/assets/icon-192.png',badge:'/assets/icon-192.png',data:{url:notificationTarget(payload.url)},renotify:Boolean(payload.renotify)};event.waitUntil(self.registration.showNotification(title,options));});\nself.addEventListener('notificationclick',event=>{event.notification.close();const target=notificationTarget(event.notification.data?.url);event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>{for(const client of clients){if('navigate'in client)client.navigate(target);if('focus'in client)return client.focus();}return self.clients.openWindow?self.clients.openWindow(target):undefined;}));});",
