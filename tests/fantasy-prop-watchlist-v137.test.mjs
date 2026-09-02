@@ -22,7 +22,7 @@ test('watchlist is local bounded persistence with no provider traffic',()=>{
 
 test('watch identity is player plus market and persisted rows are normalized and deduplicated',()=>{
   assert.match(watch,/keyFor=\(player,market\)=>/);
-  assert.match(watch,/`${slug\(player\)}\|${slug\(market\)}`/);
+  assert.ok(watch.includes('const keyFor=(player,market)=>`${slug(player)}|${slug(market)}`;'));
   assert.match(watch,/const player=clean\(item\.player\),market=clean\(item\.market\)/);
   assert.match(watch,/key:keyFor\(player,market\)/);
   assert.match(watch,/findIndex\(candidate=>candidate\.key===item\.key\)===index/);
@@ -33,8 +33,11 @@ test('each prop row gets an explicit watch toggle with pressed state',()=>{
   assert.match(watch,/button\.className='fpw-watch-button'/);
   assert.match(watch,/button\.textContent=isWatched\?'Watching':'Watch prop'/);
   assert.match(watch,/button\.setAttribute\('aria-pressed'/);
-  assert.match(watch,/Add.*to watched props/);
-  assert.match(watch,/Remove.*from watched props/);
+  assert.match(watch,/isWatched\?'Remove':'Add'/);
+  assert.match(watch,/isWatched\?'from':'to'/);
+  assert.match(watch,/identity\.player/);
+  assert.match(watch,/identity\.market/);
+  assert.match(watch,/watched props/);
 });
 
 test('watched-only filtering composes without taking hidden ownership',()=>{
