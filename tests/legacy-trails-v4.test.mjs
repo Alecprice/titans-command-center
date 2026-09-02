@@ -23,6 +23,7 @@ test('Trail state is shareable without becoming a second router',()=>{
   assert.match(js,/params\.delete\('trail'\)/);
   assert.match(js,/history\.replaceState/);
   assert.doesNotMatch(js,/location\.hash\s*=/);
+  assert.doesNotMatch(js,/addEventListener\('hashchange'/);
 });
 
 test('Trails delegate discovery to Legacy Finder instead of duplicating hidden-state ownership',()=>{
@@ -44,6 +45,7 @@ test('Trail controls remain accessible and phone safe',()=>{
   assert.match(js,/max-width:430px/);
   assert.match(js,/prefers-reduced-motion:reduce/);
   assert.match(js,/forced-colors:active/);
+  assert.match(js,/font-size:12px/);
 });
 
 test('Trail dependency ships through the v79 offline shell',()=>{
