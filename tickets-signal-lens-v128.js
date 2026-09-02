@@ -69,12 +69,17 @@
     return [...items].filter(item=>item.sources>=2).sort((a,b)=>b.sources-a.sources||(a.price??Number.MAX_SAFE_INTEGER)-(b.price??Number.MAX_SAFE_INTEGER))[0]||null;
   }
 
+  function pickMarketplaceAvailable(items){
+    return [...items].filter(item=>item.sources>=1).sort((a,b)=>b.sources-a.sources)[0]||null;
+  }
+
   function buildSignals(items,memory,party){
     const lowest=pickLowest(items);
     const lowestHome=pickLowest(items.filter(item=>item.side==='home'));
     const crossChecked=pickMostSources(items);
     const drops=items.map(item=>({item,drop:localDrop(memory.events?.[item.key],item.price)})).filter(entry=>entry.drop).sort((a,b)=>b.drop.amount-a.drop.amount||b.drop.pct-a.drop.pct);
     const biggestDrop=drops[0]||null;
+    const marketplaceAvailable=!lowest&&!lowestHome&&!crossChecked&&!biggestDrop?pickMarketplaceAvailable(items):null;
 
     return [
       lowest?{
@@ -91,6 +96,11 @@
         kind:'sources',label:'MOST CROSS-CHECKED',title:crossChecked.title,key:crossChecked.key,
         detail:`${crossChecked.sources} reported source${crossChecked.sources===1?'':'s'} · ${crossChecked.price!=null?`${money(crossChecked.price)} starting price`:'check live'}`,
         note:'Highest current marketplace source coverage; ties break toward lower starting price.'
+      }:null,
+      marketplaceAvailable?{
+        kind:'marketplace',label:'MARKETPLACE AVAILABLE',title:marketplaceAvailable.title,key:marketplaceAvailable.key,
+        detail:`${marketplaceAvailable.sources} source${marketplaceAvailable.sources===1?'':'s'} with offers · live price pending`,
+        note:'Open the current marketplace for live price and inventory.'
       }:null,
       biggestDrop?{
         kind:'drop',label:'BIGGEST LOCAL DROP',title:biggestDrop.item.title,key:biggestDrop.item.key,
