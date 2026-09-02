@@ -95,6 +95,17 @@ async function writeD1Bootstrap(env,payload,{source='audited-fallback',ttlSecond
   try{await putD1Snapshot(env,BOOTSTRAP_SNAPSHOT_KEY,payload,{source,ttlSeconds});return true;}
   catch(error){console.warn('[d1-bootstrap-write]',error);return false;}
 }
+async function materializeAuditedBootstrap(env,reason='Fresh bootstrap snapshot unavailable'){
+  const payload={...auditedBootstrapFallback(reason),teamContext:await getAuditedTeamContext(null),storage:'bundled-audited-data'};
+  const stored=await writeD1Bootstrap(env,payload,{source:'audited-fallback'});
+  return {payload,stored};
+}
+async function ensureFreshD1Bootstrap(env){
+  const snapshot=await readD1Bootstrap(env);
+  if(snapshot)return {ok:true,refreshed:false,mode:snapshot.mode||null};
+  const {payload,stored}=await materializeAuditedBootstrap(env,'Scheduled bootstrap materialization after snapshot expiry');
+  return {ok:stored,refreshed:stored,mode:payload.mode||null};
+}
 function scoreboardSnapshotPayload(row,{stale=false}={}){
   const payload=row?.payload;
   if(!payload||typeof payload!=='object'||payload.ok!==true)return null;
@@ -236,8 +247,16 @@ async function runApi(request,env,ctx){
 async function executeScheduledJob(env,job,run){const started=new Date();let result;try{result={job,...(await run())};}catch(error){console.error('[cloudflare-cron]',job,error);result={job,ok:false,error:'Sync job failed'};}const stored=await recordSyncRun(env,job,result,started);return {...result,auditStored:Boolean(stored.stored)};}
 async function runNearLiveScheduled(env){
   if(!hasD1(env))return {ok:true,skipped:true,reason:'D1 binding not configured'};
-  try{const result=await fetchScoreboardUpstream(env,{persist:true});console.log('[cloudflare-near-live]',{ok:true,provider:result.provider,fetchedAt:result.fetchedAt});return result;}
-  catch(error){console.error('[cloudflare-near-live]',error);return {ok:false,error:'Near-live scoreboard refresh failed'};}
+  const bootstrap=await ensureFreshD1Bootstrap(env);
+  try{
+    const result=await fetchScoreboardUpstream(env,{persist:true});
+    const ok=Boolean(result.ok&&bootstrap.ok);
+    console.log('[cloudflare-near-live]',{ok,provider:result.provider,fetchedAt:result.fetchedAt,bootstrapRefreshed:bootstrap.refreshed});
+    return {...result,ok,bootstrapReady:bootstrap.ok,bootstrapRefreshed:bootstrap.refreshed};
+  }catch(error){
+    console.error('[cloudflare-near-live]',error);
+    return {ok:false,error:'Near-live scoreboard refresh failed',bootstrapReady:bootstrap.ok,bootstrapRefreshed:bootstrap.refreshed};
+  }
 }
 async function runDailyScheduled(env){const jobs=[['official-audit',()=>syncTitansOfficialAudit(env)],['espn',()=>syncEspn(env)],['nflverse-roster',()=>syncNflverseRoster(env,2026)],['nflverse-stats',()=>syncNflverseStats(env,2026)],['nws-weather',()=>syncNwsNextHomeGame(env)],['bluesky',()=>syncBluesky(env,'Tennessee Titans',30)],['odds',()=>env.PROPLINE_API_KEY||env.ODDS_API_IO_KEY?syncFreeOdds(env):Promise.resolve({ok:true,skipped:true,source:'titans-cc',error:'No free odds API key configured'})]];const results=await Promise.all(jobs.map(([job,run])=>executeScheduledJob(env,job,run)));const succeeded=results.filter(r=>r?.ok&&!r?.skipped).length;const failed=results.filter(r=>!r?.ok&&!r?.skipped).length;console.log('[cloudflare-cron]',{succeeded,failed,results:results.map(r=>({job:r.job,ok:r.ok,skipped:Boolean(r.skipped),auditStored:Boolean(r.auditStored)}))});return {ok:failed===0,succeeded,failed};}
 async function runScheduled(env,cron=''){return cron===NEAR_LIVE_CRON?runNearLiveScheduled(env):runDailyScheduled(env);}

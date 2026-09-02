@@ -235,6 +235,42 @@ def compare_snapshot(driver):
     """)
 
 
+def advanced_snapshot(driver):
+    return driver.execute_script(r"""
+      const center=document.querySelector('[data-ticket-center]');
+      if(!center)return null;
+      const finalists=center.querySelector('[data-ticket-finalists-v127]');
+      const signal=center.querySelector('[data-ticket-signal-lens-v128]');
+      const viewport=document.documentElement.clientWidth;
+      const visibleKeys=[...center.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')]
+        .filter(card=>!card.hidden).map(card=>card.dataset.ticketTenxKey).filter(Boolean);
+      const signalCards=signal?[...signal.querySelectorAll('.tickets-signal-v128-card')]:[];
+      return {
+        finalists:Boolean(finalists),
+        finalistsText:(finalists?.textContent||'').replace(/\s+/g,' ').trim(),
+        signal:Boolean(signal),
+        signalText:(signal?.textContent||'').replace(/\s+/g,' ').trim(),
+        visibleKeys,
+        overflow:document.documentElement.scrollWidth>viewport+3,
+        viewport,
+        finalistControls:finalists?[...finalists.querySelectorAll('button')].map(button=>({
+          text:button.textContent.trim(),height:button.getBoundingClientRect().height,
+          pressed:button.getAttribute('aria-pressed'),disabled:Boolean(button.disabled)
+        })):[],
+        signalCards:signalCards.map(card=>({
+          kind:card.dataset.ticketSignalKind||'',
+          left:card.getBoundingClientRect().left,
+          right:card.getBoundingClientRect().right,
+          action:card.querySelector('button')?{
+            text:card.querySelector('button').textContent.trim(),
+            height:card.querySelector('button').getBoundingClientRect().height,
+            key:card.querySelector('button').dataset.ticketSignalFocus||''
+          }:null
+        }))
+      };
+    """)
+
+
 def saved_count(driver):
     return driver.execute_script("""
       try{
@@ -275,6 +311,9 @@ def exercise_saved_compare(driver,label,mobile=False):
     WebDriverWait(driver,8,poll_frequency=.1).until(
         lambda d:d.execute_script("return document.querySelectorAll('[data-ticket-compare-v125] .tickets-compare-v125-card').length")>=2
     )
+    WebDriverWait(driver,8,poll_frequency=.1).until(
+        lambda d:d.execute_script("return Boolean(document.querySelector('[data-ticket-finalists-v127]')&&document.querySelector('[data-ticket-signal-lens-v128]'))")
+    )
     state=compare_snapshot(driver)
     if not state or state['count']!=2:raise RuntimeError(f'{label}: saved compare did not render two cards: {state}')
     if state['overflow']:raise RuntimeError(f'{label}: compare flow created horizontal page overflow: {state}')
@@ -283,6 +322,72 @@ def exercise_saved_compare(driver,label,mobile=False):
     if short_actions:raise RuntimeError(f'{label}: compare actions below 44px: {short_actions}')
     if mobile and any(card['left']<-1 or card['right']>state['viewport']+1 for card in state['cards']):
         raise RuntimeError(f'{label}: compare card escapes mobile viewport: {state}')
+
+    advanced=advanced_snapshot(driver)
+    if not advanced or not advanced['finalists'] or not advanced['signal']:
+        raise RuntimeError(f'{label}: finalists or signal surface missing: {advanced}')
+    if advanced['overflow']:raise RuntimeError(f'{label}: finalists/signal surfaces created overflow: {advanced}')
+    truth_text=advanced['signalText'].lower()
+    if 'not a deal score or buy/wait recommendation' not in truth_text:
+        raise RuntimeError(f'{label}: Signal Lens lost truth disclosure: {advanced}')
+    short_finalists=[control for control in advanced['finalistControls'] if control['height']<44]
+    short_signals=[card['action'] for card in advanced['signalCards'] if card['action'] and card['action']['height']<44]
+    if short_finalists or short_signals:
+        raise RuntimeError(f'{label}: finalists/signal controls below 44px: finalists={short_finalists} signals={short_signals}')
+    if mobile and any(card['left']<-1 or card['right']>advanced['viewport']+1 for card in advanced['signalCards']):
+        raise RuntimeError(f'{label}: Signal Lens card escapes mobile viewport: {advanced}')
+
+    finalist_clicked=driver.execute_script("""
+      const button=document.querySelector('[data-ticket-center] [data-ticket-finalists-view="saved"]');
+      if(!button||button.disabled)return false;
+      button.click();
+      return true;
+    """)
+    if not finalist_clicked:raise RuntimeError(f'{label}: Finalists only control unavailable after two saves')
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:d.execute_script("""
+      return document.querySelector('[data-ticket-finalists-view="saved"]')?.getAttribute('aria-pressed')==='true';
+    """))
+    finalist_state=advanced_snapshot(driver)
+    leaked=[key for key in finalist_state['visibleKeys'] if key not in keys]
+    if leaked:raise RuntimeError(f'{label}: Finalists only leaked unsaved games: {leaked}')
+
+    group_clicked=driver.execute_script("""
+      const button=document.querySelector('[data-ticket-center] [data-ticket-finalists-budget="300"]');
+      if(!button)return false;
+      button.click();
+      return true;
+    """)
+    if not group_clicked:raise RuntimeError(f'{label}: group-budget control missing')
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:d.execute_script("""
+      return document.querySelector('[data-ticket-finalists-budget="300"]')?.getAttribute('aria-pressed')==='true'
+        && (document.querySelector('[data-ticket-finalists-summary]')?.textContent||'').includes('$300');
+    """))
+
+    driver.execute_script("""
+      document.querySelector('[data-ticket-center] [data-ticket-filter="away"]')?.click();
+      document.querySelector('[data-ticket-center] [data-ticket-tenx-budget="75"]')?.click();
+    """)
+    signal_key=driver.execute_script("""
+      return document.querySelector('[data-ticket-center] [data-ticket-signal-focus]')?.dataset.ticketSignalFocus||'';
+    """)
+    if not signal_key:raise RuntimeError(f'{label}: Signal Lens has no actionable factual signal')
+    signal_clicked=driver.execute_script("""
+      const button=document.querySelector(`[data-ticket-center] [data-ticket-signal-focus="${arguments[0]}"]`);
+      if(!button)return false;
+      button.click();
+      return true;
+    """,signal_key)
+    if not signal_clicked:raise RuntimeError(f'{label}: Signal Lens Show matchup control missing')
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const center=document.querySelector('[data-ticket-center]');
+      const all=center?.querySelector('[data-ticket-filter="all"]')?.getAttribute('aria-pressed')==='true';
+      const ticketBudget=center?.querySelector('[data-ticket-tenx-budget="all"]')?.getAttribute('aria-pressed')==='true';
+      const allGames=center?.querySelector('[data-ticket-finalists-view="all"]')?.getAttribute('aria-pressed')==='true';
+      const groupBudget=center?.querySelector('[data-ticket-finalists-budget="all"]')?.getAttribute('aria-pressed')==='true';
+      const card=[...center?.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')||[]]
+        .find(node=>node.dataset.ticketTenxKey===arguments[0]);
+      return Boolean(all&&ticketBudget&&allGames&&groupBudget&&card&&!card.hidden&&card.contains(document.activeElement));
+    """,signal_key))
 
     party_clicked=driver.execute_script("""
       const button=document.querySelector('[data-ticket-center] [data-ticket-tenx-party="3"]');
@@ -311,9 +416,11 @@ def exercise_saved_compare(driver,label,mobile=False):
       const center=document.querySelector('[data-ticket-center]');
       const all=center?.querySelector('[data-ticket-filter="all"]')?.getAttribute('aria-pressed')==='true';
       const budget=center?.querySelector('[data-ticket-tenx-budget="all"]')?.getAttribute('aria-pressed')==='true';
+      const finalists=center?.querySelector('[data-ticket-finalists-view="all"]')?.getAttribute('aria-pressed')==='true';
+      const group=center?.querySelector('[data-ticket-finalists-budget="all"]')?.getAttribute('aria-pressed')==='true';
       const card=[...center?.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')||[]]
         .find(node=>node.dataset.ticketTenxKey===arguments[0]);
-      return Boolean(all&&budget&&card&&card.contains(document.activeElement));
+      return Boolean(all&&budget&&finalists&&group&&card&&card.contains(document.activeElement));
     """,focus_key))
 
     removed=driver.execute_script("""
@@ -340,10 +447,19 @@ def exercise_saved_compare(driver,label,mobile=False):
     WebDriverWait(driver,8,poll_frequency=.1).until(
         lambda d:not d.execute_script("return Boolean(document.querySelector('[data-ticket-compare-v125]'))")
     )
+    WebDriverWait(driver,8,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const saved=document.querySelector('[data-ticket-finalists-view="saved"]');
+      const all=document.querySelector('[data-ticket-finalists-view="all"]');
+      return Boolean(saved?.disabled&&all?.getAttribute('aria-pressed')==='true');
+    """))
 
     return {
         'savedKeys':keys,
         'initialCompareCards':state['count'],
+        'finalistsOnlyVerified':True,
+        'groupBudgetVerified':True,
+        'signalLensVerified':True,
+        'signalFocusKey':signal_key,
         'partySize':3,
         'viewOffersFocused':True,
         'removeLifecycle':True,
