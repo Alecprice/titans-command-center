@@ -6,7 +6,7 @@
   let serial=0,fanPromise=null,dataPromise=null,preseasonPromise=null;
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const playerId=()=>new URLSearchParams(location.hash.split('?')[1]||'').get('id')||'';
-  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const arr=value=>Array.isArray(value)?value:[];
   const getJson=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback}};
   const setJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}};
@@ -179,7 +179,7 @@
     const contextLabel=isPreseasonFallback?`${context.season||2026} Preseason · official fallback`:'';
     const layer=document.createElement('section');layer.className='v16-player-intel';layer.innerHTML=`
       <section class="v16-player-command">
-        <header><div><small>PLAYER COMMAND CENTER</small><h2>${esc(player.name||'Titans player')}</h2><p>Quick answer first. Game logs, trends and deeper football context stay one tap away.</p></div><button type="button" data-v16-favorite aria-pressed="${favorite}">${favorite?'★ Favorite':'☆ Make favorite'}</button></header>
+        <header><div><small>PLAYER COMMAND CENTER</small><h2>${esc(player.name||'Titans player')}</h2><p>Quick answer first. Game logs, trends and deeper football context stay one tap away.</p></div><button type="button" data-v16-favorite aria-pressed="${favorite}" aria-live="polite">${favorite?'★ Favorite':'☆ Make favorite'}</button></header>
         ${isPreseasonFallback?`<p class="v16-note"><strong>${esc(contextLabel)}</strong> · ${esc(context.source||'Verified Titans/NFL preseason sources')}. ${esc(context.coverage||'')}</p>`:''}
         <div class="v16-quick-grid"><article><small>${esc(status.label)}</small><strong>${esc(status.value)}</strong><span>${esc(status.copy)}</span></article><article><small>Last loaded game</small><strong>${esc(last?weekLabel(last):'Awaiting stats')}</strong><span>${esc(last?teamDate(last.kickoff):'No game-stat row loaded')}${last?.fallback?' · 2026 preseason':''}</span></article>${quick.slice(0,2).map(metric=>`<article><small>${esc(metric.label)}</small><strong>${esc(metric.value)}</strong><span>${esc(contextLabel||'Latest loaded game')}</span></article>`).join('')}</div>
       </section>
@@ -195,7 +195,7 @@
       const tab=event.target.closest?.('[data-v16-player-tab]');
       if(tab){const id=tab.dataset.v16PlayerTab;layer.querySelectorAll('[data-v16-player-tab]').forEach(x=>{const on=x===tab;x.classList.toggle('active',on);x.setAttribute('aria-selected',String(on))});layer.querySelectorAll('[data-v16-pane]').forEach(x=>x.hidden=x.dataset.v16Pane!==id);return}
       const favoriteButton=event.target.closest?.('[data-v16-favorite]');
-      if(favoriteButton){const isFavorite=favoriteButton.getAttribute('aria-pressed')==='true',next=getJson(PROFILE_KEY,{});next.favorite=isFavorite?'':player.name;setJson(PROFILE_KEY,next);favoriteButton.textContent=isFavorite?'☆ Make favorite':'★ Favorite';favoriteButton.setAttribute('aria-pressed',String(!isFavorite))}
+      if(favoriteButton){const isFavorite=favoriteButton.getAttribute('aria-pressed')==='true',next=getJson(PROFILE_KEY,{});next.favorite=isFavorite?'':player.name;const saved=setJson(PROFILE_KEY,next);if(!saved){favoriteButton.textContent=isFavorite?'★ Favorite still saved · retry':'☆ Favorite not saved · retry';favoriteButton.setAttribute('aria-label',isFavorite?'Could not remove favorite. Favorite is still saved. Retry.':'Favorite was not saved on this device. Retry.');return}favoriteButton.removeAttribute('aria-label');favoriteButton.textContent=isFavorite?'☆ Make favorite':'★ Favorite';favoriteButton.setAttribute('aria-pressed',String(!isFavorite))}
     });
   }
 
