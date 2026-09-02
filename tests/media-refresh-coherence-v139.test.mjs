@@ -30,7 +30,7 @@ test('a pre-refresh media response cannot overwrite the refreshed snapshot',()=>
 });
 
 test('shared runtime invalidates API cache before publishing refresh events',()=>{
-  const invalidate=runtime.indexOf("if(targets?.length)for(const url of targets)apiCache.delete(url);else apiCache.clear();");
+  const invalidate=runtime.indexOf("if(targets?.length)for(const url of targets)invalidateApi(url);else invalidateApi();");
   const publish=runtime.indexOf('for(const listener of [...refreshListeners])safeCall(listener,event);');
   assert.ok(invalidate>=0,'runtime cache invalidation contract exists');
   assert.ok(publish>invalidate,'refresh listeners run only after runtime cache invalidation');
