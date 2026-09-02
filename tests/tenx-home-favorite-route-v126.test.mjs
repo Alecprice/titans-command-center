@@ -46,9 +46,13 @@ test('TENX Home favorite routing adds no new network or lifecycle owner',()=>{
   assert.doesNotMatch(home,/fetch\(/);
 });
 
-test('TENX Home keeps favorite actions accessible on mobile',()=>{
+test('TENX Home keeps favorite actions accessible while allowing compact mobile density',()=>{
   assert.match(home,/my-titans-home-v35 :focus-visible/);
   assert.match(home,/@media\(max-width:760px\)/);
-  assert.match(home,/min-height:112px/);
-  assert.match(home,/aria-label','My Titans quick access/);
+  assert.match(home,/my-titans-home-v35-primary,.my-titans-home-v35-quick\{display:flex;min-width:0;min-height:72px/);
+  assert.match(home,/my-titans-home-v35-primary\{flex:0 0 82vw;max-width:430px;min-height:88px/);
+  assert.match(home,/my-titans-home-v35-quick\{flex:0 0 52vw;min-width:176px;max-width:235px;min-height:88px/);
+  assert.match(home,/scroll-snap-type:x proximity/);
+  assert.match(home,/aria-label','My Titans profile summary/);
+  assert.doesNotMatch(home,/min-height:112px/);
 });
