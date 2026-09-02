@@ -21,6 +21,18 @@
     if(pos==='K')return ['Kicker watch','neutral'];
     return ['Depth watch','neutral'];
   };
+  const matchupPoints=row=>{
+    const raw=row?.points;
+    if(raw==null||raw==='')return null;
+    const value=Number(raw);
+    return Number.isFinite(value)?value:null;
+  };
+  const matchupScore=row=>{const value=matchupPoints(row);return value==null?'—':value.toFixed(2)};
+  const resolvedRosterCounts=owner=>{
+    const players=Array.isArray(owner?.players)?owner.players.map(String).filter(id=>id&&id!=='0'):[];
+    const rostered=new Set(players),starters=Array.isArray(owner?.starters)?owner.starters.map(String):[];
+    return {starters:starters.filter(id=>id&&id!=='0'&&rostered.has(id)).length,rostered:players.length};
+  };
   const sleeperFetch=async path=>{
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),6500);
     try{const r=await fetch(`https://api.sleeper.app/v1${path}`,{headers:{Accept:'application/json'},signal:controller.signal});if(!r.ok)throw new Error(`Sleeper returned ${r.status}`);return await r.json();}finally{clearTimeout(timer)}
@@ -63,8 +75,11 @@
     const owner=sleeper.user?.user_id?sleeper.rosters.find(r=>String(r.owner_id)===String(sleeper.user.user_id)):null;
     const matchup=owner?sleeper.matchups.find(m=>Number(m.roster_id)===Number(owner.roster_id)):null;
     const opp=matchup?sleeper.matchups.find(m=>Number(m.matchup_id)===Number(matchup.matchup_id)&&Number(m.roster_id)!==Number(owner.roster_id)):null;
+    const counts=resolvedRosterCounts(owner);
     const userByRoster=id=>{const r=sleeper.rosters.find(x=>Number(x.roster_id)===Number(id));const u=sleeper.users.find(x=>String(x.user_id)===String(r?.owner_id));return u?.metadata?.team_name||u?.display_name||`Roster ${id}`};
-    return `<section class="fantasy-grid"><article class="fantasy-panel fantasy-span-2"><small>SLEEPER CONNECT</small><h2>Import your league, read-only</h2><p>Sleeper requires no API token for its read-only API. Your username is stored on this device and sent directly to Sleeper only when you connect or refresh.</p><form id="sleeper-connect" class="fantasy-connect"><input name="username" maxlength="64" value="${esc(state.sleeperUser)}" placeholder="Sleeper username" required><button class="fantasy-action" type="submit">Connect / refresh</button></form>${sleeper.error?`<div class="fantasy-error" role="alert">${esc(sleeper.error)}</div>`:''}${leagues.length?`<label class="fantasy-select">League<select id="sleeper-league">${leagues.map(l=>`<option value="${esc(l.league_id)}"${String(l.league_id)===state.leagueId?' selected':''}>${esc(l.name||'Unnamed league')}</option>`).join('')}</select></label>`:''}</article>${league?`<article class="fantasy-panel"><small>LEAGUE</small><h2>${esc(league.name||'Sleeper league')}</h2><div class="fantasy-facts"><span><b>${esc(league.total_rosters||sleeper.rosters.length)}</b> teams</span><span><b>${esc(league.status||'')}</b> status</span><span><b>${esc(league.season||SEASON)}</b> season</span></div><label class="fantasy-select">Week<select id="sleeper-week">${Array.from({length:18},(_,i)=>i+1).map(w=>`<option value="${w}"${w===state.week?' selected':''}>Week ${w}</option>`).join('')}</select></label></article><article class="fantasy-panel"><small>MY MATCHUP</small><h2>${owner?esc(userByRoster(owner.roster_id)):'Roster not matched'}</h2>${owner?`<div class="fantasy-matchup"><div><strong>${Number(matchup?.points||0).toFixed(2)}</strong><span>Your points · Week ${state.week}</span></div><div><strong>${opp?Number(opp.points||0).toFixed(2):'—'}</strong><span>${opp?esc(userByRoster(opp.roster_id)):'Opponent unavailable'}</span></div></div><p>${owner.starters?.length||0} starters · ${owner.players?.length||0} rostered players</p>`:'<div class="fantasy-empty">Could not match this Sleeper user to a roster in the selected league.</div>'}</article>`:''}</section>`;
+    const ownerScoreNote=matchup?`Your points · Week ${state.week}`:`Week ${state.week} matchup not returned by Sleeper`;
+    const opponentLabel=opp?userByRoster(opp.roster_id):matchup?'Opponent unavailable':'Opponent not returned';
+    return `<section class="fantasy-grid"><article class="fantasy-panel fantasy-span-2"><small>SLEEPER CONNECT</small><h2>Import your league, read-only</h2><p>Sleeper requires no API token for its read-only API. Your username is stored on this device and sent directly to Sleeper only when you connect or refresh.</p><form id="sleeper-connect" class="fantasy-connect"><input name="username" maxlength="64" value="${esc(state.sleeperUser)}" placeholder="Sleeper username" required><button class="fantasy-action" type="submit">Connect / refresh</button></form>${sleeper.error?`<div class="fantasy-error" role="alert">${esc(sleeper.error)}</div>`:''}${leagues.length?`<label class="fantasy-select">League<select id="sleeper-league">${leagues.map(l=>`<option value="${esc(l.league_id)}"${String(l.league_id)===state.leagueId?' selected':''}>${esc(l.name||'Unnamed league')}</option>`).join('')}</select></label>`:''}</article>${league?`<article class="fantasy-panel"><small>LEAGUE</small><h2>${esc(league.name||'Sleeper league')}</h2><div class="fantasy-facts"><span><b>${esc(league.total_rosters||sleeper.rosters.length)}</b> teams</span><span><b>${esc(league.status||'')}</b> status</span><span><b>${esc(league.season||SEASON)}</b> season</span></div><label class="fantasy-select">Week<select id="sleeper-week">${Array.from({length:18},(_,i)=>i+1).map(w=>`<option value="${w}"${w===state.week?' selected':''}>Week ${w}</option>`).join('')}</select></label></article><article class="fantasy-panel"><small>MY MATCHUP</small><h2>${owner?esc(userByRoster(owner.roster_id)):'Roster not matched'}</h2>${owner?`<div class="fantasy-matchup"><div><strong>${matchupScore(matchup)}</strong><span>${esc(ownerScoreNote)}</span></div><div><strong>${matchupScore(opp)}</strong><span>${esc(opponentLabel)}</span></div></div><p>${counts.starters} resolved starters · ${counts.rostered} rostered players</p>`:'<div class="fantasy-empty">Could not match this Sleeper user to a roster in the selected league.</div>'}</article>`:''}</section>`;
   }
   function draftTab(){
     const draft=sleeper.drafts?.[0],picks=sleeper.picks||[];
