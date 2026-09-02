@@ -127,35 +127,60 @@
     return `${value.book} not reporting now · was ${lineText(value.before)}`;
   }
 
+  function bookStateAria(value){
+    if(value.kind==='up'||value.kind==='down')return `${value.book}, line ${value.kind}, ${lineText(Math.abs(value.delta))}, from ${lineText(value.before)} to ${lineText(value.now)}`;
+    if(value.kind==='same')return `${value.book}, no line change, ${lineText(value.now)}`;
+    if(value.kind==='now-reporting')return `${value.book}, now reporting, ${lineText(value.now)}`;
+    return `${value.book}, not reporting now, previous line ${lineText(value.before)}`;
+  }
+
+  function markOneReviewed(row,identity){
+    const liveIdentity=rowIdentity(row),watchedKeys=new Set(loadWatchlist().map(item=>item.key));
+    if(!liveIdentity||liveIdentity.key!==identity.key||!watchedKeys.has(liveIdentity.key))return false;
+    const books=currentBooks(row);if(!Object.keys(books).length)return false;
+    const store=pruneReview(loadReview(),watchedKeys);
+    store[liveIdentity.key]={reviewedAt:Date.now(),books};
+    saveReview(store);decorate();return true;
+  }
+
   function renderRowDetail(row,identity,result,baseline){
     let detail=row.querySelector(':scope > .fpr-row-detail');
     const lastQuote=[...row.querySelectorAll(':scope > .fprop-quote')].at(-1);
-    if(result?.kind!=='changed'||!baseline){
+    if(!result||result.kind==='same'){
       detail?.remove();lastQuote?.classList.remove('fpr-before-detail');return;
     }
     if(!detail){
       detail=document.createElement('div');detail.className='fpr-row-detail';detail.setAttribute('role','group');row.append(detail);
     }
     lastQuote?.classList.add('fpr-before-detail');
-    detail.setAttribute('aria-label',`Changes since review for ${identity.player} ${identity.market}`);
-    const signature=JSON.stringify([baseline.reviewedAt,result.bookStates]);
+    detail.setAttribute('aria-label',result.kind==='changed'?`Changes since review for ${identity.player} ${identity.market}`:`Review checkpoint for ${identity.player} ${identity.market}`);
+    const canCapture=Object.keys(currentBooks(row)).length>0;
+    const signature=JSON.stringify([result.kind,baseline?.reviewedAt||0,result.bookStates,canCapture]);
     if(detail.dataset.signature===signature)return;
     detail.dataset.signature=signature;detail.replaceChildren();
-    const lead=document.createElement('strong');lead.className='fpr-row-detail-lead';lead.textContent=`Since review · ${formatTime(baseline.reviewedAt)}`;detail.append(lead);
+    const lead=document.createElement('strong');lead.className='fpr-row-detail-lead';lead.textContent=result.kind==='changed'?`Since review · ${formatTime(baseline.reviewedAt)}`:'No review checkpoint yet';detail.append(lead);
     for(const item of result.bookStates){
-      const chip=document.createElement('span');chip.className=`fpr-book-state is-${item.kind}`;chip.textContent=bookStateLabel(item);detail.append(chip);
+      const chip=document.createElement('span');chip.className=`fpr-book-state is-${item.kind}`;chip.textContent=bookStateLabel(item);chip.setAttribute('aria-label',bookStateAria(item));detail.append(chip);
     }
+    const button=document.createElement('button');button.type='button';button.className='fpr-row-mark';button.textContent=result.kind==='changed'?'Mark this reviewed':'Set checkpoint';
+    button.disabled=!canCapture;
+    const action=result.kind==='changed'?'Mark this watched prop reviewed':'Set a review checkpoint for this watched prop';
+    const unavailable=`Cannot mark ${identity.player} ${identity.market} reviewed because no current numeric sportsbook lines are reporting`;
+    button.setAttribute('aria-label',canCapture?`${action}: ${identity.player} ${identity.market}`:unavailable);
+    if(!canCapture)button.title=unavailable;
+    button.addEventListener('click',()=>markOneReviewed(row,identity));
+    detail.append(button);
   }
 
   function injectStyle(){
     if(document.querySelector('style[data-fantasy-prop-review-v138]'))return;
     const style=document.createElement('style');style.dataset.fantasyPropReviewV138='true';style.textContent=`
       .fpr-review{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;margin:0 0 14px;padding:13px 14px;border:1px solid rgba(126,184,238,.2);border-radius:14px;background:rgba(9,27,44,.76)}.fpr-copy strong,.fpr-copy span{display:block}.fpr-copy strong{font-size:.86rem;color:#f5f8fb}.fpr-copy span{margin-top:3px;color:#9db1c5;font-size:.76rem;line-height:1.4}.fpr-changes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.fpr-change{padding:5px 7px;border:1px solid rgba(126,184,238,.18);border-radius:8px;background:rgba(75,146,219,.08);font-size:.7rem;color:#cfe8ff}.fpr-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}.fpr-actions button{min-height:44px;border:1px solid rgba(126,184,238,.3);border-radius:10px;padding:0 11px;background:#102c49;color:#eaf5ff;font:inherit;font-size:.75rem;font-weight:900;cursor:pointer}.fpr-actions button[aria-pressed="true"]{background:#4b92db;color:#071321}.fpr-actions button:disabled{opacity:.48;cursor:not-allowed}.fpr-actions button:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fpr-review-badge{display:inline-flex;align-items:center;min-height:24px;margin-top:6px;padding:2px 7px;border:1px solid rgba(126,184,238,.25);border-radius:999px;background:rgba(75,146,219,.12);color:#cfe8ff;font-size:.67rem;font-weight:950}.fpr-review-badge.is-unreviewed{color:#ffd69a;background:rgba(255,181,71,.08);border-color:rgba(255,181,71,.25)}.fprop-row.is-filtered-by-review{display:none!important}.fprop-row.is-review-changed{box-shadow:inset 0 -2px 0 rgba(126,184,238,.45)}
-      .fpr-row-detail{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:9px 12px;border-top:1px solid rgba(126,184,238,.16);background:rgba(75,146,219,.055)}.fpr-row-detail-lead{margin-right:2px;color:#eaf5ff;font-size:.7rem;letter-spacing:.02em}.fpr-book-state{display:inline-flex;align-items:center;min-height:28px;padding:4px 8px;border:1px solid rgba(126,184,238,.18);border-radius:999px;background:rgba(4,24,43,.66);color:#cfe2f4;font-size:.69rem;font-weight:800;line-height:1.25}.fpr-book-state.is-up{border-color:rgba(126,217,170,.3)}.fpr-book-state.is-down{border-color:rgba(255,181,181,.3)}.fpr-book-state.is-now-reporting,.fpr-book-state.is-not-reporting{border-style:dashed}.fprop-row>.fpr-before-detail{border-right:0}
+      .fpr-row-detail{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:9px 12px;border-top:1px solid rgba(126,184,238,.16);background:rgba(75,146,219,.055)}.fpr-row-detail-lead{margin-right:2px;color:#eaf5ff;font-size:.7rem;letter-spacing:.02em}.fpr-book-state{display:inline-flex;align-items:center;min-height:28px;padding:4px 8px;border:1px solid rgba(126,184,238,.18);border-radius:999px;background:rgba(4,24,43,.66);color:#cfe2f4;font-size:.69rem;font-weight:800;line-height:1.25}.fpr-book-state.is-up{border-color:rgba(126,217,170,.3)}.fpr-book-state.is-down{border-color:rgba(255,181,181,.3)}.fpr-book-state.is-now-reporting,.fpr-book-state.is-not-reporting{border-style:dashed}.fpr-row-mark{min-height:44px;margin-left:auto;border:1px solid rgba(126,184,238,.32);border-radius:10px;padding:0 11px;background:#102c49;color:#eaf5ff;font:inherit;font-size:.7rem;font-weight:900;cursor:pointer}.fpr-row-mark:disabled{opacity:.48;cursor:not-allowed}.fpr-row-mark:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fprop-row>.fpr-before-detail{border-right:0}
       @media(max-width:700px){.fpr-review{grid-template-columns:1fr;align-items:stretch}.fpr-actions{display:grid;grid-template-columns:1fr 1fr}.fpr-actions button{min-height:48px}}
-      @media(max-width:620px){.fprop-row>.fpr-before-detail{border-bottom:0}.fpr-row-detail{padding:10px;align-items:stretch}.fpr-row-detail-lead{flex:1 0 100%;font-size:.76rem}.fpr-book-state{flex:1 1 155px;min-height:36px;border-radius:10px;font-size:.73rem}}
+      @media(max-width:620px){.fprop-row>.fpr-before-detail{border-bottom:0}.fpr-row-detail{padding:10px;align-items:stretch}.fpr-row-detail-lead{flex:1 0 100%;font-size:.76rem}.fpr-book-state{flex:1 1 155px;min-height:36px;border-radius:10px;font-size:.73rem}.fpr-row-mark{width:100%;min-height:48px;margin-left:0}}
       @media(max-width:430px){.fpr-actions{grid-template-columns:1fr}.fpr-copy strong{font-size:.9rem}.fpr-copy span{font-size:.79rem}.fpr-book-state{flex-basis:100%}}
-      @media(forced-colors:active){.fpr-review,.fpr-actions button,.fpr-review-badge,.fpr-row-detail,.fpr-book-state{border:1px solid CanvasText}.fprop-row.is-review-changed{outline:1px solid Highlight}}
+      @media(forced-colors:active){.fpr-review,.fpr-actions button,.fpr-review-badge,.fpr-row-detail,.fpr-book-state,.fpr-row-mark{border:1px solid CanvasText}.fprop-row.is-review-changed{outline:1px solid Highlight}}
     `;document.head.append(style);
   }
 
