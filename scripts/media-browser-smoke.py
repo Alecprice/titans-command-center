@@ -104,11 +104,30 @@ try:
     wait_for(driver, "document.querySelector('a[href=\"#media\"]')")
     driver.execute_script("document.querySelector('a[href=\"#media\"]')?.click()")
     wait_for(driver, "location.hash === '#media'")
-    wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-tune-guide')")
+    wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-tune-guide') && document.querySelector('.media-quickstart')")
     time.sleep(0.25)
     if not driver.execute_script("return Boolean(document.querySelector('.media-page'))"):
         raise RuntimeError('Media route was overwritten after interaction')
     no_overflow(driver, 'desktop media')
+
+    stage = 'desktop:quick-start'
+    quick_start = driver.execute_script("""
+      const root=document.querySelector('.media-quickstart');
+      const cards=[...root?.querySelectorAll('.media-quick-card')||[]];
+      return {
+        present:Boolean(root),
+        phase:root?.dataset.phase||'',
+        result:root?.dataset.result||'',
+        cards:cards.length,
+        labels:cards.map(card=>card.getAttribute('aria-label')||''),
+        watchHref:root?.querySelector('.media-quick-watch')?.href||'',
+        listenHref:root?.querySelector('.media-quick-listen')?.href||''
+      };
+    """)
+    if not quick_start['present'] or not quick_start['phase'] or quick_start['cards'] != 2:
+        raise RuntimeError(f'Game Day Quick Start incomplete: {quick_start}')
+    if any(not label for label in quick_start['labels']) or not quick_start['watchHref'] or not quick_start['listenHref']:
+        raise RuntimeError(f'Game Day Quick Start actions are not accessible/routable: {quick_start}')
 
     stage = 'desktop:official-video-api'
     youtube = media_video_context(driver)
@@ -203,30 +222,38 @@ try:
         stage = f'desktop:territory:{area}'
         driver.execute_script("document.querySelector(`[data-media-area=\"${arguments[0]}\"]`)?.click()", area)
         wait_for(driver, f"document.querySelector('[data-media-area=\"{area}\"]')?.getAttribute('aria-pressed') === 'true'")
-        wait_for(driver, "document.querySelector('.media-page') && location.hash === '#media'")
+        wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-quickstart') && location.hash === '#media'")
         time.sleep(0.08)
         state = driver.execute_script("""
           const selected=document.querySelector('[data-media-area][aria-pressed="true"]');
-          return {hash:location.hash,selected:selected?.textContent?.trim()||'',page:Boolean(document.querySelector('.media-page')),guide:Boolean(document.querySelector('.media-tune-guide')),watch:(document.querySelector('.media-watch')?.innerText||'').slice(0,500)};
+          const quick=document.querySelector('.media-quickstart');
+          return {hash:location.hash,selected:selected?.textContent?.trim()||'',page:Boolean(document.querySelector('.media-page')),guide:Boolean(document.querySelector('.media-tune-guide')),quickStart:Boolean(quick),quickPhase:quick?.dataset.phase||'',quickCards:quick?.querySelectorAll('.media-quick-card').length||0,watch:(document.querySelector('.media-watch')?.innerText||'').slice(0,500)};
         """)
-        if state['hash'] != '#media' or not state['page'] or not state['guide'] or text not in state['selected']:
+        if state['hash'] != '#media' or not state['page'] or not state['guide'] or not state['quickStart'] or not state['quickPhase'] or state['quickCards'] != 2 or text not in state['selected']:
             raise RuntimeError(f'Territory switch failed for {area}: {state}')
         territory_checks.append(state['selected'])
 
     stage = 'mobile:media'
     driver.set_window_size(390, 844)
-    shell = load_shell(driver, '#media', "document.querySelector('.media-page') && document.querySelector('.media-tune-guide')", timeout=12)
+    shell = load_shell(driver, '#media', "document.querySelector('.media-page') && document.querySelector('.media-tune-guide') && document.querySelector('.media-quickstart')", timeout=12)
     shell_retries += shell['retries']
     shell_load_diagnostics.extend(shell['diagnostics'])
     if body.get('configured') and videos:
         wait_for(driver, "document.querySelector('[data-youtube-official-shelf]')", timeout=12)
     no_overflow(driver, '390px media')
     mobile = driver.execute_script("""
+      const quick=document.querySelector('.media-quickstart');
+      const quickCards=[...quick?.querySelectorAll('.media-quick-card')||[]];
       return {
         areaButtons:[...document.querySelectorAll('[data-media-area]')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height})),
         launchCards:document.querySelectorAll('.media-radio-launch a').length,
         timeRows:document.querySelectorAll('.media-time-row').length,
         page:Boolean(document.querySelector('.media-page')),
+        quickStart:Boolean(quick),
+        quickPhase:quick?.dataset.phase||'',
+        quickCards:quickCards.length,
+        quickTargets:quickCards.map(x=>x.getBoundingClientRect().height),
+        quickLabels:quickCards.map(x=>x.getAttribute('aria-label')||''),
         youtubeCards:document.querySelectorAll('[data-youtube-video]').length,
         youtubePlayTargets:[...document.querySelectorAll('[data-youtube-play]')].map(x=>x.getBoundingClientRect().height)
       }
@@ -235,6 +262,8 @@ try:
         raise RuntimeError(f'Mobile territory controls invalid: {mobile}')
     if mobile['launchCards'] != 2 or mobile['timeRows'] != 4 or not mobile['page']:
         raise RuntimeError(f'Mobile media layout incomplete: {mobile}')
+    if not mobile['quickStart'] or not mobile['quickPhase'] or mobile['quickCards'] != 2 or any(height < 44 for height in mobile['quickTargets']) or any(not label for label in mobile['quickLabels']):
+        raise RuntimeError(f'Mobile Game Day Quick Start invalid: {mobile}')
     if body.get('configured') and videos and (mobile['youtubeCards'] < 1 or any(height < 44 for height in mobile['youtubePlayTargets'])):
         raise RuntimeError(f'Mobile official video shelf controls invalid: {mobile}')
 
@@ -250,6 +279,7 @@ try:
         'shellLoadRetries': shell_retries,
         'transientShellAssetFailures': len(shell_load_diagnostics),
         'territoryChecks': territory_checks,
+        'quickStart': quick_start,
         'officialTitansAudio': True,
         'official1045Player': True,
         'rawEmbeddedAudio': False,
@@ -263,6 +293,12 @@ try:
         },
         'mobileAreaTargets': mobile['areaButtons'],
         'mobileTimeRows': mobile['timeRows'],
+        'mobileQuickStart': {
+            'phase': mobile['quickPhase'],
+            'cards': mobile['quickCards'],
+            'targets': mobile['quickTargets'],
+            'labels': mobile['quickLabels'],
+        },
         'mobileYoutubeCards': mobile['youtubeCards'],
         'browserWarnings': warnings[:20],
         'durationSeconds': round(time.time() - started, 2),
