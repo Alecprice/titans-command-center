@@ -17,8 +17,9 @@ test('Target Price Watch is additive to the Ticket runtime chain',()=>{
 test('targets are bounded browser-local values tied only to currently saved matchups',()=>{
   assert.match(js,/if\(!Number\.isFinite\(parsed\)\|\|parsed<1\|\|parsed>MAX_AMOUNT\)return null/);
   assert.match(js,/const allowed=new Set\(saved\.map\(item=>item\.key\)\)/);
+  assert.match(js,/for\(const \[key,value\] of Object\.entries\(source\)\)/);
   assert.match(js,/if\(!allowed\.has\(key\)\)continue/);
-  assert.match(js,/Object\.entries\(source\)\.slice\(0,MAX_TARGETS\)/);
+  assert.match(js,/if\(Object\.keys\(targets\)\.length>=MAX_TARGETS\)break/);
   assert.match(js,/JSON\.stringify\(original\)!==JSON\.stringify\(clean\.targets\)/);
   assert.match(js,/delete store\.targets\[key\]/);
   assert.doesNotMatch(js,/title:.*targets|date:.*targets|price:.*targets/);
@@ -28,8 +29,8 @@ test('target state is factual current-starting-price math without recommendation
   assert.match(js,/badge:'TARGET MET'/);
   assert.match(js,/badge:'ABOVE TARGET'/);
   assert.match(js,/badge:'PRICE UNAVAILABLE'/);
-  assert.match(js,/Current reported start \$\{money\(current\)\} is/);
-  assert.match(js,/Targets compare current reported starting prices only\. Checkout fees, seat quality, and future prices are not inferred\./);
+  assert.match(js,/Current reported start \$\{money\(current\)\} per ticket is/);
+  assert.match(js,/Targets compare current reported starting prices per ticket only\. Checkout fees, seat quality, and future prices are not inferred\./);
   assert.doesNotMatch(js,/buy now/i);
   assert.doesNotMatch(js,/wait to buy/i);
   assert.doesNotMatch(js,/deal score/i);
@@ -57,7 +58,8 @@ test('Target Price Watch composes with shortlist and refresh lifecycle without o
 
 test('inputs and controls remain phone-safe and accessible',()=>{
   assert.match(js,/inputmode="decimal"/);
-  assert.match(js,/aria-label="Target reported starting price for/);
+  assert.match(js,/Target starting price per ticket/);
+  assert.match(js,/aria-label="Target reported starting price per ticket for/);
   assert.match(js,/role="status" aria-live="polite"/);
   assert.match(css,/font-size:16px/);
   assert.match(css,/\.tickets-target-v143-money input\{[^}]*min-height:44px/);
