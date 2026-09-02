@@ -19,7 +19,7 @@ def wait_for(driver, predicate, timeout=14):
 
 
 def finder_state(driver):
-    return driver.execute_script("""
+    return driver.execute_script(r"""
       const root=document.querySelector('.media-affiliate-finder');
       const visible=[...root?.querySelectorAll('[data-affiliate-station]:not([hidden])')||[]];
       const favoriteButton=root?.querySelector('[data-affiliate-station]:not([hidden]) [data-affiliate-favorite]');
