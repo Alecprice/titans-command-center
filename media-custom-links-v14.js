@@ -9,7 +9,7 @@
   if(!document.querySelector('link[data-media-custom-links]')){
     const style=document.createElement('link');
     style.rel='stylesheet';
-    style.href='/media-custom-links-v14.css?v=2';
+    style.href='/media-custom-links-v14.css?v=3';
     style.dataset.mediaCustomLinks='true';
     document.head.append(style);
   }
@@ -21,17 +21,13 @@
   const STORAGE_VERSION=1;
   const LEGACY_STORAGE_RE=/^titans:v\d+CustomMediaLinks$/i;
   const MAX_LINKS=12;
-  // UI-order preference only, never authorization. Store only a one-way account fingerprint
-  // in public client code rather than publishing the account address in the bundle.
-  const PRIORITY_ACCOUNT_HASH='ca45320c96fc21c7b4dfa800eb5b249569716334f053537d065fea88574e78d2';
-  let priorityAccount=false,priorityFingerprint='';
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   function normalizeUrl(value){
     try{
       const u=new URL(String(value||'').trim());
-      return ['https:','http:'].includes(u.protocol)?u.href:null;
+      return u.protocol==='https:'?u.href:null;
     }catch{return null}
   }
 
@@ -116,43 +112,22 @@
     try{localStorage.setItem(STORAGE_KEY,encodedLinks(links));return true}catch{return false}
   }
 
-  async function refreshPriorityAccount(){
-    const email=String(window.TitansAccount?.user?.email||'').trim().toLowerCase();
-    if(email===priorityFingerprint)return priorityAccount;
-    priorityFingerprint=email;
-    priorityAccount=false;
-    if(!email||!globalThis.crypto?.subtle)return false;
-    try{
-      const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(email));
-      const hash=[...new Uint8Array(bytes)].map(value=>value.toString(16).padStart(2,'0')).join('');
-      priorityAccount=hash===PRIORITY_ACCOUNT_HASH;
-    }catch{priorityAccount=false}
-    if(route()==='media')queueMicrotask(render);
-    return priorityAccount;
-  }
-
   const readLinks=()=>migrateAndReadLinks();
   const writeLinks=value=>persistLinks(value);
 
   function card(item,index){
-    return `<article class="media-custom-card"><div><small>USER SAVED</small><strong>${esc(item.label||'Custom link')}</strong><span>${esc(new URL(item.url).hostname)}</span></div><div class="media-custom-actions"><a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">Open ↗</a><button type="button" data-custom-remove="${index}" aria-label="Remove ${esc(item.label||'custom link')}">Remove</button></div></article>`;
+    return `<article class="media-custom-card"><div><small>USER SAVED</small><strong>${esc(item.label||'Personal bookmark')}</strong><span>${esc(new URL(item.url).hostname)}</span></div><div class="media-custom-actions"><a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">Open ↗</a><button type="button" data-custom-remove="${index}" aria-label="Remove ${esc(item.label||'personal bookmark')}">Remove</button></div></article>`;
   }
 
   function sectionHtml(links){
-    return `<section class="media-custom-links" data-custom-media-links><header><div><small>OTHER STREAMING OPTIONS</small><h3>Your saved links</h3><p>Add a website you personally use. <strong>Guest links stay on this device through normal app and PWA updates.</strong> Signed-in users can sync saved links when account sync is available. Clearing browser/site data, switching site domains, or uninstalling may remove device-only links. Links are not verified or endorsed by the Command Center. Save up to ${MAX_LINKS} unique websites.</p></div></header><form class="media-custom-form" data-custom-form><label><span>Name</span><input name="label" maxlength="50" placeholder="My streaming option" required /></label><label><span>Website</span><input name="url" type="url" inputmode="url" autocomplete="url" spellcheck="false" autocapitalize="none" placeholder="https://…" required /></label><button type="submit">Save link</button><p class="media-custom-error" data-custom-error role="status" aria-live="polite"></p></form><div class="media-custom-grid">${links.length?links.map(card).join(''):'<p class="media-custom-empty">No personal links saved yet.</p>'}</div></section>`;
+    return `<section class="media-custom-links" data-custom-media-links><header><div><small>PERSONAL BOOKMARKS</small><h3>Your saved media sites</h3><p>Save secure websites you personally trust for quick access. <strong>These bookmarks never replace the authorized Watch / Listen routes above.</strong> Guest links stay on this device through normal app and PWA updates; signed-in users can sync these bookmarks when account sync is available. Clearing browser/site data, switching site domains, or uninstalling may remove device-only bookmarks. Sites are not verified or endorsed by the Command Center. HTTPS only; save up to ${MAX_LINKS} unique websites.</p></div></header><form class="media-custom-form" data-custom-form><label><span>Name</span><input name="label" maxlength="50" placeholder="My media site" required /></label><label><span>Website</span><input name="url" type="url" inputmode="url" autocomplete="url" spellcheck="false" autocapitalize="none" placeholder="https://…" required /></label><button type="submit">Save bookmark</button><p class="media-custom-error" data-custom-error role="status" aria-live="polite"></p></form><div class="media-custom-grid">${links.length?links.map(card).join(''):'<p class="media-custom-empty">No personal media bookmarks saved yet.</p>'}</div></section>`;
   }
 
-  function placeSection(section,links){
+  function placeSection(section){
     if(!section)return;
-    const watch=document.querySelector('.media-watch'),page=document.querySelector('.media-page');
+    const watch=document.querySelector('.media-watch');
     if(!watch)return;
-    const priority=priorityAccount&&links.length>0;
-    section.classList.toggle('media-custom-links-priority',priority);
-    section.dataset.savedPriority=String(priority);
-    if(priority){
-      const hero=page?.querySelector('.media-hero');
-      if(hero)hero.insertAdjacentElement('afterend',section);else watch.prepend(section);
-    }else watch.append(section);
+    watch.append(section);
   }
 
   function render(){
@@ -162,7 +137,7 @@
     const links=readLinks(),old=document.querySelector('[data-custom-media-links]');
     const html=sectionHtml(links);
     if(old)old.outerHTML=html;else watch.insertAdjacentHTML('beforeend',html);
-    placeSection(document.querySelector('[data-custom-media-links]'),links);
+    placeSection(document.querySelector('[data-custom-media-links]'));
   }
 
   document.addEventListener('submit',event=>{
@@ -170,12 +145,12 @@
     if(!form)return;
     event.preventDefault();
     const data=new FormData(form),label=String(data.get('label')||'').trim(),url=normalizeUrl(data.get('url')),error=form.querySelector('[data-custom-error]');
-    if(!label||!url){if(error)error.textContent='Enter a name and a normal http/https website.';return}
+    if(!label||!url){if(error)error.textContent='Enter a name and a secure https:// website.';return}
     const links=readLinks();
     if(links.length>=MAX_LINKS){if(error)error.textContent=`You can save up to ${MAX_LINKS} websites. Remove one before adding another.`;return}
     if(links.some(item=>item.url===url)){if(error)error.textContent='That website is already saved.';return}
     links.push({label:label.slice(0,50),url});
-    if(!writeLinks(links)){if(error)error.textContent='This link could not be saved on this device.';return}
+    if(!writeLinks(links)){if(error)error.textContent='This bookmark could not be saved on this device.';return}
     render();
   });
 
@@ -187,7 +162,7 @@
     links.splice(index,1);
     if(!writeLinks(links)){
       const error=document.querySelector('[data-custom-error]');
-      if(error)error.textContent='This link could not be removed from this device.';
+      if(error)error.textContent='This bookmark could not be removed from this device.';
       return;
     }
     render();
@@ -196,13 +171,11 @@
   addEventListener('storage',event=>{
     if(event.key===STORAGE_KEY||event.key===SYNC_STORAGE_KEY||LEGACY_STORAGE_RE.test(String(event.key||'')))render();
   });
-  addEventListener('titans:account',()=>{refreshPriorityAccount();queueMicrotask(render)});
-  addEventListener('titans:preferences-synced',()=>{adoptSyncedLinks();refreshPriorityAccount();queueMicrotask(render)});
-  addEventListener('titans:preferences-imported',()=>{adoptSyncedLinks();refreshPriorityAccount();queueMicrotask(render)});
-  addEventListener('titans:preferences-reset',()=>{try{localStorage.removeItem(STORAGE_KEY)}catch{};priorityAccount=false;queueMicrotask(render)});
-  addEventListener('hashchange',()=>setTimeout(()=>{refreshPriorityAccount();render()},0));
+  addEventListener('titans:preferences-synced',()=>{adoptSyncedLinks();queueMicrotask(render)});
+  addEventListener('titans:preferences-imported',()=>{adoptSyncedLinks();queueMicrotask(render)});
+  addEventListener('titans:preferences-reset',()=>{try{localStorage.removeItem(STORAGE_KEY)}catch{};queueMicrotask(render)});
+  addEventListener('hashchange',()=>setTimeout(render,0));
   const app=document.querySelector('#app');
   if(app)new MutationObserver(()=>{if(route()==='media')queueMicrotask(render)}).observe(app,{childList:true});
-  refreshPriorityAccount();
   render();
 })();
