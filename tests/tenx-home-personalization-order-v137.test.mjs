@@ -10,7 +10,9 @@ const impact=read('my-player-impact-v38.js');
 test('TENX My Titans owns one deterministic Home personalization sibling stack',()=>{
   assert.match(home,/function reconcilePersonalizationStack\(root,pulse\)/);
   assert.match(home,/const watch=app\.querySelector\('\.v36-watch-home'\)/);
-  assert.match(home,/const impact=app\.querySelector\('\.v38-impact-home'\)/);
+  assert.match(home,/const impact=app\.querySelector\('\.v38-impact\[data-surface="home"\]'\)/);
+  assert.match(impact,/root\.className='v38-impact'/);
+  assert.match(impact,/root\.dataset\.surface=current/);
   assert.match(home,/const tail=impact\|\|watch\|\|root/);
   assert.match(home,/tail\.nextElementSibling===pulse/);
 });
