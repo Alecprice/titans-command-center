@@ -61,10 +61,16 @@ test('anniversary lens adds no network, persistence, polling, timer, or mutation
   assert.match(moduleSource,/requestAnimationFrame\(tick\)/);
 });
 
-test('mobile and accessibility contracts keep the anniversary controls usable',()=>{
+test('mobile and accessibility contracts keep the anniversary controls and copy readable',()=>{
   const source=compact(moduleSource);
   assert.match(source,/\.legacy-anniversary-card button\{min-height:44px/);
-  assert.match(source,/@media\(max-width:760px\).*\.legacy-anniversary-card button\{min-height:48px/);
+  assert.match(source,/@media\(max-width:760px\).*\.legacy-anniversary-head small\{font-size:12px;line-height:1\.35\}/);
+  assert.match(source,/@media\(max-width:760px\).*\.legacy-anniversary-head p\{font-size:14px;line-height:1\.6\}/);
+  assert.match(source,/@media\(max-width:760px\).*\.legacy-anniversary-card>small\{font-size:12px;line-height:1\.35\}/);
+  assert.match(source,/@media\(max-width:760px\).*\.legacy-anniversary-card strong\{font-size:16px;line-height:1\.2\}/);
+  assert.match(source,/@media\(max-width:760px\).*\.legacy-anniversary-card span\{font-size:13px;line-height:1\.5\}/);
+  assert.match(source,/@media\(max-width:760px\).*\.legacy-anniversary-card button\{min-height:48px;font-size:12px;line-height:1\.25\}/);
+  assert.doesNotMatch(source,/@media\(max-width:760px\).*\.legacy-anniversary-card button\{min-height:48px;font-size:9px\}/);
   assert.match(source,/button:focus-visible\{outline:3px/);
   assert.match(source,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(source,/@media\(forced-colors:active\)/);
