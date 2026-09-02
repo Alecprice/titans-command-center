@@ -47,39 +47,62 @@
   }
 
   function impactFor(item){
+    const rosterAvailable=Array.isArray(data?.roster);
     const roster=arr(data?.roster);
-    const rosterRow=roster.find(row=>(item.id&&String(row?.id||'')===item.id)||norm(playerName(row))===norm(item.name))||null;
-    const resolvedName=playerName(rosterRow)||item.name;
-    const injury=arr(fan?.injuries).find(row=>norm(playerName(row))===norm(resolvedName)||textMatch(row,resolvedName))||null;
-    const transaction=arr(data?.transactions).find(row=>textMatch(row,resolvedName))||null;
-    const depth=arr(fan?.depthChart?.changes).find(row=>textMatch(row,resolvedName))||null;
-    const id=String(rosterRow?.id||item.id||'');
-    const href=id?`#player?id=${encodeURIComponent(id)}`:'#roster';
-    const rosterStatus=String(rosterRow?.status||'Roster status unavailable').trim();
+    const storedId=String(item?.id||'').trim();
+    const storedName=norm(item?.name);
+    const rosterRow=roster.find(row=>(storedId&&String(row?.id||'').trim()===storedId)||(storedName&&norm(playerName(row))===storedName))||null;
+    const canonicalName=playerName(rosterRow);
+    const verified=Boolean(rosterRow&&canonicalName);
+    const resolvedName=verified?canonicalName:String(item?.name||'').trim();
+    const injuryRows=verified&&Array.isArray(fan?.injuries)?fan.injuries:[];
+    const transactionRows=verified&&Array.isArray(data?.transactions)?data.transactions:[];
+    const depthRows=verified&&Array.isArray(fan?.depthChart?.changes)?fan.depthChart.changes:[];
+    const injury=verified?(injuryRows.find(row=>norm(playerName(row))===norm(canonicalName)||textMatch(row,canonicalName))||null):null;
+    const transaction=verified?(transactionRows.find(row=>textMatch(row,canonicalName))||null):null;
+    const depth=verified?(depthRows.find(row=>textMatch(row,canonicalName))||null):null;
+    const id=verified?String(rosterRow?.id||'').trim():'';
+    const href=id?`#player?id=${encodeURIComponent(id)}`:verified?`#player?name=${encodeURIComponent(canonicalName)}`:'#roster';
+    const routeState=verified?'verified':'review';
+    const rosterStatus=verified
+      ?String(rosterRow?.status||'Roster status unavailable').trim()
+      :rosterAvailable?'Saved player is not on the loaded roster':'Current roster verification unavailable';
     const injuryLabel=injury?String(injury.practiceStatus||injury.reportStatus||injury.gameStatus||injury.status||injury.primaryInjury||'Injury-report row loaded').trim():'';
     const transactionLabel=transaction?String(transaction.description||transaction.summary||transaction.title||transaction.type||'Roster transaction').trim():'';
     const depthType=depth?String(depth.type||depth.change||'Depth-chart change').trim():'';
     const depthMove=depth&&((depth.from!=null)||(depth.to!=null))?`${depth.from??'—'} → ${depth.to??'—'}`:'';
-    const flagged=Boolean(injury||transaction||depth||rosterStatus.toLowerCase()!=='active');
-    return {item,rosterRow,resolvedName,href,rosterStatus,injuryLabel,transactionLabel,depthLabel:depth?[depthType,depthMove].filter(Boolean).join(' · '):'',flagged};
+    const loadedFeeds=[];
+    if(verified&&Array.isArray(fan?.injuries))loadedFeeds.push('injury-report');
+    if(verified&&Array.isArray(data?.transactions))loadedFeeds.push('transaction');
+    if(verified&&Array.isArray(fan?.depthChart?.changes))loadedFeeds.push('depth');
+    const noSignalLabel=!verified
+      ?'Player-specific signals are withheld until current roster identity is verified.'
+      :loadedFeeds.length
+        ?`No flagged change in the loaded ${loadedFeeds.join(', ')} feed${loadedFeeds.length===1?'':'s'}. Unavailable feeds are excluded.`
+        :'Player-specific change feeds are currently unavailable.';
+    const flagged=routeState==='review'||Boolean(injury||transaction||depth||rosterStatus.toLowerCase()!=='active');
+    return {item,rosterRow,resolvedName,href,routeState,rosterStatus,injuryLabel,transactionLabel,depthLabel:depth?[depthType,depthMove].filter(Boolean).join(' · '):'',noSignalLabel,flagged};
   }
 
   function cardMarkup(impact){
-    const meta=[impact.rosterRow?.number?`#${impact.rosterRow.number}`:'',impact.rosterRow?.position,impact.rosterRow?.unit].filter(Boolean).join(' · ');
+    const verified=impact.routeState==='verified';
+    const meta=verified?[impact.rosterRow?.number?`#${impact.rosterRow.number}`:'',impact.rosterRow?.position,impact.rosterRow?.unit].filter(Boolean).join(' · '):'Saved follow · roster review needed';
     const signals=[];
     signals.push(`<li><b>Roster</b><span>${esc(impact.rosterStatus)}</span></li>`);
-    if(impact.injuryLabel)signals.push(`<li class="attention"><b>Injury report</b><span>${esc(impact.injuryLabel)}</span></li>`);
-    if(impact.transactionLabel)signals.push(`<li><b>Recent move</b><span>${esc(impact.transactionLabel)}</span></li>`);
-    if(impact.depthLabel)signals.push(`<li><b>Depth context</b><span>${esc(impact.depthLabel)}</span></li>`);
-    if(!impact.injuryLabel&&!impact.transactionLabel&&!impact.depthLabel)signals.push('<li><b>Loaded feeds</b><span>No flagged change in the loaded injury, transaction, or depth feeds.</span></li>');
-    return `<article class="v38-impact-card${impact.flagged?' has-impact':''}"><header><div><small>${impact.item.favorite?'FAVORITE · FOLLOWED PLAYER':'FOLLOWED PLAYER'}</small><strong>${esc(impact.resolvedName)}</strong><span>${esc(meta||'Titans roster')}</span></div><a href="${esc(impact.href)}" aria-label="Open ${esc(impact.resolvedName)} in Player Intelligence">Open →</a></header><ul>${signals.join('')}</ul></article>`;
+    if(verified&&impact.injuryLabel)signals.push(`<li class="attention"><b>Injury report</b><span>${esc(impact.injuryLabel)}</span></li>`);
+    if(verified&&impact.transactionLabel)signals.push(`<li><b>Recent move</b><span>${esc(impact.transactionLabel)}</span></li>`);
+    if(verified&&impact.depthLabel)signals.push(`<li><b>Depth context</b><span>${esc(impact.depthLabel)}</span></li>`);
+    if(!verified||(!impact.injuryLabel&&!impact.transactionLabel&&!impact.depthLabel))signals.push(`<li><b>${verified?'Loaded feeds':'Impact feed'}</b><span>${esc(impact.noSignalLabel)}</span></li>`);
+    const action=verified?'Open →':'Review roster →';
+    const aria=verified?`Open ${impact.resolvedName} in Player Intelligence`:`Review ${impact.resolvedName} in Team Room`;
+    return `<article class="v38-impact-card${impact.flagged?' has-impact':''}${verified?'':' needs-review'}" data-v38-state="${impact.routeState}"><header><div><small>${impact.item.favorite?'FAVORITE · FOLLOWED PLAYER':'FOLLOWED PLAYER'}</small><strong>${esc(impact.resolvedName)}</strong><span>${esc(meta||'Titans roster')}</span></div><a href="${esc(impact.href)}" aria-label="${esc(aria)}">${action}</a></header><ul>${signals.join('')}</ul></article>`;
   }
 
   function injectStyle(){
     if(document.querySelector('#my-player-impact-v38-style'))return;
     const style=document.createElement('style');
     style.id='my-player-impact-v38-style';
-    style.textContent='.v38-impact{margin:0 0 18px;padding:16px;border:1px solid rgba(134,210,255,.24);border-radius:18px;background:linear-gradient(145deg,rgba(7,25,43,.96),rgba(13,43,70,.86));box-shadow:0 14px 34px rgba(0,0,0,.14)}.v38-impact>header{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:11px}.v38-impact>header small,.v38-impact-card header small{display:block;color:#9ed8ff;font-size:.68rem;font-weight:950;letter-spacing:.11em}.v38-impact>header h2{margin:4px 0 0;color:#fff;font-size:1.08rem}.v38-impact>header span{max-width:480px;color:#c4d7e5;font-size:.76rem;line-height:1.45;text-align:right}.v38-impact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.v38-impact-card{min-width:0;padding:13px;border:1px solid rgba(255,255,255,.11);border-radius:13px;background:rgba(255,255,255,.04)}.v38-impact-card.has-impact{border-color:rgba(134,210,255,.34);background:rgba(75,146,219,.085)}.v38-impact-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.v38-impact-card header strong{display:block;margin:4px 0 2px;color:#fff;font-size:.95rem}.v38-impact-card header span{display:block;color:#bdd0df;font-size:.72rem}.v38-impact-card header a,.v38-impact-actions a,.v38-impact-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;color:#a5dcff;font-size:.74rem;font-weight:900;text-decoration:none}.v38-impact-card ul{display:grid;gap:7px;margin:11px 0 0;padding:0;list-style:none}.v38-impact-card li{display:grid;gap:2px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08)}.v38-impact-card li b{color:#eaf6ff;font-size:.69rem;text-transform:uppercase;letter-spacing:.06em}.v38-impact-card li span{color:#c5d7e5;font-size:.75rem;line-height:1.4}.v38-impact-card li.attention span{color:#fff}.v38-impact-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}.v38-impact-actions a{padding:0 12px;border:1px solid rgba(134,210,255,.2);border-radius:11px;background:rgba(255,255,255,.035);color:#fff}.v38-impact-empty{color:#c5d7e5;font-size:.8rem;line-height:1.5}.v38-impact-empty a{margin-left:4px}.v38-impact :focus-visible{outline:3px solid #fff;outline-offset:2px}@media(max-width:980px){.v38-impact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.v38-impact>header{align-items:flex-start;flex-direction:column}.v38-impact>header span{text-align:left}.v38-impact-grid{grid-template-columns:1fr}.v38-impact-actions a{flex:1 1 130px}}';
+    style.textContent='.v38-impact{margin:0 0 18px;padding:16px;border:1px solid rgba(134,210,255,.24);border-radius:18px;background:linear-gradient(145deg,rgba(7,25,43,.96),rgba(13,43,70,.86));box-shadow:0 14px 34px rgba(0,0,0,.14)}.v38-impact>header{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:11px}.v38-impact>header small,.v38-impact-card header small{display:block;color:#9ed8ff;font-size:.68rem;font-weight:950;letter-spacing:.11em}.v38-impact>header h2{margin:4px 0 0;color:#fff;font-size:1.08rem}.v38-impact>header span{max-width:480px;color:#c4d7e5;font-size:.76rem;line-height:1.45;text-align:right}.v38-impact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.v38-impact-card{min-width:0;padding:13px;border:1px solid rgba(255,255,255,.11);border-radius:13px;background:rgba(255,255,255,.04)}.v38-impact-card.has-impact{border-color:rgba(134,210,255,.34);background:rgba(75,146,219,.085)}.v38-impact-card.needs-review{border-color:rgba(255,196,102,.34);background:rgba(255,196,102,.055)}.v38-impact-card.needs-review header a{color:#f2d49b}.v38-impact-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.v38-impact-card header strong{display:block;margin:4px 0 2px;color:#fff;font-size:.95rem}.v38-impact-card header span{display:block;color:#bdd0df;font-size:.72rem}.v38-impact-card header a,.v38-impact-actions a,.v38-impact-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;color:#a5dcff;font-size:.74rem;font-weight:900;text-decoration:none}.v38-impact-card ul{display:grid;gap:7px;margin:11px 0 0;padding:0;list-style:none}.v38-impact-card li{display:grid;gap:2px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08)}.v38-impact-card li b{color:#eaf6ff;font-size:.69rem;text-transform:uppercase;letter-spacing:.06em}.v38-impact-card li span{color:#c5d7e5;font-size:.75rem;line-height:1.4}.v38-impact-card li.attention span{color:#fff}.v38-impact-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}.v38-impact-actions a{padding:0 12px;border:1px solid rgba(134,210,255,.2);border-radius:11px;background:rgba(255,255,255,.035);color:#fff}.v38-impact-empty{color:#c5d7e5;font-size:.8rem;line-height:1.5}.v38-impact-empty a{margin-left:4px}.v38-impact :focus-visible{outline:3px solid #fff;outline-offset:2px}@media(max-width:980px){.v38-impact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.v38-impact>header{align-items:flex-start;flex-direction:column}.v38-impact>header span{text-align:left}.v38-impact-grid{grid-template-columns:1fr}.v38-impact-actions a{flex:1 1 130px}}';
     document.head.appendChild(style);
   }
 
@@ -95,7 +118,7 @@
     const list=followed();
     if(list.length&&(!data||!fan)&&!loading){load();return;}
     const impacts=list.map(impactFor);
-    const signature=JSON.stringify([current,impacts.map(x=>[x.resolvedName,x.rosterStatus,x.injuryLabel,x.transactionLabel,x.depthLabel])]);
+    const signature=JSON.stringify([current,impacts.map(x=>[x.resolvedName,x.href,x.routeState,x.rosterStatus,x.injuryLabel,x.transactionLabel,x.depthLabel,x.noSignalLabel])]);
     let root=app.querySelector(`.v38-impact[data-surface="${current}"]`);
     if(!root){root=document.createElement('section');root.className='v38-impact';root.dataset.surface=current;root.setAttribute('aria-label','My Player Impact');host.insertAdjacentElement('afterend',root);}
     if(root.dataset.signature===signature)return;
