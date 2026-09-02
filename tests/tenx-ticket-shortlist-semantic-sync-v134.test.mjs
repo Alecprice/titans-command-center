@@ -16,7 +16,7 @@ test('ticket shortlist owner exposes stable semantic saved state',()=>{
 test('ticket shortlist owner announces saves only after storage and tray agree',()=>{
   assert.match(tenx,/function announceSaved\(center,saved=readSaved\(\)\)/);
   assert.match(tenx,/center\.dispatchEvent\(new CustomEvent\(SHORTLIST_CHANGE,\{bubbles:true,detail:\{count,keys:\[\.\.\.keys\]\}\}\)\)/);
-  assert.match(tenx,/window\.dispatchEvent\(new StorageEvent\('storage',\{key:STORAGE_KEY,newValue:JSON\.stringify\(items\)\}\)\)/);
+  assert.doesNotMatch(tenx,/window\.dispatchEvent\(new StorageEvent/);
   assert.match(tenx,/decorate\(items\);\s*savedTray\(center,items\);\s*announceSaved\(center,saved\);/s);
 });
 
@@ -24,7 +24,9 @@ test('clear emits the same semantic handoff as save and remove',()=>{
   assert.match(tenx,/const saved=\[\];writeSaved\(saved\);decorate\(records\(center\)\);savedTray\(center,records\(center\)\);announceSaved\(center,saved\);/);
 });
 
-test('same-tab compatibility signal reaches existing compare and finalists consumers',()=>{
+test('same-tab semantic signal reaches compare and finalists while storage remains cross-tab',()=>{
+  assert.match(compare,/app\.addEventListener\(SHORTLIST_CHANGE,schedule\)/);
+  assert.match(finalists,/app\.addEventListener\(SHORTLIST_CHANGE,schedule\)/);
   assert.match(compare,/addEventListener\('storage',event=>\{if\(event\.key===SHORTLIST_KEY\|\|event\.key===MEMORY_KEY\)schedule\(\);\}\)/);
   assert.match(finalists,/addEventListener\('storage',event=>\{if\(event\.key===SHORTLIST_KEY\)schedule\(\);\}\)/);
 });
