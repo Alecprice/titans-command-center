@@ -68,7 +68,7 @@ jobs:
         if: steps.deployed.outputs.should_run == 'true'
         env:
           WORKER_URL: https://titans.alecjprice.com
-        run: python scripts/ticket-budget-browser-smoke.py
+        run: python scripts/ticket-budget-browser-smoke-v140.py
 
       - name: Record stale or skipped deploy
         if: steps.deployed.outputs.should_run != 'true'
