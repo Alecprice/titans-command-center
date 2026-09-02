@@ -130,6 +130,12 @@ jobs:
         continue-on-error: true
         run: python scripts/market-browser-smoke.py
 
+      - name: Audit Legacy museum
+        id: legacy_museum
+        if: steps.deployed_sha.outcome == 'success'
+        continue-on-error: true
+        run: python scripts/legacy-browser-smoke.py
+
       - name: Upload audit reports
         if: steps.deployed_sha.outcome == 'success'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -143,6 +149,7 @@ jobs:
             /tmp/fantasy-decision-browser-smoke.json
             /tmp/account-browser-smoke.json
             /tmp/market-browser-smoke.json
+            /tmp/legacy-browser-smoke.json
           if-no-files-found: ignore
           retention-days: 14
 
@@ -157,6 +164,7 @@ jobs:
           FANTASY_DECISION_OUTCOME: ${{ steps.fantasy_decision.outcome }}
           ACCOUNT_OUTCOME: ${{ steps.account_guest.outcome }}
           MARKET_OUTCOME: ${{ steps.live_markets.outcome }}
+          LEGACY_OUTCOME: ${{ steps.legacy_museum.outcome }}
         with:
           script: |
             const checks = {
@@ -167,12 +175,13 @@ jobs:
               decisions: process.env.FANTASY_DECISION_OUTCOME,
               account: process.env.ACCOUNT_OUTCOME,
               markets: process.env.MARKET_OUTCOME,
+              legacy: process.env.LEGACY_OUTCOME,
             };
             const failed = Object.entries(checks).filter(([, value]) => value !== 'success');
             const state = failed.length ? 'failure' : 'success';
             const description = failed.length
               ? `Failed: ${failed.map(([name]) => name).join(', ')}`.slice(0, 140)
-              : 'Runtime, search, mobile, fantasy, decisions, account and markets passed';
+              : 'Runtime, search, mobile, fantasy, decisions, account, markets and Legacy passed';
             const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
             await github.rest.repos.createCommitStatus({
               owner,
@@ -194,7 +203,8 @@ jobs:
           FANTASY_DECISION_OUTCOME: ${{ steps.fantasy_decision.outcome }}
           ACCOUNT_OUTCOME: ${{ steps.account_guest.outcome }}
           MARKET_OUTCOME: ${{ steps.live_markets.outcome }}
+          LEGACY_OUTCOME: ${{ steps.legacy_museum.outcome }}
         run: |
-          for outcome in "$RUNTIME_OUTCOME" "$SEARCH_OUTCOME" "$MOBILE_OUTCOME" "$FANTASY_OUTCOME" "$FANTASY_DECISION_OUTCOME" "$ACCOUNT_OUTCOME" "$MARKET_OUTCOME"; do
+          for outcome in "$RUNTIME_OUTCOME" "$SEARCH_OUTCOME" "$MOBILE_OUTCOME" "$FANTASY_OUTCOME" "$FANTASY_DECISION_OUTCOME" "$ACCOUNT_OUTCOME" "$MARKET_OUTCOME" "$LEGACY_OUTCOME"; do
             [[ "$outcome" == "success" ]] || exit 1
           done
