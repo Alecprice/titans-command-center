@@ -23,9 +23,13 @@ test('player pages expose an accessible watch toggle without nesting controls in
   assert.doesNotMatch(feature,/<a[^>]*>[^`]*data-v36-watch/s);
 });
 
-test('Home renders watched players as direct Player Intelligence shortcuts with explicit remove controls',()=>{
-  assert.match(feature,/class="v36-watch-grid"/);
-  assert.match(feature,/#player\?id=/);
+test('Home resolves watched players through loaded roster identity before direct Player Intelligence routing',()=>{
+  assert.match(feature,/runtime\.apiJson\('\/api\/data',\{ttl:30000\}\)/);
+  assert.match(feature,/function watchMatch\(item\)/);
+  assert.match(feature,/if\(id\)return `#player\?id=\$\{encodeURIComponent\(id\)\}`/);
+  assert.match(feature,/canonical\?`#player\?name=\$\{encodeURIComponent\(canonical\)\}`:'#roster'/);
+  assert.match(feature,/Review roster →/);
+  assert.match(feature,/data-v36-state=/);
   assert.match(feature,/data-v36-remove/);
   assert.match(feature,/aria-label="Remove \$\{esc\(item\.name\)\} from watchlist"/);
   assert.match(feature,/\.v36-watch-remove\{[^}]*width:44px[^}]*min-height:44px[^}]*height:44px/);
