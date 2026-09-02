@@ -1,3 +1,4 @@
+import('./fantasy-prop-review-v138.js').catch(()=>{});
 (() => {
   'use strict';
   const ROUTE='fantasy',ROOT='#fantasy-live-props-v122',STORE='titans-fantasy-prop-watchlist-v1',MAX_ITEMS=32;
