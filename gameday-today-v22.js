@@ -160,9 +160,14 @@
     if(runtime.route()!=='live')return;
     const root=app.querySelector('.v16-gameday');
     if(!root)return;
-    const [data,fan]=await Promise.all([runtime.apiJson('/api/data',{ttl:30000}),runtime.apiJson('/api/fan-intel',{ttl:15000})]);
+    const liveAtStart=root.dataset.phase==='live';
+    const dataPromise=runtime.apiJson('/api/data',{ttl:30000});
+    const [data,fan]=liveAtStart
+      ?await Promise.all([dataPromise,runtime.apiJson('/api/fan-intel',{ttl:15000})])
+      :[await dataPromise,null];
     if(runtime.route()!=='live'||!root.isConnected)return;
     if(root.dataset.phase==='live'){
+      if(!liveAtStart){queueMicrotask(mount);return;}
       root.querySelector('.v22-verification-note')?.remove();
       root.querySelector('.v22-today-brief')?.remove();
       root.querySelector('.v22-home-guide')?.remove();
