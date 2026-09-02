@@ -13,7 +13,8 @@ const indexOf=needle=>{
 
 test('Cloudflare deploy accepts the active Fan Event Radar secrets without reviving Bandsintown',()=>{
   for(const key of ['EVENTBRITE_PRIVATE_TOKEN','EVENTBRITE_ORGANIZATION_IDS','SKIDDLE_API_KEY']){
-    assert.match(workflow,new RegExp(`${key}: \\${{ secrets\\.${key} }}`));
+    const envMarker=key+': $'+'{{ secrets.'+key+' }}';
+    assert.ok(workflow.includes(envMarker),`missing workflow secret env for ${key}`);
     assert.match(workflow,new RegExp(`'${key}'`));
   }
   assert.match(workflow,/echo "eventbrite=true"/);
@@ -43,9 +44,12 @@ test('Fan Event Radar production truth gates browser regressions without duplica
 });
 
 test('deployment status distinguishes GitHub secret availability from runtime provider truth',()=>{
-  assert.match(workflow,/EVENTBRITE_READY: \$\{\{ steps\.creds\.outputs\.eventbrite \}\}/);
-  assert.match(workflow,/SKIDDLE_READY: \$\{\{ steps\.creds\.outputs\.skiddle \}\}/);
-  assert.match(workflow,/FAN_EVENTS_SMOKE_OUTCOME: \$\{\{ steps\.fan_events_smoke\.outcome \}\}/);
+  const eventbriteOutput='EVENTBRITE_READY: $'+'{{ steps.creds.outputs.eventbrite }}';
+  const skiddleOutput='SKIDDLE_READY: $'+'{{ steps.creds.outputs.skiddle }}';
+  const smokeOutput='FAN_EVENTS_SMOKE_OUTCOME: $'+'{{ steps.fan_events_smoke.outcome }}';
+  assert.ok(workflow.includes(eventbriteOutput));
+  assert.ok(workflow.includes(skiddleOutput));
+  assert.ok(workflow.includes(smokeOutput));
   assert.match(workflow,/Fan event GitHub-managed secrets available: Eventbrite=/);
   assert.match(workflow,/Fan Event Radar production regression:/);
   assert.match(workflow,/deployed \+ Fan Event Radar production regression/);
