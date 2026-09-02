@@ -28,8 +28,9 @@ test('checkpoint identity matches watchlist player plus market normalization',()
 test('checkpoint creation is an explicit board review action',()=>{
   assert.ok(review.includes('function markReviewed(root,watchedKeys)'));
   assert.ok(review.includes('store[identity.key]={reviewedAt:stamp,books};captured++'));
-  assert.ok(review.includes("panel.querySelector('.fpr-mark')?.addEventListener('click',()=>markReviewed(root,watchedKeys)"));
+  assert.ok(review.includes("const mark=panel.querySelector('.fpr-mark');if(mark)mark.onclick=()=>markReviewed(root,watchedKeys);"));
   assert.ok(review.includes('Mark board reviewed'));
+  assert.doesNotMatch(review,/panel\.querySelector\('\.fpr-mark'\)\?\.addEventListener/);
 });
 
 test('comparison distinguishes line movement from reporting availability',()=>{
