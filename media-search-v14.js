@@ -1,3 +1,5 @@
+import './media-affiliates-v14.js';
+
 (() => {
   'use strict';
   const app=document.querySelector('#app');
