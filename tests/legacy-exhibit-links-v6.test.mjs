@@ -7,7 +7,7 @@ const finder=read('legacy-finder-v2.js');
 const css=read('legacy-finder-v2.css');
 
 test('Legacy exact links derive semantic exhibit keys from already-rendered museum cards',()=>{
-  assert.match(finder,/const FINDER_VERSION='2\.3\.0'/);
+  assert.match(finder,/const FINDER_VERSION='2\.4\.0'/);
   for(const type of ['story','moment','legend','record','retired','venue','honor'])assert.match(finder,new RegExp(`type:'${type}'`));
   assert.match(finder,/const slug=value=>normalize\(value\).*slice\(0,72\)/);
   assert.match(finder,/item\.dataset\.legacyExhibitKey=key/);
@@ -56,10 +56,16 @@ test('each share action sends only its semantic label and exact app URL with saf
 
 test('exact exhibit links add no data provider persistence or lifecycle owner',()=>{
   assert.doesNotMatch(finder,/\bfetch\s*\(/);
-  assert.doesNotMatch(finder,/XMLHttpRequest|WebSocket|EventSource/);
-  assert.doesNotMatch(finder,/localStorage|sessionStorage|indexedDB/);
+  assert.doesNotMatch(finder,/XMLHttpRequest|WebSocket|EventSource|sessionStorage|indexedDB/);
   assert.doesNotMatch(finder,/setInterval\(/);
   assert.doesNotMatch(finder,/legacy-passport-v1/);
+  const routeLayer=finder.slice(finder.indexOf('function writeExhibitState'),finder.indexOf('function normalizeMyMuseum'));
+  const shareStart=finder.indexOf('async function shareExhibit');
+  const shareLayer=finder.slice(shareStart,finder.indexOf("\n  finder.addEventListener",shareStart));
+  assert.doesNotMatch(routeLayer,/localStorage|MY_MUSEUM_KEY/,'exact-link URL state must remain storage-free');
+  assert.doesNotMatch(shareLayer,/localStorage|MY_MUSEUM_KEY/,'exact-link sharing must remain storage-free');
+  assert.match(finder,/localStorage\.getItem\(MY_MUSEUM_KEY\)/,'My Museum may own its bounded local collection');
+  assert.match(finder,/localStorage\.setItem\(MY_MUSEUM_KEY/,'My Museum may own its bounded local collection');
   const hashListeners=(finder.match(/addEventListener\('hashchange'/g)||[]).length;
   assert.equal(hashListeners,1,'Finder must retain its single existing route listener');
 });
