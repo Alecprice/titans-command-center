@@ -30,8 +30,8 @@ test('TENX My Titans preserves current-roster verification before player routing
 });
 
 test('TENX My Titans stays truthful while favorite roster verification is pending or stale',()=>{
-  assert.match(feature,/Checking against the current roster…/);
-  assert.match(feature,/Saved favorite is not on the loaded roster\. Review Team Room\./);
+  assert.match(feature,/Checking your favorite against the current roster…/);
+  assert.match(feature,/Saved favorite is not on the loaded roster\. Review Team Room before opening a player page\./);
   assert.match(feature,/favoriteVerified\?'Open player →':'Review roster →'/);
   assert.doesNotMatch(feature,/favorite\?`#player\?name=/);
 });
