@@ -166,7 +166,7 @@
       <header><div>${tags?`<div class="tickets-compare-v125-badges">${tags}</div>`:''}<h3>${esc(item.title)}</h3><p>${esc(item.date)}${item.side?` · ${esc(item.side)}`:''}</p><small>${esc(item.venue)}</small></div></header>
       <dl>
         <div><dt>Starting price</dt><dd>${item.price!=null?esc(money(item.price)):'Check live'}</dd></div>
-        <div><dt>${party} ticket${party===1?'':'s'}</dt><dd>${total!=null?`${esc(money(total))} <small>before fees</small>`:'—'}</dd></div>
+        <div><dt>${party} ticket${party===1?'':'s'}</dt><dd>${total!=null?`${esc(money(total))} <small>before fees</small>`:'— <small>before fees when a current price is available</small>'}</dd></div>
         <div><dt>Source coverage</dt><dd>${item.sources?`${item.sources} source${item.sources===1?'':'s'}`:'Not current'}</dd></div>
         <div><dt>Observed move</dt><dd class="${esc(item.movement.kind)}">${esc(item.movement.label)}</dd></div>
       </dl>

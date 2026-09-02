@@ -1,11 +1,11 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Ticket Center browser regression failure**
-- Source commit: `0140818c9e605ed10687ff3bc077a56c2f1001c2`
+- Source commit: `4f6ca6480b2f4970225770187282474d43cc7c46`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `0140818c9e605ed10687ff3bc077a56c2f1001c2`
+- Main SHA observed before deploy: `4f6ca6480b2f4970225770187282474d43cc7c46`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers configured: SeatGeek=false, Ticketmaster=false, StubHub=false
@@ -27,7 +27,7 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-02T02:58:07Z
+- Recorded: 2026-09-02T03:06:42Z
 
 ## Canonical front door regression
 
@@ -36,13 +36,13 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "deployedCommit": "0140818c9e605ed10687ff3bc077a56c2f1001c2",
+  "deployedCommit": "4f6ca6480b2f4970225770187282474d43cc7c46",
   "version": "1.0.0",
-  "revisionAttempts": 2,
+  "revisionAttempts": 1,
   "cloudFront": {
-    "requestId": "5BkRSxHPpIBzuj6LHZE9QH7nnVkvQ-cVa15nxsX1Jg1FahRM7zOFFQ==",
-    "pop": "IAD55-P2",
-    "via": "1.1 5443600a954c786f2e851cd6ea9e7e98.cloudfront.net (CloudFront)",
+    "requestId": "Wz0AMdV_-TAfhCsw-58VCZJP_fC-5_vVY5Zumqm6BY_KnHeI0DBDiw==",
+    "pop": "ORD51-P2",
+    "via": "1.1 b565f0300f2399ef58d0c89b3972a77a.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -61,13 +61,13 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 34,
-    "originMeta": 23,
-    "canonicalRoot": 26,
-    "originRoot": 25,
-    "health": 125
+    "canonicalMeta": 251,
+    "originMeta": 84,
+    "canonicalRoot": 23,
+    "originRoot": 23,
+    "health": 124
   },
-  "testedAt": "2026-09-02T02:57:33.042Z"
+  "testedAt": "2026-09-02T03:06:02.138Z"
 }```
 
 ## Production regression
@@ -127,19 +127,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "0140818c9e605ed10687ff3bc077a56c2f1001c2",
-    "builtAt": "2026-09-02T02:57:15.657Z"
+    "commit": "4f6ca6480b2f4970225770187282474d43cc7c46",
+    "builtAt": "2026-09-02T03:05:46.679Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 30,
-    "health": 110,
-    "data": 31,
-    "stats": 111,
-    "market": 72,
-    "analytics": 221
+    "root": 28,
+    "health": 81,
+    "data": 146,
+    "stats": 149,
+    "market": 2999,
+    "analytics": 99
   },
-  "testedAt": "2026-09-02T02:57:37.839Z",
+  "testedAt": "2026-09-02T03:06:09.551Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-snapshot",
@@ -150,8 +150,8 @@
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 174,
-    "testedAt": "2026-09-02T02:57:38.229Z"
+    "responseMs": 134,
+    "testedAt": "2026-09-02T03:06:09.894Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -159,17 +159,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 103,
-    "warmHitMs": 103,
+    "coldOrInitialMs": 100,
+    "warmHitMs": 100,
     "rows": 608,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 103,
+        "durationMs": 100,
         "rows": 608
       }
     ],
-    "testedAt": "2026-09-02T02:57:38.373Z"
+    "testedAt": "2026-09-02T03:06:10.039Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -228,8 +228,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 110,
-  "testedAt": "2026-09-02T02:57:38.831Z"
+  "durationMs": 99,
+  "testedAt": "2026-09-02T03:06:10.386Z"
 }```
 
 ## Browser navigation regression
@@ -275,11 +275,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 110,
+  "maxLongTaskMs": 105,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 12.87,
-  "testedAt": "2026-09-02T02:57:55Z"
+  "durationSeconds": 16.42,
+  "testedAt": "2026-09-02T03:06:31Z"
 }```
 
 ## Listen Watch browser regression
@@ -359,11 +359,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788317877870
+      "timestamp": 1788318393627
     }
   ],
-  "durationSeconds": 2.87,
-  "testedAt": "2026-09-02T02:57:58Z"
+  "durationSeconds": 2.46,
+  "testedAt": "2026-09-02T03:06:34Z"
 }```
 
 ## Market Pulse browser regression
@@ -636,8 +636,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 5.89,
-  "testedAt": "2026-09-02T02:58:04Z"
+  "durationSeconds": 6.0,
+  "testedAt": "2026-09-02T03:06:40Z"
 }```
 
 ## Ticket Center browser regression
@@ -817,7 +817,7 @@
   "mobile": {},
   "browserWarnings": [],
   "stage": "desktop:tenx-compare",
-  "error": "RuntimeError: desktop: compare party totals lost before-fees disclosure: {'cards': [{'actions': [{'height': 46, 'text': 'View offers'}, {'height': 46, 'text': 'Remove'}], 'beforeFees': False, 'key': 'tix-18wddhd', 'left': 330, 'right': 605}, {'actions': [{'height': 46, 'text': 'View offers'}, {'height': 46, 'text': 'Remove'}], 'beforeFees': False, 'key': 'tix-xbdd08', 'left': 617, 'right': 892}], 'count': 2, 'overflow': False, 'panel': True, 'text': 'TENX \u00b7 SAVED GAME COMPAREYour finalists, side by side.Compares only the live starting prices, source counts, and browser-observed movement already shown in Ticket Center.2/3 saved Tennessee Titans vs. New York JetsSun, Sep 13, 12:00 PM \u00b7 HOMENissan Stadium \u00b7 Nashville \u00b7 TN Starting priceCheck live 2 tickets\u2014 Source coverage1 source Observed moveNot in current board Current starting price unavailable View offers Remove Tennessee Titans vs. Philadelphia EaglesSun, Sep 20, 12:00 PM \u00b7 HOMENissan Stadium \u00b7 Nashville \u00b7 TN Starting priceCheck live 2 tickets\u2014 Source coverage1 source Observed moveNot in current board Current starting price unavailable View offers Remove Party totals are starting price \u00d7 ticket count, before fees. Seat quality and checkout fees are not inferred.Share plan', 'viewport': 1265}",
+  "error": "RuntimeError: desktop: finalists/signal controls below 44px: finalists=[{'disabled': False, 'height': 40, 'pressed': 'true', 'text': 'All games'}, {'disabled': False, 'height': 40, 'pressed': 'false', 'text': 'Finalists only'}, {'disabled': False, 'height': 40, 'pressed': 'true', 'text': 'Any total'}, {'disabled': False, 'height': 40, 'pressed': 'false', 'text': '\u2264 $200'}, {'disabled': False, 'height': 40, 'pressed': 'false', 'text': '\u2264 $300'}, {'disabled': False, 'height': 40, 'pressed': 'false', 'text': '\u2264 $500'}] signals=[]",
   "state": {
     "comparison": [
       {
@@ -979,8 +979,8 @@
     "upcoming": false,
     "viewport": 1265
   },
-  "durationSeconds": 1.63,
-  "testedAt": "2026-09-02T02:58:06Z"
+  "durationSeconds": 1.49,
+  "testedAt": "2026-09-02T03:06:42Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
