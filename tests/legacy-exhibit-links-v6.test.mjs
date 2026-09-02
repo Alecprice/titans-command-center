@@ -35,7 +35,7 @@ test('Finder and Trail actions clear stale exhibit state instead of creating mix
 });
 
 test('deep-linked exhibits restore native museum visibility then focus only the exact card',()=>{
-  assert.match(finder,/const item=index\.byExhibit\.get\(String\(key\|\|'?'?\)\)/);
+  assert.match(finder,/const item=index\.byExhibit\.get\(String\(key\|\|''\)\)/);
   assert.match(finder,/resetMuseumNativeFilters\(page\)/);
   assert.match(finder,/item\.classList\.add\('legacy-exhibit-focus'\)/);
   assert.match(finder,/item\.scrollIntoView\(\{behavior:reduced\?'auto':'smooth',block:'center'\}\)/);
@@ -63,7 +63,9 @@ test('exact exhibit links add no data provider persistence or lifecycle owner',(
   assert.equal(hashListeners,1,'Finder must retain its single existing route listener');
 });
 
-test('share and spotlight controls are keyboard readable phone safe and high-contrast aware',()=>{
+test('share actions stay contextual while spotlight controls remain phone safe and accessible',()=>{
+  assert.match(css,/\.legacy-exhibit-actions\{display:none/);
+  assert.match(css,/\.legacy-finder-active \.legacy-finder-match>\.legacy-exhibit-actions,\.legacy-exhibit-focus>\.legacy-exhibit-actions\{display:flex\}/);
   assert.match(css,/legacy-exhibit-actions button,.legacy-exhibit-clear\{min-height:44px/);
   assert.match(css,/@media\(max-width:760px\)[\s\S]*legacy-exhibit-actions button,.legacy-exhibit-clear\{min-height:48px/);
   assert.match(css,/legacy-exhibit-focus:focus-visible/);
