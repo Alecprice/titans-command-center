@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 BASE = os.environ.get('WORKER_URL', 'https://titans.alecjprice.com').rstrip('/')
 REPORT = Path('/tmp/media-affiliate-browser-smoke.json')
+FAVORITE_KEY = 'titans:favoriteRadioAffiliate'
 
 
 def wait_for(driver, predicate, timeout=14):
@@ -21,6 +22,7 @@ def finder_state(driver):
     return driver.execute_script("""
       const root=document.querySelector('.media-affiliate-finder');
       const visible=[...root?.querySelectorAll('[data-affiliate-station]:not([hidden])')||[]];
+      const favoriteButton=root?.querySelector('[data-affiliate-station]:not([hidden]) [data-affiliate-favorite]');
       return {
         present:Boolean(root),
         open:Boolean(root?.open),
@@ -30,9 +32,13 @@ def finder_state(driver):
         cities:visible.map(x=>x.querySelector('small')?.textContent?.trim()||''),
         frequencies:visible.map(x=>x.querySelector('span')?.textContent?.trim()||''),
         count:root?.querySelector('[data-affiliate-count]')?.textContent?.trim()||'',
+        summary:root?.querySelector('[data-affiliate-summary]')?.textContent?.trim()||'',
+        savedText:root?.querySelector('[data-affiliate-saved]')?.textContent?.replace(/\s+/g,' ')?.trim()||'',
+        favoritePressed:root?.querySelectorAll('[data-affiliate-favorite][aria-pressed="true"]').length||0,
         source:root?.querySelector('.media-affiliate-source a')?.href||'',
         inputHeight:root?.querySelector('[data-affiliate-search-input]')?.getBoundingClientRect().height||0,
-        clearHeight:root?.querySelector('[data-affiliate-clear]')?.getBoundingClientRect().height||0
+        clearHeight:root?.querySelector('[data-affiliate-clear]')?.getBoundingClientRect().height||0,
+        favoriteHeight:favoriteButton?.getBoundingClientRect().height||0
       };
     """)
 
@@ -71,6 +77,9 @@ try:
     stage='desktop:load'
     driver.get(f'{BASE}/#media')
     wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-affiliate-finder')")
+    driver.execute_script("localStorage.removeItem(arguments[0])", FAVORITE_KEY)
+    driver.refresh()
+    wait_for(driver, "document.querySelector('.media-page') && document.querySelector('.media-affiliate-finder')")
     driver.execute_script("document.querySelector('.media-affiliate-finder').open=true")
     wait_for(driver, "document.querySelectorAll('[data-affiliate-station]').length===39")
     initial=finder_state(driver)
@@ -78,12 +87,40 @@ try:
         raise RuntimeError(f'Expected 39 official 2026 stations: {initial}')
     if 'tennesseetitans.com/broadcast/titans-radio/titans-radio-affiliates' not in initial['source']:
         raise RuntimeError(f'Official affiliate source link missing: {initial}')
+    if initial['favoritePressed'] != 0:
+        raise RuntimeError(f'Favorite state was not clean at test start: {initial}')
     no_overflow(driver,'desktop affiliate finder')
 
     stage='desktop:greeneville'
     greeneville=search(driver,'Greeneville')
     if greeneville['visible'] != 1 or greeneville['calls'] != ['WIKQ'] or greeneville['frequencies'] != ['103.1 FM']:
         raise RuntimeError(f'Greeneville search mismatch: {greeneville}')
+
+    stage='desktop:favorite-save'
+    driver.execute_script("document.querySelector('[data-affiliate-station]:not([hidden]) [data-affiliate-favorite]').click()")
+    wait_for(driver, "document.querySelector('[data-affiliate-summary]')?.textContent?.includes('Saved WIKQ') && document.querySelectorAll('[data-affiliate-favorite][aria-pressed=\"true\"]').length===1")
+    favoriteSaved=finder_state(driver)
+    stored=driver.execute_script("return localStorage.getItem(arguments[0])", FAVORITE_KEY) or ''
+    if 'WIKQ' not in favoriteSaved['summary'] or 'WIKQ' not in favoriteSaved['savedText'] or 'WIKQ' not in stored:
+        raise RuntimeError(f'WIKQ favorite did not persist to device storage: state={favoriteSaved}, storage={stored}')
+
+    stage='desktop:favorite-reload'
+    driver.refresh()
+    wait_for(driver, "document.querySelector('.media-affiliate-finder') && document.querySelector('[data-affiliate-summary]')?.textContent?.includes('Saved WIKQ')")
+    driver.execute_script("document.querySelector('.media-affiliate-finder').open=true")
+    wait_for(driver, "document.querySelectorAll('[data-affiliate-station]').length===39")
+    favoriteReloaded=finder_state(driver)
+    if favoriteReloaded['favoritePressed'] != 1 or 'WIKQ' not in favoriteReloaded['savedText']:
+        raise RuntimeError(f'Favorite did not survive reload: {favoriteReloaded}')
+
+    stage='desktop:favorite-remove'
+    driver.execute_script("document.querySelector('[data-affiliate-unfavorite]').click()")
+    wait_for(driver, "document.querySelectorAll('[data-affiliate-favorite][aria-pressed=\"true\"]').length===0 && document.querySelector('[data-affiliate-summary]')?.textContent?.includes('39 stations')")
+    favoriteRemoved=finder_state(driver)
+    if favoriteRemoved['favoritePressed'] != 0 or 'No station saved yet' not in favoriteRemoved['savedText']:
+        raise RuntimeError(f'Favorite removal mismatch: {favoriteRemoved}')
+    if driver.execute_script("return localStorage.getItem(arguments[0])", FAVORITE_KEY) is not None:
+        raise RuntimeError('Favorite storage key remained after removal')
 
     stage='desktop:columbia'
     columbia=search(driver,'Columbia')
@@ -120,6 +157,8 @@ try:
     mobile_greeneville=search(driver,'WIKQ')
     if mobile_greeneville['visible'] != 1 or mobile_greeneville['cities'] != ['Greeneville']:
         raise RuntimeError(f'Mobile station search mismatch: {mobile_greeneville}')
+    if mobile_greeneville['favoriteHeight'] < 44:
+        raise RuntimeError(f'Mobile favorite control is too small: {mobile_greeneville}')
     no_overflow(driver,'390px filtered affiliate finder')
 
     stage='console'
@@ -137,9 +176,12 @@ try:
         'base':BASE,
         'stations':initial['total'],
         'greeneville':greeneville['calls'],
+        'favoriteSaved':favoriteSaved['summary'],
+        'favoriteReloaded':favoriteReloaded['summary'],
+        'favoriteRemoved':favoriteRemoved['summary'],
         'columbia':columbia['calls'],
         'frequency1023':frequency['calls'],
-        'mobileTargets':{'input':mobile['inputHeight'],'clear':mobile['clearHeight']},
+        'mobileTargets':{'input':mobile['inputHeight'],'clear':mobile['clearHeight'],'favorite':mobile_greeneville['favoriteHeight']},
         'officialSource':initial['source'],
         'durationSeconds':round(time.time()-started,2),
         'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
