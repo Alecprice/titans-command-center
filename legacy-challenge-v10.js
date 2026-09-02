@@ -171,8 +171,8 @@ function createGame(page,root,bank){
   }
 
   root.addEventListener('click',event=>{
-    const start=event.target.closest('[data-legacy-challenge-start]');
-    if(start){start();return;}
+    const startControl=event.target.closest('[data-legacy-challenge-start]');
+    if(startControl){start();return;}
     const answerButton=event.target.closest('[data-legacy-challenge-answer]');
     if(answerButton){answer(answerButton);return;}
     if(event.target.closest('[data-legacy-challenge-reveal]')){reveal();return;}
