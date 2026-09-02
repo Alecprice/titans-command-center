@@ -25,7 +25,15 @@
     }finally{clearTimeout(timer)}
   }
 
-  const slimPlayer=(id,p={})=>({id:String(id),name:clean(p.full_name||[p.first_name,p.last_name].filter(Boolean).join(' ')||`Player ${id}`),position:clean(p.position||p.fantasy_positions?.[0]||''),team:clean(p.team||'')});
+  const slimPlayer=(id,p={})=>({
+    id:String(id),
+    name:clean(p.full_name||[p.first_name,p.last_name].filter(Boolean).join(' ')||`Player ${id}`),
+    position:clean(p.position||p.fantasy_positions?.[0]||''),
+    team:clean(p.team||''),
+    status:clean(p.status||''),
+    injury:clean(p.injury_status||''),
+    number:p.number==null?'':String(p.number)
+  });
   async function playerIndex(){
     const cached=parseObject(localStorage.getItem(PLAYER_KEY));
     if(Number(cached.savedAt)>0&&Date.now()-Number(cached.savedAt)<PLAYER_TTL&&cached.players&&typeof cached.players==='object')return cached.players;
