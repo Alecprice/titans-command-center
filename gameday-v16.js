@@ -4,7 +4,11 @@
   const app=document.querySelector('#app');
   const runtime=window.TitansRuntime;
   const POSTGAME_WINDOW_MS=18*3600000;
-  let state={data:null,fan:null,espn:null,loading:null,serial:0};
+  const LIVE_REFRESH_MS=30000;
+  const IDLE_REFRESH_MS=300000;
+  const REFRESH_GUARD_MS=10000;
+  const SCOREBOARD_STALE_MS=300000;
+  let state={data:null,fan:null,espn:null,loading:null,refreshing:null,feed:{fanOk:null,espnOk:null,checkedAt:null},serial:0};
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const arr=v=>Array.isArray(v)?v:[];
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -13,16 +17,35 @@
   const shortFmt=value=>{try{const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric'}).format(d)}catch{return'TBD'}};
   const gameLabel=g=>g?`${g.homeAway==='home'?'vs':'at'} ${g.opponent||g.opponentAbbr||'Opponent'}`:'Titans game';
   const countdown=value=>{const t=Date.parse(value),diff=t-Date.now();if(!Number.isFinite(t))return'Time TBD';if(diff<=0)return'Game time';const m=Math.floor(diff/60000),d=Math.floor(m/1440),h=Math.floor((m%1440)/60);return d?`${d}d ${h}h`:h?`${h}h ${m%60}m`:`${Math.max(1,m)}m`};
+  const checkedAge=()=>{const t=Date.parse(state.feed.checkedAt);return Number.isFinite(t)?Math.max(0,Date.now()-t):Infinity};
+  const relativeAge=value=>{const t=Date.parse(value);if(!Number.isFinite(t))return'';const ms=Math.max(0,Date.now()-t);if(ms<5000)return'just now';if(ms<60000)return`${Math.max(1,Math.floor(ms/1000))}s ago`;const minutes=Math.floor(ms/60000);if(minutes<60)return`${minutes}m ago`;return fmt(value)};
+  const json=url=>fetch(url,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+  const available=response=>Boolean(response?.ok&&response?.available!==false);
 
   async function load(){
     if(state.data&&state.fan)return state;
     if(state.loading)return state.loading;
-    state.loading=Promise.all([
-      fetch('/api/data',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
-      fetch('/api/fan-intel',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
-      fetch('/api/espn-scoreboard',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
-    ]).then(([data,fan,espn])=>{state.data=data?.ok?data:{};state.fan=fan?.ok?fan:{};state.espn=espn?.ok?espn:null;return state}).finally(()=>state.loading=null);
+    state.loading=Promise.all([json('/api/data'),json('/api/fan-intel'),json('/api/espn-scoreboard')]).then(([data,fan,espn])=>{
+      state.data=data?.ok?data:{};
+      state.fan=fan?.ok?fan:{};
+      state.espn=espn?.ok?espn:null;
+      state.feed={fanOk:available(fan),espnOk:available(espn),checkedAt:new Date().toISOString()};
+      return state;
+    }).finally(()=>state.loading=null);
     return state.loading;
+  }
+
+  async function refreshLiveData(force=false){
+    if(state.refreshing)return state.refreshing;
+    if(!force&&checkedAge()<REFRESH_GUARD_MS)return state;
+    state.refreshing=Promise.all([json('/api/fan-intel'),json('/api/espn-scoreboard')]).then(([fan,espn])=>{
+      const fanOk=available(fan),espnOk=available(espn);
+      if(fanOk)state.fan=fan;
+      if(espnOk)state.espn=espn;
+      state.feed={fanOk,espnOk,checkedAt:new Date().toISOString()};
+      return state;
+    }).finally(()=>state.refreshing=null);
+    return state.refreshing;
   }
 
   const games=()=>arr(state.data?.games);
@@ -95,6 +118,22 @@
     return [...byPlayer.values()].map(x=>{x.values.sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));return x}).sort((a,b)=>(b.values[0]?.[1]||0)-(a.values[0]?.[1]||0)).slice(0,5);
   }
 
+  function feedStatus(mode){
+    const stamp=Date.parse(state.espn?.fetchedAt),ageMs=Number.isFinite(stamp)?Math.max(0,Date.now()-stamp):Infinity;
+    const espnHealthy=Boolean(state.espn)&&state.feed.espnOk!==false&&state.espn?.snapshot?.stale!==true&&ageMs<=SCOREBOARD_STALE_MS;
+    const fanHealthy=state.feed.fanOk!==false;
+    const healthy=espnHealthy&&fanHealthy;
+    const label=mode==='live'?(espnHealthy?'Live scoreboard connected':'Live scoreboard delayed'):(espnHealthy?'Game data synced':'Scoreboard feed delayed');
+    const source=state.espn?`${state.espn.provider||'ESPN'} · synced ${relativeAge(state.espn.fetchedAt)||'recently'}${state.espn.unofficial?' · unofficial':''}`:'ESPN scoreboard unavailable';
+    const fan=fanHealthy?'Fan intel connected':'Fan intel retrying · showing last good snapshot';
+    return {healthy,label,source,fan};
+  }
+
+  function feedBar(mode){
+    const status=feedStatus(mode),label=`Game data status: ${status.label}. ${status.source}. ${status.fan}.`;
+    return `<div class="v16-gd-feed" data-state="${status.healthy?'healthy':'degraded'}" aria-label="${esc(label)}"><span class="v16-gd-feed-dot" aria-hidden="true"></span><strong>${esc(status.label)}</strong><span>${esc(status.source)}</span><span>${esc(status.fan)} · checks every 30s during game windows</span><button type="button" data-gameday-refresh>Refresh now</button></div>`;
+  }
+
   function playCard(play){if(!play)return'<div class="v16-gd-empty"><strong>No play loaded.</strong><span>Live play context appears only when a trustworthy play row exists.</span></div>';const down=play.down?`${play.down}${play.down===1?'st':play.down===2?'nd':play.down===3?'rd':'th'} & ${play.yardsToGo??'?'}`:'Down/distance unavailable';return `<article class="v16-last-play"><small>WHAT JUST HAPPENED</small><strong>${esc(play.description||play.type||'Latest play')}</strong><span>${esc(down)}${play.yardline?` · ${esc(play.yardline)}`:''}${play.yards!=null?` · ${esc(play.yards)} yards`:''}</span><div><b>${play.success?'Successful play':'Not marked successful'}</b>${play.explosive?'<b>Explosive</b>':''}${num(play.epa)!=null?`<b>EPA ${play.epa>0?'+':''}${Number(play.epa).toFixed(2)}</b>`:''}${num(play.winProbabilityAdded)!=null?`<b>WPA ${play.winProbabilityAdded>0?'+':''}${(Number(play.winProbabilityAdded)*100).toFixed(1)}%</b>`:''}</div><p>EPA/WPA are model-derived football metrics from the loaded play data, not official league win-probability labels.</p></article>`}
 
   function broadcast(g){return `<section class="v16-gd-tune"><div><small>TUNE IN</small><strong>${esc(g?.network||'Network TBD')}</strong><span>Kickoff ${esc(g?.date?fmt(g.date):'TBD')} · ${esc(g?.date?countdown(g.date):'')}</span></div><a href="#media">Listen / Watch →</a></section>`}
@@ -116,13 +155,38 @@
     return `<section class="v16-gd-phase post"><header><div><small>POSTGAME COMMAND</small><h2>${esc(result)} · TEN ${esc(g?.score??'—')} — ${esc(g?.opponentAbbr||'OPP')} ${esc(g?.opponentScore??'—')}</h2><p>${esc(gameLabel(g))} · ${esc(shortFmt(g?.date))}</p></div><a href="#games">Full schedule →</a></header><div class="v16-gd-grid two"><article class="v16-gd-panel"><small>TURNING POINTS</small><h3>Biggest loaded swings</h3>${turning.length?turning.map(x=>`<div class="v16-gd-row"><strong>${esc(x.description||x.type||'Play')}</strong><span>${num(x.winProbabilityAdded)!=null?`WPA ${(Number(x.winProbabilityAdded)*100).toFixed(1)}%`:x.explosive?'Explosive play':'High-impact play'}</span></div>`).join(''):'<p>No trustworthy turning-point rows are loaded yet.</p>'}</article><article class="v16-gd-panel"><small>WHAT CHANGED?</small><h3>Because of this game</h3><p>${m?.label?`The final loaded stretch reads as “${esc(m.label)}.” `:''}Roster, injury and depth consequences populate through Command Intel as verified updates arrive.</p><a href="#command">Open Change Engine →</a></article></div><section class="v16-gd-panel"><header><div><small>TOP PERFORMERS</small><h3>Final loaded leaders</h3></div><span>${top.length} players</span></header>${top.length?`<div class="v16-gd-leaders">${top.map(x=>`<article><strong>${esc(x.name)}</strong><small>${esc(x.position||'')}</small><span>${x.values.slice(0,3).map(([k,v])=>`${esc(String(k).replace(/_/g,' '))} ${esc(v)}`).join(' · ')}</span></article>`).join('')}</div>`:'<div class="v16-gd-empty"><strong>Postgame player stats are awaiting ingest.</strong><span>The page will populate automatically when the warehouse has them.</span></div>'}</section>${next?`<section class="v16-next-up"><div><small>NEXT UP</small><strong>${esc(gameLabel(next))}</strong><span>${esc(fmt(next.date))} · ${esc(next.network||'Network TBD')}</span></div><a href="#media">Plan how to watch →</a></section>`:''}</section>`;
   }
 
-  function render(){
-    if(route()!=='live'||!state.data||!state.fan)return;const target=document.querySelector('.v14-gameday-quick')||document.querySelector('.page-head');if(!target||document.querySelector('.v16-gameday'))return;
-    const [mode,g,eg]=phase(),root=document.createElement('section');root.className='v16-gameday';root.dataset.phase=mode;root.innerHTML=`<div class="v16-gd-mode"><span class="active">${mode==='pregame'?'Pregame':mode==='live'?'Live':'Postgame'}</span><small>Game Day 3.0 · source-aware</small></div>${mode==='live'?live(g,eg):mode==='postgame'?postgame(g):pregame(g)}`;target.insertAdjacentElement('afterend',root);
+  function render(replaceExisting=false){
+    if(route()!=='live'||!state.data||!state.fan)return;
+    const target=document.querySelector('.v14-gameday-quick')||document.querySelector('.page-head'),existing=document.querySelector('.v16-gameday');
+    if(!target||(existing&&!replaceExisting))return;
+    const [mode,g,eg]=phase(),root=document.createElement('section');
+    root.className='v16-gameday';root.dataset.phase=mode;
+    root.innerHTML=`<div class="v16-gd-mode"><span class="active">${mode==='pregame'?'Pregame':mode==='live'?'Live':'Postgame'}</span><small>Game Day 3.1 · source-aware</small></div>${feedBar(mode)}${mode==='live'?live(g,eg):mode==='postgame'?postgame(g):pregame(g)}`;
+    if(existing)existing.replaceWith(root);else target.insertAdjacentElement('afterend',root);
+  }
+
+  async function refresh(force=false,button=null){
+    if(route()!=='live'||document.hidden||!state.data)return;
+    const current=state.serial;
+    if(button){button.disabled=true;button.textContent='Refreshing…'}
+    await refreshLiveData(force);
+    if(current!==state.serial||route()!=='live'||document.hidden)return;
+    render(true);
+  }
+
+  function shouldAutoRefresh(){
+    if(route()!=='live'||document.hidden||!state.data)return false;
+    const [mode]=phase(),focus=gameFocus();
+    return mode==='live'||focus.state==='game-window'||checkedAge()>=IDLE_REFRESH_MS;
   }
 
   async function enhance(){if(route()!=='live')return;const current=++state.serial;await load();if(current!==state.serial||route()!=='live')return;render()}
-  if(app)new MutationObserver(()=>queueMicrotask(render)).observe(app,{childList:true,subtree:false});
+  if(app){
+    new MutationObserver(()=>queueMicrotask(render)).observe(app,{childList:true,subtree:false});
+    app.addEventListener('click',event=>{const button=event.target.closest?.('[data-gameday-refresh]');if(!button)return;event.preventDefault();void refresh(true,button)});
+  }
   addEventListener('hashchange',()=>{state.serial++;setTimeout(enhance,40)});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&route()==='live')void refresh()});
+  setInterval(()=>{if(shouldAutoRefresh())void refresh()},LIVE_REFRESH_MS);
   setTimeout(enhance,120);
 })();

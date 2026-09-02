@@ -86,9 +86,10 @@ test('Game Day kickoff-window bridge fills the scoreboard-gap state without clai
 
 test('Game Day live state is sourced and model labels are transparent',()=>{
   const js=read('gameday-v16.js');
-  assert.match(js,/fetch\('\/api\/espn-scoreboard'/);
-  assert.match(js,/fetch\('\/api\/fan-intel'/);
-  assert.match(js,/fetch\('\/api\/data'/);
+  assert.match(js,/const json=url=>fetch\(url,\{cache:'no-store'\}\)/);
+  assert.match(js,/json\('\/api\/espn-scoreboard'\)/);
+  assert.match(js,/json\('\/api\/fan-intel'\)/);
+  assert.match(js,/json\('\/api\/data'\)/);
   assert.match(js,/EPA\/WPA are model-derived football metrics/);
   assert.match(js,/No live leader is guessed/);
   assert.match(js,/No trustworthy turning-point rows are loaded yet/);
