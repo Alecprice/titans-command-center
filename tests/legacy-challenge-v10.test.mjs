@@ -19,14 +19,18 @@ test('question facts are derived from rendered Record Book and Retired Numbers c
   assert.doesNotMatch(source,/Warren Moon|Eddie George|Derrick Henry|Steve McNair|Earl Campbell|Bruce Matthews/);
 });
 
-test('five-question rounds use four same-kind museum-derived options without replacement-sort tricks',()=>{
+test('five-question rounds use four same-kind museum-derived options and unseen-first replay selection',()=>{
   assert.match(source,/const ROUND_SIZE=5/);
   assert.match(source,/const OPTION_COUNT=4/);
   assert.match(source,/record:\[\.\.\.new Set\(records\.map\(item=>item\.answer\)\)\]/);
   assert.match(source,/retired:\[\.\.\.new Set\(retired\.map\(item=>item\.answer\)\)\]/);
   assert.match(source,/pools\[item\.kind\]\.filter\(value=>value!==item\.answer\)/);
   assert.match(source,/shuffle\(\[item\.answer,\.\.\.distractors\]\)/);
-  assert.match(source,/shuffle\(bank\)\.slice\(0,Math\.min\(ROUND_SIZE,bank\.length\)\)/);
+  assert.match(source,/function selectRound\(bank,previousKeys=\[\]\)/);
+  assert.match(source,/const fresh=shuffle\(bank\.filter\(item=>!previous\.has\(questionIdentity\(item\)\)\)\)/);
+  assert.match(source,/const repeats=shuffle\(bank\.filter\(item=>previous\.has\(questionIdentity\(item\)\)\)\)/);
+  assert.match(source,/return \[\.\.\.fresh,\.\.\.repeats\]\.slice\(0,Math\.min\(ROUND_SIZE,bank\.length\)\)/);
+  assert.doesNotMatch(source,/shuffle\(bank\)\.slice\(0,Math\.min\(ROUND_SIZE,bank\.length\)\)/);
   assert.doesNotMatch(source,/sort\(\(\)=>Math\.random/);
 });
 
