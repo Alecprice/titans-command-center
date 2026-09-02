@@ -42,10 +42,10 @@ test('Signal Lens is read-only and adds no provider traffic or persistence write
 
 test('Signal focus reveals a matchup through every Ticket filter layer',async()=>{
   const source=await read('tickets-signal-lens-v128.js');
-  assert.match(source,/data-ticket-filter=\\"all\\"/);
-  assert.match(source,/data-ticket-tenx-budget=\\"all\\"/);
-  assert.match(source,/data-ticket-finalists-view=\\"all\\"/);
-  assert.match(source,/data-ticket-finalists-budget=\\"all\\"/);
+  assert.match(source,/data-ticket-filter="all"/);
+  assert.match(source,/data-ticket-tenx-budget="all"/);
+  assert.match(source,/data-ticket-finalists-view="all"/);
+  assert.match(source,/data-ticket-finalists-budget="all"/);
   assert.match(source,/data-ticket-signal-focus/);
   assert.match(source,/scrollIntoView/);
   assert.match(source,/window\.matchMedia/);
