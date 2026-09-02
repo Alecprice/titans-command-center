@@ -126,7 +126,7 @@ function renderAuditedIntelligence(root,profile,preseason,site){
 }
 
 async function loadAuditedPlayer(name,key,serial){
-  const [siteResponse,preseasonResponse]=await Promise.all([fetch('/api/data',{cache:'no-store',headers:{Accept:'application/json'}}),fetch('/api/preseason-stats',{cache:'no-store',headers:{Accept:'application/json'}})]),site=await siteResponse.json(),preseason=await preseasonResponse.json();
+  const [siteResponse,preseasonResponse]=await Promise.all([fetch('/api/data',{cache:'no-store',headers:{Accept:'application/json'}}),fetch('/api/preseason-stats',{cache:'no-store',headers:{Accept:'application/json'}})]),site=await siteResponse.json(),preseason=preseasonResponse.ok?await preseasonResponse.json().catch(()=>null):null;
   if(serial!==requestSerial||playerRoute()!=='player'||playerName()!==name)return;
   if(!siteResponse.ok||!site?.ok)throw new Error(site?.error||'Audited roster unavailable');
   const matched=(site.roster||[]).find(row=>playerNorm(row?.name)===playerNorm(name));
