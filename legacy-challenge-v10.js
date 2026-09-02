@@ -3,7 +3,7 @@ const ROUND_SIZE=5;
 const OPTION_COUNT=4;
 
 const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const clean=value=>String(value||'').replace(/\s+/g,' ').trim();
 const cleanChallengeUrl=()=>`${location.origin}${location.pathname}${location.search}#legacy`;
 
