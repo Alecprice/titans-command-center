@@ -4,7 +4,7 @@
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const AREA_KEY='titans:v14MediaArea';
   let data=null,loading=null,timer=0;
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const storageGet=key=>{try{return localStorage.getItem(key)}catch{return null}};
   const gameTime=g=>{const raw=g?.date;if(raw===null||raw===undefined||String(raw).trim()==='')return NaN;const value=Date.parse(raw);return Number.isFinite(value)?value:NaN};
   const focusedGame=()=>{
