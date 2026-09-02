@@ -1,10 +1,11 @@
-const VERSION='10.0.0';
+const VERSION='10.1.0';
 const ROUND_SIZE=5;
 const OPTION_COUNT=4;
 
 const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const clean=value=>String(value||'').replace(/\s+/g,' ').trim();
+const cleanChallengeUrl=()=>`${location.origin}${location.pathname}${location.search}#legacy`;
 
 function shuffle(values){
   const copy=[...values];
@@ -67,6 +68,7 @@ function ensureStyle(){
     .legacy-challenge-actions{display:flex;gap:8px;flex-wrap:wrap}
     .legacy-challenge-action{min-width:140px;text-transform:uppercase}
     .legacy-challenge-action[hidden]{display:none}
+    .legacy-challenge-share{background:#eaf4fb;border-color:#9fc8e4}
     .legacy-challenge-start{min-height:46px;width:min(320px,100%);border:0;background:var(--retro-blue,#4a95ce);color:#fff;padding:11px 14px;font-size:9px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-bottom:4px solid var(--retro-red,#d5272c)}
     .legacy-challenge button:focus-visible{outline:3px solid var(--titans-red,#c8102e);outline-offset:3px}
     @media(max-width:760px){.legacy-challenge-head{grid-template-columns:1fr}.legacy-challenge-options{grid-template-columns:1fr}.legacy-challenge-options button,.legacy-challenge-action,.legacy-challenge-start{min-height:48px;font-size:10px}.legacy-challenge-actions{display:grid;grid-template-columns:1fr}}
@@ -85,7 +87,7 @@ function shellMarkup(){
       <p class="legacy-challenge-reference" data-legacy-challenge-reference>Each answer can be revealed back in the audited museum.</p>
       <div class="legacy-challenge-options" data-legacy-challenge-options></div>
       <p class="legacy-challenge-feedback" data-legacy-challenge-feedback role="status" aria-live="polite">Start a five-question round.</p>
-      <div class="legacy-challenge-actions"><button type="button" class="legacy-challenge-start" data-legacy-challenge-start>Start 5-question challenge</button><button type="button" class="legacy-challenge-action" data-legacy-challenge-reveal hidden>Reveal in museum</button><button type="button" class="legacy-challenge-action" data-legacy-challenge-next hidden>Next question</button></div>
+      <div class="legacy-challenge-actions"><button type="button" class="legacy-challenge-start" data-legacy-challenge-start>Start 5-question challenge</button><button type="button" class="legacy-challenge-action" data-legacy-challenge-reveal hidden>Reveal in museum</button><button type="button" class="legacy-challenge-action" data-legacy-challenge-next hidden>Next question</button><button type="button" class="legacy-challenge-action legacy-challenge-share" data-legacy-challenge-share hidden>Challenge another fan</button></div>
     </div>
   </section>`;
 }
@@ -100,7 +102,8 @@ function createGame(page,root,bank){
   const startButton=root.querySelector('[data-legacy-challenge-start]');
   const revealButton=root.querySelector('[data-legacy-challenge-reveal]');
   const nextButton=root.querySelector('[data-legacy-challenge-next]');
-  let round=[],index=0,score=0,answered=false;
+  const shareButton=root.querySelector('[data-legacy-challenge-share]');
+  let round=[],index=0,score=0,answered=false,completed=false;
 
   const current=()=>round[index]||null;
 
@@ -116,11 +119,13 @@ function createGame(page,root,bank){
     feedback.textContent='Choose one answer.';
     revealButton.hidden=true;
     nextButton.hidden=true;
+    shareButton.hidden=true;
     nextButton.textContent=index===round.length-1?'See score':'Next question';
     startButton.hidden=true;
   }
 
   function finish(){
+    completed=true;
     progress.textContent='Round complete';
     scoreNode.textContent=`Final ${score} / ${round.length}`;
     questionNode.textContent=`You scored ${score} out of ${round.length}.`;
@@ -129,13 +134,15 @@ function createGame(page,root,bank){
     feedback.textContent=score===round.length?'Perfect round. Titan Up.':'Run it back for a different mix.';
     revealButton.hidden=true;
     nextButton.hidden=true;
+    shareButton.hidden=false;
     startButton.hidden=false;
     startButton.textContent='Play another round';
   }
 
   function start(){
     round=shuffle(bank).slice(0,Math.min(ROUND_SIZE,bank.length));
-    index=0;score=0;
+    index=0;score=0;completed=false;
+    shareButton.hidden=true;
     renderQuestion();
   }
 
@@ -170,12 +177,28 @@ function createGame(page,root,bank){
     try{item.card.focus({preventScroll:true});}catch{item.card.focus();}
   }
 
+  async function shareResult(){
+    if(!completed||!round.length)return;
+    const url=cleanChallengeUrl();
+    const text=`I scored ${score}/${round.length} in the Titans Legacy Challenge. Think you can beat it?`;
+    const payload={title:'Titans Legacy Challenge',text,url};
+    try{
+      if(navigator.share){await navigator.share(payload);feedback.textContent='Challenge share sheet opened.';return;}
+      if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(`${text}\n${url}`);feedback.textContent='Challenge result copied.';return;}
+      feedback.textContent='Sharing is unavailable on this browser.';
+    }catch(error){
+      if(error?.name==='AbortError'){feedback.textContent='Share cancelled.';return;}
+      feedback.textContent='Challenge sharing is unavailable right now.';
+    }
+  }
+
   root.addEventListener('click',event=>{
     const startControl=event.target.closest('[data-legacy-challenge-start]');
     if(startControl){start();return;}
     const answerButton=event.target.closest('[data-legacy-challenge-answer]');
     if(answerButton){answer(answerButton);return;}
     if(event.target.closest('[data-legacy-challenge-reveal]')){reveal();return;}
+    if(event.target.closest('[data-legacy-challenge-share]')){void shareResult();return;}
     if(event.target.closest('[data-legacy-challenge-next]')){
       if(!answered)return;
       if(index>=round.length-1){finish();return;}
