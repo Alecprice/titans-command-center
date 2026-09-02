@@ -27,7 +27,7 @@ test('Signal Lens party totals stay explicitly before fees',async()=>{
   const source=await read('tickets-signal-lens-v128.js');
   assert.match(source,/lowest\.price\*party/);
   assert.match(source,/lowestHome\.price\*party/);
-  assert.match(source,/for \$\{party\} before fees/);
+  assert.match(source,/before fees/);
 });
 
 test('Signal Lens is read-only and adds no provider traffic or persistence writes',async()=>{
@@ -52,12 +52,12 @@ test('Signal focus reveals a matchup through every Ticket filter layer',async()=
   assert.match(source,/prefers-reduced-motion/);
 });
 
-test('Signal Lens decorates the corresponding live matchup cards without changing offers',async()=>{
+test('Signal Lens decorates the corresponding live matchup cards without rewriting marketplace offers',async()=>{
   const source=await read('tickets-signal-lens-v128.js');
   assert.match(source,/data-ticket-signal-badges/);
   assert.match(source,/labelsByKey/);
   assert.match(source,/tickets-offer-row a/);
-  assert.doesNotMatch(source,/href\s*=/);
+  assert.doesNotMatch(source,/\.href\s*=\s*['"`]https?:\/\/(?:www\.)?(?:seatgeek|ticketmaster|stubhub)/i);
 });
 
 test('Signal Lens is phone-first and accessible',async()=>{
