@@ -23,6 +23,13 @@ test('legacy finder indexes the rendered museum instead of duplicating history d
   assert.doesNotMatch(js,/Warren Moon|Steve McNair|Derrick Henry|Music City Miracle/);
 });
 
+test('legacy finder strips citation metadata from searchable museum text',()=>{
+  const js=read('legacy-finder-v2.js');
+  assert.match(js,/function searchableText\(item\)/);
+  assert.match(js,/\.legacy-history-sources,\.archive-source-list,\.archive-inline-sources,\.visual-audit-source-chips/);
+  assert.match(js,/dataset\.legacyFinderText=searchableText\(item\)/);
+});
+
 test('legacy finder supports shareable route-safe state and resilient native-filter coexistence',()=>{
   const js=read('legacy-finder-v2.js');
   assert.match(js,/history\.replaceState/);
