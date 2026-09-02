@@ -8,7 +8,7 @@ const watch=read('my-player-watch-v36.js');
 
 test('TENX Home keeps Watchlist as the sole zero-follow player onboarding owner',()=>{
   assert.match(watch,/Your Titans watchlist/);
-  assert.match(watch,/Open roster/);
+  assert.match(watch,/Open any player from the roster and tap <strong>Watch player<\/strong>/);
   assert.match(impact,/const list=followed\(\)/);
   assert.match(impact,/const home=current==='home'/);
   assert.match(impact,/let root=app\.querySelector\(`\.v38-impact\[data-surface="\$\{current\}"\]`\)/);
