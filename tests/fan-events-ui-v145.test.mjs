@@ -3,47 +3,54 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const ui=fs.readFileSync(new URL('../fan-events-v145.js',import.meta.url),'utf8');
+const runtime=fs.readFileSync(new URL('../runtime-v19.js',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
 const headers=fs.readFileSync(new URL('../_headers',import.meta.url),'utf8');
-const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
 
-test('Fan Event Radar loads only through shared same-origin runtime API',()=>{
-  assert.match(ui,/api\('\/api\/fan-events'/);
-  assert.match(ui,/TitansRuntime/);
-  assert.doesNotMatch(ui,/fetch\(['"]https?:\/\//);
-  assert.doesNotMatch(ui,/ticketmaster\.com\/discovery|eventbriteapi\.com|api\.bandsintown\.com|skiddle\.com\/api/i);
+ test('Fan Event Radar loads only through shared same-origin runtime API',()=>{
+  assert.match(runtime,/import\('\.\/fan-events-v145\.js'\)/);
+  assert.match(ui,/const API='\/api\/fan-events'/);
+  assert.match(ui,/runtime\.apiJson\(API,\{ttl:600000,force\}\)/);
+  assert.doesNotMatch(ui,/\bfetch\s*\(/);
+  assert.doesNotMatch(ui,/eventbriteapi\.com|skiddle\.com\/api|app\.ticketmaster\.com/);
+  for(const key of ['EVENTBRITE_PRIVATE_TOKEN','EVENTBRITE_OAUTH_TOKEN','SKIDDLE_API_KEY','TICKETMASTER_API_KEY'])assert.doesNotMatch(ui,new RegExp(key));
 });
 
-test('event radar reuses shared route render refresh lifecycle without another observer or poller',()=>{
-  assert.match(ui,/onRoute/);
-  assert.match(ui,/onAppRender/);
-  assert.match(ui,/titans:refresh/);
-  assert.doesNotMatch(ui,/new MutationObserver|setInterval|setTimeout/);
+ test('event radar reuses shared route/render/refresh lifecycle without another observer or poller',()=>{
+  assert.match(ui,/runtime\.onRoute\(schedule,\{immediate:true\}\)/);
+  assert.match(ui,/runtime\.onAppRender\(schedule\)/);
+  assert.match(ui,/runtime\.onRefresh/);
+  assert.doesNotMatch(ui,/MutationObserver/);
+  assert.doesNotMatch(ui,/setInterval/);
+  assert.doesNotMatch(ui,/setTimeout/);
+  assert.doesNotMatch(ui,/WebSocket|EventSource/);
 });
 
-test('fan event links preserve provider identity and external-link safety',()=>{
+ test('fan event links preserve provider identity and external-link safety',()=>{
+  for(const provider of ['Skiddle','Eventbrite','Ticketmaster'])assert.match(ui,new RegExp(provider));
+  assert.doesNotMatch(ui,/Bandsintown/i);
   assert.match(ui,/target="_blank" rel="noopener noreferrer"/);
   assert.match(ui,/data-fan-events-source/);
-  assert.match(ui,/Ticketmaster/);
-  assert.match(ui,/Eventbrite/);
-  assert.match(ui,/Skiddle/);
-  assert.doesNotMatch(ui,/Bandsintown/);
+  assert.match(ui,/Listings are discovery links, not Titans-affiliated events/);
+  assert.match(ui,/source availability can differ by provider/);
 });
 
-test('Skiddle results carry required official logo attribution and direct source action',()=>{
-  assert.match(ui,/d1plawd8huk6hh\.cloudfront\.net\/assets\/logo\/png\/skiddle-logo-white-landscape\.png/);
+ test('Skiddle results carry required official logo attribution and direct source action',()=>{
+  assert.match(ui,/https:\/\/d1plawd8huk6hh\.cloudfront\.net\/assets\/logo\/png\/skiddle-logo-white-landscape\.png/);
   assert.match(ui,/<img src="\$\{SKIDDLE_LOGO\}" alt="Skiddle"/);
-  assert.match(ui,/View on Skiddle/);
-  assert.match(ui,/padding:19px/);
-  assert.match(headers,/https:\/\/d1plawd8huk6hh\.cloudfront\.net/);
+  assert.match(ui,/View on Skiddle ↗/);
+  assert.match(ui,/aria-label="View this event on Skiddle"/);
+  assert.match(ui,/fan-event-skiddle-logo-space\{[^}]*padding:19px/);
+  assert.match(headers,/img-src[^\n]*https:\/\/d1plawd8huk6hh\.cloudfront\.net/);
 });
 
-test('Fan Hub surface is compact, mobile touch safe, and horizontally browseable',()=>{
+ test('Fan Hub surface is compact, mobile touch safe, and horizontally browseable',()=>{
   assert.match(ui,/grid-auto-flow:column/);
-  assert.match(ui,/overflow-x:auto/);
+  assert.match(ui,/scroll-snap-type:x proximity/);
   assert.match(ui,/min-height:44px/);
-  assert.match(ui,/@media\(max-width:640px\)/);
+  assert.match(ui,/@media\(max-width:759px\)/);
   assert.match(ui,/min-height:48px/);
+  assert.match(ui,/grid-auto-columns:minmax\(82vw,1fr\)/);
   assert.match(ui,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(ui,/@media\(forced-colors:active\)/);
   assert.match(ui,/focus-visible/);
