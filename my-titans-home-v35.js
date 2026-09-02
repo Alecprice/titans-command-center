@@ -29,7 +29,7 @@
   }
 
   function favoriteTarget(name){
-    if(!name)return '#command';
+    if(!name)return '#roster';
     const player=favoritePlayer(name);
     if(!player)return '#roster';
     const id=String(player.id||'').trim();
@@ -64,8 +64,8 @@
     const favoriteTitle=favorite||'Choose a favorite player';
     const favoriteHref=favoriteTarget(favorite);
     const favoriteVerified=favoriteHref.startsWith('#player?');
-    const favoriteDetail=!favorite?'Set your player identity in My Titans':favoriteVerified?'Open verified Player Intelligence':data?'Saved favorite is not on the loaded roster. Review Team Room before opening a player page.':'Checking your favorite against the current roster…';
-    const favoriteAction=!favorite?'Set favorite →':favoriteVerified?'Open player →':'Review roster →';
+    const favoriteDetail=!favorite?'Open a roster player and tap Make favorite':favoriteVerified?'Open verified Player Intelligence':data?'Saved favorite is not on the loaded roster. Review Team Room before opening a player page.':'Checking your favorite against the current roster…';
+    const favoriteAction=!favorite?'Choose player →':favoriteVerified?'Open player →':'Review roster →';
     const fantasyTitle=savedCount?`${savedCount} saved · ${starterCount} starters`:'Build your board';
     const fantasyDetail=`${scoringLabel(fantasy.scoring)}${sleeper?' · Sleeper linked':' · Sleeper optional'}`;
     const signature=JSON.stringify([favoriteTitle,favoriteDetail,favoriteHref,favoriteAction,fantasyTitle,fantasyDetail,accountTitle,accountDetail]);
