@@ -17,7 +17,7 @@ function finalRule(selector) {
 }
 
 function hexProperty(block, property) {
-  const match = block.match(new RegExp(`${property}\\s*:\\s*(#[0-9a-f]{3,6})`, 'i'));
+  const match = block.match(new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*(#[0-9a-f]{3,6})`, 'i'));
   assert.ok(match, `missing hexadecimal ${property}`);
   return match[1];
 }
