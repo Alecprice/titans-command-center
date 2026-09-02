@@ -12,7 +12,7 @@ test('Watch Listen refreshes game-day state on a fan-safe one minute cadence',()
 });
 
 test('pregame minute changes invalidate the quick-start signature',()=>{
-  assert.match(js,/phase\.key,phase\.title,providerName/);
+  assert.match(js,/phase\.key,phase\.title,result\?\.label\|\|'no-score',providerName/);
   assert.match(js,/Kickoff is \$\{Math\.max\(1,Math\.ceil\(diff\/60000\)\)\} min away/);
 });
 

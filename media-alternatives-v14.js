@@ -32,6 +32,16 @@ import './media-custom-links-v14.js';
   const gameTime=game=>{const raw=game?.date;if(raw===null||raw===undefined||String(raw).trim()==='')return NaN;const value=new Date(raw).getTime();return Number.isFinite(value)?value:NaN};
   const gameLabel=game=>game?`${game.homeAway==='home'?'vs':'at'} ${game.opponent||game.opponentAbbr||'Opponent'}`:'Titans game';
   const kickoffLabel=game=>{const time=gameTime(game);if(!Number.isFinite(time))return'Time TBD';return new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Chicago',timeZoneName:'short'}).format(new Date(time))};
+  const scoreValue=value=>{if(value===null||value===undefined||String(value).trim()==='')return null;const score=Number(value);return Number.isFinite(score)&&score>=0?score:null};
+
+  function finalResult(game){
+    if(!game||!/final/i.test(String(game.status||'')))return null;
+    const titansScore=scoreValue(game.score),opponentScore=scoreValue(game.opponentScore);
+    if(titansScore===null||opponentScore===null)return null;
+    const outcome=titansScore>opponentScore?'WIN':titansScore<opponentScore?'LOSS':'TIE';
+    const opponentAbbr=String(game.opponentAbbr||'OPP').trim().toUpperCase()||'OPP';
+    return{outcome,titansScore,opponentScore,label:`TEN ${titansScore} · ${opponentAbbr} ${opponentScore}`};
+  }
 
   function options(){
     if(area()==='international')return [
@@ -92,6 +102,11 @@ import './media-custom-links-v14.js';
   }
 
   function postgamePhase(game){
+    const result=finalResult(game);
+    if(result){
+      const title=result.outcome==='WIN'?`Titans win ${result.titansScore}–${result.opponentScore}`:result.outcome==='LOSS'?`Titans fall ${result.titansScore}–${result.opponentScore}`:`Titans tie ${result.titansScore}–${result.opponentScore}`;
+      return{key:'postgame',eyebrow:`FINAL · ${result.outcome}`,title,detail:`${gameLabel(game)} · ${result.label}. Stay with official Titans coverage for the podium, highlights and audio analysis.`};
+    }
     return{key:'postgame',eyebrow:'FINAL · POSTGAME',title:`Postgame: ${gameLabel(game)}`,detail:'Stay with official Titans coverage for the podium, game highlights and audio analysis before the media center advances to the next matchup.'};
   }
 
@@ -129,6 +144,7 @@ import './media-custom-links-v14.js';
     if(route()!=='media'||!document.body.contains(hero))return;
     const postgame=recentPostgame(context.completed);
     const game=postgame||context.game;
+    const result=postgame?finalResult(postgame):null;
     const current=area(),phase=postgame?postgamePhase(postgame):gamePhase(game),provider=watch.querySelector('.media-watch-card');
     let providerName=provider?.querySelector('strong')?.textContent?.trim()||'Official Titans watch guide';
     let providerUrl=provider?.href||OFFICIAL.titansGuide;
@@ -144,14 +160,15 @@ import './media-custom-links-v14.js';
       watchNote='Official Titans live-video page for postgame press conferences. The team lists the podium stream at approximately 10 minutes after the game ends.';
       timeline=`<div><small>~10 MIN AFTER</small><strong>Postgame podium</strong><span>Official live video when available.</span></div><div><small>AFTER FINAL</small><strong>Game highlights</strong><span><a href="${OFFICIAL.titansVideo}" target="_blank" rel="noopener noreferrer">Open Titans video ↗</a></span></div><div><small>NEXT</small><strong>OTP + Titans Radio</strong><span>Official analysis as it is published.</span></div>`;
     }
-    const signature=[current,game?.id||game?.date||'none',phase.key,phase.title,providerName].join('|');
+    const signature=[current,game?.id||game?.date||'none',phase.key,phase.title,result?.label||'no-score',providerName].join('|');
     let section=document.querySelector('.media-quickstart');
     if(section?.dataset.signature===signature)return;
     if(!section){section=document.createElement('section');section.className='media-quickstart';hero.insertAdjacentElement('afterend',section)}
     section.dataset.signature=signature;
     section.dataset.phase=phase.key;
-    const statusLabel=postgame?'Final':game?.network||'Network TBD';
-    section.innerHTML=`<header class="media-quick-head"><div><small>GAME DAY QUICK START</small><h2>${esc(phase.title)}</h2><p>${esc(phase.detail)}</p></div><div class="media-phase media-phase-${esc(phase.key)}"><i aria-hidden="true"></i><span>${esc(phase.eyebrow)}</span>${game?`<strong>${esc(kickoffLabel(game))}</strong><em>${esc(statusLabel)}</em>`:'<strong>Official routes only</strong><em>Watch + listen</em>'}</div></header><div class="media-quick-grid"><a class="media-quick-card media-quick-watch" href="${esc(providerUrl)}" target="_blank" rel="noopener noreferrer"><small>WATCH</small><strong>${esc(watchAction)}</strong><span>${esc(watchNote)}</span><b>Open ${esc(providerName)} ↗</b></a><a class="media-quick-card media-quick-listen" href="${esc(listen.url)}" target="_blank" rel="noopener noreferrer"><small>LISTEN</small><strong>${esc(listen.title)}</strong><span>${esc(listen.note)}</span><b>${esc(listen.action)} ↗</b></a></div><div class="media-gameplan" aria-label="Titans game day media timeline">${timeline}</div>`;
+    if(result)section.dataset.result=result.outcome;else delete section.dataset.result;
+    const statusLabel=result?.label||(postgame?'Final':game?.network||'Network TBD');
+    section.innerHTML=`<header class="media-quick-head"><div><small>GAME DAY QUICK START</small><h2>${esc(phase.title)}</h2><p>${esc(phase.detail)}</p></div><div class="media-phase media-phase-${esc(phase.key)}"><i aria-hidden="true"></i><span>${esc(phase.eyebrow)}</span>${game?`<strong>${esc(kickoffLabel(game))}</strong><em>${esc(statusLabel)}</em>`:'<strong>Official routes only</strong><em>Watch + listen</em>'}</div></header><div class="media-quick-grid"><a class="media-quick-card media-quick-watch" href="${esc(providerUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Watch Titans coverage: ${esc(watchAction)}"><small>WATCH</small><strong>${esc(watchAction)}</strong><span>${esc(watchNote)}</span><b>Open ${esc(providerName)} ↗</b></a><a class="media-quick-card media-quick-listen" href="${esc(listen.url)}" target="_blank" rel="noopener noreferrer" aria-label="Listen to Titans coverage: ${esc(listen.title)}"><small>LISTEN</small><strong>${esc(listen.title)}</strong><span>${esc(listen.note)}</span><b>${esc(listen.action)} ↗</b></a></div><div class="media-gameplan" aria-label="Titans game day media timeline">${timeline}</div>`;
   }
 
   function render(){renderAlternatives();renderQuickStart()}
