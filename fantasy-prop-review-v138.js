@@ -139,8 +139,10 @@
     if(!liveIdentity||liveIdentity.key!==identity.key||!watchedKeys.has(liveIdentity.key))return false;
     const books=currentBooks(row);if(!Object.keys(books).length)return false;
     const store=pruneReview(loadReview(),watchedKeys);
+    const result=compare(row,store[liveIdentity.key]);
+    if(result.kind!=='changed'&&result.kind!=='unreviewed')return false;
     store[liveIdentity.key]={reviewedAt:Date.now(),books};
-    saveReview(store);decorate();return true;
+    saveReview(store);decorate({kind:'advance',reviewKind:result.kind,key:liveIdentity.key});return true;
   }
 
   function jumpToChanged(root,key){
@@ -202,6 +204,30 @@
     return focused;
   }
 
+  function focusNextReview(root,reviewKind,afterKey){
+    if(reviewKind!=='changed'&&reviewKind!=='unreviewed')return false;
+    const watchedKeys=new Set(loadWatchlist().map(item=>item.key));
+    const store=pruneReview(loadReview(),watchedKeys);
+    const rows=[...root.querySelectorAll('.fprop-row')];
+    const start=rows.findIndex(row=>rowIdentity(row)?.key===afterKey);
+    const ordered=start>=0?[...rows.slice(start+1),...rows.slice(0,start)]:rows;
+    const candidates=[];
+    for(const row of ordered){
+      const identity=rowIdentity(row);
+      if(!identity||!watchedKeys.has(identity.key)||!row.getClientRects().length)continue;
+      if(compare(row,store[identity.key]).kind!==reviewKind)continue;
+      candidates.push(row);
+    }
+    if(!candidates.length)return false;
+    const actionable=candidates.find(row=>row.querySelector('.fpr-row-mark:not(:disabled)'));
+    const next=actionable||candidates[0];
+    const target=next.querySelector('.fpr-row-mark:not(:disabled)');
+    const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    try{next.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'})}catch{}
+    if(focusControl(target))return true;
+    return focusTemporary(next,'fpr-focus-anchor');
+  }
+
   function reviewFocusRequest(root){
     try{
       const active=document.activeElement;
@@ -236,6 +262,11 @@
       if(request.kind==='new-summary'){
         const summary=[...root.querySelectorAll('.fpr-new[data-review-key]')].find(button=>button.dataset.reviewKey===request.key);
         return focusControl(summary)||focusReviewPanel(root,['.fpr-only:not(:disabled)','.fpr-mark:not(:disabled)']);
+      }
+      if(request.kind==='advance'){
+        if(focusNextReview(root,request.reviewKind,request.key))return true;
+        const selectors=request.reviewKind==='changed'?['.fpr-mark-changed:not(:disabled)','.fpr-mark:not(:disabled)','.fpr-only:not(:disabled)']:['.fpr-mark:not(:disabled)','.fpr-only:not(:disabled)'];
+        return focusReviewPanel(root,selectors);
       }
       if(request.kind!=='row')return false;
       const row=[...root.querySelectorAll('.fprop-row')].find(candidate=>rowIdentity(candidate)?.key===request.key);
@@ -331,10 +362,10 @@
     decorate();return captured;
   }
 
-  function decorate(){
+  function decorate(preferredFocusRequest=null){
     if(route()!==ROUTE)return;
     const root=document.querySelector(ROOT);if(!root)return;
-    const focusRequest=reviewFocusRequest(root);
+    const focusRequest=preferredFocusRequest||reviewFocusRequest(root);
     observer?.disconnect();
     try{
       try{
