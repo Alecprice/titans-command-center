@@ -6,7 +6,7 @@ Reduce duplicate Home command density after the Watch and Player Impact compacti
 ## 1. Technical Program Manager
 - Started from merged PR #393 baseline.
 - Avoided active ownership in Fan Events, Fantasy, Legacy, Game Day, Tickets, and mobile release-gate branches.
-- Limited implementation to the existing `my-titans-home-v35.js`, its established regression suite, one focused TENX regression file, and this review note.
+- Limited implementation to the existing `my-titans-home-v35.js`, its established regression suite, the canonical prior favorite-route TENX regression, one focused TENX regression file, and this review note.
 
 ## 2. Product Manager
 - Reframed My Titans from another three-card command launcher into a compact fan-profile summary.
@@ -35,14 +35,17 @@ Reduce duplicate Home command density after the Watch and Player Impact compacti
 ## 6. Senior Engineer
 - Preserved UUID-first Player Intelligence routing with audited canonical-name fallback.
 - Preserved stale favorite fallback to Team Room.
+- Preserved the established explicit pending/stale favorite truth copy after the first integration gate caught a compatibility regression.
 - Preserved Account opening through the existing `[data-account-open]` control.
 - Preserved Fantasy destination `#fantasy`.
-- Reworked only Home presentation and copy hierarchy.
+- Reworked only Home presentation and hierarchy.
 
 ## 7. QA Engineer
 - Strengthened the existing My Titans suite for the new hierarchy and phone layout.
 - Added seven focused TENX regressions covering primary identity, secondary action demotion, route trust, pending/stale truth, horizontal phone density, owner isolation, and accessibility/motion safeguards.
-- Full repository Quality Gate is required before merge readiness.
+- Evolved `tests/tenx-home-favorite-route-v126.test.mjs` only where its old `112px` card-height assertion conflicted with the intentional density change; its identity, UUID-first, stale fail-closed, persistence, and lifecycle assertions remain intact.
+- Quality Gate #1373 correctly failed the first candidate on three compatibility assertions; those findings were fixed rather than waived.
+- A fresh full repository Quality Gate is required before merge readiness.
 
 ## 8. Security Engineer
 - No new persistence writes.
@@ -57,7 +60,7 @@ Reduce duplicate Home command density after the Watch and Player Impact compacti
 
 ## 10. VP Engineering
 Approve only when:
-- exactly the intended four files differ from current `main`;
+- exactly the intended five files differ from current `main`;
 - branch is zero commits behind;
 - current full Titans Quality Gate passes;
 - existing Home, favorite-player trust, Watch, Player Impact, Game Day, account, mobile, security, D1, and Cloudflare contracts stay green;
