@@ -20,7 +20,7 @@ test('anniversary dates are derived from rendered Iconic Moments instead of a du
 
 test('only explicit month-day-year museum dates qualify and season-only text cannot be invented into a date',()=>{
   assert.match(moduleSource,/^function parseMomentDate/mi);
-  assert.match(moduleSource,/\^\(\[A-Z\]\[a-z\]\{2\}\)\\\.\\s\+\(\\d\{1,2\}\),\\s\+\(\\d\{4\}\)\$/);
+  assert.ok(moduleSource.includes("const match=/^([A-Z][a-z]{2})\\.\\s+(\\d{1,2}),\\s+(\\d{4})$/.exec"));
   assert.doesNotMatch(moduleSource,/Date\.parse\(/);
   assert.match(moduleSource,/if\(!match\)return null/);
   assert.match(moduleSource,/Season-only entries are not converted into made-up dates/);
