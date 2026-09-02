@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const settle=fs.readFileSync(new URL('../tickets-decision-settle-v149.js',import.meta.url),'utf8');
 const fallback=fs.readFileSync(new URL('../tickets-price-fallback-v58.js',import.meta.url),'utf8');
 const smoke=fs.readFileSync(new URL('../scripts/tickets-browser-smoke.py',import.meta.url),'utf8');
+const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
 
 test('Ticket decision settle coordinator loads after the three decision surfaces',()=>{
   const compare=fallback.indexOf("import './tickets-compare-v125.js'");
@@ -37,6 +38,11 @@ test('settle repair is bounded to one frame and one storage wake-up without poll
 test('settle diagnostics expose counts only and never provider or ticket credentials',()=>{
   assert.match(settle,/checks:0,repairs:0,last:null/);
   assert.doesNotMatch(settle,/api[_-]?key|client[_-]?secret|access[_-]?token|authorization/i);
+});
+
+test('Ticket decision settle coordinator remains available to installed offline clients',()=>{
+  assert.match(sw,/titans-cc-brand-2026-v82/);
+  assert.match(sw,/\/tickets-decision-settle-v149\.js/);
 });
 
 test('production Ticket compare SLA remains eight seconds instead of masking the race',()=>{
