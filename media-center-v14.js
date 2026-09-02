@@ -35,7 +35,7 @@
   const initialArea=savedArea==='outside'?'us':['nashville','us','international'].includes(savedArea)?savedArea:'nashville';
   const state={data:null,loading:null,area:initialArea};
 
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const validDate=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d};
   const fmt=v=>{const d=validDate(v);return d?new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Chicago'}).format(d):'TBD'};
   const safeUrl=v=>{try{const u=new URL(v);return ['https:','http:'].includes(u.protocol)?u.href:'#'}catch{return'#'}};
