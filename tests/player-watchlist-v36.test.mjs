@@ -35,6 +35,17 @@ test('Home resolves watched players through loaded roster identity before direct
   assert.match(feature,/\.v36-watch-remove\{[^}]*width:44px[^}]*min-height:44px[^}]*height:44px/);
 });
 
+test('Home watchlist is a horizontal quick-access rail instead of a vertical card wall',()=>{
+  assert.match(feature,/root\.dataset\.homeLayout='rail'/);
+  assert.match(feature,/PLAYER WATCH · QUICK ACCESS/);
+  assert.match(feature,/grid-auto-flow:column/);
+  assert.match(feature,/grid-auto-columns:minmax\(190px,1fr\)/);
+  assert.match(feature,/overflow-x:auto/);
+  assert.match(feature,/scroll-snap-type:x proximity/);
+  assert.match(feature,/grid-auto-columns:minmax\(220px,82vw\)/);
+  assert.doesNotMatch(feature,/\.v36-watch-grid\{grid-template-columns:1fr\}/);
+});
+
 test('watchlist feature loads from stable runtime and remains available offline',()=>{
   assert.match(runtime,/import '\.\/my-player-watch-v36\.js';/);
   assert.match(sw,/titans-cc-brand-2026-v\d+/);
