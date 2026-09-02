@@ -1,11 +1,11 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Ticket Center browser regression failure**
-- Source commit: `ec35cfb8e482b20e717cd864abdbf048a71a2701`
+- Source commit: `6b8c54ad5c15dac7304b8c1c344b60c2470293ca`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `ec35cfb8e482b20e717cd864abdbf048a71a2701`
+- Main SHA observed before deploy: `6b8c54ad5c15dac7304b8c1c344b60c2470293ca`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers configured: SeatGeek=false, Ticketmaster=false, StubHub=false
@@ -27,7 +27,7 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-02T04:59:55Z
+- Recorded: 2026-09-02T11:21:15Z
 
 ## Canonical front door regression
 
@@ -36,13 +36,13 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "deployedCommit": "92f430259685d4332c23603a6ab18d32fc94d3f0",
+  "deployedCommit": "6b8c54ad5c15dac7304b8c1c344b60c2470293ca",
   "version": "1.0.0",
-  "revisionAttempts": 1,
+  "revisionAttempts": 2,
   "cloudFront": {
-    "requestId": "dNEtc38x2nibxaKVEpIpZaGJWnuTMvaMlXAGq20_tgxWGOPR-jTERA==",
-    "pop": "SFO5-P1",
-    "via": "1.1 fa640a50340d741c579292b495a2218e.cloudfront.net (CloudFront)",
+    "requestId": "77fcCwniSNNneJAOZZfwVhI81C8oPwz-a4e3P7HlLTzPbLadoo8B0w==",
+    "pop": "HIO52-P4",
+    "via": "1.1 7ad3d6571deff4c3c83d7e4476fcc6d0.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -61,13 +61,13 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 182,
-    "originMeta": 116,
-    "canonicalRoot": 45,
-    "originRoot": 23,
-    "health": 156
+    "canonicalMeta": 42,
+    "originMeta": 39,
+    "canonicalRoot": 30,
+    "originRoot": 78,
+    "health": 381
   },
-  "testedAt": "2026-09-02T04:59:07.718Z"
+  "testedAt": "2026-09-02T11:20:24.804Z"
 }```
 
 ## Production regression
@@ -127,19 +127,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "ec35cfb8e482b20e717cd864abdbf048a71a2701",
-    "builtAt": "2026-09-02T04:58:52.911Z"
+    "commit": "6b8c54ad5c15dac7304b8c1c344b60c2470293ca",
+    "builtAt": "2026-09-02T11:20:06.784Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
     "root": 31,
-    "health": 150,
-    "data": 88,
-    "stats": 143,
-    "market": 802,
-    "analytics": 222
+    "health": 193,
+    "data": 130,
+    "stats": 226,
+    "market": 3541,
+    "analytics": 285
   },
-  "testedAt": "2026-09-02T04:59:13.956Z",
+  "testedAt": "2026-09-02T11:20:33.585Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-snapshot",
@@ -150,8 +150,8 @@
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 243,
-    "testedAt": "2026-09-02T04:59:14.439Z"
+    "responseMs": 302,
+    "testedAt": "2026-09-02T11:20:34.191Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -159,17 +159,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 121,
-    "warmHitMs": 121,
+    "coldOrInitialMs": 125,
+    "warmHitMs": 125,
     "rows": 608,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 121,
+        "durationMs": 125,
         "rows": 608
       }
     ],
-    "testedAt": "2026-09-02T04:59:14.591Z"
+    "testedAt": "2026-09-02T11:20:34.349Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -228,8 +228,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 112,
-  "testedAt": "2026-09-02T04:59:15.021Z"
+  "durationMs": 156,
+  "testedAt": "2026-09-02T11:20:34.895Z"
 }```
 
 ## Browser navigation regression
@@ -275,11 +275,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 147,
+  "maxLongTaskMs": 91,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 16.36,
-  "testedAt": "2026-09-02T04:59:35Z"
+  "durationSeconds": 15.73,
+  "testedAt": "2026-09-02T11:20:55Z"
 }```
 
 ## Listen Watch browser regression
@@ -359,11 +359,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788325177729
+      "timestamp": 1788348057907
     }
   ],
-  "durationSeconds": 2.94,
-  "testedAt": "2026-09-02T04:59:38Z"
+  "durationSeconds": 2.85,
+  "testedAt": "2026-09-02T11:20:58Z"
 }```
 
 ## Market Pulse browser regression
@@ -377,9 +377,9 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 75,
+        "shown": 73,
         "total": 608,
-        "renderedRows": 75
+        "renderedRows": 73
       },
       "summary": {
         "controls": [
@@ -427,16 +427,16 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Showing 75 of 608 rows",
+        "result": "Showing 73 of 608 rows",
         "resultTotal": 608,
-        "rowCount": 75,
+        "rowCount": 73,
         "rowSample": [
           "New York Jets at Tennessee Titans Spread \u00b7 BetOnline.ag \u2197SideNew York JetsLine1.5Price-108Implied51.9%",
           "New York Jets at Tennessee Titans Spread \u00b7 BetUS \u2197SideNew York JetsLine1.5Price-105Implied51.2%",
           "New York Jets at Tennessee Titans Spread \u00b7 LowVig.ag \u2197SideNew York JetsLine1.5Price-103Implied50.7%"
         ],
         "scrollWidth": 1265,
-        "shown": 75,
+        "shown": 73,
         "title": "Live Titans market board",
         "total": 608,
         "viewport": 1265
@@ -447,27 +447,27 @@
         "available": true,
         "options": 3,
         "selectedValue": "25077",
-        "before": "Showing 75 of 608 rows",
-        "after": "Showing 67 of 608 rows"
+        "before": "Showing 73 of 608 rows",
+        "after": "Showing 65 of 608 rows"
       },
       "book": {
         "available": true,
         "options": 11,
         "selectedValue": "betonlineag",
-        "before": "Showing 75 of 608 rows",
+        "before": "Showing 73 of 608 rows",
         "after": "Showing 6 of 608 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Showing 75 of 608 rows",
-        "after": "Showing 75 of 608 rows"
+        "before": "Showing 73 of 608 rows",
+        "after": "Showing 73 of 608 rows"
       }
     },
     "alternateLines": {
       "available": true,
-      "beforeRows": 75,
+      "beforeRows": 73,
       "afterRows": 608
     },
     "refresh": {
@@ -636,8 +636,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 6.03,
-  "testedAt": "2026-09-02T04:59:44Z"
+  "durationSeconds": 6.19,
+  "testedAt": "2026-09-02T11:21:05Z"
 }```
 
 ## Ticket Center browser regression
@@ -979,8 +979,8 @@
     "upcoming": false,
     "viewport": 1265
   },
-  "durationSeconds": 9.85,
-  "testedAt": "2026-09-02T04:59:54Z"
+  "durationSeconds": 9.8,
+  "testedAt": "2026-09-02T11:21:15Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
