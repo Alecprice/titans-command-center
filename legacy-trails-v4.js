@@ -1,5 +1,5 @@
 const STYLE_ID='legacy-trails-v4-styles';
-const TRAIL_VERSION='4.1.0';
+const TRAIL_VERSION='4.2.0';
 const PASSPORT_KEY='titans:legacy-passport-v1';
 const ROUTE='legacy';
 
@@ -144,12 +144,12 @@ function injectStyles(){
     .legacy-passport{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin-top:14px;padding:14px;border:1px dashed rgba(0,33,68,.34);background:rgba(255,255,255,.84);color:var(--retro-navy,#002144)}.legacy-passport small,.legacy-passport strong,.legacy-passport span{display:block}.legacy-passport small{font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:var(--retro-red,#c8102e)}.legacy-passport strong{margin-top:4px;font-size:18px;line-height:1.05;text-transform:uppercase}.legacy-passport span{margin-top:5px;color:#526b80;font-size:12px;line-height:1.4}.legacy-passport-meter{height:6px;margin-top:9px;background:rgba(0,33,68,.12);overflow:hidden}.legacy-passport-meter span{display:block;height:100%;margin:0;background:#69b3e7;transition:width .2s ease}.legacy-passport-actions{display:flex;gap:7px;align-items:center}.legacy-passport-actions button{min-height:44px;padding:0 12px;border:1px solid rgba(0,33,68,.26);background:var(--retro-navy,#002144);color:#fff;font-size:11px;font-weight:950;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}.legacy-passport-actions [data-legacy-passport-reset]{background:#fff;color:var(--retro-navy,#002144)}.legacy-passport-actions button:focus-visible{outline:3px solid rgba(75,146,219,.45);outline-offset:2px}
     .legacy-trail-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:14px}.legacy-trail-card{position:relative;min-height:152px;padding:14px;border:1px solid rgba(0,33,68,.14);background:#fff;color:var(--retro-navy,#002144);text-align:left;cursor:pointer;overflow:hidden}.legacy-trail-card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--retro-blue,#4b92db)}.legacy-trail-card[data-trail-tone="oilers"]:before{background:#69b3e7}.legacy-trail-card[data-trail-tone="red"]:before{background:var(--retro-red,#c8102e)}.legacy-trail-card[data-trail-tone="midnight"]:before{background:#002a5c}.legacy-trail-card[aria-pressed="true"]{border-color:rgba(0,33,68,.45);box-shadow:0 0 0 2px rgba(75,146,219,.18)}.legacy-trail-card[data-passport-complete="true"]{border-color:rgba(0,89,63,.36);background:linear-gradient(180deg,#fff,#f2fbf7)}
     .legacy-trail-card small,.legacy-trail-card strong,.legacy-trail-card span{display:block}.legacy-trail-card small{font-size:11px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;color:#5b7388}.legacy-trail-card strong{margin-top:7px;font-size:15px;line-height:1.1;text-transform:uppercase}.legacy-trail-card span{margin-top:8px;color:#526b80;font-size:12px;line-height:1.45}.legacy-trail-card em{position:absolute;right:10px;bottom:8px;font-style:normal;font-size:11px;font-weight:900;color:#637b8f}
-    .legacy-trail-player{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin-top:13px;padding:14px;border:1px solid rgba(0,33,68,.16);background:var(--retro-navy,#002144);color:#fff}.legacy-trail-player[hidden]{display:none!important}.legacy-trail-player small{display:block;color:#bfe1f6;font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.legacy-trail-player h3{margin:5px 0 0;font-size:19px;line-height:1.05;text-transform:uppercase}.legacy-trail-progress{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:9px}.legacy-trail-progress-bar{height:5px;background:rgba(255,255,255,.2);overflow:hidden}.legacy-trail-progress-bar span{display:block;height:100%;background:#69b3e7;transition:width .2s ease}.legacy-trail-progress strong{font-size:11px;letter-spacing:.08em}.legacy-trail-stop{margin-top:8px;color:#e3f0f8;font-size:12px}.legacy-trail-actions{display:flex;gap:7px;align-items:center}.legacy-trail-actions button{min-height:44px;padding:0 12px;border:1px solid rgba(255,255,255,.32);background:#fff;color:var(--retro-navy,#002144);font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.legacy-trail-actions button:disabled{opacity:.42;cursor:not-allowed}.legacy-trail-actions [data-legacy-trail-exit]{background:transparent;color:#fff}.legacy-trail-card:focus-visible,.legacy-trail-actions button:focus-visible{outline:3px solid rgba(105,179,231,.55);outline-offset:2px}
+    .legacy-trail-player{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin-top:13px;padding:14px;border:1px solid rgba(0,33,68,.16);background:var(--retro-navy,#002144);color:#fff}.legacy-trail-player[hidden]{display:none!important}.legacy-trail-player small{display:block;color:#bfe1f6;font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.legacy-trail-player h3{margin:5px 0 0;font-size:19px;line-height:1.05;text-transform:uppercase}.legacy-trail-progress{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:9px}.legacy-trail-progress-bar{height:5px;background:rgba(255,255,255,.2);overflow:hidden}.legacy-trail-progress-bar span{display:block;height:100%;background:#69b3e7;transition:width .2s ease}.legacy-trail-progress strong{font-size:11px;letter-spacing:.08em}.legacy-trail-stop{margin-top:8px;color:#e3f0f8;font-size:12px}.legacy-trail-actions{display:flex;gap:7px;align-items:center}.legacy-trail-actions button{min-height:44px;padding:0 12px;border:1px solid rgba(255,255,255,.32);background:#fff;color:var(--retro-navy,#002144);font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.legacy-trail-actions button:disabled{opacity:.42;cursor:not-allowed}.legacy-trail-actions [data-legacy-trail-exit]{background:transparent;color:#fff}.legacy-trail-card:focus-visible,.legacy-trail-actions button:focus-visible{outline:3px solid rgba(105,179,231,.55);outline-offset:2px}.legacy-finder-match[data-legacy-trail-focus]:focus-visible{outline:3px solid rgba(105,179,231,.72);outline-offset:4px}
     @media(max-width:1000px){.legacy-trail-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
     @media(max-width:760px){.legacy-trails{padding:14px}.legacy-trails-head{display:block}.legacy-trails-head p{margin-top:8px}.legacy-passport{grid-template-columns:1fr}.legacy-passport-actions{display:grid;grid-template-columns:1fr 1fr}.legacy-passport-actions button{min-height:48px;font-size:12px}.legacy-passport-actions button:only-child{grid-column:1/-1}.legacy-trail-grid{display:flex;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:1px 1px 7px}.legacy-trail-card{flex:0 0 76vw;min-height:148px;scroll-snap-align:start}.legacy-trail-player{grid-template-columns:1fr}.legacy-trail-actions{display:grid;grid-template-columns:repeat(3,1fr)}.legacy-trail-actions button{min-height:48px;font-size:12px}}
     @media(max-width:430px){.legacy-trail-card{flex-basis:82vw}.legacy-trail-actions{grid-template-columns:1fr 1fr}.legacy-trail-actions [data-legacy-trail-exit]{grid-column:1/-1}.legacy-trails-head h2{font-size:24px}.legacy-passport-actions{grid-template-columns:1fr}}
     @media(prefers-reduced-motion:reduce){.legacy-trail-progress-bar span,.legacy-passport-meter span{transition:none}.legacy-trail-grid{scroll-behavior:auto}}
-    @media(forced-colors:active){.legacy-trails,.legacy-passport,.legacy-trail-card,.legacy-trail-player,.legacy-passport-actions button,.legacy-trail-actions button{border:1px solid CanvasText}.legacy-trail-card:before,.legacy-trail-progress-bar span,.legacy-passport-meter span{background:CanvasText}}
+    @media(forced-colors:active){.legacy-trails,.legacy-passport,.legacy-trail-card,.legacy-trail-player,.legacy-passport-actions button,.legacy-trail-actions button{border:1px solid CanvasText}.legacy-trail-card:before,.legacy-trail-progress-bar span,.legacy-passport-meter span{background:CanvasText}.legacy-finder-match[data-legacy-trail-focus]:focus-visible{outline:3px solid Highlight}}
   `;
   document.head.append(style);
 }
@@ -175,11 +175,32 @@ function playerMarkup(trail,step){
   return `<div><small>${trail.eyebrow} · ${trail.title}</small><h3>${stop.label}</h3><div class="legacy-trail-progress"><div class="legacy-trail-progress-bar" aria-hidden="true"><span style="width:${pct}%"></span></div><strong>STOP ${step+1} / ${trail.stops.length}</strong></div><div class="legacy-trail-stop">Showing this stop through Legacy Finder · ${stop.scope}</div></div><div class="legacy-trail-actions"><button type="button" data-legacy-trail-prev ${step===0?'disabled':''}>← Previous</button><button type="button" data-legacy-trail-next ${step===trail.stops.length-1?'disabled':''}>Next →</button><button type="button" data-legacy-trail-exit>Exit trail</button></div>`;
 }
 
+function clearTrailDestinationFocus(page){
+  page.querySelectorAll('[data-legacy-trail-focus]').forEach(node=>{
+    delete node.dataset.legacyTrailFocus;
+    if(node.dataset.legacyTrailTabindexAdded==='true'){
+      node.removeAttribute('tabindex');
+      delete node.dataset.legacyTrailTabindexAdded;
+    }
+  });
+}
+
+function focusTrailDestination(page,target){
+  clearTrailDestinationFocus(page);
+  target.dataset.legacyTrailFocus='true';
+  if(!target.hasAttribute('tabindex')){
+    target.setAttribute('tabindex','-1');
+    target.dataset.legacyTrailTabindexAdded='true';
+  }
+  try{target.focus({preventScroll:true});}catch{target.focus();}
+}
+
 function scrollToMatch(page){
   const target=page.querySelector('.legacy-finder-match');
   if(!target)return;
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   target.scrollIntoView({behavior:reduced?'auto':'smooth',block:'center'});
+  focusTrailDestination(page,target);
 }
 
 export function ensureLegacyTrails(page,controller){
@@ -218,6 +239,7 @@ export function ensureLegacyTrails(page,controller){
   };
 
   const deactivate=({clearFinder=true,syncUrl=true}={})=>{
+    clearTrailDestinationFocus(page);
     active=null;step=0;paint();
     if(syncUrl)writeTrailState(null,0);
     if(clearFinder){internal=true;controller.apply({q:'',scope:'all'});internal=false;}
