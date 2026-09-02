@@ -38,7 +38,9 @@ test('heritage honors filter is accessible and mobile ready',()=>{
   assert.match(js,/aria-label="Filter Ring of Honor members"/);
   assert.match(js,/aria-pressed/);
   assert.match(js,/data-heritage-honor-filter/);
-  assert.match(js,/min-height:46px/);
+  assert.match(js,/\.legacy-honor-filters button\{min-height:44px/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-filters button\{min-height:48px/);
+  assert.doesNotMatch(js,/\.legacy-honor-filters button\{min-height:(?:4[0-3]|4[5-7])px/);
   assert.match(js,/max-width:430px/);
   assert.match(js,/prefers-reduced-motion:reduce/);
   assert.match(js,/forced-colors:active/);
