@@ -14,6 +14,7 @@
   const connection=()=>{const raw=parseObject(localStorage.getItem(STATE_KEY));return {username:clean(raw.sleeperUser).slice(0,64),leagueId:clean(raw.leagueId).slice(0,32)};};
   const validConnection=value=>Boolean(value.username&&/^\d{6,32}$/.test(value.leagueId));
   const connectionKey=value=>validConnection(value)?`${value.username.toLowerCase()}|${value.leagueId}`:'';
+  const requestCurrent=(serial,key)=>serial===requestSerial&&route()===ROUTE&&connectionKey(connection())===key;
   const resumeObserver=()=>{if(observer&&app)observer.observe(app,{childList:true,subtree:true})};
 
   async function sleeper(path){
@@ -80,20 +81,25 @@
         sleeper(`/league/${current.leagueId}/rosters`),
         playerIndex()
       ]);
-      if(serial!==requestSerial||route()!==ROUTE)return;
+      if(!requestCurrent(serial,key))return;
       if(!user?.user_id)throw new Error('Sleeper user not found');
       state.context=buildContext(user,Array.isArray(rosters)?rosters:[],players||{});
       state.loadedAt=Date.now();
       if(!state.context.matched)state.rosterOnly=false;
       publish();
     }catch(error){
-      if(serial!==requestSerial)return;
+      if(!requestCurrent(serial,key))return;
       state.context=null;state.rosterOnly=false;
       state.error=error?.name==='AbortError'?'Sleeper roster check timed out':clean(error?.message||'Sleeper roster unavailable');
       publish();
     }finally{
-      if(serial===requestSerial)state.loading=false;
-      if(route()===ROUTE)decorate();
+      if(serial===requestSerial){
+        state.loading=false;
+        if(route()===ROUTE){
+          if(connectionKey(connection())!==key)queue();
+          else decorate();
+        }
+      }
     }
   }
 
@@ -171,7 +177,7 @@
     const key=connectionKey(connection());
     if(key!==state.connectionKey){state.context=null;state.error='';state.loadedAt=0;state.rosterOnly=false;loadContext(true);return}
     if(!key){decorate();return}
-    if(!state.context&&!state.loading)loadContext(false);else decorate();
+    if(!state.context&&!state.loading&&!state.error)loadContext(false);else decorate();
   }
 
   const queue=()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;maybeLoad()})};
