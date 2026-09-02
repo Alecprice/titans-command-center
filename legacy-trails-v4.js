@@ -1,5 +1,5 @@
 const STYLE_ID='legacy-trails-v4-styles';
-const TRAIL_VERSION='4.0.0';
+const TRAIL_VERSION='4.0.1';
 const ROUTE='legacy';
 
 const trails=[
@@ -64,13 +64,8 @@ function routeState(){
 function writeTrailState(trailId,step){
   if(route()!==ROUTE)return;
   const params=new URLSearchParams(hashQuery());
-  if(trailId){
-    params.set('trail',trailId);
-    params.set('step',String(step));
-  }else{
-    params.delete('trail');
-    params.delete('step');
-  }
+  if(trailId){params.set('trail',trailId);params.set('step',String(step));}
+  else{params.delete('trail');params.delete('step');}
   const query=params.toString();
   const next=`#${ROUTE}${query?`?${query}`:''}`;
   if(location.hash!==next)history.replaceState(history.state,'',`${location.pathname}${location.search}${next}`);
@@ -82,11 +77,12 @@ function injectStyles(){
   style.id=STYLE_ID;
   style.textContent=`
     .legacy-trails{margin:18px 0 24px;padding:18px;border:1px solid rgba(0,33,68,.15);background:linear-gradient(135deg,#f7f3ea 0 44%,#edf7fd 44% 100%);box-shadow:0 16px 42px rgba(0,33,68,.08)}
-    .legacy-trails-head{display:flex;justify-content:space-between;gap:18px;align-items:end}.legacy-trails-head small{display:block;color:var(--retro-red,#c8102e);font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.legacy-trails-head h2{margin:5px 0 0;color:var(--retro-navy,#002144);font-size:27px;line-height:1;text-transform:uppercase}.legacy-trails-head p{max-width:540px;margin:0;color:#5f7488;font-size:10px;line-height:1.55}
-    .legacy-trail-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:14px}.legacy-trail-card{position:relative;min-height:142px;padding:14px;border:1px solid rgba(0,33,68,.14);background:#fff;color:var(--retro-navy,#002144);text-align:left;cursor:pointer;overflow:hidden}.legacy-trail-card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--retro-blue,#4b92db)}.legacy-trail-card[data-trail-tone="oilers"]:before{background:#69b3e7}.legacy-trail-card[data-trail-tone="red"]:before{background:var(--retro-red,#c8102e)}.legacy-trail-card[data-trail-tone="midnight"]:before{background:#002a5c}.legacy-trail-card[aria-pressed="true"]{border-color:rgba(0,33,68,.45);box-shadow:0 0 0 2px rgba(75,146,219,.18)}.legacy-trail-card small,.legacy-trail-card strong,.legacy-trail-card span{display:block}.legacy-trail-card small{font-size:7px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;color:#6d8295}.legacy-trail-card strong{margin-top:7px;font-size:14px;line-height:1.1;text-transform:uppercase}.legacy-trail-card span{margin-top:7px;color:#607487;font-size:9px;line-height:1.45}.legacy-trail-card em{position:absolute;right:10px;bottom:8px;font-style:normal;font-size:8px;font-weight:900;color:#7c8f9e}
-    .legacy-trail-player{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin-top:13px;padding:14px;border:1px solid rgba(0,33,68,.16);background:var(--retro-navy,#002144);color:#fff}.legacy-trail-player[hidden]{display:none!important}.legacy-trail-player small{display:block;color:#9fcff0;font-size:7px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.legacy-trail-player h3{margin:5px 0 0;font-size:18px;line-height:1.05;text-transform:uppercase}.legacy-trail-progress{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:9px}.legacy-trail-progress-bar{height:5px;background:rgba(255,255,255,.2);overflow:hidden}.legacy-trail-progress-bar span{display:block;height:100%;background:#69b3e7;transition:width .2s ease}.legacy-trail-progress strong{font-size:8px;letter-spacing:.08em}.legacy-trail-stop{margin-top:8px;color:#dbeaf6;font-size:10px}.legacy-trail-actions{display:flex;gap:7px;align-items:center}.legacy-trail-actions button{min-height:44px;padding:0 12px;border:1px solid rgba(255,255,255,.28);background:#fff;color:var(--retro-navy,#002144);font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.legacy-trail-actions button:disabled{opacity:.42;cursor:not-allowed}.legacy-trail-actions [data-legacy-trail-exit]{background:transparent;color:#fff}.legacy-trail-card:focus-visible,.legacy-trail-actions button:focus-visible{outline:3px solid rgba(105,179,231,.55);outline-offset:2px}
+    .legacy-trails-head{display:flex;justify-content:space-between;gap:18px;align-items:end}.legacy-trails-head small{display:block;color:var(--retro-red,#c8102e);font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.legacy-trails-head h2{margin:5px 0 0;color:var(--retro-navy,#002144);font-size:27px;line-height:1;text-transform:uppercase}.legacy-trails-head p{max-width:540px;margin:0;color:#526b80;font-size:12px;line-height:1.55}
+    .legacy-trail-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:14px}.legacy-trail-card{position:relative;min-height:152px;padding:14px;border:1px solid rgba(0,33,68,.14);background:#fff;color:var(--retro-navy,#002144);text-align:left;cursor:pointer;overflow:hidden}.legacy-trail-card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--retro-blue,#4b92db)}.legacy-trail-card[data-trail-tone="oilers"]:before{background:#69b3e7}.legacy-trail-card[data-trail-tone="red"]:before{background:var(--retro-red,#c8102e)}.legacy-trail-card[data-trail-tone="midnight"]:before{background:#002a5c}.legacy-trail-card[aria-pressed="true"]{border-color:rgba(0,33,68,.45);box-shadow:0 0 0 2px rgba(75,146,219,.18)}
+    .legacy-trail-card small,.legacy-trail-card strong,.legacy-trail-card span{display:block}.legacy-trail-card small{font-size:11px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;color:#5b7388}.legacy-trail-card strong{margin-top:7px;font-size:15px;line-height:1.1;text-transform:uppercase}.legacy-trail-card span{margin-top:8px;color:#526b80;font-size:12px;line-height:1.45}.legacy-trail-card em{position:absolute;right:10px;bottom:8px;font-style:normal;font-size:11px;font-weight:900;color:#637b8f}
+    .legacy-trail-player{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin-top:13px;padding:14px;border:1px solid rgba(0,33,68,.16);background:var(--retro-navy,#002144);color:#fff}.legacy-trail-player[hidden]{display:none!important}.legacy-trail-player small{display:block;color:#bfe1f6;font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.legacy-trail-player h3{margin:5px 0 0;font-size:19px;line-height:1.05;text-transform:uppercase}.legacy-trail-progress{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:9px}.legacy-trail-progress-bar{height:5px;background:rgba(255,255,255,.2);overflow:hidden}.legacy-trail-progress-bar span{display:block;height:100%;background:#69b3e7;transition:width .2s ease}.legacy-trail-progress strong{font-size:11px;letter-spacing:.08em}.legacy-trail-stop{margin-top:8px;color:#e3f0f8;font-size:12px}.legacy-trail-actions{display:flex;gap:7px;align-items:center}.legacy-trail-actions button{min-height:44px;padding:0 12px;border:1px solid rgba(255,255,255,.32);background:#fff;color:var(--retro-navy,#002144);font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.legacy-trail-actions button:disabled{opacity:.42;cursor:not-allowed}.legacy-trail-actions [data-legacy-trail-exit]{background:transparent;color:#fff}.legacy-trail-card:focus-visible,.legacy-trail-actions button:focus-visible{outline:3px solid rgba(105,179,231,.55);outline-offset:2px}
     @media(max-width:1000px){.legacy-trail-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:760px){.legacy-trails{padding:14px}.legacy-trails-head{display:block}.legacy-trails-head p{margin-top:8px}.legacy-trail-grid{display:flex;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:1px 1px 7px}.legacy-trail-card{flex:0 0 76vw;min-height:132px;scroll-snap-align:start}.legacy-trail-player{grid-template-columns:1fr}.legacy-trail-actions{display:grid;grid-template-columns:repeat(3,1fr)}.legacy-trail-actions button{min-height:46px}}
+    @media(max-width:760px){.legacy-trails{padding:14px}.legacy-trails-head{display:block}.legacy-trails-head p{margin-top:8px}.legacy-trail-grid{display:flex;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:1px 1px 7px}.legacy-trail-card{flex:0 0 76vw;min-height:148px;scroll-snap-align:start}.legacy-trail-player{grid-template-columns:1fr}.legacy-trail-actions{display:grid;grid-template-columns:repeat(3,1fr)}.legacy-trail-actions button{min-height:46px;font-size:12px}}
     @media(max-width:430px){.legacy-trail-card{flex-basis:82vw}.legacy-trail-actions{grid-template-columns:1fr 1fr}.legacy-trail-actions [data-legacy-trail-exit]{grid-column:1/-1}.legacy-trails-head h2{font-size:24px}}
     @media(prefers-reduced-motion:reduce){.legacy-trail-progress-bar span{transition:none}.legacy-trail-grid{scroll-behavior:auto}}
     @media(forced-colors:active){.legacy-trails,.legacy-trail-card,.legacy-trail-player,.legacy-trail-actions button{border:1px solid CanvasText}.legacy-trail-card:before,.legacy-trail-progress-bar span{background:CanvasText}}
@@ -95,11 +91,7 @@ function injectStyles(){
 }
 
 function trailMarkup(){
-  return `<section class="legacy-trails" data-legacy-trails data-version="${TRAIL_VERSION}" aria-labelledby="legacy-trails-title">
-    <div class="legacy-trails-head"><div><small>Curated museum paths</small><h2 id="legacy-trails-title">Legacy Trails</h2></div><p>Pick an era and move through connected Story, Moments, Legends, Records and Heritage stops without losing your place.</p></div>
-    <div class="legacy-trail-grid" role="group" aria-label="Choose a Legacy Trail">${trails.map(trail=>`<button type="button" class="legacy-trail-card" data-legacy-trail="${trail.id}" data-trail-tone="${trail.tone}" aria-pressed="false"><small>${trail.eyebrow}</small><strong>${trail.title}</strong><span>${trail.summary}</span><em>${trail.stops.length} stops</em></button>`).join('')}</div>
-    <div class="legacy-trail-player" data-legacy-trail-player hidden aria-live="polite"></div>
-  </section>`;
+  return `<section class="legacy-trails" data-legacy-trails data-version="${TRAIL_VERSION}" aria-labelledby="legacy-trails-title"><div class="legacy-trails-head"><div><small>Curated museum paths</small><h2 id="legacy-trails-title">Legacy Trails</h2></div><p>Pick an era and move through connected Story, Moments, Legends, Records and Heritage stops without losing your place.</p></div><div class="legacy-trail-grid" role="group" aria-label="Choose a Legacy Trail">${trails.map(trail=>`<button type="button" class="legacy-trail-card" data-legacy-trail="${trail.id}" data-trail-tone="${trail.tone}" aria-pressed="false"><small>${trail.eyebrow}</small><strong>${trail.title}</strong><span>${trail.summary}</span><em>${trail.stops.length} stops</em></button>`).join('')}</div><div class="legacy-trail-player" data-legacy-trail-player hidden aria-live="polite"></div></section>`;
 }
 
 function playerMarkup(trail,step){
@@ -138,17 +130,18 @@ export function ensureLegacyTrails(page,controller){
     player.hidden=false;player.innerHTML=playerMarkup(active,step);
   };
 
-  const clearTrailRoute=()=>writeTrailState(null,0);
   const deactivate=({clearFinder=true,syncUrl=true}={})=>{
     active=null;step=0;paint();
-    if(syncUrl)clearTrailRoute();
+    if(syncUrl)writeTrailState(null,0);
     if(clearFinder){internal=true;controller.apply({q:'',scope:'all'});internal=false;}
   };
 
   const activate=(trailId,nextStep=0,{syncUrl=true,scroll=true}={})=>{
     const trail=trailById(trailId);
     if(!trail){deactivate({clearFinder:false,syncUrl});return;}
-    active=trail;step=Math.min(Math.max(Number(nextStep)||0,0),trail.stops.length-1);paint();
+    active=trail;
+    step=Math.min(Math.max(Number(nextStep)||0,0),trail.stops.length-1);
+    paint();
     if(syncUrl)writeTrailState(active.id,step);
     const stop=active.stops[step];
     internal=true;controller.apply({q:stop.q,scope:stop.scope});internal=false;
@@ -164,22 +157,16 @@ export function ensureLegacyTrails(page,controller){
   });
 
   page.addEventListener('input',event=>{
-    if(internal||!active)return;
-    if(event.target?.matches?.('#legacy-finder-input'))deactivate({clearFinder:false});
+    if(!internal&&active&&event.target?.matches?.('#legacy-finder-input'))deactivate({clearFinder:false});
   });
   page.addEventListener('click',event=>{
     if(internal||!active||event.target.closest('[data-legacy-trails]'))return;
     if(event.target.closest('[data-legacy-finder-scope],[data-legacy-finder-clear],[data-legacy-scroll],.legacy-era-filter,.archive-filter,[data-heritage-honor-filter]'))deactivate({clearFinder:false});
   },true);
 
-  const syncFromRoute=()=>{
-    if(route()!==ROUTE)return;
-    const state=routeState();
-    if(state.trail)activate(state.trail.id,state.step,{syncUrl:false,scroll:false});
-    else if(active)deactivate({clearFinder:false,syncUrl:false});
-  };
-  addEventListener('hashchange',syncFromRoute);
-  syncFromRoute();
+  const initial=routeState();
+  if(initial.trail)activate(initial.trail.id,initial.step,{syncUrl:false,scroll:false});
+  else paint();
   page.dataset.legacyTrailsReady='true';
   page._legacyTrails={activate,deactivate,getState:()=>({trail:active?.id||null,step})};
   return root;
