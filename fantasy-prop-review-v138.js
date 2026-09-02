@@ -148,8 +148,30 @@
     if(!watchedKeys.has(key)){decorate();return false}
     const row=[...root.querySelectorAll('.fprop-row')].find(candidate=>rowIdentity(candidate)?.key===key);
     if(!row){decorate();return false}
+    if(!row.getClientRects().length){decorate();return false}
     const baseline=pruneReview(loadReview(),watchedKeys)[key];
     if(!baseline||compare(row,baseline).kind!=='changed'){decorate();return false}
+    const target=row.querySelector('.fpr-row-mark:not(:disabled)')||row;
+    const addedTabindex=target===row&&!row.hasAttribute('tabindex');
+    if(addedTabindex)row.tabIndex=-1;
+    row.classList.add('fpr-jump-target');
+    const cleanup=()=>{row.classList.remove('fpr-jump-target');if(addedTabindex)row.removeAttribute('tabindex')};
+    target.addEventListener('blur',cleanup,{once:true});
+    const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    row.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'});
+    target.focus({preventScroll:true});
+    if(document.activeElement!==target){cleanup();return false}
+    return true;
+  }
+
+  function jumpToUnreviewed(root,key){
+    const watchedKeys=new Set(loadWatchlist().map(item=>item.key));
+    if(!watchedKeys.has(key)){decorate();return false}
+    const row=[...root.querySelectorAll('.fprop-row')].find(candidate=>rowIdentity(candidate)?.key===key);
+    if(!row){decorate();return false}
+    if(!row.getClientRects().length){decorate();return false}
+    const baseline=pruneReview(loadReview(),watchedKeys)[key];
+    if(baseline||compare(row,baseline).kind!=='unreviewed'){decorate();return false}
     const target=row.querySelector('.fpr-row-mark:not(:disabled)')||row;
     const addedTabindex=target===row&&!row.hasAttribute('tabindex');
     if(addedTabindex)row.tabIndex=-1;
@@ -189,6 +211,7 @@
         return identity?{kind:'row',key:identity.key}:null;
       }
       if(active.matches('.fpr-change[data-review-key]'))return {kind:'summary',key:clean(active.dataset.reviewKey)};
+      if(active.matches('.fpr-new[data-review-key]'))return {kind:'new-summary',key:clean(active.dataset.reviewKey)};
       if(active.matches('.fpr-mark'))return {kind:'panel',selectors:['.fpr-mark:not(:disabled)','.fpr-only:not(:disabled)']};
       if(active.matches('.fpr-mark-changed'))return {kind:'panel',selectors:['.fpr-mark-changed:not(:disabled)','.fpr-mark:not(:disabled)','.fpr-only:not(:disabled)']};
       if(active.matches('.fpr-only'))return {kind:'panel',selectors:['.fpr-only:not(:disabled)','.fpr-mark:not(:disabled)']};
@@ -208,6 +231,10 @@
       if(request.kind==='panel')return focusReviewPanel(root,request.selectors);
       if(request.kind==='summary'){
         const summary=[...root.querySelectorAll('.fpr-change[data-review-key]')].find(button=>button.dataset.reviewKey===request.key);
+        return focusControl(summary)||focusReviewPanel(root,['.fpr-only:not(:disabled)','.fpr-mark:not(:disabled)']);
+      }
+      if(request.kind==='new-summary'){
+        const summary=[...root.querySelectorAll('.fpr-new[data-review-key]')].find(button=>button.dataset.reviewKey===request.key);
         return focusControl(summary)||focusReviewPanel(root,['.fpr-only:not(:disabled)','.fpr-mark:not(:disabled)']);
       }
       if(request.kind!=='row')return false;
@@ -260,12 +287,12 @@
   function injectStyle(){
     if(document.querySelector('style[data-fantasy-prop-review-v138]'))return;
     const style=document.createElement('style');style.dataset.fantasyPropReviewV138='true';style.textContent=`
-      .fpr-review{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;margin:0 0 14px;padding:13px 14px;border:1px solid rgba(126,184,238,.2);border-radius:14px;background:rgba(9,27,44,.76)}.fpr-copy strong,.fpr-copy span{display:block}.fpr-copy strong{font-size:.86rem;color:#f5f8fb}.fpr-copy span{margin-top:3px;color:#9db1c5;font-size:.76rem;line-height:1.4}.fpr-changes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.fpr-change{min-height:44px;padding:5px 9px;border:1px solid rgba(126,184,238,.18);border-radius:8px;background:rgba(75,146,219,.08);color:#cfe8ff;font:inherit;font-size:.7rem;font-weight:750;line-height:1.25;text-align:left;cursor:pointer}.fpr-change:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fpr-change:hover{background:rgba(75,146,219,.16)}.fprop-row.fpr-jump-target{outline:2px solid #7eb8ee;outline-offset:2px}.fpr-review.fpr-focus-anchor:focus-visible,.fprop-row.fpr-focus-anchor:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fpr-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}.fpr-actions button{min-height:44px;border:1px solid rgba(126,184,238,.3);border-radius:10px;padding:0 11px;background:#102c49;color:#eaf5ff;font:inherit;font-size:.75rem;font-weight:900;cursor:pointer}.fpr-actions button[aria-pressed="true"]{background:#4b92db;color:#071321}.fpr-actions button:disabled{opacity:.48;cursor:not-allowed}.fpr-actions button:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fpr-review-badge{display:inline-flex;align-items:center;min-height:24px;margin-top:6px;padding:2px 7px;border:1px solid rgba(126,184,238,.25);border-radius:999px;background:rgba(75,146,219,.12);color:#cfe8ff;font-size:.67rem;font-weight:950}.fpr-review-badge.is-unreviewed{color:#ffd69a;background:rgba(255,181,71,.08);border-color:rgba(255,181,71,.25)}.fprop-row.is-filtered-by-review{display:none!important}.fprop-row.is-review-changed{box-shadow:inset 0 -2px 0 rgba(126,184,238,.45)}
+      .fpr-review{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;margin:0 0 14px;padding:13px 14px;border:1px solid rgba(126,184,238,.2);border-radius:14px;background:rgba(9,27,44,.76)}.fpr-copy strong,.fpr-copy span{display:block}.fpr-copy strong{font-size:.86rem;color:#f5f8fb}.fpr-copy span{margin-top:3px;color:#9db1c5;font-size:.76rem;line-height:1.4}.fpr-changes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.fpr-change{min-height:44px;padding:5px 9px;border:1px solid rgba(126,184,238,.18);border-radius:8px;background:rgba(75,146,219,.08);color:#cfe8ff;font:inherit;font-size:.7rem;font-weight:750;line-height:1.25;text-align:left;cursor:pointer}.fpr-change:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fpr-change:hover{background:rgba(75,146,219,.16)}.fpr-new-watches{margin-top:8px}.fpr-queue-label{color:#ffd69a!important;font-size:.68rem!important;font-weight:900;letter-spacing:.05em;text-transform:uppercase}.fpr-new{min-height:44px;padding:5px 9px;border:1px solid rgba(255,181,71,.25);border-radius:8px;background:rgba(255,181,71,.07);color:#ffe0ad;font:inherit;font-size:.7rem;font-weight:750;line-height:1.25;text-align:left;cursor:pointer}.fpr-new:focus-visible{outline:3px solid #ffd69a;outline-offset:2px}.fpr-new:hover{background:rgba(255,181,71,.13)}.fprop-row.fpr-jump-target{outline:2px solid #7eb8ee;outline-offset:2px}.fpr-review.fpr-focus-anchor:focus-visible,.fprop-row.fpr-focus-anchor:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fpr-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}.fpr-actions button{min-height:44px;border:1px solid rgba(126,184,238,.3);border-radius:10px;padding:0 11px;background:#102c49;color:#eaf5ff;font:inherit;font-size:.75rem;font-weight:900;cursor:pointer}.fpr-actions button[aria-pressed="true"]{background:#4b92db;color:#071321}.fpr-actions button:disabled{opacity:.48;cursor:not-allowed}.fpr-actions button:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fpr-review-badge{display:inline-flex;align-items:center;min-height:24px;margin-top:6px;padding:2px 7px;border:1px solid rgba(126,184,238,.25);border-radius:999px;background:rgba(75,146,219,.12);color:#cfe8ff;font-size:.67rem;font-weight:950}.fpr-review-badge.is-unreviewed{color:#ffd69a;background:rgba(255,181,71,.08);border-color:rgba(255,181,71,.25)}.fprop-row.is-filtered-by-review{display:none!important}.fprop-row.is-review-changed{box-shadow:inset 0 -2px 0 rgba(126,184,238,.45)}
       .fpr-row-detail{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:9px 12px;border-top:1px solid rgba(126,184,238,.16);background:rgba(75,146,219,.055)}.fpr-row-detail-lead{margin-right:2px;color:#eaf5ff;font-size:.7rem;letter-spacing:.02em}.fpr-book-state{display:inline-flex;align-items:center;min-height:28px;padding:4px 8px;border:1px solid rgba(126,184,238,.18);border-radius:999px;background:rgba(4,24,43,.66);color:#cfe2f4;font-size:.69rem;font-weight:800;line-height:1.25}.fpr-book-state.is-up{border-color:rgba(126,217,170,.3)}.fpr-book-state.is-down{border-color:rgba(255,181,181,.3)}.fpr-book-state.is-now-reporting,.fpr-book-state.is-not-reporting{border-style:dashed}.fpr-row-mark{min-height:44px;margin-left:auto;border:1px solid rgba(126,184,238,.32);border-radius:10px;padding:0 11px;background:#102c49;color:#eaf5ff;font:inherit;font-size:.7rem;font-weight:900;cursor:pointer}.fpr-row-mark:disabled{opacity:.48;cursor:not-allowed}.fpr-row-mark:focus-visible{outline:3px solid #7eb8ee;outline-offset:2px}.fprop-row>.fpr-before-detail{border-right:0}
-      @media(max-width:700px){.fpr-review{grid-template-columns:1fr;align-items:stretch}.fpr-change{min-height:48px;flex:1 1 220px}.fpr-actions{display:grid;grid-template-columns:1fr 1fr}.fpr-actions button{min-height:48px}.fpr-actions .fpr-mark-changed{grid-column:1/-1}}
+      @media(max-width:700px){.fpr-review{grid-template-columns:1fr;align-items:stretch}.fpr-change{min-height:48px;flex:1 1 220px}.fpr-new{min-height:48px;flex:1 1 220px}.fpr-actions{display:grid;grid-template-columns:1fr 1fr}.fpr-actions button{min-height:48px}.fpr-actions .fpr-mark-changed{grid-column:1/-1}}
       @media(max-width:620px){.fprop-row>.fpr-before-detail{border-bottom:0}.fpr-row-detail{padding:10px;align-items:stretch}.fpr-row-detail-lead{flex:1 0 100%;font-size:.76rem}.fpr-book-state{flex:1 1 155px;min-height:36px;border-radius:10px;font-size:.73rem}.fpr-row-mark{width:100%;min-height:48px;margin-left:0}}
       @media(max-width:430px){.fpr-actions{grid-template-columns:1fr}.fpr-copy strong{font-size:.9rem}.fpr-copy span{font-size:.79rem}.fpr-book-state{flex-basis:100%}}
-      @media(forced-colors:active){.fpr-review,.fpr-change,.fpr-actions button,.fpr-review-badge,.fpr-row-detail,.fpr-book-state,.fpr-row-mark{border:1px solid CanvasText}.fprop-row.is-review-changed,.fprop-row.fpr-jump-target,.fpr-review.fpr-focus-anchor,.fprop-row.fpr-focus-anchor{outline:1px solid Highlight}}
+      @media(forced-colors:active){.fpr-review,.fpr-change,.fpr-new,.fpr-actions button,.fpr-review-badge,.fpr-row-detail,.fpr-book-state,.fpr-row-mark{border:1px solid CanvasText}.fprop-row.is-review-changed,.fprop-row.fpr-jump-target,.fpr-review.fpr-focus-anchor,.fprop-row.fpr-focus-anchor{outline:1px solid Highlight}}
     `;document.head.append(style);
   }
 
@@ -336,6 +363,7 @@
         }
         changed.sort((a,b)=>b.result.score-a.result.score||a.identity.player.localeCompare(b.identity.player));
         const batchCapturable=changed.filter(item=>Object.keys(currentBooks(item.row)).length>0).length;
+        const unreviewedCapturable=unreviewed.filter(item=>Object.keys(currentBooks(item.row)).length>0).length;
         if(state.changedOnly&&!changed.length)state.changedOnly=false;
 
         for(const item of assessed){
@@ -352,16 +380,27 @@
           badge.title=result.kind==='changed'?summaryReason({result}):'This watched prop has not been included in a review checkpoint yet';
         }
 
+        const visibleChanged=changed.filter(item=>item.row.getClientRects().length);
+        const visibleUnreviewed=unreviewed.filter(item=>item.row.getClientRects().length);
+        const hiddenChanged=changed.length-visibleChanged.length,hiddenUnreviewed=unreviewed.length-visibleUnreviewed.length;
         const reviewedTimes=Object.values(review).map(entry=>entry.reviewedAt).filter(Number.isFinite),latest=reviewedTimes.length?Math.max(...reviewedTimes):0;
         const panel=ensureReview(root);
-        const highlights=changed.slice(0,3).map(item=>`<button type="button" class="fpr-change" data-review-key="${esc(item.identity.key)}" aria-label="Jump to review details for ${esc(item.identity.player)} ${esc(item.identity.market)}"><b>${esc(item.identity.player)}</b> · ${esc(item.identity.market)} · ${esc(summaryReason(item))} · Review</button>`).join('');
+        const highlights=visibleChanged.slice(0,3).map(item=>`<button type="button" class="fpr-change" data-review-key="${esc(item.identity.key)}" aria-label="Jump to review details for ${esc(item.identity.player)} ${esc(item.identity.market)}"><b>${esc(item.identity.player)}</b> · ${esc(item.identity.market)} · ${esc(summaryReason(item))} · Review</button>`).join('');
+        const newHighlights=visibleUnreviewed.slice(0,3).map(item=>{const capturable=Object.keys(currentBooks(item.row)).length>0;return `<button type="button" class="fpr-new" data-review-key="${esc(item.identity.key)}" aria-label="${capturable?'Set review checkpoint for':'View review checkpoint status for'} ${esc(item.identity.player)} ${esc(item.identity.market)}"><b>${esc(item.identity.player)}</b> · ${esc(item.identity.market)} · ${capturable?'Set checkpoint':'View status'}</button>`}).join('');
         const checkpoint=latest?`Latest checkpoint ${formatTime(latest)}.`:'No review checkpoint yet.';
         const unavailableChanged=changed.length-batchCapturable;
+        const unavailableUnreviewed=unreviewed.length-unreviewedCapturable;
         const unavailableCopy=unavailableChanged?` ${unavailableChanged} changed watched prop${unavailableChanged===1?'':'s'} currently ${unavailableChanged===1?'has':'have'} no numeric line to checkpoint.`:'';
-        const detail=`${boardWatched} watched on this board · ${unreviewed.length} without a checkpoint. ${checkpoint} Compares only what this browser sees now with your explicit checkpoint; it does not monitor while closed.${unavailableCopy}`;
-        const markup=`<div class="fpr-copy"><strong>${changed.length} watched prop${changed.length===1?'':'s'} on this board changed since review</strong><span>${detail}</span>${highlights?`<div class="fpr-changes">${highlights}</div>`:''}</div><div class="fpr-actions"><button type="button" class="fpr-mark"${boardWatched?'':' disabled'}>Mark board reviewed</button><button type="button" class="fpr-mark-changed"${batchCapturable?'':' disabled'} aria-label="Mark currently changed watched props with reporting lines reviewed">Mark changed reviewed</button><button type="button" class="fpr-only" aria-pressed="${state.changedOnly?'true':'false'}"${changed.length?'':' disabled'}>${state.changedOnly?'Show all props':'Changed only'}</button></div>`;
+        const unavailableNewCopy=unavailableUnreviewed?` ${unavailableUnreviewed} watched prop${unavailableUnreviewed===1?'':'s'} without a checkpoint currently ${unavailableUnreviewed===1?'has':'have'} no numeric line to set one.`:'';
+        const hiddenParts=[];
+        if(hiddenChanged)hiddenParts.push(`${hiddenChanged} changed`);
+        if(hiddenUnreviewed)hiddenParts.push(`${hiddenUnreviewed} without a checkpoint`);
+        const hiddenCopy=hiddenParts.length?` ${hiddenParts.join(' · ')} currently hidden by another active Fantasy filter.`:'';
+        const detail=`${boardWatched} watched on this board · ${unreviewed.length} without a checkpoint. ${checkpoint} Compares only what this browser sees now with your explicit checkpoint; it does not monitor while closed.${unavailableCopy}${unavailableNewCopy}${hiddenCopy}`;
+        const markup=`<div class="fpr-copy"><strong>${changed.length} watched prop${changed.length===1?'':'s'} on this board changed since review</strong><span>${detail}</span>${highlights?`<div class="fpr-changes">${highlights}</div>`:''}${newHighlights?`<div class="fpr-new-watches"><span class="fpr-queue-label">Needs checkpoint</span><div class="fpr-changes">${newHighlights}</div></div>`:''}</div><div class="fpr-actions"><button type="button" class="fpr-mark"${boardWatched?'':' disabled'}>Mark board reviewed</button><button type="button" class="fpr-mark-changed"${batchCapturable?'':' disabled'} aria-label="Mark currently changed watched props with reporting lines reviewed">Mark changed reviewed</button><button type="button" class="fpr-only" aria-pressed="${state.changedOnly?'true':'false'}"${changed.length?'':' disabled'}>${state.changedOnly?'Show all props':'Changed only'}</button></div>`;
         if(panel.dataset.signature!==markup){panel.innerHTML=markup;panel.dataset.signature=markup}
         for(const button of panel.querySelectorAll('.fpr-change[data-review-key]'))button.onclick=()=>jumpToChanged(root,button.dataset.reviewKey);
+        for(const button of panel.querySelectorAll('.fpr-new[data-review-key]'))button.onclick=()=>jumpToUnreviewed(root,button.dataset.reviewKey);
         const mark=panel.querySelector('.fpr-mark');if(mark)mark.onclick=()=>markReviewed(root,watchedKeys);
         const markChanged=panel.querySelector('.fpr-mark-changed');if(markChanged)markChanged.onclick=()=>markChangedReviewed(changed,watchedKeys);
         const only=panel.querySelector('.fpr-only');if(only)only.onclick=()=>{if(!changed.length)return;state.changedOnly=!state.changedOnly;decorate()};
