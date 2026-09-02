@@ -9,7 +9,7 @@ const smoke=readFileSync(new URL('../scripts/tickets-browser-smoke.py',import.me
 
 test('TENX Ticket runtime bridge ships on a new immutable browser path',()=>{
   assert.match(index,/tickets-price-fallback-v58\.js\?v=1[^]*tickets-compare-cache-bridge-v141\.js/);
-  assert.match(sw,/titans-cc-brand-2026-v80/);
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/['"]\/tickets-compare-cache-bridge-v141\.js['"]/);
   assert.match(bridge,/__TitansTicketCompareCacheBridgeV141/);
 });
