@@ -13,7 +13,7 @@
 
   const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
   const money=value=>Number.isFinite(value)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value):'—';
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
   function ensureStyles(){
     if(document.querySelector('link[data-tickets-signal-lens-v128]'))return;
