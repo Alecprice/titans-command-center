@@ -72,7 +72,6 @@
     const tray=center.querySelector('[data-ticket-tenx-shortlist]');
     if(tray)tray.dataset.ticketTenxSavedCount=String(count);
     center.dispatchEvent(new CustomEvent(SHORTLIST_CHANGE,{bubbles:true,detail:{count,keys:[...keys]}}));
-    window.dispatchEvent(new StorageEvent('storage',{key:STORAGE_KEY,newValue:JSON.stringify(items)}));
   }
 
   function recordFor(card,index){
@@ -299,7 +298,7 @@
     if(target.closest('[data-ticket-refresh],[data-ticket-trend-clear]'))requestAnimationFrame(schedule);
   });
 
-  addEventListener('storage',event=>{if(event.key===PRICE_MEMORY_KEY)schedule();});
+  addEventListener('storage',event=>{if(event.key===STORAGE_KEY||event.key===PRICE_MEMORY_KEY)schedule();});
   new MutationObserver(schedule).observe(app,{childList:true,subtree:false});
   runtime?.onRoute?.(scheduleAfterMemoryCapture,{immediate:true});
   runtime?.onAppRender?.(scheduleAfterMemoryCapture,{immediate:true});

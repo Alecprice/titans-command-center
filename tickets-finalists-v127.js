@@ -9,6 +9,7 @@
   if(!app)return;
 
   const SHORTLIST_KEY='titans:tickets-shortlist-v123';
+  const SHORTLIST_CHANGE='titans:ticket-shortlist-change';
   const state={view:'all',groupBudget:'all',queued:false};
   const money=value=>Number.isFinite(value)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value):'—';
   const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
@@ -204,6 +205,7 @@
     if(target.closest('[data-ticket-tenx-save],[data-ticket-tenx-clear],[data-ticket-tenx-party],[data-ticket-tenx-budget],[data-ticket-tenx-sort],[data-ticket-filter],[data-ticket-refresh]'))schedule();
   });
 
+  app.addEventListener(SHORTLIST_CHANGE,schedule);
   addEventListener('storage',event=>{if(event.key===SHORTLIST_KEY)schedule();});
   new MutationObserver(schedule).observe(app,{childList:true,subtree:false});
   runtime?.onRoute?.(schedule,{immediate:true});
