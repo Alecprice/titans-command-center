@@ -14,6 +14,7 @@
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const rows=value=>Array.isArray(value)?value:[];
   const route=()=>runtime.route();
+  const customDeck=()=>app.querySelector('[data-v10-home]');
 
   function ensureStyles(){
     if(document.querySelector('#home-command-v123-style'))return;
@@ -26,6 +27,9 @@
       .home-command-v123-head small,.home-command-v123-kicker{display:block;color:#8ad8f8;font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
       .home-command-v123-head h2{margin:4px 0 0;color:#fff;font-size:clamp(1.15rem,2vw,1.45rem);letter-spacing:-.02em}
       .home-command-v123-head p{margin:0;max-width:470px;color:#bed3e4;font-size:.82rem;line-height:1.45;text-align:right}
+      .home-command-v123-head-tools{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+      .home-command-v123-customize{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 12px;border:1px solid rgba(138,216,248,.42);border-radius:11px;background:rgba(255,255,255,.055);color:#f5fbff;font:inherit;font-size:.76rem;font-weight:900;white-space:nowrap;cursor:pointer}
+      .home-command-v123-customize:hover{background:rgba(75,146,219,.16);border-color:rgba(138,216,248,.65)}
       .home-command-v123-grid{display:grid;grid-template-columns:minmax(0,1.24fr) minmax(300px,.86fr);gap:12px}
       .home-command-v123-focus{min-width:0;padding:18px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:linear-gradient(125deg,rgba(75,146,219,.16),rgba(3,18,33,.42));position:relative;overflow:hidden}
       .home-command-v123-focus:after{content:"TEN";position:absolute;right:12px;bottom:-25px;color:rgba(255,255,255,.035);font-size:6.5rem;font-weight:1000;letter-spacing:-.08em;pointer-events:none}
@@ -46,11 +50,19 @@
       .home-command-v123-link strong{display:block;margin:4px 0 2px;color:#fff;font-size:.9rem;line-height:1.15}
       .home-command-v123-link span{color:#b9cedd;font-size:.71rem;line-height:1.32}
       .home-command-v123-link b{margin-top:7px;color:#d8f1ff;font-size:.72rem}
-      .home-command-v123 a:focus-visible{outline:3px solid #fff;outline-offset:2px}
+      .home-command-v123 a:focus-visible,.home-command-v123 button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+      .home-command-v123.compact{margin-bottom:10px;padding-bottom:12px}
+      .home-command-v123.compact .home-command-v123-head{align-items:center;padding-bottom:10px}
+      .home-command-v123.compact .home-command-v123-grid{grid-template-columns:minmax(0,1fr)}
+      .home-command-v123.compact .home-command-v123-focus{padding:15px}
+      .home-command-v123.compact .home-command-v123-launch{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;scrollbar-width:thin;padding:1px 1px 4px}
+      .home-command-v123.compact .home-command-v123-link{flex:0 0 min(185px,46vw);min-height:72px;padding:10px;scroll-snap-align:start}
+      .home-command-v123.compact .home-command-v123-link b{margin-top:5px}
       @media(max-width:760px){
         .home-command-v123{margin-top:10px;padding:11px;border-radius:17px}
         .home-command-v123-head{align-items:start;flex-direction:column;gap:4px;padding:2px 4px 10px 7px}
         .home-command-v123-head p{max-width:none;text-align:left;font-size:.78rem}
+        .home-command-v123-head-tools{width:100%;justify-content:space-between}
         .home-command-v123-grid{grid-template-columns:1fr}
         .home-command-v123-focus{padding:15px}
         .home-command-v123-matchup{gap:10px}
@@ -59,14 +71,19 @@
         .home-command-v123-action{width:100%;padding-inline:9px}
         .home-command-v123-launch{grid-template-columns:repeat(2,minmax(0,1fr))}
         .home-command-v123-link{min-height:86px;padding:11px}
+        .home-command-v123.compact .home-command-v123-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+        .home-command-v123.compact .home-command-v123-head-tools{width:auto}
+        .home-command-v123.compact .home-command-v123-head p{display:none}
+        .home-command-v123.compact .home-command-v123-link{flex-basis:min(172px,72vw);min-height:70px}
       }
       @media(max-width:390px){
         .home-command-v123-matchup h3{font-size:1.2rem}
         .home-command-v123-opponent{min-width:56px;min-height:56px;font-size:1.05rem}
         .home-command-v123-link strong{font-size:.83rem}
         .home-command-v123-link span{font-size:.69rem}
+        .home-command-v123.compact .home-command-v123-customize{padding-inline:9px;font-size:.72rem}
       }
-      @media(prefers-reduced-motion:reduce){.home-command-v123 a{transition:none!important}.home-command-v123 a:hover{transform:none!important}}
+      @media(prefers-reduced-motion:reduce){.home-command-v123 a,.home-command-v123 button{transition:none!important}.home-command-v123 a:hover{transform:none!important}.home-command-v123.compact .home-command-v123-launch{scroll-behavior:auto}}
     `;
     document.head.appendChild(style);
   }
@@ -165,11 +182,19 @@
     return `<nav class="home-command-v123-launch" aria-label="Fan launchpad">${launchLinks.map(([eyebrow,title,detail,href])=>`<a class="home-command-v123-link" href="${href}"><div><small>${esc(eyebrow)}</small><strong>${esc(title)}</strong><span>${esc(detail)}</span></div><b>Open →</b></a>`).join('')}</nav>`;
   }
 
-  function signature(){
+  function signature(compact){
     const games=rows(data?.games);
     const focus=runtime.scheduleFocus?.(games)||{};
     const game=focus.game||{};
-    return JSON.stringify([focus.state||'none',game.id||'',game.date||'',game.status||'',game.opponentAbbr||'',game.network||'',Boolean(data)]);
+    return JSON.stringify([focus.state||'none',game.id||'',game.date||'',game.status||'',game.opponentAbbr||'',game.network||'',Boolean(data),Boolean(compact)]);
+  }
+
+  function placeRoot(root,hero,deck){
+    if(deck){
+      if(root.nextElementSibling!==deck)deck.insertAdjacentElement('beforebegin',root);
+      return;
+    }
+    if(root.previousElementSibling!==hero)hero.insertAdjacentElement('afterend',root);
   }
 
   function mount(){
@@ -186,11 +211,28 @@
       root.setAttribute('aria-labelledby','home-command-v123-title');
       hero.insertAdjacentElement('afterend',root);
     }
-    const nextSignature=signature();
+    const deck=customDeck();
+    const compact=Boolean(deck);
+    placeRoot(root,hero,deck);
+    root.classList.toggle('compact',compact);
+    root.dataset.commandMode=compact?'integrated':'standalone';
+    const nextSignature=signature(compact);
     if(root.dataset.signature===nextSignature)return;
     root.dataset.signature=nextSignature;
-    root.innerHTML=`<div class="home-command-v123-head"><div><small>FAN LAUNCHPAD</small><h2 id="home-command-v123-title">What do you want to do next?</h2></div><p>Game-week context first, then the Titans destinations fans use most.</p></div><div class="home-command-v123-grid">${focusMarkup()}${launchMarkup()}</div>`;
+    const header=compact
+      ?`<div class="home-command-v123-head"><div><small>FAN LAUNCHPAD · QUICK ROUTES</small><h2 id="home-command-v123-title">Next move, then your deck.</h2></div><div class="home-command-v123-head-tools"><p>Your custom command deck stays directly below.</p><button class="home-command-v123-customize" type="button" data-home-command-customize>Customize deck</button></div></div>`
+      :`<div class="home-command-v123-head"><div><small>FAN LAUNCHPAD</small><h2 id="home-command-v123-title">What do you want to do next?</h2></div><p>Game-week context first, then the Titans destinations fans use most.</p></div>`;
+    root.innerHTML=`${header}<div class="home-command-v123-grid">${focusMarkup()}${launchMarkup()}</div>`;
   }
+
+  app.addEventListener('click',event=>{
+    const trigger=event.target instanceof Element?event.target.closest('[data-home-command-customize]'):null;
+    if(!trigger)return;
+    const deckButton=app.querySelector('[data-v10-home] [data-customize-home]');
+    if(deckButton instanceof HTMLElement){deckButton.click();return;}
+    const settings=document.querySelector('#v10-settings-button');
+    if(settings instanceof HTMLElement)settings.click();
+  });
 
   runtime.onRoute(mount,{immediate:true});
   runtime.onAppRender(mount,{immediate:true});
