@@ -27,7 +27,7 @@ const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
 
  test('fan event links preserve provider identity and external-link safety',()=>{
   for(const provider of ['Skiddle','Bandsintown','Eventbrite','Ticketmaster'])assert.match(ui,new RegExp(provider));
-  assert.match(ui,/target=\\"_blank\\" rel=\\"noopener noreferrer\\"/);
+  assert.match(ui,/target="_blank" rel="noopener noreferrer"/);
   assert.match(ui,/data-fan-events-source/);
   assert.match(ui,/Listings are discovery links, not Titans-affiliated events/);
   assert.match(ui,/source availability can differ by provider/);
