@@ -46,6 +46,22 @@
     document.head.appendChild(style);
   }
 
+  function reconcilePersonalizationStack(root,pulse){
+    const host=pulse?.parentNode;
+    if(!root||!host)return;
+    const watch=app.querySelector('.v36-watch-home');
+    const impact=app.querySelector('.v38-impact-home');
+    const watchOrdered=!watch||(watch.parentNode===host&&watch.previousElementSibling===root);
+    const impactAnchor=watch||root;
+    const impactOrdered=!impact||(impact.parentNode===host&&impact.previousElementSibling===impactAnchor);
+    const tail=impact||watch||root;
+    const ordered=root.parentNode===host&&watchOrdered&&impactOrdered&&tail.nextElementSibling===pulse;
+    if(ordered)return;
+    host.insertBefore(root,pulse);
+    if(watch)root.insertAdjacentElement('afterend',watch);
+    if(impact)(watch||root).insertAdjacentElement('afterend',impact);
+  }
+
   function mount(){
     if(!app||route()!=='home')return;
     const pulse=app.querySelector('.pulse-ribbon');
@@ -71,6 +87,7 @@
     const signature=JSON.stringify([favoriteTitle,favoriteDetail,favoriteHref,favoriteAction,fantasyTitle,fantasyDetail,accountTitle,accountDetail]);
     let root=app.querySelector('.my-titans-home-v35');
     if(!root){root=document.createElement('section');root.className='my-titans-home-v35';root.setAttribute('aria-label','My Titans profile summary');pulse.parentNode.insertBefore(root,pulse);}
+    reconcilePersonalizationStack(root,pulse);
     if(root.dataset.signature===signature)return;
     root.dataset.signature=signature;
     root.innerHTML=`<div class="my-titans-home-v35-head"><div><small>MY TITANS</small><h2>Your fan profile</h2></div><span>Saved identity and setup at a glance</span></div><div class="my-titans-home-v35-summary"><a class="my-titans-home-v35-primary" href="${esc(favoriteHref)}" data-my-titans-favorite-state="${favoriteVerified?'verified':favorite?'review':'unset'}"><div class="my-titans-home-v35-primary-copy"><small>FAVORITE PLAYER</small><strong>${esc(favoriteTitle)}</strong><span>${esc(favoriteDetail)}</span></div><b>${esc(favoriteAction)}</b></a><a class="my-titans-home-v35-quick" href="#fantasy"><small>FANTASY</small><strong>${esc(fantasyTitle)}</strong><span>${esc(fantasyDetail)}</span></a><button class="my-titans-home-v35-quick" type="button" data-my-titans-account><small>ACCOUNT</small><strong>${esc(accountTitle)}</strong><span>${esc(accountDetail)}</span></button></div>`;
