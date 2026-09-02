@@ -10,6 +10,7 @@
 
   const VERSION='123';
   const STORAGE_KEY='titans:tickets-shortlist-v123';
+  const PRICE_MEMORY_KEY='titans:tickets-price-memory-v124';
   const SHORTLIST_CHANGE='titans:ticket-shortlist-change';
   const MAX_SAVED=3;
   const state={budget:'all',sort:'price',party:2,queued:false};
@@ -43,6 +44,22 @@
   function readSaved(){
     const value=runtime?.storage?.getJSON?.(STORAGE_KEY,[]);
     return Array.isArray(value)?value.filter(item=>item&&typeof item.key==='string').slice(0,MAX_SAVED):[];
+  }
+
+  function readMemory(){
+    const value=runtime?.storage?.getJSON?.(PRICE_MEMORY_KEY,{events:{}});
+    return value&&typeof value==='object'&&value.events&&typeof value.events==='object'?value:{events:{}};
+  }
+
+  function observedDrop(item,memory){
+    const points=Array.isArray(memory?.events?.[item.key]?.points)?memory.events[item.key].points:[];
+    if(points.length<2||item.price==null)return null;
+    const current=Number(points.at(-1)?.price);
+    const previous=Number(points.at(-2)?.price);
+    if(!Number.isFinite(current)||!Number.isFinite(previous)||current<=0||previous<=current||current!==item.price)return null;
+    const amount=previous-current;
+    const pct=Math.round((amount/previous)*100);
+    return {amount,pct,previous,current};
   }
 
   function writeSaved(value){runtime?.storage?.setJSON?.(STORAGE_KEY,value.slice(0,MAX_SAVED));}
@@ -118,7 +135,7 @@
       ${summaryMarkup(items)}
       <div class="tickets-tenx-controls">
         <fieldset><legend>Budget per ticket</legend><button type="button" data-ticket-tenx-budget="all" aria-pressed="${state.budget==='all'}">Any price</button><button type="button" data-ticket-tenx-budget="75" aria-pressed="${state.budget==='75'}">≤ $75</button><button type="button" data-ticket-tenx-budget="100" aria-pressed="${state.budget==='100'}">≤ $100</button><button type="button" data-ticket-tenx-budget="150" aria-pressed="${state.budget==='150'}">≤ $150</button></fieldset>
-        <fieldset><legend>Sort games</legend><button type="button" data-ticket-tenx-sort="price" aria-pressed="${state.sort==='price'}">Cheapest</button><button type="button" data-ticket-tenx-sort="sources" aria-pressed="${state.sort==='sources'}">Most sources</button></fieldset>
+        <fieldset><legend>Sort games</legend><button type="button" data-ticket-tenx-sort="price" aria-pressed="${state.sort==='price'}">Cheapest</button><button type="button" data-ticket-tenx-sort="sources" aria-pressed="${state.sort==='sources'}">Most sources</button><button type="button" data-ticket-tenx-sort="drops" aria-pressed="${state.sort==='drops'}" disabled>Observed drops</button></fieldset>
         <fieldset><legend>Party size</legend>${[1,2,3,4].map(size=>`<button type="button" data-ticket-tenx-party="${size}" aria-pressed="${state.party===size}">${size}</button>`).join('')}</fieldset>
       </div>
       <div class="tickets-tenx-shortlist" data-ticket-tenx-shortlist data-ticket-tenx-saved-count="${saved.length}"><div><strong>Compare shortlist</strong><span>Save up to ${MAX_SAVED} matchups. Prices refresh from the live cards when available.</span></div><div data-ticket-tenx-saved>${saved.length?`${saved.length}/${MAX_SAVED} saved`:'Nothing saved yet'}</div>${saved.length?'<button type="button" data-ticket-tenx-clear>Clear</button>':''}</div>
@@ -180,16 +197,34 @@
   function apply(center,items){
     const cap=budgetCap();
     const list=center.querySelector('.tickets-compare-list');
+    const memory=readMemory();
+    const drops=new Map(items.map(item=>[item.key,observedDrop(item,memory)]));
+    const dropCount=[...drops.values()].filter(Boolean).length;
+    if(state.sort==='drops'&&!dropCount)state.sort='price';
     const sorted=[...items].sort((a,b)=>{
       if(state.sort==='sources')return (b.sourceCount-a.sourceCount)||((a.price??Number.MAX_SAFE_INTEGER)-(b.price??Number.MAX_SAFE_INTEGER));
+      if(state.sort==='drops'){
+        const aDrop=drops.get(a.key)?.amount||0;
+        const bDrop=drops.get(b.key)?.amount||0;
+        return (bDrop-aDrop)||((a.price??Number.MAX_SAFE_INTEGER)-(b.price??Number.MAX_SAFE_INTEGER))||(b.sourceCount-a.sourceCount);
+      }
       return ((a.price??Number.MAX_SAFE_INTEGER)-(b.price??Number.MAX_SAFE_INTEGER))||(b.sourceCount-a.sourceCount);
     });
     if(list)for(const item of sorted)list.append(item.card);
     let visible=0;
     for(const item of sorted){
+      const drop=drops.get(item.key);
+      if(drop){item.card.dataset.ticketObservedDrop=String(drop.amount);item.card.dataset.ticketObservedDropPct=String(drop.pct);}
+      else{delete item.card.dataset.ticketObservedDrop;delete item.card.dataset.ticketObservedDropPct;}
       const show=cap==null||(item.price!=null&&item.price<=cap);
       item.card.hidden=!show;
       if(show)visible+=1;
+    }
+    const dropButton=center.querySelector('[data-ticket-tenx-sort="drops"]');
+    if(dropButton){
+      dropButton.disabled=dropCount===0;
+      dropButton.textContent=dropCount?`Observed drops (${dropCount})`:'Observed drops';
+      dropButton.setAttribute('aria-label',dropCount?`Sort with ${dropCount} browser-observed price drop${dropCount===1?'':'s'} first`:'Observed drops unavailable until this browser records a lower current price after an earlier observation');
     }
     const visibleNode=center.querySelector('[data-ticket-tenx-visible]');
     if(visibleNode)visibleNode.textContent=`${visible} of ${items.length} games shown`;
@@ -238,6 +273,7 @@
   }
 
   function schedule(){if(state.queued)return;state.queued=true;queueMicrotask(enhance);}
+  function scheduleAfterMemoryCapture(){schedule();requestAnimationFrame(schedule);}
 
   app.addEventListener('click',event=>{
     const target=event.target instanceof Element?event.target:null;
@@ -247,17 +283,26 @@
     const budget=target.closest('[data-ticket-tenx-budget]');
     if(budget){state.budget=budget.dataset.ticketTenxBudget||'all';apply(center,records(center));setStatus(center,state.budget==='all'?'Showing every priced game.':`Showing games at ${money(Number(state.budget))} or less per ticket.`);return;}
     const sort=target.closest('[data-ticket-tenx-sort]');
-    if(sort){state.sort=sort.dataset.ticketTenxSort||'price';apply(center,records(center));setStatus(center,state.sort==='sources'?'Sorted by source coverage, then price.':'Sorted by lowest reported starting price.');return;}
+    if(sort){
+      if(sort.disabled)return;
+      state.sort=sort.dataset.ticketTenxSort||'price';
+      apply(center,records(center));
+      const message=state.sort==='sources'?'Sorted by source coverage, then price.':state.sort==='drops'?'Sorted with the largest price drops observed in this browser first, then current starting price. This is local history, not marketplace-wide.':'Sorted by lowest reported starting price.';
+      setStatus(center,message);
+      return;
+    }
     const party=target.closest('[data-ticket-tenx-party]');
     if(party){state.party=Math.min(4,Math.max(1,Number(party.dataset.ticketTenxParty)||2));decorate(records(center));apply(center,records(center));setStatus(center,`Showing simple starting-price totals for ${state.party} ticket${state.party===1?'':'s'} before fees.`);return;}
     const save=target.closest('[data-ticket-tenx-save]');
     if(save){toggleSaved(center,save.dataset.ticketTenxSave||'');return;}
-    if(target.closest('[data-ticket-tenx-clear]')){const saved=[];writeSaved(saved);decorate(records(center));savedTray(center,records(center));announceSaved(center,saved);setStatus(center,'Compare shortlist cleared.');}
+    if(target.closest('[data-ticket-tenx-clear]')){const saved=[];writeSaved(saved);decorate(records(center));savedTray(center,records(center));announceSaved(center,saved);setStatus(center,'Compare shortlist cleared.');return;}
+    if(target.closest('[data-ticket-refresh],[data-ticket-trend-clear]'))requestAnimationFrame(schedule);
   });
 
+  addEventListener('storage',event=>{if(event.key===PRICE_MEMORY_KEY)schedule();});
   new MutationObserver(schedule).observe(app,{childList:true,subtree:false});
-  runtime?.onRoute?.(schedule,{immediate:true});
-  runtime?.onAppRender?.(schedule,{immediate:true});
-  addEventListener('hashchange',schedule);
-  schedule();
+  runtime?.onRoute?.(scheduleAfterMemoryCapture,{immediate:true});
+  runtime?.onAppRender?.(scheduleAfterMemoryCapture,{immediate:true});
+  addEventListener('hashchange',scheduleAfterMemoryCapture);
+  scheduleAfterMemoryCapture();
 })();
