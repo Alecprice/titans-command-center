@@ -18,8 +18,8 @@ test('strong cross-check copy reports the real current source count',async()=>{
 
 test('price-memory escaping uses a complete quote entity',async()=>{
   const source=await read('tickets-trend-v124.js');
-  assert.ok(source.includes("'\\"':'&quot;'"));
-  assert.ok(!source.includes("'\\"':'&quot',"));
+  assert.ok(source.includes(`'"':'&quot;'`));
+  assert.ok(!source.includes(`'"':'&quot',`));
   assert.match(source,/&#39;/);
 });
 
