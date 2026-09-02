@@ -8,6 +8,7 @@ const DEFAULT_LON=-86.7713;
 const DEFAULT_RADIUS_MILES=25;
 const DEFAULT_LOOKAHEAD_DAYS=30;
 const DEFAULT_LIMIT=18;
+const EARTH_RADIUS_MILES=3958.8;
 
 const text=value=>String(value??'').trim();
 const finite=value=>{const number=Number(value);return Number.isFinite(number)?number:null;};
@@ -43,11 +44,12 @@ function safeUrl(value,provider){
   }catch{return'';}
 }
 
-function eventShape({id,provider,title,start,end='',venue={},url='',category='',artist='',distanceMiles=null}){
+function eventShape({id,provider,title,start,end='',venue={},url='',category='',artist='',distanceMiles=null,lat=null,lon=null}){
   return {
     id:text(id),provider,title:text(title)||'Event',start:text(start),end:text(end),
     venue:{name:text(venue?.name)||'Venue TBD',city:text(venue?.city),state:text(venue?.state),country:text(venue?.country)},
-    url:safeUrl(url,provider),category:text(category),artist:text(artist),distanceMiles:finite(distanceMiles)
+    url:safeUrl(url,provider),category:text(category),artist:text(artist),distanceMiles:finite(distanceMiles),
+    coordinates:{lat:finite(lat),lon:finite(lon)}
   };
 }
 
@@ -58,7 +60,8 @@ export function normalizeEventbriteEvents(events=[]){
     return eventShape({
       id:`eb:${text(event?.id)}`,provider:'Eventbrite',title:event?.name?.text||event?.name?.html||event?.name,
       start:event?.start?.utc||event?.start?.local,end:event?.end?.utc||event?.end?.local,
-      venue:{name:venue?.name,city:address?.city,state:address?.region,country:address?.country},url:event?.url,category:'Eventbrite organizer event'
+      venue:{name:venue?.name,city:address?.city,state:address?.region,country:address?.country},url:event?.url,category:'Eventbrite organizer event',
+      lat:address?.latitude??venue?.latitude,lon:address?.longitude??venue?.longitude
     });
   }).filter(event=>event.id!=='eb:'&&event.start&&event.url);
 }
@@ -71,7 +74,8 @@ export function normalizeSkiddleEvents(events=[]){
       id:`sk:${text(event?.id||event?.eventid)}`,provider:'Skiddle',title:event?.eventname||event?.name,
       start,end:event?.enddate||event?.endDate||event?.openingtimes?.lastentry||'',
       venue:{name:venue?.name||event?.venuename,city:venue?.town||venue?.city,state:venue?.county||venue?.state,country:venue?.country},
-      url:event?.link||event?.url,category:event?.eventcode||event?.type,distanceMiles:event?.distance
+      url:event?.link||event?.url,category:event?.eventcode||event?.type,distanceMiles:event?.distance,
+      lat:event?.latitude??venue?.latitude,lon:event?.longitude??venue?.longitude
     });
   }).filter(event=>event.id!=='sk:'&&event.start&&event.url);
 }
@@ -82,7 +86,7 @@ export function normalizeBandsintownEvents(events=[],artist=''){
     return eventShape({
       id:`bit:${text(event?.id)}`,provider:'Bandsintown',title:event?.title||event?.lineup?.join(' + ')||artist||'Live event',
       start:event?.datetime,end:event?.ends_at||'',venue:{name:venue?.name,city:venue?.city,state:venue?.region,country:venue?.country},
-      url:event?.url,category:'Live music',artist
+      url:event?.url,category:'Live music',artist,lat:venue?.latitude,lon:venue?.longitude
     });
   }).filter(event=>event.id!=='bit:'&&event.start&&event.url);
 }
@@ -94,13 +98,41 @@ export function normalizeTicketmasterEvents(events=[]){
     return eventShape({
       id:`tm-event:${text(event?.id)}`,provider:'Ticketmaster',title:event?.name,start:event?.dates?.start?.dateTime||event?.dates?.start?.localDate,
       venue:{name:venue?.name,city:venue?.city?.name,state:venue?.state?.stateCode||venue?.state?.name,country:venue?.country?.countryCode||venue?.country?.name},
-      url:event?.url,category:classification?.segment?.name||classification?.genre?.name
+      url:event?.url,category:classification?.segment?.name||classification?.genre?.name,lat:venue?.location?.latitude,lon:venue?.location?.longitude
     });
   }).filter(event=>event.id!=='tm-event:'&&event.start&&event.url);
 }
 
 function eventSignature(event){return `${isoDay(event.start)}|${normalize(event.title)}|${normalize(event.venue?.name)}`;}
 function sourceOf(event){return {provider:event.provider,url:event.url,attribution:event.provider==='Skiddle'?'Skiddle':event.provider};}
+function radians(value){return Number(value)*Math.PI/180;}
+function distanceMiles(lat1,lon1,lat2,lon2){
+  const aLat=radians(lat1),bLat=radians(lat2),dLat=radians(Number(lat2)-Number(lat1)),dLon=radians(Number(lon2)-Number(lon1));
+  const a=Math.sin(dLat/2)**2+Math.cos(aLat)*Math.cos(bLat)*Math.sin(dLon/2)**2;
+  return 2*EARTH_RADIUS_MILES*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function regionParts(label='Nashville, TN'){
+  const [city='',state='']=String(label).split(',').map(value=>normalize(value));
+  return {city,state};
+}
+function stateMatches(value,expected){
+  const actual=normalize(value);
+  if(!expected)return true;
+  if(actual===expected)return true;
+  if(expected==='tn'&&actual==='tennessee')return true;
+  if(expected==='tennessee'&&actual==='tn')return true;
+  return false;
+}
+export function eventInRegion(event,config={}){
+  const radius=bounded(config.radiusMiles,DEFAULT_RADIUS_MILES,5,50);
+  const reported=finite(event?.distanceMiles);
+  if(reported!=null)return reported>=0&&reported<=radius;
+  const lat=finite(event?.coordinates?.lat),lon=finite(event?.coordinates?.lon);
+  const centerLat=bounded(config.lat,DEFAULT_LAT,-90,90),centerLon=bounded(config.lon,DEFAULT_LON,-180,180);
+  if(lat!=null&&lon!=null)return distanceMiles(centerLat,centerLon,lat,lon)<=radius;
+  const expected=regionParts(config.regionLabel||'Nashville, TN');
+  return normalize(event?.venue?.city)===expected.city&&stateMatches(event?.venue?.state,expected.state);
+}
 
 export function groupFanEvents(events=[],config={start:new Date(),end:new Date(Date.now()+DEFAULT_LOOKAHEAD_DAYS*86400000),limit:DEFAULT_LIMIT}){
   const startMs=config.start instanceof Date?config.start.getTime():dateMs(config.start);
@@ -108,7 +140,7 @@ export function groupFanEvents(events=[],config={start:new Date(),end:new Date(D
   const groups=new Map();
   for(const event of Array.isArray(events)?events:[]){
     const stamp=dateMs(event?.start);
-    if(stamp==null||stamp<(startMs??0)||stamp>(endMs??Number.MAX_SAFE_INTEGER)||!event?.url)continue;
+    if(stamp==null||stamp<(startMs??0)||stamp>(endMs??Number.MAX_SAFE_INTEGER)||!event?.url||!eventInRegion(event,config))continue;
     const signature=eventSignature(event);
     const existing=groups.get(signature);
     if(!existing){groups.set(signature,{...event,sources:[sourceOf(event)],providerCount:1});continue;}
@@ -120,8 +152,9 @@ export function groupFanEvents(events=[],config={start:new Date(),end:new Date(D
 }
 
 async function getJson(url,options={}){
-  const response=await fetch(url,{...options,headers:{Accept:'application/json','User-Agent':USER_AGENT,...(options.headers||{})},signal:AbortSignal.timeout(4200)});
-  if(!response.ok)throw new Error(`${options.label||'Provider'} ${response.status}`);
+  const {label='Provider',...requestOptions}=options;
+  const response=await fetch(url,{...requestOptions,headers:{Accept:'application/json','User-Agent':USER_AGENT,...(requestOptions.headers||{})},signal:AbortSignal.timeout(4200)});
+  if(!response.ok)throw new Error(`${label} ${response.status}`);
   return response.json();
 }
 
@@ -143,7 +176,7 @@ async function fetchEventbrite(token,config,env){
     return getJson(url,{headers:{Authorization:`Bearer ${token}`},label:'Eventbrite events'});
   }));
   const events=normalizeEventbriteEvents(payloads.flatMap(payload=>payload?.events||[]));
-  return {events,scope:'authorized-organizations',message:'Eventbrite is limited to events owned by organizations authorized for this token; the retired public Event Search API is not used.'};
+  return {events,scope:'authorized-organizations',message:'Eventbrite is limited to events owned by organizations authorized for this token; only events verified inside the configured Nashville region are displayed. The retired public Event Search API is not used.'};
 }
 
 async function fetchSkiddle(apiKey,config){
@@ -168,7 +201,7 @@ async function fetchBandsintown(apiKey,artists){
     url.searchParams.set('date','upcoming');
     return {artist,payload:await getJson(url,{label:'Bandsintown'})};
   }));
-  return {events:payloads.flatMap(({artist,payload})=>normalizeBandsintownEvents(payload,artist)),scope:'configured-artists',message:'Bandsintown is queried only for configured artists. Standard API keys are artist-scoped unless Bandsintown grants broader partnership access.'};
+  return {events:payloads.flatMap(({artist,payload})=>normalizeBandsintownEvents(payload,artist)),scope:'configured-artists',message:'Bandsintown is queried only for configured artists; only returned events verified inside the configured Nashville region are displayed. Standard API keys are artist-scoped unless Bandsintown grants broader partnership access.'};
 }
 
 async function fetchTicketmaster(apiKey,config){
@@ -211,27 +244,29 @@ export async function fanEventsRoute(req,res,env=process.env){
   const configuredProviders={
     ticketmaster:Boolean(ticketmasterKey),
     eventbrite:Boolean(eventbriteToken),
-    skiddle:Boolean(skiddleKey),
+    skiddle:false,
+    skiddleKey:Boolean(skiddleKey),
     bandsintown:Boolean(bandsintownKey&&bandsintownArtists.length),
     bandsintownKey:Boolean(bandsintownKey),
   };
   const jobs=[];
   if(ticketmasterKey)jobs.push(runProvider('Ticketmaster',()=>fetchTicketmaster(ticketmasterKey,config)));
   if(eventbriteToken)jobs.push(runProvider('Eventbrite',()=>fetchEventbrite(eventbriteToken,config,env)));
-  if(skiddleKey)jobs.push(runProvider('Skiddle',()=>fetchSkiddle(skiddleKey,config)));
+  // Skiddle remains deliberately staged until the required official brand-logo attribution is shipped in the public UI.
   if(bandsintownKey&&bandsintownArtists.length)jobs.push(runProvider('Bandsintown',()=>fetchBandsintown(bandsintownKey,bandsintownArtists)));
   const providerCatalog=[
     {provider:'Ticketmaster',key:'ticketmaster',scope:'broad Nashville-radius discovery',terms:'Existing Discovery API integration.'},
-    {provider:'Eventbrite',key:'eventbrite',scope:'events from organizations authorized by the server token',terms:'Public Event Search was retired; this integration does not call it.'},
-    {provider:'Skiddle',key:'skiddle',scope:'geographic event search',terms:'Skiddle requires source attribution and event links; commercial use requires written approval according to its current API page.'},
-    {provider:'Bandsintown',key:'bandsintown',scope:'configured artist events',terms:'Standard API keys are linked to a single artist unless Bandsintown authorizes broader access.'},
+    {provider:'Eventbrite',key:'eventbrite',scope:'authorized-organization events that also pass Nashville-region verification',terms:'Public Event Search was retired; this integration does not call it.'},
+    {provider:'Skiddle',key:'skiddle',scope:'adapter staged; public display disabled',terms:'Current Skiddle terms require name, brand-logo attribution, and the direct event link. The production adapter remains off until that UI asset is shipped.'},
+    {provider:'Bandsintown',key:'bandsintown',scope:'configured-artist events that also pass Nashville-region verification',terms:'Standard API keys are linked to a single artist unless Bandsintown authorizes broader access.'},
   ];
   const base={
     ok:true,providerType:'fan-event-discovery',region:{label:config.regionLabel,lat:config.lat,lon:config.lon,radiusMiles:config.radiusMiles},
     window:{start:config.start.toISOString(),end:config.end.toISOString(),lookaheadDays:config.lookaheadDays},
     configuredProviders,providerCatalog,fetchedAt:new Date().toISOString()
   };
-  if(!jobs.length)return res.status(200).json({...base,configured:false,available:false,events:[],count:0,providersConfigured:0,providersAvailable:0,providerFailures:0,providerResults:[],message:'No fan-event providers are configured yet. Server-side credentials can be added without exposing API keys to the browser.'});
+  if(!jobs.length)return res.status(200).json({...base,configured:false,available:false,events:[],count:0,providersConfigured:0,providersAvailable:0,providerFailures:0,providerResults:[],message:'No production-ready fan-event providers are configured yet. Server-side credentials can be added without exposing API keys to the browser.'});
+
   const providerResults=await Promise.all(jobs);
   const successful=providerResults.filter(result=>result.ok);
   const failed=providerResults.filter(result=>!result.ok);
@@ -239,7 +274,7 @@ export async function fanEventsRoute(req,res,env=process.env){
   return res.status(200).json({
     ...base,configured:true,available:Boolean(events.length),events,count:events.length,providersConfigured:jobs.length,
     providersAvailable:successful.length,providerFailures:failed.length,
-    providerResults:providerResults.map(({events:ignored,...result})=>result),
-    message:events.length?`Showing ${events.length} upcoming event${events.length===1?'':'s'} from ${successful.length} connected source${successful.length===1?'':'s'} around ${config.regionLabel}.`:`Connected event sources did not return an upcoming event inside the current ${config.radiusMiles}-mile ${config.regionLabel} window.`
+    providerResults:providerResults.map(({events:rows,...result})=>({...result,count:rows.length})),
+    message:events.length?`Showing ${events.length} upcoming event${events.length===1?'':'s'} from ${successful.length} connected source${successful.length===1?'':'s'} around ${config.regionLabel}.`:`Connected event sources did not return an upcoming event verified inside the current ${config.radiusMiles}-mile ${config.regionLabel} window.`
   });
 }
