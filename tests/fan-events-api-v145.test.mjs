@@ -92,7 +92,7 @@ test('Eventbrite uses authenticated organization inventory, never the retired pu
   assert.match(source,/\/organizations\/\$\{encodeURIComponent\(id\)\}\/events\//);
   assert.match(source,/Authorization:`Bearer \$\{token\}`/);
   assert.doesNotMatch(source,/EVENTBRITE_BASE\}\/events\/search/);
-  assert.match(source,/retired public Event Search endpoint/);
+  assert.match(source,/retired public Event Search API is not used/);
   assert.match(source,/only events verified inside the configured Nashville region are displayed/);
   assert.match(envExample,/EVENTBRITE_PRIVATE_TOKEN=/);
 });
