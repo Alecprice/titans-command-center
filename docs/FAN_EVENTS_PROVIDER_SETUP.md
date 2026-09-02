@@ -54,6 +54,26 @@ Fan Event Radar satisfies those display requirements by using Skiddle's official
 
 Skiddle is primarily a UK events source, so a Nashville-radius query may legitimately return zero events even when the API key is valid.
 
+## Cloudflare and GitHub Actions secret paths
+
+Direct Worker secrets remain a supported production path:
+
+```bash
+npx wrangler@4 secret put EVENTBRITE_PRIVATE_TOKEN
+npx wrangler@4 secret put EVENTBRITE_ORGANIZATION_IDS   # optional
+npx wrangler@4 secret put SKIDDLE_API_KEY
+```
+
+The main Cloudflare deployment workflow also accepts these optional GitHub Actions repository secrets with the same names:
+
+- `EVENTBRITE_PRIVATE_TOKEN`
+- `EVENTBRITE_ORGANIZATION_IDS` (optional)
+- `SKIDDLE_API_KEY`
+
+Only non-empty GitHub Actions values are placed into the deployment `--secrets-file`. Wrangler preserves existing Worker secrets that are omitted from that file, so a credential added directly to the Worker is not removed just because the corresponding GitHub Actions secret is absent.
+
+`docs/CLOUDFLARE_STATUS.md` reports **GitHub-managed secret availability** separately from runtime provider truth. A `false` value there does not prove the Worker lacks a directly configured secret. The authoritative runtime check remains `GET /api/fan-events`, and the main Cloudflare deploy plus the standalone **Fan Events Production Gate** both validate that public contract without exposing credential values.
+
 ## Bandsintown removal
 
 Bandsintown is no longer queried or exposed by the Fan Event Radar provider catalog. If its Worker secrets were previously added, remove them:
@@ -102,5 +122,7 @@ Expected response traits:
 - `events` contains only normalized HTTPS source links
 - a failed provider does not turn the whole endpoint into a 5xx response
 - no Bandsintown provider appears in `configuredProviders`, `providerCatalog`, or `providerResults`
+
+The primary **Titans Cloudflare Deploy** now runs `scripts/fan-events-production-regression.mjs` immediately after the broader production audit and records the result in `docs/CLOUDFLARE_STATUS.md`. The standalone **Fan Events Production Gate** still runs after a real deploy as an independent post-deploy check.
 
 Then open `https://titans.alecjprice.com/#fan` and verify the **Nashville Event Radar** surface on desktop and mobile. Any Skiddle result must show the Skiddle logo/name and its direct event link.
