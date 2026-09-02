@@ -41,7 +41,13 @@ import './account-import-v116.js?v=1';
   function open(mode='signin'){
     state.mode=mode;close();
     const u=user(),modal=document.createElement('div');modal.className='account-modal';modal.innerHTML=`<div class="account-backdrop" data-account-close></div><section class="account-panel" role="dialog" aria-modal="true" aria-labelledby="account-title"><button class="account-close" data-account-close aria-label="Close account">×</button>${u?`<small class="account-eyebrow">YOUR TITANS ACCOUNT</small><h2 id="account-title">${esc(u.name||'Signed in')}</h2><p>${esc(u.email||'')}</p>${syncStatusMarkup()}<div class="account-benefits"><span>Favorite player can sync across signed-in devices when account storage is available.</span><span>Smart alert and display preferences can follow your account.</span><span>Saved personal media links can follow your account.</span><span>Guest browsing and device-local settings always remain available.</span></div>${accountTools(true)}<button class="account-guest account-signout" data-account-signout type="button">Sign out</button>`:`<small class="account-eyebrow">OPTIONAL ACCOUNT</small><h2 id="account-title">${mode==='signup'?'Create your account':'Welcome back'}</h2><p>Everything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.</p><div class="account-tabs" role="tablist"><button type="button" data-account-mode="signin" class="${mode==='signin'?'active':''}">Log in</button><button type="button" data-account-mode="signup" class="${mode==='signup'?'active':''}">Sign up</button></div><form class="account-form">${mode==='signup'?'<label>Name<input name="name" autocomplete="name" required maxlength="80"></label>':''}<label>Email<input name="email" type="email" autocomplete="email" required></label><label>Password<input name="password" type="password" autocomplete="${mode==='signup'?'new-password':'current-password'}" required minlength="8"></label><div class="account-error" role="alert"></div><button class="account-primary" type="submit">${mode==='signup'?'Create account':'Log in'}</button><button class="account-guest" type="button" data-account-close>Continue as guest</button></form>${accountTools(false)}`}</section>`;
-    document.body.appendChild(modal);document.body.classList.add('account-open');modal.querySelector('input')?.focus();
+    document.body.appendChild(modal);document.body.classList.add('account-open');
+    const panel=modal.querySelector('.account-panel');
+    panel?.scrollTo?.({top:0,left:0,behavior:'instant'});
+    if(!phone.matches){
+      const firstInput=modal.querySelector('input');
+      try{firstInput?.focus({preventScroll:true});}catch{firstInput?.focus();}
+    }
   }
   async function refresh(){state.loading=true;try{state.session=await auth('get-session');}catch{state.session=null;}state.loading=false;renderEntry();announce();}
   function armReset(button){
