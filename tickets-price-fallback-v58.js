@@ -1,3 +1,5 @@
+import './tickets-tenx-v123.js';
+
 (() => {
   'use strict';
   if(window.__TitansTicketPriceFallbackV58)return;
