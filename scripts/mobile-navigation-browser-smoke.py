@@ -12,7 +12,25 @@ BASE=os.environ.get('WORKER_URL','https://titans-command-center.alecjordanprice.
 OUT=Path('/tmp/mobile-navigation-browser-smoke.json')
 
 def driver_for(width,height):
-    options=Options();options.add_argument('--headless=new');options.add_argument('--no-sandbox');options.add_argument('--disable-dev-shm-usage');options.add_argument(f'--window-size={width},{height}');options.set_capability('goog:loggingPrefs',{'browser':'ALL'});return webdriver.Chrome(options=options)
+    options=Options()
+    options.add_argument('--headless=new')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument(f'--window-size={width},{height}')
+    options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+    driver=webdriver.Chrome(options=options)
+    driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride',{
+        'width':width,
+        'height':height,
+        'deviceScaleFactor':1,
+        'mobile':False,
+    })
+    actual_width=driver.execute_script('return window.innerWidth')
+    actual_height=driver.execute_script('return window.innerHeight')
+    if actual_width!=width or actual_height!=height:
+        driver.quit()
+        raise RuntimeError(f'viewport override failed: requested {width}x{height}, got {actual_width}x{actual_height}')
+    return driver
 
 def prepare_returning_user(driver):
     driver.execute_script("""
