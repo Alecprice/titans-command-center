@@ -44,7 +44,8 @@
   async function load(){
     if(state.data)return state.data;
     if(state.loading)return state.loading;
-    state.loading=fetch('/api/data',{cache:'no-store',headers:{Accept:'application/json'}}).then(async r=>r.ok?r.json():null).catch(()=>null).then(d=>{state.data=d?.ok?d:null;return state.data}).finally(()=>state.loading=null);
+    const runtime=window.TitansRuntime;
+    state.loading=(typeof runtime?.apiJson==='function'?runtime.apiJson('/api/data',{ttl:30000}):fetch('/api/data',{cache:'no-store',headers:{Accept:'application/json'}}).then(async r=>r.ok?r.json():null).catch(()=>null)).then(d=>{state.data=d?.ok?d:null;return state.data}).finally(()=>state.loading=null);
     return state.loading;
   }
 
