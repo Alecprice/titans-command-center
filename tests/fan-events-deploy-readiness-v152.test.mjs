@@ -44,7 +44,8 @@ test('deployment status records Fan Events outcome and sanitized runtime evidenc
   assert.match(workflow,/Fan Events production regression: \$\{FAN_EVENTS_OUTCOME:-not-run\}/);
   assert.match(workflow,/\/tmp\/fan-events-production-smoke\.json/);
   assert.match(workflow,/## Fan Events production regression/);
-  assert.match(workflow,/full production \+ fan events \+ browser/);
+  assert.match(workflow,/full production \+ browser \+ media \+ market \+ tickets \+ command intelligence/);
+  assert.match(workflow,/command intelligence \+ fan events \+ player intelligence/);
 });
 
 test('Fan Events production evidence contains readiness booleans and no provider credentials',()=>{
