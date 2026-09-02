@@ -222,9 +222,11 @@
     center.dispatchEvent(new CustomEvent(SHORTLIST_CHANGE,{bubbles:true,detail:{count:items.length,keys:[...keys],reason:'compare-convergence-v156'}}));
     requestAnimationFrame(()=>{
       const liveCenter=app.querySelector('[data-ticket-center]');
-      if(!liveCenter||settled(liveCenter,saved()))return;
+      if(!liveCenter)return;
+      const liveItems=saved();
+      if(settled(liveCenter,liveItems))return;
       state.legacyWakeups+=1;
-      window.dispatchEvent(new StorageEvent('storage',{key:SHORTLIST_KEY,newValue:JSON.stringify(saved())}));
+      window.dispatchEvent(new StorageEvent('storage',{key:SHORTLIST_KEY,newValue:JSON.stringify(liveItems)}));
     });
   }
 
@@ -260,7 +262,7 @@
   app.addEventListener('click',event=>{
     const target=event.target instanceof Element?event.target:null;
     if(!target?.closest('[data-ticket-tenx-save],[data-ticket-tenx-clear]'))return;
-    queueMicrotask(()=>schedule('shortlist-click'));
+    queueMicrotask(reconcile);
   },true);
   app.addEventListener(SHORTLIST_CHANGE,()=>schedule('shortlist-event'));
   addEventListener('storage',event=>{if(event.key===SHORTLIST_KEY||event.key===MEMORY_KEY)schedule('storage');});
