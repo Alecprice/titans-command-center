@@ -8,7 +8,6 @@ const SECTION_MAP={
   identity:{id:'legacy-identity',label:'Identity',selectors:['.legacy-era','.archive-card','.visual-gap-card']}
 };
 const ITEM_SELECTOR=Object.values(SECTION_MAP).flatMap(section=>section.selectors).join(',');
-const SECTION_BY_ID=Object.fromEntries(Object.entries(SECTION_MAP).map(([key,value])=>[value.id,key]));
 
 const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
 const normalize=value=>String(value||'').toLocaleLowerCase('en-US').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
@@ -28,7 +27,8 @@ function writeHashState(q,scope){
   const cleanQ=String(q||'').trim();
   if(cleanQ)params.set('q',cleanQ);
   if(scope&&scope!=='all'&&SECTION_MAP[scope])params.set('scope',scope);
-  const next=`#${ROUTE}${params.size?`?${params.toString()}`:''}`;
+  const query=params.toString();
+  const next=`#${ROUTE}${query?`?${query}`:''}`;
   if(location.hash!==next)history.replaceState(history.state,'',`${location.pathname}${location.search}${next}`);
 }
 
@@ -50,12 +50,18 @@ function finderMarkup(counts){
   </section>`;
 }
 
+function searchableText(item){
+  const clone=item.cloneNode(true);
+  clone.querySelectorAll('.legacy-history-sources,.archive-source-list,.archive-inline-sources,.visual-audit-source-chips').forEach(node=>node.remove());
+  return normalize(clone.textContent);
+}
+
 function indexMuseum(page){
   const items=[...page.querySelectorAll(ITEM_SELECTOR)];
   items.forEach(item=>{
     item.dataset.legacyFinderItem='true';
     item.dataset.legacyFinderScope=scopeForItem(item);
-    item.dataset.legacyFinderText=normalize(item.textContent);
+    item.dataset.legacyFinderText=searchableText(item);
   });
   const counts={total:items.length,story:0,moments:0,legends:0,records:0,identity:0};
   items.forEach(item=>{const scope=item.dataset.legacyFinderScope;if(scope in counts)counts[scope]+=1;});
