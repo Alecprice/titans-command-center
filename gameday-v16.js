@@ -8,6 +8,8 @@
   const IDLE_REFRESH_MS=300000;
   const REFRESH_GUARD_MS=10000;
   const SCOREBOARD_STALE_MS=300000;
+  const BOOTSTRAP_TTL_MS=30000;
+  const LIVE_DATA_TTL_MS=15000;
   let state={data:null,fan:null,espn:null,loading:null,refreshing:null,feed:{fanOk:null,espnOk:null,checkedAt:null},serial:0};
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const arr=v=>Array.isArray(v)?v:[];
@@ -21,15 +23,30 @@
   const relativeAge=value=>{const t=Date.parse(value);if(!Number.isFinite(t))return'';const ms=Math.max(0,Date.now()-t);if(ms<5000)return'just now';if(ms<60000)return`${Math.max(1,Math.floor(ms/1000))}s ago`;const minutes=Math.floor(ms/60000);if(minutes<60)return`${minutes}m ago`;return fmt(value)};
   const json=url=>fetch(url,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
   const available=response=>Boolean(response?.ok&&response?.available!==false);
+  const cacheInfo=url=>runtime?.apiCacheInfo?.().find(row=>row.url===url)||null;
+
+  async function sharedJson(url,{ttl=LIVE_DATA_TTL_MS,force=false}={}){
+    if(!runtime?.apiJson)return {value:await json(url),fresh:null};
+    const value=await runtime.apiJson(url,{ttl,force});
+    const updatedAt=Number(cacheInfo(url)?.updatedAt)||0;
+    const age=updatedAt?Math.max(0,Date.now()-updatedAt):Infinity;
+    return {value,fresh:Number.isFinite(age)&&age<=Math.max(1000,ttl)};
+  }
+  const readHealthy=read=>read?.fresh!==false&&available(read?.value);
 
   async function load(){
     if(state.data&&state.fan)return state;
     if(state.loading)return state.loading;
-    state.loading=Promise.all([json('/api/data'),json('/api/fan-intel'),json('/api/espn-scoreboard')]).then(([data,fan,espn])=>{
+    state.loading=Promise.all([
+      sharedJson('/api/data',{ttl:BOOTSTRAP_TTL_MS}),
+      sharedJson('/api/fan-intel',{ttl:LIVE_DATA_TTL_MS}),
+      sharedJson('/api/espn-scoreboard',{ttl:LIVE_DATA_TTL_MS})
+    ]).then(([dataRead,fanRead,espnRead])=>{
+      const data=dataRead.value,fan=fanRead.value,espn=espnRead.value;
       state.data=data?.ok?data:{};
       state.fan=fan?.ok?fan:{};
       state.espn=espn?.ok?espn:null;
-      state.feed={fanOk:available(fan),espnOk:available(espn),checkedAt:new Date().toISOString()};
+      state.feed={fanOk:readHealthy(fanRead),espnOk:readHealthy(espnRead),checkedAt:new Date().toISOString()};
       return state;
     }).finally(()=>state.loading=null);
     return state.loading;
@@ -38,10 +55,14 @@
   async function refreshLiveData(force=false){
     if(state.refreshing)return state.refreshing;
     if(!force&&checkedAge()<REFRESH_GUARD_MS)return state;
-    state.refreshing=Promise.all([json('/api/fan-intel'),json('/api/espn-scoreboard')]).then(([fan,espn])=>{
-      const fanOk=available(fan),espnOk=available(espn);
-      if(fanOk)state.fan=fan;
-      if(espnOk)state.espn=espn;
+    state.refreshing=Promise.all([
+      sharedJson('/api/fan-intel',{ttl:LIVE_DATA_TTL_MS,force}),
+      sharedJson('/api/espn-scoreboard',{ttl:LIVE_DATA_TTL_MS,force})
+    ]).then(([fanRead,espnRead])=>{
+      const fan=fanRead.value,espn=espnRead.value;
+      const fanOk=readHealthy(fanRead),espnOk=readHealthy(espnRead);
+      if(available(fan))state.fan=fan;
+      if(available(espn))state.espn=espn;
       state.feed={fanOk,espnOk,checkedAt:new Date().toISOString()};
       return state;
     }).finally(()=>state.refreshing=null);
