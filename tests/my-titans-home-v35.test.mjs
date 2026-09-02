@@ -17,8 +17,12 @@ test('My Titans Home consumes only existing bounded personalization namespaces',
 
 test('favorite player shortcuts use loaded roster identity rather than guessing a player route',()=>{
   assert.match(feature,/runtime\?\.apiJson\?\.\('\/api\/data',\{ttl:30000\}\)/);
-  assert.match(feature,/rows\.find\(row=>String\(row\?\.name\|\|row\?\.fullName\|\|''\)/);
-  assert.match(feature,/player\?\.id\?`#player\?id=\$\{encodeURIComponent\(player\.id\)\}`:'#roster'/);
+  assert.match(feature,/function favoritePlayer\(name\)/);
+  assert.match(feature,/rows\.find\(row=>normalizeName\(row\?\.name\|\|row\?\.fullName\)===needle\)/);
+  assert.match(feature,/if\(!player\)return '#roster'/);
+  assert.match(feature,/if\(id\)return `#player\?id=\$\{encodeURIComponent\(id\)\}`/);
+  assert.match(feature,/canonical\?`#player\?name=\$\{encodeURIComponent\(canonical\)\}`:'#roster'/);
+  assert.doesNotMatch(feature,/#player\?name=\$\{encodeURIComponent\(name\)\}/);
 });
 
 test('personal Home card surfaces favorite Fantasy and account access with mobile-safe controls',()=>{

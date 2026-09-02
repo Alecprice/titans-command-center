@@ -57,7 +57,7 @@
     const price=parsePrice(card.querySelector('.tickets-price-block strong')?.textContent);
     const insight=card.querySelector('.tickets-price-block em')?.textContent||'';
     const spreadPct=Number(insight.match(/\((\d+)%\)/)?.[1]||NaN);
-    const nextGap=parsePrice(insight.match(/Next best is ([^ ]+(?: [^ ]+)*) more/i)?.[1]||'');
+    const nextGap=parsePrice(insight.match(/Next best is (\$\s*[0-9]+(?:\.[0-9]+)?)/i)?.[1]||'');
     const key=hashKey(`${title}|${date}|${venue}`);
     return {card,index,key,title,date,venue,side,sourceCount,price,spreadPct:Number.isFinite(spreadPct)?spreadPct:null,nextGap};
   }
@@ -80,7 +80,7 @@
 
   function recommendation(record,cheapest){
     if(record.price!=null&&cheapest!=null&&record.price===cheapest)return['LOWEST ENTRY','Best starting price currently reported'];
-    if(record.sourceCount>=3&&record.spreadPct!=null&&record.spreadPct<=15)return['STRONG CROSS-CHECK','Three sources with a relatively tight starting-price spread'];
+    if(record.sourceCount>=3&&record.spreadPct!=null&&record.spreadPct<=15)return['STRONG CROSS-CHECK',`${record.sourceCount} sources with a relatively tight starting-price spread`];
     if(record.sourceCount>=2)return['COMPARE CHECKOUT','Multiple sources available — compare fees and seat quality'];
     return['VERIFY LIVE','Only one usable starting-price source is visible'];
   }
