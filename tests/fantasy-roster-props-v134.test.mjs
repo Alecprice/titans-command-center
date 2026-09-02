@@ -4,6 +4,7 @@ import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const bridge=read('fantasy-roster-props-v134.js');
+const sleeperIntel=read('fantasy-sleeper-intelligence-v2.js');
 const trends=read('fantasy-prop-trends-v133.js');
 
 test('Fantasy roster prop bridge loads from the existing live-prop enhancement chain',()=>{
@@ -18,6 +19,15 @@ test('Sleeper roster context is read-only, bounded, and reuses the shared one-da
   assert.match(bridge,/\/league\/\$\{current\.leagueId\}\/rosters/);
   assert.match(bridge,/players\/nfl\?position=\$\{position\}&active=true/);
   assert.doesNotMatch(bridge,/method\s*:\s*['"](?:POST|PUT|PATCH|DELETE)/i);
+});
+
+test('shared Sleeper player cache preserves the existing intelligence metadata shape',()=>{
+  for(const field of ['status','injury','number']){
+    assert.match(bridge,new RegExp(`${field}:`));
+    assert.match(sleeperIntel,new RegExp(`${field}:`));
+  }
+  assert.match(bridge,/injury_status/);
+  assert.match(bridge,/p\.number==null\?'':String\(p\.number\)/);
 });
 
 test('player prop personalization uses deterministic normalized-name matching rather than fuzzy guesses',()=>{
