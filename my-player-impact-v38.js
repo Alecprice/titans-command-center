@@ -75,13 +75,15 @@
     if(verified&&Array.isArray(fan?.injuries))loadedFeeds.push('injury-report');
     if(verified&&Array.isArray(data?.transactions))loadedFeeds.push('transaction');
     if(verified&&Array.isArray(fan?.depthChart?.changes))loadedFeeds.push('depth');
+    const evidenceAvailable=loadedFeeds.length>0;
     const noSignalLabel=!verified
       ?'Player-specific signals are withheld until current roster identity is verified.'
       :loadedFeeds.length
         ?`No flagged change in the loaded ${loadedFeeds.join(', ')} feed${loadedFeeds.length===1?'':'s'}. Unavailable feeds are excluded.`
         :'Player-specific change feeds are currently unavailable.';
-    const flagged=routeState==='review'||Boolean(injury||transaction||depth||rosterStatus.toLowerCase()!=='active');
-    return {item,rosterRow,resolvedName,href,routeState,rosterStatus,injuryLabel,transactionLabel,depthLabel:depth?[depthType,depthMove].filter(Boolean).join(' · '):'',noSignalLabel,flagged};
+    const hasSignal=Boolean(injury||transaction||depth||rosterStatus.toLowerCase()!=='active');
+    const flagged=routeState==='review'||hasSignal;
+    return {item,rosterRow,resolvedName,href,routeState,rosterStatus,injuryLabel,transactionLabel,depthLabel:depth?[depthType,depthMove].filter(Boolean).join(' · '):'',noSignalLabel,evidenceAvailable,hasSignal,flagged};
   }
 
   function cardMarkup(impact){
@@ -98,11 +100,22 @@
     return `<article class="v38-impact-card${impact.flagged?' has-impact':''}${verified?'':' needs-review'}" data-v38-state="${impact.routeState}"><header><div><small>${impact.item.favorite?'FAVORITE · FOLLOWED PLAYER':'FOLLOWED PLAYER'}</small><strong>${esc(impact.resolvedName)}</strong><span>${esc(meta||'Titans roster')}</span></div><a href="${esc(impact.href)}" aria-label="${esc(aria)}">${action}</a></header><ul>${signals.join('')}</ul></article>`;
   }
 
+  function homeSummary(impacts){
+    const quiet=impacts.filter(impact=>!impact.flagged);
+    if(!quiet.length)return '';
+    const withEvidence=quiet.filter(impact=>impact.evidenceAvailable).length;
+    const unavailable=quiet.length-withEvidence;
+    const parts=[];
+    if(withEvidence)parts.push(`${withEvidence} additional followed Titan${withEvidence===1?' has':'s have'} no flagged change in the loaded player-specific feeds`);
+    if(unavailable)parts.push(`${unavailable} additional followed Titan${unavailable===1?' has':'s have'} player-specific change feeds unavailable`);
+    return `${parts.join('. ')}. Unavailable feeds are not treated as proof that nothing changed.`;
+  }
+
   function injectStyle(){
     if(document.querySelector('#my-player-impact-v38-style'))return;
     const style=document.createElement('style');
     style.id='my-player-impact-v38-style';
-    style.textContent='.v38-impact{margin:0 0 18px;padding:16px;border:1px solid rgba(134,210,255,.24);border-radius:18px;background:linear-gradient(145deg,rgba(7,25,43,.96),rgba(13,43,70,.86));box-shadow:0 14px 34px rgba(0,0,0,.14)}.v38-impact>header{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:11px}.v38-impact>header small,.v38-impact-card header small{display:block;color:#9ed8ff;font-size:.68rem;font-weight:950;letter-spacing:.11em}.v38-impact>header h2{margin:4px 0 0;color:#fff;font-size:1.08rem}.v38-impact>header span{max-width:480px;color:#c4d7e5;font-size:.76rem;line-height:1.45;text-align:right}.v38-impact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.v38-impact-card{min-width:0;padding:13px;border:1px solid rgba(255,255,255,.11);border-radius:13px;background:rgba(255,255,255,.04)}.v38-impact-card.has-impact{border-color:rgba(134,210,255,.34);background:rgba(75,146,219,.085)}.v38-impact-card.needs-review{border-color:rgba(255,196,102,.34);background:rgba(255,196,102,.055)}.v38-impact-card.needs-review header a{color:#f2d49b}.v38-impact-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.v38-impact-card header strong{display:block;margin:4px 0 2px;color:#fff;font-size:.95rem}.v38-impact-card header span{display:block;color:#bdd0df;font-size:.72rem}.v38-impact-card header a,.v38-impact-actions a,.v38-impact-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;color:#a5dcff;font-size:.74rem;font-weight:900;text-decoration:none}.v38-impact-card ul{display:grid;gap:7px;margin:11px 0 0;padding:0;list-style:none}.v38-impact-card li{display:grid;gap:2px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08)}.v38-impact-card li b{color:#eaf6ff;font-size:.69rem;text-transform:uppercase;letter-spacing:.06em}.v38-impact-card li span{color:#c5d7e5;font-size:.75rem;line-height:1.4}.v38-impact-card li.attention span{color:#fff}.v38-impact-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}.v38-impact-actions a{padding:0 12px;border:1px solid rgba(134,210,255,.2);border-radius:11px;background:rgba(255,255,255,.035);color:#fff}.v38-impact-empty{color:#c5d7e5;font-size:.8rem;line-height:1.5}.v38-impact-empty a{margin-left:4px}.v38-impact :focus-visible{outline:3px solid #fff;outline-offset:2px}@media(max-width:980px){.v38-impact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.v38-impact>header{align-items:flex-start;flex-direction:column}.v38-impact>header span{text-align:left}.v38-impact-grid{grid-template-columns:1fr}.v38-impact-actions a{flex:1 1 130px}}';
+    style.textContent='.v38-impact{margin:0 0 18px;padding:16px;border:1px solid rgba(134,210,255,.24);border-radius:18px;background:linear-gradient(145deg,rgba(7,25,43,.96),rgba(13,43,70,.86));box-shadow:0 14px 34px rgba(0,0,0,.14)}.v38-impact[data-surface="home"]{margin-bottom:12px;padding:12px 14px;border-color:rgba(134,210,255,.18);border-radius:16px;background:linear-gradient(145deg,rgba(7,25,43,.88),rgba(13,43,70,.72));box-shadow:0 9px 24px rgba(0,0,0,.1)}.v38-impact>header{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:11px}.v38-impact[data-surface="home"]>header{margin-bottom:8px}.v38-impact>header small,.v38-impact-card header small{display:block;color:#9ed8ff;font-size:.68rem;font-weight:950;letter-spacing:.11em}.v38-impact>header h2{margin:4px 0 0;color:#fff;font-size:1.08rem}.v38-impact[data-surface="home"]>header h2{font-size:1.02rem}.v38-impact>header span{max-width:480px;color:#c4d7e5;font-size:.76rem;line-height:1.45;text-align:right}.v38-impact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.v38-impact[data-surface="home"] .v38-impact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.v38-impact-card{min-width:0;padding:13px;border:1px solid rgba(255,255,255,.11);border-radius:13px;background:rgba(255,255,255,.04)}.v38-impact-card.has-impact{border-color:rgba(134,210,255,.34);background:rgba(75,146,219,.085)}.v38-impact-card.needs-review{border-color:rgba(255,196,102,.34);background:rgba(255,196,102,.055)}.v38-impact-card.needs-review header a{color:#f2d49b}.v38-impact-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.v38-impact-card header strong{display:block;margin:4px 0 2px;color:#fff;font-size:.95rem}.v38-impact-card header span{display:block;color:#bdd0df;font-size:.72rem}.v38-impact-card header a,.v38-impact-actions a,.v38-impact-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;color:#a5dcff;font-size:.74rem;font-weight:900;text-decoration:none}.v38-impact-card ul{display:grid;gap:7px;margin:11px 0 0;padding:0;list-style:none}.v38-impact-card li{display:grid;gap:2px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08)}.v38-impact-card li b{color:#eaf6ff;font-size:.69rem;text-transform:uppercase;letter-spacing:.06em}.v38-impact-card li span{color:#c5d7e5;font-size:.75rem;line-height:1.4}.v38-impact-card li.attention span{color:#fff}.v38-impact-summary{padding:10px 11px;border:1px solid rgba(134,210,255,.14);border-radius:11px;background:rgba(255,255,255,.025);color:#c5d7e5;font-size:.76rem;line-height:1.45}.v38-impact-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}.v38-impact-actions a{padding:0 12px;border:1px solid rgba(134,210,255,.2);border-radius:11px;background:rgba(255,255,255,.035);color:#fff}.v38-impact-empty{color:#c5d7e5;font-size:.8rem;line-height:1.5}.v38-impact-empty a{margin-left:4px}.v38-impact :focus-visible{outline:3px solid #fff;outline-offset:2px}@media(max-width:980px){.v38-impact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.v38-impact>header{align-items:flex-start;flex-direction:column}.v38-impact>header span{text-align:left}.v38-impact-grid,.v38-impact[data-surface="home"] .v38-impact-grid{grid-template-columns:1fr}.v38-impact-actions a{flex:1 1 130px}}';
     document.head.appendChild(style);
   }
 
@@ -118,12 +131,19 @@
     const list=followed();
     if(list.length&&(!data||!fan)&&!loading){load();return;}
     const impacts=list.map(impactFor);
-    const signature=JSON.stringify([current,impacts.map(x=>[x.resolvedName,x.href,x.routeState,x.rosterStatus,x.injuryLabel,x.transactionLabel,x.depthLabel,x.noSignalLabel])]);
+    const home=current==='home';
+    const visibleImpacts=home?impacts.filter(impact=>impact.flagged):impacts;
+    const summary=home?homeSummary(impacts):'';
+    const signature=JSON.stringify([current,visibleImpacts.map(x=>[x.resolvedName,x.href,x.routeState,x.rosterStatus,x.injuryLabel,x.transactionLabel,x.depthLabel,x.noSignalLabel,x.evidenceAvailable]),summary]);
     let root=app.querySelector(`.v38-impact[data-surface="${current}"]`);
     if(!root){root=document.createElement('section');root.className='v38-impact';root.dataset.surface=current;root.setAttribute('aria-label','My Player Impact');host.insertAdjacentElement('afterend',root);}
     if(root.dataset.signature===signature)return;
     root.dataset.signature=signature;
-    root.innerHTML=`<header><div><small>MY PLAYER IMPACT</small><h2>What changed for the Titans you follow</h2></div><span>Current loaded roster, injury-report, transaction, and depth context. Missing signals are not treated as proof that nothing changed.</span></header>${impacts.length?`<div class="v38-impact-grid">${impacts.map(cardMarkup).join('')}</div>`:`<div class="v38-impact-empty">Watch a player from the roster to build your personal impact feed. <a href="#roster">Open roster →</a></div>`}<div class="v38-impact-actions" aria-label="Player impact quick actions"><a href="#transactions">All roster moves</a><a href="#roster?view=depth">Depth Chart</a><a href="#roster">Manage watchlist</a></div>`;
+    const context=home?'Home expands only followed players with a flagged change or roster-review need. Missing signals are not treated as proof that nothing changed.':'Current loaded roster, injury-report, transaction, and depth context. Missing signals are not treated as proof that nothing changed.';
+    const cards=visibleImpacts.length?`<div class="v38-impact-grid">${visibleImpacts.map(cardMarkup).join('')}</div>`:'';
+    const quiet=summary?`<div class="v38-impact-summary" data-v38-home-summary>${esc(summary)}</div>`:'';
+    const empty=!impacts.length?'<div class="v38-impact-empty">Watch a player from the roster to build your personal impact feed. <a href="#roster">Open roster →</a></div>':'';
+    root.innerHTML=`<header><div><small>MY PLAYER IMPACT</small><h2>What changed for the Titans you follow</h2></div><span>${esc(context)}</span></header>${cards}${quiet}${empty}<div class="v38-impact-actions" aria-label="Player impact quick actions"><a href="#transactions">All roster moves</a><a href="#roster?view=depth">Depth Chart</a><a href="#roster">Manage watchlist</a></div>`;
   }
 
   addEventListener('titans:player-watchlist',()=>queueMicrotask(mount));
