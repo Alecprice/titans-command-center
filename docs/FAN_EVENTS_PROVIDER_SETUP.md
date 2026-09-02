@@ -14,6 +14,41 @@ Titans Command Center keeps event-provider credentials on the server. Never past
 
 The endpoint normalizes provider payloads into one event shape and isolates provider failures so one unavailable service does not break Fan Hub.
 
+## Secret ownership and deploy behavior
+
+There are two supported ways to manage Fan Event provider secrets. Either path keeps credentials server-only.
+
+### Direct Cloudflare Worker secrets
+
+Use Wrangler when a provider secret should live only on the `titans-command-center` Worker:
+
+```bash
+npx wrangler@4 secret put EVENTBRITE_PRIVATE_TOKEN
+npx wrangler@4 secret put SKIDDLE_API_KEY
+```
+
+Optional Eventbrite organization scoping can also be stored directly:
+
+```bash
+npx wrangler@4 secret put EVENTBRITE_ORGANIZATION_IDS
+```
+
+This remains a valid production setup. The deploy workflow builds its `--secrets-file` from **non-empty** GitHub-managed values only. Wrangler preserves existing Worker secrets omitted from that file, so a direct Worker secret is not interpreted as missing just because no matching GitHub Actions secret exists.
+
+### Optional GitHub-managed deploy secrets
+
+If you want CI to own the same bindings, create GitHub Actions secrets with these exact names:
+
+```text
+EVENTBRITE_PRIVATE_TOKEN
+EVENTBRITE_ORGANIZATION_IDS   # optional
+SKIDDLE_API_KEY
+```
+
+The normal Cloudflare deploy includes only the non-empty values. Deployment status reports these as **staged in GitHub**, which is deliberately different from runtime provider readiness. Runtime readiness is proved after deploy by `scripts/fan-events-production-regression.mjs` against the canonical `/api/fan-events` endpoint.
+
+Do not duplicate a secret into GitHub merely to make the provider function. Direct Worker secrets are supported.
+
 ## Active provider stack
 
 ### Ticketmaster
@@ -97,10 +132,13 @@ Expected response traits:
 
 - `ok: true`
 - no API keys/tokens in the response
+- `configuredProviders.eventbrite` is `true` when an Eventbrite private/OAuth token is bound
 - `configuredProviders.skiddle` is `true` when `SKIDDLE_API_KEY` is bound
 - `providerResults` reports per-provider success/failure and scope
 - `events` contains only normalized HTTPS source links
 - a failed provider does not turn the whole endpoint into a 5xx response
 - no Bandsintown provider appears in `configuredProviders`, `providerCatalog`, or `providerResults`
+
+The primary Cloudflare deploy now runs the same production contract before browser regressions and writes the sanitized result to the generated Cloudflare status report. The report contains booleans/counts only; provider credentials are never recorded.
 
 Then open `https://titans.alecjprice.com/#fan` and verify the **Nashville Event Radar** surface on desktop and mobile. Any Skiddle result must show the Skiddle logo/name and its direct event link.
