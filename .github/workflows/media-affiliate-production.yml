@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   verify:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -27,6 +27,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
           WORKFLOW_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          WORKFLOW_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
         run: |
           set -euo pipefail
           if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
@@ -44,9 +45,10 @@ jobs:
           DEPLOY_OUTCOME="$(jq -r '[.jobs[].steps[]? | select(.name == "Deploy to Cloudflare") | .conclusion][0] // "unknown"' <<<"$JOBS_JSON")"
           echo "cloudflare_deploy_outcome=${DEPLOY_OUTCOME}" >> "$GITHUB_OUTPUT"
           echo "source_sha=${WORKFLOW_HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Parent Cloudflare workflow conclusion: ${WORKFLOW_CONCLUSION:-unknown}; deploy step conclusion: ${DEPLOY_OUTCOME}."
           if [[ "$DEPLOY_OUTCOME" == "success" ]]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
-            echo "Cloudflare deployed ${WORKFLOW_HEAD_SHA}; running affiliate browser verification."
+            echo "Cloudflare deployed ${WORKFLOW_HEAD_SHA}; running affiliate browser verification even if a later unrelated regression changed the parent workflow conclusion."
           else
             echo "should_run=false" >> "$GITHUB_OUTPUT"
             echo "Cloudflare step outcome was ${DEPLOY_OUTCOME}; this was not a deployed source, so no production browser assertion is appropriate."

@@ -5,19 +5,21 @@ import {readFile} from 'node:fs/promises';
 const workflow=await readFile(new URL('../.github/workflows/media-affiliate-production.yml',import.meta.url),'utf8');
 const browser=await readFile(new URL('../scripts/media-affiliate-browser-smoke.py',import.meta.url),'utf8');
 
-test('affiliate production gate runs after successful Cloudflare workflows and supports manual verification',()=>{
+test('affiliate production gate runs after completed main Cloudflare workflows and supports manual verification',()=>{
   assert.match(workflow,/workflow_run:/);
   assert.match(workflow,/workflows: \['Titans Cloudflare Deploy'\]/);
   assert.match(workflow,/types: \[completed\]/);
   assert.match(workflow,/workflow_dispatch:/);
-  assert.match(workflow,/github\.event\.workflow_run\.conclusion == 'success'/);
   assert.match(workflow,/github\.event\.workflow_run\.head_branch == 'main'/);
+  assert.doesNotMatch(workflow,/workflow_run\.conclusion == 'success'/);
 });
 
-test('gate distinguishes a real Cloudflare deployment from a stale skipped workflow',()=>{
+test('gate distinguishes the real Cloudflare deploy step from the parent workflow conclusion',()=>{
+  assert.match(workflow,/WORKFLOW_CONCLUSION: \$\{\{ github\.event\.workflow_run\.conclusion \}\}/);
   assert.match(workflow,/actions\/runs\/\$\{WORKFLOW_RUN_ID\}\/jobs\?per_page=100/);
   assert.match(workflow,/select\(\.name == "Deploy to Cloudflare"\)/);
   assert.match(workflow,/if \[\[ "\$DEPLOY_OUTCOME" == "success" \]\]/);
+  assert.match(workflow,/even if a later unrelated regression changed the parent workflow conclusion/);
   assert.match(workflow,/should_run=true/);
   assert.match(workflow,/should_run=false/);
   assert.match(workflow,/this was not a deployed source/);
