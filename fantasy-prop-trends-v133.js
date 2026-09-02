@@ -9,6 +9,8 @@
   const slug=value=>clean(value).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
   const num=value=>{const n=Number(String(value??'').replace(/,/g,''));return Number.isFinite(n)?n:null};
   const now=()=>Date.now();
+  const app=document.querySelector('#app');
+  let observer=null;
 
   function observationKey(player,market,book){return `${slug(player)}|${slug(market)}|${slug(book)}`}
   function prune(store){
@@ -35,38 +37,40 @@
     (controls||root.querySelector('.fprop-board'))?.insertAdjacentElement('beforebegin',summary);
     return summary;
   }
+  function resumeObserver(){if(observer&&app)observer.observe(app,{childList:true,subtree:true})}
   function decorate(){
     if(route()!==ROUTE)return;
     const root=document.querySelector(ROOT);if(!root)return;
-    const store=load(),seen=[],counts={up:0,down:0,flat:0,first:0};
-    root.querySelectorAll('.fprop-row').forEach(row=>{
-      const player=clean(row.querySelector('.fprop-player strong')?.textContent),market=clean(row.querySelector('.fprop-player span')?.textContent);
-      if(!player||!market)return;
-      row.querySelectorAll('.fprop-quote:not(.is-empty)').forEach(quote=>{
-        const book=clean(quote.querySelector(':scope > strong')?.textContent),line=num(quote.querySelector('.fprop-line b')?.textContent);
-        if(!book||line==null)return;
-        const key=observationKey(player,market,book),points=Array.isArray(store[key])?store[key]:[],current={line,at:now()};
-        const previous=priorPoint(points,current),move=movement(previous,current);counts[move.kind]++;
-        let badge=quote.querySelector('.fprop-trend-badge');
-        if(!badge){badge=document.createElement('span');badge.className='fprop-trend-badge';quote.appendChild(badge)}
-        badge.className=`fprop-trend-badge is-${move.kind}`;
-        badge.textContent=move.label;
-        badge.title=previous?`This browser previously observed ${previous.line}`:'No earlier different line is stored in this browser';
-        const last=points.at(-1),shouldCapture=!last||last.line!==line||current.at-(last.at||0)>=MIN_CAPTURE_MS;
-        if(shouldCapture){store[key]=[...points,current].slice(-MAX_POINTS)}
-        seen.push(key);
+    observer?.disconnect();
+    try{
+      const store=load(),counts={up:0,down:0,flat:0,first:0};
+      root.querySelectorAll('.fprop-row').forEach(row=>{
+        const player=clean(row.querySelector('.fprop-player strong')?.textContent),market=clean(row.querySelector('.fprop-player span')?.textContent);
+        if(!player||!market)return;
+        row.querySelectorAll('.fprop-quote:not(.is-empty)').forEach(quote=>{
+          const book=clean(quote.querySelector(':scope > strong')?.textContent),line=num(quote.querySelector('.fprop-line b')?.textContent);
+          if(!book||line==null)return;
+          const key=observationKey(player,market,book),points=Array.isArray(store[key])?store[key]:[],current={line,at:now()};
+          const previous=priorPoint(points,current),move=movement(previous,current);counts[move.kind]++;
+          let badge=quote.querySelector('.fprop-trend-badge');
+          if(!badge){badge=document.createElement('span');badge.className='fprop-trend-badge';quote.appendChild(badge)}
+          badge.className=`fprop-trend-badge is-${move.kind}`;
+          badge.textContent=move.label;
+          badge.title=previous?`This browser previously observed ${previous.line}`:'No earlier different line is stored in this browser';
+          const last=points.at(-1),shouldCapture=!last||last.line!==line||current.at-(last.at||0)>=MIN_CAPTURE_MS;
+          if(shouldCapture)store[key]=[...points,current].slice(-MAX_POINTS);
+        });
       });
-    });
-    save(prune(store));
-    const summary=ensureSummary(root);if(!summary)return;
-    const changed=counts.up+counts.down;
-    summary.innerHTML=`<div><strong>${changed}</strong><span>lines moved in this browser</span></div><div><b>${counts.up}</b><span>up</span></div><div><b>${counts.down}</b><span>down</span></div><div><b>${counts.first}</b><span>first observed</span></div><button type="button" class="fprop-trend-reset">Reset line memory</button>`;
-    summary.querySelector('.fprop-trend-reset')?.addEventListener('click',()=>{try{localStorage.removeItem(STORE)}catch{};decorate()},{once:true});
+      save(prune(store));
+      const summary=ensureSummary(root);if(!summary)return;
+      const changed=counts.up+counts.down;
+      summary.innerHTML=`<div><strong>${changed}</strong><span>lines moved in this browser</span></div><div><b>${counts.up}</b><span>up</span></div><div><b>${counts.down}</b><span>down</span></div><div><b>${counts.first}</b><span>first observed</span></div><button type="button" class="fprop-trend-reset">Reset line memory</button>`;
+      summary.querySelector('.fprop-trend-reset')?.addEventListener('click',()=>{try{localStorage.removeItem(STORE)}catch{};decorate()},{once:true});
+    } finally {resumeObserver()}
   }
   let queued=false;
   const queue=()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;decorate()})};
-  const app=document.querySelector('#app');
-  const observer=new MutationObserver(queue);if(app)observer.observe(app,{childList:true,subtree:true});
+  observer=new MutationObserver(queue);resumeObserver();
   addEventListener('hashchange',queue);queue();
   window.TitansFantasyPropTrends={movement,observationKey,prune};
 })();
