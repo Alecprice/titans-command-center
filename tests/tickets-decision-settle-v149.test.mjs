@@ -41,7 +41,7 @@ test('settle diagnostics expose counts only and never provider or ticket credent
 });
 
 test('Ticket decision settle coordinator remains available to installed offline clients',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v83/);
+  assert.match(sw,/titans-cc-brand-2026-v84/);
   assert.match(sw,/\/tickets-decision-settle-v149\.js/);
 });
 
