@@ -54,6 +54,20 @@ Fan Event Radar satisfies those display requirements by using Skiddle's official
 
 Skiddle is primarily a UK events source, so a Nashville-radius query may legitimately return zero events even when the API key is valid.
 
+## Production secret ownership
+
+Direct Cloudflare Worker secrets remain a supported production setup. The current deploy command uses Wrangler's secret-file deploy behavior, and secrets omitted from the deploy secret file are preserved rather than treated as deletions. That means a provider configured directly with `wrangler secret put` does not need a matching GitHub secret just to survive later normal deployments.
+
+The primary Cloudflare deployment can also manage these optional values from GitHub Actions secrets:
+
+- `EVENTBRITE_PRIVATE_TOKEN`
+- `EVENTBRITE_ORGANIZATION_IDS`
+- `SKIDDLE_API_KEY`
+
+Only non-empty GitHub values are added to the temporary Worker secret bundle. Secret values are never printed. If one of those GitHub secrets is absent, the deployment status reports only that the **GitHub-managed input** is absent; it does not claim the production provider is disabled because a direct Worker secret may already exist.
+
+Actual provider readiness is determined after deploy by `GET /api/fan-events`. The primary Cloudflare release now runs `scripts/fan-events-production-regression.mjs` before browser regressions and records a sanitized report in `docs/CLOUDFLARE_STATUS.md`, including boolean configured-provider state and provider availability/count evidence without credentials.
+
 ## Bandsintown removal
 
 Bandsintown is no longer queried or exposed by the Fan Event Radar provider catalog. If its Worker secrets were previously added, remove them:
@@ -97,6 +111,7 @@ Expected response traits:
 
 - `ok: true`
 - no API keys/tokens in the response
+- `configuredProviders.eventbrite` is `true` when an Eventbrite private/OAuth token is bound
 - `configuredProviders.skiddle` is `true` when `SKIDDLE_API_KEY` is bound
 - `providerResults` reports per-provider success/failure and scope
 - `events` contains only normalized HTTPS source links
