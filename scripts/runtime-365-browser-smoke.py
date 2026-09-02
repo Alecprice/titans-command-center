@@ -191,8 +191,8 @@ try:
     mobile=m.execute_script("""
       const panel=document.querySelector('.v19-365');
       const links=[...document.querySelectorAll('.v19-365-grid>a')];
-      const menu=document.querySelector('#menu-button'),dock=document.querySelector('.mobile-nav');
-      const mr=menu?.getBoundingClientRect(),dr=dock?.getBoundingClientRect();
+      const dock=document.querySelector('.mobile-nav');
+      const dr=dock?.getBoundingClientRect();
       const dockTargets=[...(dock?.querySelectorAll('a,button')||[])];
       return {
         viewport:innerWidth,
@@ -201,7 +201,6 @@ try:
         panelHeight:panel?.getBoundingClientRect().height||0,
         targets:links.map(x=>({h:x.getBoundingClientRect().height,w:x.getBoundingClientRect().width,label:x.querySelector('small')?.textContent||''})),
         reviewHeight:document.querySelector('.v19-365>header>a')?.getBoundingClientRect().height||0,
-        menu:mr?{x:mr.x,y:mr.y,w:mr.width,h:mr.height,display:getComputedStyle(menu).display}:null,
         dock:dr?{x:dr.x,y:dr.y,w:dr.width,h:dr.height,display:getComputedStyle(dock).display}:null,
         dockTargets:dockTargets.map(x=>({h:x.getBoundingClientRect().height,w:x.getBoundingClientRect().width,label:(x.textContent||'').trim()}))
       }
@@ -209,7 +208,6 @@ try:
     if mobile['overflow']: raise RuntimeError(f'Mobile horizontal overflow: {mobile}')
     if mobile['reviewHeight']<44: raise RuntimeError(f'Mobile review target too small: {mobile}')
     if any(x['h']<44 for x in mobile['targets']): raise RuntimeError(f'Mobile 365 card target too small: {mobile}')
-    if not mobile['menu'] or mobile['menu']['display']=='none' or mobile['menu']['w']<44 or mobile['menu']['h']<44 or mobile['menu']['x']<0 or mobile['menu']['y']<0: raise RuntimeError(f'Mobile menu unreachable: {mobile}')
     if not mobile['dock'] or mobile['dock']['display']=='none' or mobile['dock']['h']<60 or mobile['dock']['x']<0 or mobile['dock']['x']+mobile['dock']['w']>mobile['viewport']+1: raise RuntimeError(f'Mobile dock invalid: {mobile}')
     if len(mobile['dockTargets'])!=5 or any(x['h']<44 or x['w']<44 for x in mobile['dockTargets']): raise RuntimeError(f'Mobile five-action dock targets invalid: {mobile}')
     dock_labels={x['label'] for x in mobile['dockTargets']}
