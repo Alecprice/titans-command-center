@@ -69,6 +69,11 @@
     const date=new Date(game?.date);if(Number.isNaN(date.getTime()))return 'Kickoff TBD';
     return new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(date);
   }
+  function latestMove(){
+    const rows=Array.isArray(data?.transactions)?data.transactions:[];
+    if(typeof runtime?.latestTransaction==='function')return runtime.latestTransaction(rows);
+    return rows.map((move,index)=>{const raw=String(move?.date||'').trim(),time=raw?new Date(raw).getTime():Number.NaN;return {move,index,time}}).filter(row=>Number.isFinite(row.time)).sort((a,b)=>b.time-a.time||a.index-b.index)[0]?.move||null;
+  }
   function availabilityWatch(){
     const roster=(data?.roster||[]).filter(fantasyPlayer),byName=new Map(roster.map(player=>[norm(player.name),player]));
     const rows=[];
@@ -87,9 +92,9 @@
     return {title:'Manual board ready',detail:`${state.starters} starters · ${state.bench} bench · ${state.watch} watchlist. ${latest}`};
   }
   function markup(){
-    const game=nextGame(),watch=availabilityWatch(),state=stateSummary(),move=data?.transactions?.[0];
+    const game=nextGame(),watch=availabilityWatch(),state=stateSummary(),move=latestMove();
     const gameName=game?`${game.homeAway==='home'?'vs':'at'} ${game.opponent||game.opponentAbbr||'Opponent'}`:'Next game not loaded';
-    const moveText=move?.description||'No recent official roster move is loaded.';
+    const moveText=move?.description||'No dated roster move is loaded.';
     const workspace=workspaceCopy(state,moveText);
     return `<section class="fantasy-weekly-v42" data-fantasy-weekly-v42>
       <div class="fw42-head"><div><small>FANTASY THIS WEEK</small><h2>Decisions first. Tools second.</h2><p>Verified Titans context for your lineup workflow. This card does not create projections or pretend an empty feed means a player is cleared.</p></div><span class="fw42-week">Selected week ${state.week}</span></div>

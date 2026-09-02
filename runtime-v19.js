@@ -1,5 +1,5 @@
 import {formatTeamKickoff,TEAM_TIME_LABEL,TEAM_TIME_ZONE} from './team-time-v21.js';
-import {scheduleFocus,latestCompletedGame,GAME_FOCUS_WINDOW_MS} from './src/core.mjs';
+import {scheduleFocus,latestCompletedGame,sortTransactionsLatestFirst,latestTransaction,GAME_FOCUS_WINDOW_MS} from './src/core.mjs';
 
 (() => {
   'use strict';
@@ -96,6 +96,8 @@ import {scheduleFocus,latestCompletedGame,GAME_FOCUS_WINDOW_MS} from './src/core
     formatTeamKickoff,
     scheduleFocus,
     latestCompletedGame,
+    sortTransactionsLatestFirst,
+    latestTransaction,
     gameFocusWindowMs:GAME_FOCUS_WINDOW_MS,
     teamTimeZone:TEAM_TIME_ZONE,
     teamTimeLabel:TEAM_TIME_LABEL,

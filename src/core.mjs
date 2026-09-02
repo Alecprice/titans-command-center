@@ -48,6 +48,28 @@ export function latestCompletedGame(games) {
   return dated.at(-1)?.game || null;
 }
 
+function transactionDateMs(transaction) {
+  const raw = String(transaction?.date || '').trim();
+  return raw ? new Date(raw).getTime() : Number.NaN;
+}
+
+export function sortTransactionsLatestFirst(transactions) {
+  return (Array.isArray(transactions) ? transactions : [])
+    .map((transaction, index) => ({ transaction, index, time: transactionDateMs(transaction) }))
+    .sort((a, b) => {
+      const aDated = Number.isFinite(a.time), bDated = Number.isFinite(b.time);
+      if (aDated && bDated) return b.time - a.time || a.index - b.index;
+      if (aDated) return -1;
+      if (bDated) return 1;
+      return a.index - b.index;
+    })
+    .map(row => row.transaction);
+}
+
+export function latestTransaction(transactions) {
+  return sortTransactionsLatestFirst(transactions).find(transaction => Number.isFinite(transactionDateMs(transaction))) || null;
+}
+
 export function filterFeed(items, filters = {}) {
   const query = (filters.query || '').trim().toLowerCase();
   return items.filter(item => {

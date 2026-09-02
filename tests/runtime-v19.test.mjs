@@ -24,11 +24,13 @@ test('shared runtime centralizes route, render, and refresh subscriptions',()=>{
   assert.doesNotMatch(js,/subtree:true/);
 });
 
-test('shared runtime exposes core game focus and completion truth without duplicating kickoff math',()=>{
+test('shared runtime exposes core game and transaction truth without duplicating chronology math',()=>{
   const js=read('runtime-v19.js');
-  assert.match(js,/import \{scheduleFocus,latestCompletedGame,GAME_FOCUS_WINDOW_MS\} from '\.\/src\/core\.mjs';/);
+  assert.match(js,/import \{scheduleFocus,latestCompletedGame,sortTransactionsLatestFirst,latestTransaction,GAME_FOCUS_WINDOW_MS\} from '\.\/src\/core\.mjs';/);
   assert.match(js,/scheduleFocus,/);
   assert.match(js,/latestCompletedGame,/);
+  assert.match(js,/sortTransactionsLatestFirst,/);
+  assert.match(js,/latestTransaction,/);
   assert.match(js,/gameFocusWindowMs:GAME_FOCUS_WINDOW_MS/);
   assert.doesNotMatch(js,/5\*60\*60\*1000/);
 });
