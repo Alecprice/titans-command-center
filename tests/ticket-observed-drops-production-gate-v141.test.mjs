@@ -22,9 +22,9 @@ test('Observed Drops production gate follows real completed main deploys and exa
 test('production browser gate exercises shipped v123 and v124 modules through a deterministic local fixture',()=>{
   assert.match(browser,/window\.__TitansTicketTenxV123/);
   assert.match(browser,/window\.__TitansTicketTrendV124/);
-  assert.match(browser,/data-smoke-fixture=\\"alpha\\"/);
-  assert.match(browser,/data-smoke-fixture=\\"bravo\\"/);
-  assert.match(browser,/data-smoke-fixture=\\"charlie\\"/);
+  assert.match(browser,/data-smoke-fixture="alpha"/);
+  assert.match(browser,/data-smoke-fixture="bravo"/);
+  assert.match(browser,/data-smoke-fixture="charlie"/);
   assert.match(browser,/window\.dispatchEvent\(new Event\('hashchange'\)\)/);
   assert.match(browser,/StorageEvent\('storage'/);
   assert.match(browser,/MEMORY_KEY='titans:tickets-price-memory-v124'/);
