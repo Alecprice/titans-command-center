@@ -92,8 +92,9 @@ function injectStyles(){
     .legacy-venue-years{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 9px;padding:8px 0;border-top:1px solid rgba(0,33,68,.1);border-bottom:1px solid rgba(0,33,68,.1)}
     .legacy-venue-years strong{color:var(--retro-navy,#002144);font-size:11px}.legacy-venue-years span{color:#60788d;font-size:9px}
     .legacy-venue-card p{margin:0;color:#5c7184;font-size:10px;line-height:1.5}
-    .legacy-heritage-sources{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-    .legacy-heritage-sources a{color:#4f6c83;font-size:7px;font-weight:850;text-decoration:underline;text-underline-offset:2px}
+    .legacy-heritage-sources{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .legacy-heritage-sources a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;border:1px solid rgba(0,33,68,.14);background:#f7fafc;color:#4f6c83;font-size:8px;font-weight:850;line-height:1.25;text-decoration:none}
+    .legacy-heritage-sources a:hover{background:var(--retro-navy,#002144);border-color:var(--retro-navy,#002144);color:#fff}
     .legacy-honors-wrap{margin-top:28px;padding-top:22px;border-top:1px solid rgba(0,33,68,.15)}
     .legacy-honors-head{display:flex;justify-content:space-between;gap:20px;align-items:end}
     .legacy-honors-head small{color:var(--retro-red,#c8102e);font-size:8px;font-weight:950;letter-spacing:.13em;text-transform:uppercase}
@@ -111,10 +112,10 @@ function injectStyles(){
     .legacy-honor-card[hidden]{display:none!important}
     .legacy-honor-filters button:focus-visible,.legacy-heritage-sources a:focus-visible{outline:3px solid rgba(74,149,206,.38);outline-offset:2px}
     @media(max-width:1000px){.legacy-honor-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:760px){.legacy-heritage-intro{grid-template-columns:1fr;padding:14px}.legacy-heritage-now{grid-template-columns:1fr 1fr}.legacy-venue-grid{grid-template-columns:repeat(7,82vw)}.legacy-venue-card{min-height:220px}.legacy-honors-head{display:block}.legacy-honors-head p{margin-top:8px}.legacy-honor-filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px;scrollbar-width:none}.legacy-honor-filters::-webkit-scrollbar{display:none}.legacy-honor-filters button{min-height:48px;flex:0 0 auto}.legacy-honor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:760px){.legacy-heritage-intro{grid-template-columns:1fr;padding:14px}.legacy-heritage-now{grid-template-columns:1fr 1fr}.legacy-venue-grid{grid-template-columns:repeat(7,82vw)}.legacy-venue-card{min-height:220px}.legacy-honors-head{display:block}.legacy-honors-head p{margin-top:8px}.legacy-heritage-sources a{min-height:48px;font-size:9px}.legacy-honor-filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px;scrollbar-width:none}.legacy-honor-filters::-webkit-scrollbar{display:none}.legacy-honor-filters button{min-height:48px;flex:0 0 auto}.legacy-honor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:430px){.legacy-heritage-now{grid-template-columns:1fr}.legacy-venue-grid{grid-template-columns:repeat(7,86vw)}.legacy-honor-grid{grid-template-columns:1fr}.legacy-honor-card{min-height:104px}}
     @media(prefers-reduced-motion:reduce){.legacy-venue-grid{scroll-behavior:auto}.legacy-heritage-section *{transition:none!important}}
-    @media(forced-colors:active){.legacy-venue-card,.legacy-honor-card,.legacy-heritage-intro,.legacy-honor-filters button{border:1px solid CanvasText}.legacy-venue-card:before{background:CanvasText}}
+    @media(forced-colors:active){.legacy-venue-card,.legacy-honor-card,.legacy-heritage-intro,.legacy-honor-filters button,.legacy-heritage-sources a{border:1px solid CanvasText}.legacy-venue-card:before{background:CanvasText}}
   `;
   document.head.append(style);
 }
