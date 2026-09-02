@@ -18,9 +18,9 @@ const TEAM_ROOM_VIEW_REQUEST='titans:team-room-view-request';
 let teamRoomQueued=false;
 
 function installMobileReadabilityFloor(){
-  if(document.querySelector('#tcc-mobile-type-floor-v45'))return;
+  if(document.querySelector('#tcc-mobile-type-floor-v46'))return;
   const style=document.createElement('style');
-  style.id='tcc-mobile-type-floor-v45';
+  style.id='tcc-mobile-type-floor-v46';
   style.textContent=`
     @media (max-width:760px){
       #app{font-size:16px;line-height:1.5}
@@ -52,25 +52,66 @@ function installMobileReadabilityFloor(){
         min-width:44px!important;
         min-height:44px!important;
       }
-      #app button,#app .button,#app [role="button"]{font-size:14px!important;line-height:1.25!important}
+      #app button,#app .button,#app [role="button"]{
+        font-size:14px!important;
+        line-height:1.25!important;
+        white-space:normal;
+        overflow-wrap:anywhere;
+      }
       #app a:not(.button):not([role="button"]){text-underline-offset:3px}
+      #app :is(a,button,input,select,textarea,[role="button"]):focus-visible{
+        outline:3px solid currentColor!important;
+        outline-offset:3px!important;
+      }
       #app input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
       #app select,
       #app textarea,
       .search-wrap input{
         font-size:16px!important;
+        max-width:100%!important;
+        box-sizing:border-box!important;
       }
+      #app label:has(input[type="checkbox"]),
+      #app label:has(input[type="radio"]){
+        min-height:44px;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+      }
+      #app table{
+        display:block;
+        max-width:100%;
+        overflow-x:auto;
+        overscroll-behavior-inline:contain;
+        -webkit-overflow-scrolling:touch;
+      }
+      #app img,#app video,#app iframe,#app svg{max-width:100%}
       .menu-button{display:none!important}
       .topbar{padding-left:12px!important}
-      .mobile-nav a,.mobile-nav button{font-size:11px!important;line-height:1.15!important;min-height:52px!important}
+      .mobile-nav a,.mobile-nav button{
+        font-size:12px!important;
+        line-height:1.2!important;
+        min-height:52px!important;
+        min-width:0!important;
+        padding-left:4px!important;
+        padding-right:4px!important;
+        white-space:normal!important;
+      }
       .sidebar .nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-      .sidebar .nav a{font-size:14px!important;line-height:1.25!important;min-height:48px!important}
+      .sidebar .nav a{font-size:14px!important;line-height:1.25!important;min-height:48px!important;overflow-wrap:anywhere}
       .content{padding-left:14px!important;padding-right:14px!important}
       .panel-body{padding-left:14px!important;padding-right:14px!important}
     }
     @media (max-width:390px){
       .content{padding-left:12px!important;padding-right:12px!important}
-      .mobile-nav a,.mobile-nav button{font-size:10px!important}
+      .panel-body{padding-left:12px!important;padding-right:12px!important}
+      #app h1{font-size:clamp(24px,8vw,32px)!important;line-height:1.12!important;overflow-wrap:anywhere}
+      #app h2{font-size:clamp(20px,6.8vw,28px)!important;line-height:1.16!important;overflow-wrap:anywhere}
+      #app h3{overflow-wrap:anywhere}
+    }
+    @media (max-width:340px){
+      .content,.panel-body{padding-left:10px!important;padding-right:10px!important}
+      .mobile-nav a,.mobile-nav button{font-size:12px!important;padding-left:2px!important;padding-right:2px!important}
     }
   `;
   document.head.appendChild(style);

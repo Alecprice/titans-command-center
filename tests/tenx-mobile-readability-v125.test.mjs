@@ -11,15 +11,20 @@ test('TENX mobile readability keeps supporting text legible',()=>{
 });
 
 test('TENX mobile controls are readable and thumb friendly',()=>{
-  assert.match(runtime,/font-size:14px!important;line-height:1\.25!important/);
+  assert.match(runtime,/font-size:14px!important;/);
+  assert.match(runtime,/line-height:1\.25!important;/);
   assert.match(runtime,/min-width:44px!important/);
   assert.match(runtime,/min-height:44px!important/);
-  assert.match(runtime,/\.mobile-nav a,\.mobile-nav button\{font-size:11px!important;line-height:1\.15!important;min-height:52px!important\}/);
-  assert.match(runtime,/\.sidebar \.nav a\{font-size:14px!important;line-height:1\.25!important;min-height:48px!important\}/);
+  assert.match(runtime,/\.mobile-nav a,\.mobile-nav button\{/);
+  assert.match(runtime,/font-size:12px!important;/);
+  assert.match(runtime,/line-height:1\.2!important;/);
+  assert.match(runtime,/min-height:52px!important;/);
+  assert.match(runtime,/\.sidebar \.nav a\{font-size:14px!important;line-height:1\.25!important;min-height:48px!important;overflow-wrap:anywhere\}/);
 });
 
 test('TENX mobile layout preserves useful reading width',()=>{
   assert.match(runtime,/\.content\{padding-left:14px!important;padding-right:14px!important\}/);
   assert.match(runtime,/\.panel-body\{padding-left:14px!important;padding-right:14px!important\}/);
   assert.match(runtime,/@media \(max-width:390px\)/);
+  assert.match(runtime,/@media \(max-width:340px\)/);
 });
