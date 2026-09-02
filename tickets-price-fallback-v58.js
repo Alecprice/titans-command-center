@@ -3,6 +3,7 @@ import './tickets-trend-v124.js';
 import './tickets-compare-v125.js';
 import './tickets-finalists-v127.js';
 import './tickets-signal-lens-v128.js';
+import './tickets-outing-budget-v134.js';
 
 (() => {
   'use strict';
