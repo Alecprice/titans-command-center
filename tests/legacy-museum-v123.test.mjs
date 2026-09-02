@@ -36,8 +36,13 @@ test('legacy in-page navigation is router-safe and accessible',()=>{
 
 test('legacy responsive layer protects touch targets, reduced motion and phone layouts',()=>{
   const css=read('legacy-polish.css');
-  assert.match(css,/\.legacy-museum-jump button\{min-height:40px/);
-  assert.match(css,/@media\(max-width:760px\)[\s\S]*\.legacy-museum-jump button\{min-height:44px/);
+  assert.match(css,/\.legacy-museum-jump button\{min-height:44px/);
+  assert.match(css,/\.legacy-era-filter\{min-height:44px/);
+  assert.match(css,/\.archive-filter\{min-height:44px/);
+  assert.match(css,/@media\(max-width:760px\)[\s\S]*\.legacy-museum-jump button\{min-height:48px\}[\s\S]*\.legacy-era-filter\{min-height:48px\}[\s\S]*\.archive-filter\{min-height:48px/);
+  assert.doesNotMatch(css,/\.legacy-museum-jump button\{min-height:40px/);
+  assert.doesNotMatch(css,/\.legacy-era-filter\{min-height:42px/);
+  assert.doesNotMatch(css,/\.archive-filter\{min-height:40px/);
   assert.match(css,/@media\(max-width:900px\)/);
   assert.match(css,/@media\(max-width:760px\)/);
   assert.match(css,/@media\(max-width:430px\)/);
