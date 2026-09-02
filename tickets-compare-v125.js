@@ -90,6 +90,55 @@
     });
   }
 
+  function shareUrl(){
+    return `${location.origin}${location.pathname}#tickets`;
+  }
+
+  function shareText(items,party){
+    const lines=['Tennessee Titans ticket shortlist'];
+    items.forEach((item,index)=>{
+      const total=item.price!=null?item.price*party:null;
+      const sources=item.sources?`${item.sources} source${item.sources===1?'':'s'}`:'Source coverage not current';
+      const place=item.venue&&item.venue!=='Venue unavailable'?` · ${item.venue}`:'';
+      lines.push('');
+      lines.push(`${index+1}. ${item.title}`);
+      lines.push(`${item.date}${item.side?` · ${item.side}`:''}${place}`);
+      lines.push(item.price!=null?`Current start: ${money(item.price)} · ${party} ticket${party===1?'':'s'}: ${money(total)} before fees · ${sources}`:`Current starting price unavailable · ${sources}`);
+      lines.push(`Browser-observed movement: ${item.movement.label}`);
+    });
+    lines.push('');
+    lines.push('Ticket Center uses current reported starting prices. Party totals are starting price × ticket count, before fees. Seat quality and checkout fees are not inferred.');
+    return lines.join('\n');
+  }
+
+  async function sharePlan(center){
+    const items=savedRecords(center);
+    if(!items.length){setStatus(center,'Save a matchup before sharing a ticket plan.');return;}
+    const party=partySize(center);
+    const text=shareText(items,party);
+    const url=shareUrl();
+    try{
+      if(typeof navigator.share==='function'){
+        await navigator.share({title:'Titans ticket shortlist',text,url});
+        setStatus(center,'Shared your saved Ticket Center plan.');
+        return;
+      }
+    }catch(error){
+      if(error?.name==='AbortError'){
+        setStatus(center,'Share canceled. Your shortlist is unchanged.');
+        return;
+      }
+    }
+    try{
+      if(navigator.clipboard?.writeText){
+        await navigator.clipboard.writeText(`${text}\n\nOpen Ticket Center: ${url}`);
+        setStatus(center,'Share is not available here, so the ticket plan was copied to your clipboard.');
+        return;
+      }
+    }catch{}
+    setStatus(center,'Sharing is unavailable in this browser. Your saved matchups are unchanged.');
+  }
+
   function badges(item,items){
     const priced=items.filter(entry=>entry.price!=null);
     const lowest=priced.length?Math.min(...priced.map(entry=>entry.price)):null;
@@ -136,7 +185,7 @@
       <header><div><small>TENX · SAVED GAME COMPARE</small><h2>${count>=2?'Your finalists, side by side.':'Build your final matchup list.'}</h2><p>Compares only the live starting prices, source counts, and browser-observed movement already shown in Ticket Center.</p></div><span>${count}/${MAX_SAVED} saved</span></header>
       ${prompt}
       <div class="tickets-compare-v125-grid">${items.map(item=>cardMarkup(item,items,party)).join('')}</div>
-      <footer><span>Party totals are starting price × ticket count, before fees. Seat quality and checkout fees are not inferred.</span></footer>
+      <footer><span>Party totals are starting price × ticket count, before fees. Seat quality and checkout fees are not inferred.</span><button type="button" data-ticket-compare-share aria-label="Share saved ticket plan">Share plan</button></footer>
       <p class="tickets-compare-v125-status" data-ticket-compare-status role="status" aria-live="polite"></p>
     </section>`;
   }
@@ -193,6 +242,8 @@
     if(!target)return;
     const center=target.closest('[data-ticket-center]');
     if(!center)return;
+    const share=target.closest('[data-ticket-compare-share]');
+    if(share){void sharePlan(center);return;}
     const focus=target.closest('[data-ticket-compare-focus]');
     if(focus){reveal(center,focus.dataset.ticketCompareFocus||'');return;}
     if(target.closest('[data-ticket-tenx-save],[data-ticket-tenx-clear],[data-ticket-tenx-party],[data-ticket-tenx-budget],[data-ticket-tenx-sort],[data-ticket-trend-clear],[data-ticket-refresh],[data-ticket-filter]'))schedule();
