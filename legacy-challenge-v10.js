@@ -1,4 +1,4 @@
-const VERSION='10.4.0';
+const VERSION='10.5.0';
 const ROUND_SIZE=5;
 const OPTION_COUNT=4;
 const MODE_META={
@@ -170,6 +170,10 @@ function createGame(page,root,banks){
   const current=()=>round[index]||null;
   const modeLabel=value=>MODE_META[value]?.label||MODE_META.fan.label;
   const setChallengeState=value=>{root.dataset.legacyChallengeState=value;};
+  const focusQuestion=()=>{
+    if(!questionNode.hasAttribute('tabindex'))questionNode.setAttribute('tabindex','-1');
+    try{questionNode.focus({preventScroll:true});}catch{questionNode.focus();}
+  };
 
   function updateModeControls(disabled=false){
     modeButtons.forEach(button=>{
@@ -207,6 +211,7 @@ function createGame(page,root,banks){
     nextButton.textContent=index===round.length-1?'See score':'Next question';
     startButton.hidden=true;
     updateModeControls(true);
+    focusQuestion();
   }
 
   function finish(){
@@ -224,6 +229,7 @@ function createGame(page,root,banks){
     startButton.hidden=false;
     startButton.textContent=`Play another ${modeLabel(mode)} round`;
     updateModeControls(false);
+    focusQuestion();
   }
 
   function start(){

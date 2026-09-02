@@ -5,8 +5,8 @@ import fs from 'node:fs';
 const js=fs.readFileSync('legacy-challenge-v10.js','utf8');
 // This contract intentionally runs in the full Titans gate so replay variety is checked against the current repository baseline.
 
-test('Legacy Challenge v10.4 remembers only the previous round per mode',()=>{
-  assert.match(js,/const VERSION='10\.4\.0'/);
+test('Legacy Challenge v10.5 remembers only the previous round per mode',()=>{
+  assert.match(js,/const VERSION='10\.5\.0'/);
   assert.match(js,/const lastRoundKeysByMode=\{fan:\[\],diehard:\[\]\}/);
   assert.match(js,/round=selectRound\(bank,lastRoundKeysByMode\[mode\]\|\|\[\]\)/);
   assert.match(js,/lastRoundKeysByMode\[mode\]=round\.map\(questionIdentity\)/);
