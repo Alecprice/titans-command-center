@@ -12,6 +12,7 @@ test('TENX Ticket runtime bridge ships on a new immutable browser path',()=>{
   assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/['"]\/tickets-compare-cache-bridge-v141\.js['"]/);
   assert.match(bridge,/__TitansTicketCompareCacheBridgeV141/);
+  assert.match(bridge,/__TitansTicketCompareConvergenceV156/);
 });
 
 test('bridge observes Ticket save ownership before synchronous DOM replacement',()=>{
@@ -28,7 +29,15 @@ test('legacy CDN wake-up is bounded behind semantic reconciliation',()=>{
   assert.ok(semantic>=0&&frame>semantic&&settled>frame&&legacy>settled);
   assert.equal((bridge.match(/new StorageEvent\('storage'/g)||[]).length,1);
   assert.doesNotMatch(bridge,/localStorage\.(?:setItem|removeItem)/);
-  assert.doesNotMatch(bridge,/\bfetch\s*\(|setInterval\s*\(|MutationObserver/);
+  assert.doesNotMatch(bridge,/\bfetch\s*\(|setInterval\s*\(|setTimeout\s*\(/);
+});
+
+test('v156 recovery observers are narrow state and root-replacement guards',()=>{
+  assert.equal((bridge.match(/new MutationObserver/g)||[]).length,2);
+  assert.match(bridge,/centerObserver\.observe\(boundCenter,\{attributes:true,attributeFilter:\['data-ticket-tenx-saved-count'\]\}\)/);
+  assert.match(bridge,/new MutationObserver\(\(\)=>schedule\('app-replaced'\)\)\.observe\(app,\{childList:true,subtree:false\}\)/);
+  assert.doesNotMatch(bridge,/subtree:true/);
+  assert.doesNotMatch(bridge,/characterData:true/);
 });
 
 test('production Saved Compare lifecycle remains an unchanged eight-second requirement',()=>{
