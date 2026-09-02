@@ -1,4 +1,5 @@
 import './tickets-tenx-v123.js';
+import './tickets-trend-v124.js';
 
 (() => {
   'use strict';
