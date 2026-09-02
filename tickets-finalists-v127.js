@@ -151,7 +151,7 @@
     const visibleNode=center.querySelector('[data-ticket-tenx-visible]');
     if(visibleNode)visibleNode.textContent=`${visible} of ${records.length} games shown`;
     const boardCount=center.querySelector('.tickets-comparison-board>header>span');
-    if(boardCount)boardCount.textContent=state.view==='saved'?`${visible} finalist${visible===1?'':'s'}`:totalBudget!=null?`${visible} within group budget`:`${visible} games`;
+    if(boardCount)boardCount.textContent=state.view==='saved'?`${visible} finalist${visible===1?'':'s'}`:totalBudget!=null?`${visible} within group budget`:baseBudget!=null?`${visible} within per-ticket budget`:`${visible} games`;
     emptyMessage(center,visible,saved.size,totalBudget,baseBudget);
   }
 
