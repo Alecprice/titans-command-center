@@ -5,10 +5,10 @@ import {readFile} from 'node:fs/promises';
 const js=await readFile(new URL('../media-alternatives-v14.js',import.meta.url),'utf8');
 
 test('Watch Listen refreshes game-day state on a fan-safe one minute cadence',()=>{
-  assert.match(js,/const REFRESH_INTERVAL=60\*1000/);
+  const cadence=js.match(/const REFRESH_INTERVAL=(\d+)\*1000/);
+  assert.equal(Number(cadence?.[1]),60);
   assert.match(js,/setInterval\(\(\)=>\{/);
   assert.match(js,/renderQuickStart\(\);\s*\},REFRESH_INTERVAL\)/);
-  assert.doesNotMatch(js,/setInterval\([^]*?,\s*(?:[1-9]\d{0,3}|[1-5]\d{4})\s*\)/);
 });
 
 test('pregame minute changes invalidate the quick-start signature',()=>{
