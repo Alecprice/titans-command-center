@@ -20,12 +20,15 @@ test('TENX favorite-only Home promotes Watchlist as the secondary track-more ste
   assert.match(watch,/Your favorite player is set\. Open another roster player and tap <strong>Watch player<\/strong> to build quick access beyond your favorite/);
 });
 
-test('TENX empty secondary Watchlist does not hydrate roster data until a player is actually watched',()=>{
+test('TENX empty or favorite-duplicate secondary Watchlist does not hydrate roster data until another player is visible',()=>{
   const guard=watch.indexOf("if(!list.length&&!favorite){root?.remove();return;}");
-  const load=watch.indexOf('if(list.length)ensureRoster();');
+  const visible=watch.indexOf('const visibleList=favorite?list.filter(item=>!samePlayerName(item.name,favorite)):list;');
+  const load=watch.indexOf('if(visibleList.length)ensureRoster();');
   assert.ok(guard>=0,'new-fan Watchlist guard must exist');
-  assert.ok(load>guard,'new-fan hierarchy guard must run before roster hydration');
-  assert.match(watch,/if\(list\.length\)ensureRoster\(\)/);
+  assert.ok(visible>guard,'Home presentation list must resolve after the new-fan guard');
+  assert.ok(load>visible,'roster hydration must depend on visible secondary watch entries');
+  assert.match(watch,/if\(visibleList\.length\)ensureRoster\(\)/);
+  assert.doesNotMatch(watch,/if\(list\.length\)ensureRoster\(\)/);
   assert.doesNotMatch(watch,/if\(favorite\)ensureRoster\(\)/);
 });
 
