@@ -89,7 +89,7 @@
       }:null,
       crossChecked?{
         kind:'sources',label:'MOST CROSS-CHECKED',title:crossChecked.title,key:crossChecked.key,
-        detail:`${crossChecked.sources} live source${crossChecked.sources===1?'':'s'} · ${crossChecked.price!=null?`${money(crossChecked.price)} starting price`:'check live'}`,
+        detail:`${crossChecked.sources} reported source${crossChecked.sources===1?'':'s'} · ${crossChecked.price!=null?`${money(crossChecked.price)} starting price`:'check live'}`,
         note:'Highest current marketplace source coverage; ties break toward lower starting price.'
       }:null,
       biggestDrop?{
@@ -129,11 +129,10 @@
     const fresh=holder.firstElementChild;
     let panel=center.querySelector('[data-ticket-signal-lens-v128]');
     if(panel){panel.replaceWith(fresh);return;}
-    const finalists=center.querySelector('[data-ticket-finalists-v127]');
     const trend=center.querySelector('[data-ticket-trend-v124]');
-    if(finalists)finalists.after(fresh);
-    else if(trend)trend.after(fresh);
-    else center.querySelector('[data-ticket-tenx-command]')?.after(fresh);
+    const command=center.querySelector('[data-ticket-tenx-command]');
+    if(trend)trend.before(fresh);
+    else if(command)command.after(fresh);
   }
 
   function setStatus(center,message){
@@ -146,7 +145,7 @@
     center.querySelector('[data-ticket-tenx-budget="all"]')?.click();
     center.querySelector('[data-ticket-finalists-view="all"]')?.click();
     center.querySelector('[data-ticket-finalists-budget="all"]')?.click();
-    const reduce=matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       const card=[...center.querySelectorAll('.tickets-compare-card[data-ticket-tenx-key]')].find(node=>node.dataset.ticketTenxKey===key);
       if(!card){setStatus(center,'That matchup is not in the current live ticket board.');return;}
@@ -171,7 +170,13 @@
       let row=item.card.querySelector('[data-ticket-signal-badges]');
       const labels=labelsByKey.get(item.key)||[];
       if(!labels.length){row?.remove();continue;}
-      if(!row){row=document.createElement('div');row.className='tickets-signal-v128-badges';row.dataset.ticketSignalBadges='1';const tools=item.card.querySelector('[data-ticket-tenx-card-tools]');if(tools)tools.before(row);else item.card.append(row);}
+      if(!row){
+        row=document.createElement('div');
+        row.className='tickets-signal-v128-badges';
+        row.dataset.ticketSignalBadges='1';
+        const tools=item.card.querySelector('[data-ticket-tenx-card-tools]');
+        if(tools)tools.before(row);else item.card.append(row);
+      }
       row.innerHTML=labels.map(label=>`<span>${esc(label)}</span>`).join('');
     }
   }
