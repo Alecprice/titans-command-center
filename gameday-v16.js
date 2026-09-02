@@ -20,6 +20,7 @@
   const checkedAge=()=>{const t=Date.parse(state.feed.checkedAt);return Number.isFinite(t)?Math.max(0,Date.now()-t):Infinity};
   const relativeAge=value=>{const t=Date.parse(value);if(!Number.isFinite(t))return'';const ms=Math.max(0,Date.now()-t);if(ms<5000)return'just now';if(ms<60000)return`${Math.max(1,Math.floor(ms/1000))}s ago`;const minutes=Math.floor(ms/60000);if(minutes<60)return`${minutes}m ago`;return fmt(value)};
   const json=url=>fetch(url,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+  const available=response=>Boolean(response?.ok&&response?.available!==false);
 
   async function load(){
     if(state.data&&state.fan)return state;
@@ -28,7 +29,7 @@
       state.data=data?.ok?data:{};
       state.fan=fan?.ok?fan:{};
       state.espn=espn?.ok?espn:null;
-      state.feed={fanOk:Boolean(fan?.ok),espnOk:Boolean(espn?.ok),checkedAt:new Date().toISOString()};
+      state.feed={fanOk:available(fan),espnOk:available(espn),checkedAt:new Date().toISOString()};
       return state;
     }).finally(()=>state.loading=null);
     return state.loading;
@@ -38,7 +39,7 @@
     if(state.refreshing)return state.refreshing;
     if(!force&&checkedAge()<REFRESH_GUARD_MS)return state;
     state.refreshing=Promise.all([json('/api/fan-intel'),json('/api/espn-scoreboard')]).then(([fan,espn])=>{
-      const fanOk=Boolean(fan?.ok),espnOk=Boolean(espn?.ok);
+      const fanOk=available(fan),espnOk=available(espn);
       if(fanOk)state.fan=fan;
       if(espnOk)state.espn=espn;
       state.feed={fanOk,espnOk,checkedAt:new Date().toISOString()};
@@ -119,7 +120,7 @@
 
   function feedStatus(mode){
     const stamp=Date.parse(state.espn?.fetchedAt),ageMs=Number.isFinite(stamp)?Math.max(0,Date.now()-stamp):Infinity;
-    const espnHealthy=Boolean(state.espn)&&state.feed.espnOk!==false&&ageMs<=SCOREBOARD_STALE_MS;
+    const espnHealthy=Boolean(state.espn)&&state.feed.espnOk!==false&&state.espn?.snapshot?.stale!==true&&ageMs<=SCOREBOARD_STALE_MS;
     const fanHealthy=state.feed.fanOk!==false;
     const healthy=espnHealthy&&fanHealthy;
     const label=mode==='live'?(espnHealthy?'Live scoreboard connected':'Live scoreboard delayed'):(espnHealthy?'Game data synced':'Scoreboard feed delayed');
