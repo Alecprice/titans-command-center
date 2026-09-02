@@ -1,11 +1,11 @@
 # Cloudflare deployment status
 
 - Status: **deployed + Ticket Center browser regression failure**
-- Source commit: `176ca77dd1c43fcff2395de53d981cbde9016059`
+- Source commit: `54f3a5c83d80f0aef89f37bc1c472c11e6b9a8fd`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `176ca77dd1c43fcff2395de53d981cbde9016059`
+- Main SHA observed before deploy: `54f3a5c83d80f0aef89f37bc1c472c11e6b9a8fd`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers configured: SeatGeek=false, Ticketmaster=false, StubHub=false
@@ -27,7 +27,7 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-02T18:02:28Z
+- Recorded: 2026-09-02T18:23:56Z
 
 ## Canonical front door regression
 
@@ -36,7 +36,7 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "deployedCommit": "5468fd246f6e227ecf0e5ba0e5d5af4b4e783112",
+  "deployedCommit": "54f3a5c83d80f0aef89f37bc1c472c11e6b9a8fd",
   "version": "1.0.0",
   "revisionAttempts": 1,
   "shellPropagationAttempts": 1,
@@ -85,9 +85,9 @@
     }
   },
   "cloudFront": {
-    "requestId": "zG-fslUxG0gmlJnPjzgZyn_N05sNaAD3hqhIE09WpM-GPpNFK0zPyA==",
-    "pop": "DFW57-P1",
-    "via": "1.1 22067fb5d7eb764108747a104222f50a.cloudfront.net (CloudFront)",
+    "requestId": "0DCV6Gx6iPfOKIGclS7IUMPUXiPG3wP2tSFTPnaAK_k7LVciDjaXwQ==",
+    "pop": "ORD51-P2",
+    "via": "1.1 6cb03ad529b99ef54866d7ba6041dd04.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -106,13 +106,13 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 448,
-    "originMeta": 220,
-    "canonicalRoot": 96,
-    "originRoot": 75,
-    "health": 179
+    "canonicalMeta": 376,
+    "originMeta": 298,
+    "canonicalRoot": 78,
+    "originRoot": 148,
+    "health": 200
   },
-  "testedAt": "2026-09-02T18:01:11.607Z"
+  "testedAt": "2026-09-02T18:22:40.889Z"
 }```
 
 ## Production regression
@@ -132,8 +132,8 @@
   },
   "manifestStatus": 200,
   "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v82",
-  "precachePaths": 140,
+  "serviceWorkerCache": "titans-cc-brand-2026-v83",
+  "precachePaths": 141,
   "pwaIcons": {
     "icon192": {
       "width": 192,
@@ -172,19 +172,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "176ca77dd1c43fcff2395de53d981cbde9016059",
-    "builtAt": "2026-09-02T18:00:54.049Z"
+    "commit": "54f3a5c83d80f0aef89f37bc1c472c11e6b9a8fd",
+    "builtAt": "2026-09-02T18:22:22.967Z"
   },
-  "deploymentPropagationAttempts": 3,
+  "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 150,
-    "health": 318,
-    "data": 152,
-    "stats": 335,
-    "market": 170,
-    "analytics": 215
+    "root": 60,
+    "health": 139,
+    "data": 160,
+    "stats": 240,
+    "market": 76,
+    "analytics": 204
   },
-  "testedAt": "2026-09-02T18:01:30.121Z",
+  "testedAt": "2026-09-02T18:23:03.244Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-snapshot",
@@ -195,8 +195,8 @@
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 290,
-    "testedAt": "2026-09-02T18:01:30.738Z"
+    "responseMs": 227,
+    "testedAt": "2026-09-02T18:23:03.685Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -204,17 +204,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 167,
-    "warmHitMs": 167,
+    "coldOrInitialMs": 118,
+    "warmHitMs": 118,
     "rows": 0,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 167,
+        "durationMs": 118,
         "rows": 0
       }
     ],
-    "testedAt": "2026-09-02T18:01:30.927Z"
+    "testedAt": "2026-09-02T18:23:03.827Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -273,8 +273,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 240,
-  "testedAt": "2026-09-02T18:01:31.471Z"
+  "durationMs": 207,
+  "testedAt": "2026-09-02T18:23:04.321Z"
 }```
 
 ## Browser navigation regression
@@ -320,11 +320,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 163,
+  "maxLongTaskMs": 120,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 30.74,
-  "testedAt": "2026-09-02T18:02:08Z"
+  "durationSeconds": 27.05,
+  "testedAt": "2026-09-02T18:23:40Z"
 }```
 
 ## Listen Watch browser regression
@@ -404,11 +404,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/e937390a/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788372134874
+      "timestamp": 1788373423229
     }
   ],
-  "durationSeconds": 6.8,
-  "testedAt": "2026-09-02T18:02:15Z"
+  "durationSeconds": 2.98,
+  "testedAt": "2026-09-02T18:23:43Z"
 }```
 
 ## Market Pulse browser regression
@@ -505,8 +505,8 @@
     "rowGeometry": []
   },
   "browserWarnings": [],
-  "durationSeconds": 1.71,
-  "testedAt": "2026-09-02T18:02:17Z"
+  "durationSeconds": 1.73,
+  "testedAt": "2026-09-02T18:23:45Z"
 }```
 
 ## Ticket Center browser regression
@@ -848,8 +848,8 @@
     "upcoming": false,
     "viewport": 1265
   },
-  "durationSeconds": 10.07,
-  "testedAt": "2026-09-02T18:02:27Z"
+  "durationSeconds": 9.87,
+  "testedAt": "2026-09-02T18:23:55Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
