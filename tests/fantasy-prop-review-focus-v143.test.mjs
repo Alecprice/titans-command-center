@@ -6,12 +6,19 @@ const review=fs.readFileSync(new URL('../fantasy-prop-review-v138.js',import.met
 
 test('review rerenders capture only active review controls for focus continuity',()=>{
   assert.ok(review.includes('function reviewFocusRequest(root)'));
+  assert.ok(review.includes('const active=document.activeElement;'));
+  assert.ok(review.includes("if(!active||!root.contains(active))return null;"));
   assert.ok(review.includes("active.matches('.fpr-row-mark')"));
   assert.ok(review.includes("active.matches('.fpr-change[data-review-key]')"));
+  assert.ok(review.includes("active.matches('.fpr-new[data-review-key]')"));
   assert.ok(review.includes("active.matches('.fpr-mark')"));
   assert.ok(review.includes("active.matches('.fpr-mark-changed')"));
   assert.ok(review.includes("active.matches('.fpr-only')"));
-  assert.doesNotMatch(review,/document\.activeElement[\s\S]{0,500}querySelectorAll\('\.fprop-row'\)/);
+  const start=review.indexOf('function reviewFocusRequest(root)');
+  const end=review.indexOf('function focusReviewPanel',start);
+  assert.ok(start>=0&&end>start,'missing scoped focus capture helpers');
+  const focusCapture=review.slice(start,end);
+  assert.doesNotMatch(focusCapture,/querySelectorAll\('\.fprop-row'\)/);
 });
 
 test('focus restoration happens after the review DOM settles and before observer ownership resumes',()=>{
