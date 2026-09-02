@@ -29,6 +29,7 @@
   const gameFocus=()=>runtime.scheduleFocus(games());
   const latestFinal=()=>runtime.latestCompletedGame(games());
   const regularFinals=()=>games().filter(g=>Number(g?.week)>=1&&/final/i.test(String(g?.status||''))&&Number.isFinite(Number(g?.score))&&Number.isFinite(Number(g?.opponentScore)));
+  const desiredMode=()=>document.querySelector('.v14-now')?'season-lens':'full';
 
   function scheduleRecord(){
     let wins=0,losses=0,ties=0;
@@ -74,7 +75,7 @@
   }
 
   const fmtDate=value=>runtime.formatTeamKickoff(value);
-  function priorityCards(p){
+  function priorityCards(p,{integrated=false}={}){
     const focus=gameFocus(),g=focus.game,last=latestFinal(),move=moves()[0],inj=injuries(),stand=standings().find(x=>x.abbreviation==='TEN'),depth=depthChanges();
     const availability=availabilityState(g,inj),division=standingsState(stand);
     const gameCard=focus.state==='game-window'&&g
@@ -100,7 +101,17 @@
       regular:['game','injury','standings','changes'],
       offseason:['roster','players','changes','draft']
     }[p.key]||['game','changes','roster','players'];
-    return order.map(key=>base[key]);
+    const seasonLens={
+      postseason:['last','changes'],
+      'free-agency':['roster','changes'],
+      draft:['draft','roster'],
+      spring:['players','changes'],
+      camp:['changes','players'],
+      preseason:['changes','roster'],
+      regular:['standings','changes'],
+      offseason:['roster','players']
+    }[p.key]||order.slice(0,2);
+    return (integrated?seasonLens:order).map(key=>base[key]);
   }
 
   function updateStatus(p){
@@ -111,11 +122,19 @@
 
   async function render(){
     if(runtime.route()!=='home')return;
-    if(document.querySelector('.v19-365'))return;
+    const expectedMode=desiredMode();
+    const existing=document.querySelector('.v19-365');
+    if(existing?.dataset.v19Mode===expectedMode)return;
+    existing?.remove();
     const token=++state.serial;await load();if(token!==state.serial||runtime.route()!=='home')return;
+    const integrated=desiredMode()==='season-lens';
     const target=document.querySelector('.v14-now')||document.querySelector('.fan-hero');if(!target)return;
-    const p=phase(),cards=priorityCards(p);
-    const section=document.createElement('section');section.className='v19-365';section.innerHTML=`<header><div><small>365 MODE · ${esc(p.label)}</small><h2>${esc(p.title)}</h2><p>${esc(p.copy)}</p></div><a href="#command">Review changes →</a></header><div class="v19-365-grid">${cards.map(card=>`<a href="${esc(card.href)}"><small>${esc(card.eyebrow)}</small><strong>${esc(card.title)}</strong><span>${esc(card.copy)}</span></a>`).join('')}</div><footer><span>Command Center mode adapts to the football calendar; it does not claim an official league transaction window.</span></footer>`;
+    const p=phase(),cards=priorityCards(p,{integrated});
+    const section=document.createElement('section');
+    section.className=`v19-365${integrated?' integrated':''}`;
+    section.dataset.v19Mode=integrated?'season-lens':'full';
+    const copy=integrated?'A tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.':p.copy;
+    section.innerHTML=`<header><div>${integrated?'<span class="v19-365-lens">SEASON LENS</span>':''}<small>365 MODE · ${esc(p.label)}</small><h2>${esc(p.title)}</h2><p>${esc(copy)}</p></div><a href="#command">Review changes →</a></header><div class="v19-365-grid">${cards.map(card=>`<a href="${esc(card.href)}"><small>${esc(card.eyebrow)}</small><strong>${esc(card.title)}</strong><span>${esc(card.copy)}</span></a>`).join('')}</div><footer><span>Command Center mode adapts to the football calendar; it does not claim an official league transaction window.</span></footer>`;
     target.insertAdjacentElement('afterend',section);updateStatus(p);
   }
 
