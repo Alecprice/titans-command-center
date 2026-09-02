@@ -17,10 +17,12 @@ test('Game Day 3.1 checks live state every 30 seconds without hammering hidden o
 
 test('Game Day refresh preserves the last known good snapshot when either live source fails or is unavailable',()=>{
   const js=read('gameday-v16.js');
-  assert.match(js,/Promise\.all\(\[json\('\/api\/fan-intel'\),json\('\/api\/espn-scoreboard'\)\]\)/);
+  assert.match(js,/sharedJson\('\/api\/fan-intel',\{ttl:LIVE_DATA_TTL_MS,force\}\)/);
+  assert.match(js,/sharedJson\('\/api\/espn-scoreboard',\{ttl:LIVE_DATA_TTL_MS,force\}\)/);
   assert.match(js,/const available=response=>Boolean\(response\?\.ok&&response\?\.available!==false\)/);
-  assert.match(js,/if\(fanOk\)state\.fan=fan/);
-  assert.match(js,/if\(espnOk\)state\.espn=espn/);
+  assert.match(js,/const readHealthy=read=>read\?\.fresh!==false&&available\(read\?\.value\)/);
+  assert.match(js,/if\(available\(fan\)\)state\.fan=fan/);
+  assert.match(js,/if\(available\(espn\)\)state\.espn=espn/);
   assert.match(js,/Fan intel retrying · showing last good snapshot/);
   assert.match(js,/Live scoreboard delayed/);
 });
