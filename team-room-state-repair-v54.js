@@ -62,9 +62,9 @@
     const rail=bar?.querySelector('.roster-unit-quickrail');
     if(!unit||!rail)return;
     const selectedUnit=String(unit.value||'all').toLowerCase();
-    rail.querySelectorAll('[data-roster-unit-quick]').forEach(button=>{
-      const active=String(button.dataset.rosterUnitQuick||'all').toLowerCase()===selectedUnit;
-      button.setAttribute('aria-pressed',String(active));
+    rail.querySelectorAll('[data-roster-unit-quick]').forEach(control=>{
+      const active=String(control.dataset.rosterUnitQuick||'all').toLowerCase()===selectedUnit;
+      control.setAttribute('aria-pressed',String(active));
     });
   }
 
