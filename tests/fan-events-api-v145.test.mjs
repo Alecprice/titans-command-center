@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
+  eventInRegion,
   fanEventsConfig,
   fanEventsRoute,
   groupFanEvents,
@@ -40,28 +41,43 @@ test('fan event scope is fixed and server bounded',()=>{
 
 test('provider normalizers keep only provider-owned HTTPS destinations',()=>{
   const eventbrite=normalizeEventbriteEvents([
-    {id:'1',name:{text:'Nashville event'},url:'https://www.eventbrite.com/e/1',start:{utc:'2026-09-04T01:00:00Z'},venue:{name:'Venue',address:{city:'Nashville',region:'TN'}}},
+    {id:'1',name:{text:'Nashville event'},url:'https://www.eventbrite.com/e/1',start:{utc:'2026-09-04T01:00:00Z'},venue:{name:'Venue',address:{city:'Nashville',region:'TN',latitude:'36.16',longitude:'-86.78'}}},
     {id:'2',name:{text:'Unsafe'},url:'https://example.com/e/2',start:{utc:'2026-09-04T01:00:00Z'}},
   ]);
   assert.equal(eventbrite.length,1);
   assert.equal(eventbrite[0].provider,'Eventbrite');
+  assert.equal(eventbrite[0].coordinates.lat,36.16);
 
   const skiddle=normalizeSkiddleEvents([{id:'3',eventname:'Gig',startdate:'2026-09-05',link:'https://www.skiddle.com/whats-on/example',venue:{name:'Room',town:'Town'}}]);
   assert.equal(skiddle.length,1);
   assert.equal(skiddle[0].provider,'Skiddle');
 
-  const bands=normalizeBandsintownEvents([{id:'4',datetime:'2026-09-06T20:00:00',url:'https://www.bandsintown.com/e/4',venue:{name:'Club',city:'Nashville',region:'TN'}}],'Approved Artist');
+  const bands=normalizeBandsintownEvents([{id:'4',datetime:'2026-09-06T20:00:00',url:'https://www.bandsintown.com/e/4',venue:{name:'Club',city:'Nashville',region:'TN',latitude:'36.17',longitude:'-86.77'}}],'Approved Artist');
   assert.equal(bands.length,1);
   assert.equal(bands[0].artist,'Approved Artist');
 
-  const ticketmaster=normalizeTicketmasterEvents([{id:'5',name:'Local event',url:'https://www.ticketmaster.com/event/5',dates:{start:{dateTime:'2026-09-07T01:00:00Z'}},_embedded:{venues:[{name:'Arena',city:{name:'Nashville'},state:{stateCode:'TN'}}]}}]);
+  const ticketmaster=normalizeTicketmasterEvents([{id:'5',name:'Local event',url:'https://www.ticketmaster.com/event/5',dates:{start:{dateTime:'2026-09-07T01:00:00Z'}},_embedded:{venues:[{name:'Arena',city:{name:'Nashville'},state:{stateCode:'TN'},location:{latitude:'36.16',longitude:'-86.77'}}]}}]);
   assert.equal(ticketmaster.length,1);
   assert.equal(ticketmaster[0].provider,'Ticketmaster');
 });
 
+test('every provider result must independently pass Nashville-region verification',()=>{
+  const config={lat:36.1665,lon:-86.7713,radiusMiles:25,regionLabel:'Nashville, TN',start:new Date('2026-09-01T00:00:00Z'),end:new Date('2026-10-01T00:00:00Z'),limit:18};
+  assert.equal(eventInRegion({coordinates:{lat:36.16,lon:-86.78},venue:{}},config),true);
+  assert.equal(eventInRegion({coordinates:{lat:40.7128,lon:-74.006},venue:{city:'New York',state:'NY'}},config),false);
+  assert.equal(eventInRegion({coordinates:{lat:null,lon:null},venue:{city:'Nashville',state:'Tennessee'}},config),true);
+  assert.equal(eventInRegion({coordinates:{lat:null,lon:null},venue:{city:'Los Angeles',state:'CA'}},config),false);
+
+  const grouped=groupFanEvents([
+    {id:'local',provider:'Bandsintown',title:'Local Show',start:'2026-09-10T01:00:00Z',url:'https://www.bandsintown.com/e/local',venue:{name:'Local',city:'Nashville',state:'TN'},coordinates:{lat:null,lon:null}},
+    {id:'away',provider:'Eventbrite',title:'Away Show',start:'2026-09-11T01:00:00Z',url:'https://www.eventbrite.com/e/away',venue:{name:'Away',city:'New York',state:'NY'},coordinates:{lat:null,lon:null}},
+  ],config);
+  assert.deepEqual(grouped.map(event=>event.id),['local']);
+});
+
 test('dedupe preserves source attribution instead of hiding provider provenance',()=>{
-  const config={start:new Date('2026-09-01T00:00:00Z'),end:new Date('2026-10-01T00:00:00Z'),limit:18};
-  const base={title:'Same Show',start:'2026-09-10T01:00:00Z',venue:{name:'Same Venue',city:'Nashville',state:'TN'}};
+  const config={lat:36.1665,lon:-86.7713,radiusMiles:25,regionLabel:'Nashville, TN',start:new Date('2026-09-01T00:00:00Z'),end:new Date('2026-10-01T00:00:00Z'),limit:18};
+  const base={title:'Same Show',start:'2026-09-10T01:00:00Z',venue:{name:'Same Venue',city:'Nashville',state:'TN'},coordinates:{lat:null,lon:null}};
   const grouped=groupFanEvents([
     {...base,id:'a',provider:'Ticketmaster',url:'https://www.ticketmaster.com/event/a'},
     {...base,id:'b',provider:'Eventbrite',url:'https://www.eventbrite.com/e/b'},
@@ -77,21 +93,25 @@ test('Eventbrite uses authenticated organization inventory, never the retired pu
   assert.match(source,/Authorization:`Bearer \$\{token\}`/);
   assert.doesNotMatch(source,/EVENTBRITE_BASE\}\/events\/search/);
   assert.match(source,/retired public Event Search endpoint/);
+  assert.match(source,/only events verified inside the configured Nashville region are displayed/);
   assert.match(envExample,/EVENTBRITE_PRIVATE_TOKEN=/);
 });
 
-test('Bandsintown is bounded to configured artists and no broad artist sweep exists',()=>{
+test('Bandsintown is bounded to configured artists and Nashville-verified results',()=>{
   assert.match(source,/BANDSINTOWN_ARTISTS/);
   assert.match(source,/csv\(env\.BANDSINTOWN_ARTISTS,6\)/);
   assert.match(source,/artists\/\$\{encodeURIComponent\(artist\)\}\/events/);
   assert.doesNotMatch(source,/artists\/search/);
+  assert.match(source,/configured artists; only returned events verified inside the configured Nashville region/);
   assert.match(setup,/exact approved\/canonical artist names/);
 });
 
-test('Skiddle adapter keeps required direct source path staged behind a production setup warning',()=>{
+test('Skiddle adapter is staged but cannot issue production requests in this release',()=>{
   assert.match(source,/SKIDDLE_API_KEY/);
   assert.match(source,/getdistance/);
   assert.match(source,/provider:'Skiddle'/);
+  assert.match(source,/skiddle:false/);
+  assert.doesNotMatch(source,/jobs\.push\(runProvider\('Skiddle'/);
   assert.match(setup,/do not add `SKIDDLE_API_KEY` to production yet/i);
   assert.match(setup,/brand logo/i);
   assert.doesNotMatch(setup,/secret put SKIDDLE_API_KEY/);
