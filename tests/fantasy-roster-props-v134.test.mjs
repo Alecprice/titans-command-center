@@ -39,7 +39,7 @@ test('connected roster marks starter and bench props and supports a reversible r
 
 test('missing or failed Sleeper context never hides or fabricates prop rows',()=>{
   assert.match(bridge,/No prop rows were guessed or hidden/);
-  assert.match(bridge,/if\(!state\.context\?\.matched\)return null/);
+  assert.match(bridge,/if\(!name\|\|!state\.context\?\.matched\)return null/);
   assert.match(bridge,/state\.rosterOnly=false/);
   assert.doesNotMatch(bridge,/recommend|best bet|edge score|lock/i);
 });
