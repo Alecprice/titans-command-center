@@ -53,7 +53,7 @@ def passport_state(driver):
 
 
 def legacy_ready(driver):
-    return wait_for(driver,"""const p=document.querySelector('.legacy-page[data-legacy-finder-ready="true"][data-legacy-trails-ready="true"][data-legacy-passport-ready="true"]');return p&&document.querySelector('[data-legacy-trails]')&&document.querySelector('[data-legacy-passport]')&&document.querySelector('#legacy-finder-input');""",20)
+    return wait_for(driver,"""const p=document.querySelector('.legacy-page[data-legacy-finder-ready="true"][data-legacy-trails-ready="true"][data-legacy-passport-ready="true"][data-legacy-exhibit-links-ready="true"]');return p&&document.querySelector('[data-legacy-trails]')&&document.querySelector('[data-legacy-passport]')&&document.querySelector('#legacy-finder-input');""",20)
 
 
 def geometry(driver):
@@ -61,7 +61,7 @@ def geometry(driver):
       const root=document.documentElement;
       const trail=document.querySelector('[data-legacy-trails]');
       const cards=[...document.querySelectorAll('[data-legacy-trail]')];
-      const actions=[...document.querySelectorAll('[data-legacy-trail-player] button:not(:disabled),.legacy-passport-actions button')];
+      const actions=[...document.querySelectorAll('[data-legacy-trail-player] button:not(:disabled),.legacy-passport-actions button,.legacy-exhibit-focus [data-legacy-exhibit-share],.legacy-exhibit-clear:not([hidden])')];
       const r=trail?.getBoundingClientRect();
       return {
         viewport:innerWidth,
@@ -82,8 +82,8 @@ try:
     d.get(f'{BASE}/#legacy');prepare_returning_user(d,clear_passport=True);legacy_ready(d)
 
     result['stage']='desktop:inventory'
-    inventory=d.execute_script("""return {trails:document.querySelectorAll('[data-legacy-trail]').length,indexed:document.querySelectorAll('[data-legacy-finder-item="true"]').length,heritage:document.querySelectorAll('.legacy-venue-card,.legacy-honor-card').length,passport:(document.querySelector('[data-legacy-passport]')?.innerText||'')};""")
-    if inventory['trails']<5 or inventory['indexed']<20 or inventory['heritage']<20: raise RuntimeError(f'Legacy inventory incomplete: {inventory}')
+    inventory=d.execute_script("""return {trails:document.querySelectorAll('[data-legacy-trail]').length,indexed:document.querySelectorAll('[data-legacy-finder-item="true"]').length,heritage:document.querySelectorAll('.legacy-venue-card,.legacy-honor-card').length,exhibits:document.querySelectorAll('[data-legacy-exhibit-key]').length,passport:(document.querySelector('[data-legacy-passport]')?.innerText||'')};""")
+    if inventory['trails']<5 or inventory['indexed']<20 or inventory['heritage']<20 or inventory['exhibits']<40: raise RuntimeError(f'Legacy inventory incomplete: {inventory}')
     if '0 / 19 stamps' not in inventory['passport']: raise RuntimeError(f'Fresh Passport count incorrect: {inventory}')
 
     result['stage']='desktop:trail-start'
@@ -122,11 +122,32 @@ try:
     matched=wait_for(d,"return [...document.querySelectorAll('.legacy-honor-card.legacy-finder-match')].map(x=>x.textContent.trim())")
     if not any('Mike Keith' in text for text in matched):raise RuntimeError(f'Finder did not isolate Mike Keith: {matched}')
     raw3,params3=hash_params(d)
-    if 'trail' in params3 or params3.get('scope',[''])[0]!='heritage':raise RuntimeError(f'Manual Finder did not own route state: {raw3}')
+    if 'trail' in params3 or 'exhibit' in params3 or params3.get('scope',[''])[0]!='heritage':raise RuntimeError(f'Manual Finder did not own route state: {raw3}')
     after_manual=passport_state(d)
     if after_manual!=before_manual:raise RuntimeError(f'Manual Finder changed Passport progress: before={before_manual} after={after_manual}')
 
-    result['desktop']={'inventory':inventory,'trailStart':raw,'trailNext':raw2,'passportAfterTwo':passport_after_two,'passportReturn':passport_text,'resumeHash':resume_hash,'passportAfterResume':passport_after_resume,'finder':raw3,'matched':matched[:3]}
+    result['stage']='desktop:exhibit-share'
+    d.execute_script("""Object.defineProperty(navigator,'share',{configurable:true,value:async payload=>{window.__legacySharePayload=payload;}});""")
+    share_button=d.find_element(By.CSS_SELECTOR,'.legacy-honor-card.legacy-finder-match [data-legacy-exhibit-share="honor-mike-keith"]')
+    if not share_button.is_displayed():raise RuntimeError('Mike Keith exact-share action is not visible for the Finder match')
+    share_button.click()
+    share_payload=wait_for(d,"return window.__legacySharePayload||null")
+    if 'Mike Keith' not in share_payload.get('title','') or 'exhibit=honor-mike-keith' not in share_payload.get('url',''):raise RuntimeError(f'Exact exhibit share payload incorrect: {share_payload}')
+    if passport_state(d)!=before_manual:raise RuntimeError('Sharing an exhibit changed Museum Passport progress')
+    if d.execute_script('return location.hash')!=raw3:raise RuntimeError('Sharing an exhibit mutated the active Finder URL')
+
+    result['stage']='desktop:exhibit-deeplink'
+    d.get(share_payload['url']);prepare_returning_user(d);legacy_ready(d)
+    exact=wait_for(d,"""const x=document.querySelector('.legacy-exhibit-focus');return x?{key:x.dataset.legacyExhibitKey,label:x.dataset.legacyExhibitLabel,text:x.innerText,count:document.querySelectorAll('.legacy-exhibit-focus').length,filtered:document.querySelectorAll('.legacy-finder-filtered').length,sections:document.querySelectorAll('.legacy-finder-section-hidden').length,active:document.activeElement===x,clearVisible:!!document.querySelector('[data-legacy-exhibit-clear]:not([hidden])')}:null;""")
+    exact_hash,exact_params=hash_params(d)
+    if exact.get('key')!='honor-mike-keith' or 'Mike Keith' not in exact.get('text','') or exact.get('count')!=1:raise RuntimeError(f'Exact exhibit spotlight incorrect: {exact}')
+    if exact.get('filtered') or exact.get('sections') or not exact.get('clearVisible'):raise RuntimeError(f'Exact exhibit incorrectly filtered the museum: {exact}')
+    if exact_params.get('exhibit',[''])[0]!='honor-mike-keith' or any(key in exact_params for key in ['q','scope','trail','step']):raise RuntimeError(f'Exact exhibit URL contains mixed modes: {exact_hash}')
+    if passport_state(d)!=before_manual:raise RuntimeError('Opening an exact exhibit link changed Museum Passport progress')
+    d.find_element(By.CSS_SELECTOR,'[data-legacy-exhibit-clear]').click()
+    wait_for(d,"return !location.hash.includes('exhibit=')&&!document.querySelector('.legacy-exhibit-focus')")
+
+    result['desktop']={'inventory':inventory,'trailStart':raw,'trailNext':raw2,'passportAfterTwo':passport_after_two,'passportReturn':passport_text,'resumeHash':resume_hash,'passportAfterResume':passport_after_resume,'finder':raw3,'matched':matched[:3],'exhibitShare':share_payload,'exactHash':exact_hash,'exact':exact}
     result['browserWarnings']+=severe_logs(d);d.quit();d=None
 
     result['stage']='mobile:launch'
@@ -144,7 +165,16 @@ try:
     wait_for(m,"return location.hash.includes('step=3')&&document.querySelector('[data-legacy-trail-player]')?.innerText.includes('Eddie George')")
     mobile_passport=passport_state(m)
     if mobile_passport.get('visited')!=['1999-run:2','1999-run:3']:raise RuntimeError(f'Mobile Passport progress wrong: {mobile_passport}')
-    result['mobile']={'geometry':mobile,'active':active,'afterNext':m.execute_script('return location.hash'),'passport':mobile_passport}
+
+    result['stage']='mobile:exact-exhibit'
+    m.get(f'{BASE}/#legacy?exhibit=moment-music-city-miracle');prepare_returning_user(m);legacy_ready(m)
+    mobile_exact=wait_for(m,"""const x=document.querySelector('.legacy-exhibit-focus');const b=x?.querySelector('[data-legacy-exhibit-share]');const r=b?.getBoundingClientRect();return x&&b?{key:x.dataset.legacyExhibitKey,text:x.innerText,button:{w:r.width,h:r.height},hash:location.hash}:null;""")
+    exact_mobile_geometry=geometry(m)
+    if mobile_exact.get('key')!='moment-music-city-miracle' or 'Music City Miracle' not in mobile_exact.get('text',''):raise RuntimeError(f'Mobile exact exhibit did not hydrate: {mobile_exact}')
+    if mobile_exact['button']['w']<44 or mobile_exact['button']['h']<44:raise RuntimeError(f'Mobile exact exhibit share target too small: {mobile_exact}')
+    if exact_mobile_geometry['overflow']:raise RuntimeError(f'Exact exhibit caused mobile overflow: {exact_mobile_geometry}')
+    if passport_state(m)!=mobile_passport:raise RuntimeError('Mobile exact exhibit changed Passport progress')
+    result['mobile']={'geometry':mobile,'active':active,'afterNext':'#legacy?trail=1999-run&step=3','passport':mobile_passport,'exact':mobile_exact,'exactGeometry':exact_mobile_geometry}
     result['browserWarnings']+=severe_logs(m);m.quit();m=None
 
     result['stage']='console'
@@ -157,7 +187,7 @@ except Exception as exc:
         if active is not None:
             result['hash']=active.execute_script('return location.hash')
             result['passport']=active.execute_script("return localStorage.getItem(arguments[0])",PASSPORT_KEY)
-            result['pageText']=active.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,3200)")
+            result['pageText']=active.execute_script("return (document.querySelector('#app')?.innerText||'').slice(0,3600)")
     except Exception:pass
 finally:
     for driver in [d,m]:
