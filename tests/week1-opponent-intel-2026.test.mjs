@@ -21,7 +21,9 @@ test('opponent roster spine uses post-cutdown active-roster evidence',()=>{
   assert.equal(spine.quarterback.backup,'Cade Klubnik');
   assert.equal(spine.runningBack.lead,'Breece Hall');
   assert.ok(spine.receivers.includes('Garrett Wilson'));
-  assert.ok(spine.offensiveLine.includes('Jordan Meredith')===false);
+  assert.deepEqual(spine.offensiveLine,[
+    'Olu Fashanu','Dylan Parham','Josh Myers','Joe Tippmann','Armand Membou'
+  ]);
   assert.equal(spine.kicker,'Blake Grupe');
 });
 
