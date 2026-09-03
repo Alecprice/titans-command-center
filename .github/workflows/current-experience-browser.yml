@@ -5,13 +5,19 @@ on:
     workflows: ['Titans Cloudflare Deploy']
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact deployed commit SHA to audit
+        required: true
+        type: string
 
 permissions:
   contents: read
   statuses: write
 
 concurrency:
-  group: titans-current-experience-${{ github.event.workflow_run.head_sha }}
+  group: titans-current-experience-${{ inputs.expected_sha || github.event.workflow_run.head_sha }}
   cancel-in-progress: true
 
 jobs:
@@ -20,12 +26,12 @@ jobs:
     timeout-minutes: 15
     env:
       WORKER_URL: https://titans.alecjprice.com
-      EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+      EXPECTED_SHA: ${{ inputs.expected_sha || github.event.workflow_run.head_sha }}
     steps:
       - name: Checkout deployed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ inputs.expected_sha || github.event.workflow_run.head_sha }}
           persist-credentials: false
 
       - name: Use Node 24
@@ -140,7 +146,7 @@ jobs:
         if: steps.deployed_sha.outcome == 'success'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: current-experience-${{ github.event.workflow_run.head_sha }}
+          name: current-experience-${{ inputs.expected_sha || github.event.workflow_run.head_sha }}
           path: |
             /tmp/runtime-365-diagnostic.json
             /tmp/smart-search-browser-smoke.json
@@ -186,7 +192,7 @@ jobs:
             await github.rest.repos.createCommitStatus({
               owner,
               repo,
-              sha: context.payload.workflow_run.head_sha,
+              sha: process.env.EXPECTED_SHA,
               state,
               context: 'Titans Current Experience',
               description,
