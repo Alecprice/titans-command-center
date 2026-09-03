@@ -195,6 +195,13 @@ function focusTrailDestination(page,target){
   try{target.focus({preventScroll:true});}catch{target.focus();}
 }
 
+function focusTrailChooser(root,trailId){
+  if(!trailId)return;
+  const chooser=root.querySelector(`[data-legacy-trail="${trailId}"]`);
+  if(!chooser)return;
+  try{chooser.focus({preventScroll:true});}catch{chooser.focus();}
+}
+
 function scrollToMatch(page){
   const target=page.querySelector('.legacy-finder-match');
   if(!target)return;
@@ -269,7 +276,11 @@ export function ensureLegacyTrails(page,controller){
     if(card){activate(card.dataset.legacyTrail,0);return;}
     if(event.target.closest('[data-legacy-trail-prev]')&&active&&step>0){activate(active.id,step-1);return;}
     if(event.target.closest('[data-legacy-trail-next]')&&active&&step<active.stops.length-1){activate(active.id,step+1);return;}
-    if(event.target.closest('[data-legacy-trail-exit]'))deactivate();
+    if(event.target.closest('[data-legacy-trail-exit]')){
+      const trailId=active?.id||null;
+      deactivate();
+      focusTrailChooser(root,trailId);
+    }
   });
 
   page.addEventListener('input',event=>{
