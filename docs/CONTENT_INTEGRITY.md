@@ -2,6 +2,8 @@
 
 Last full audit: **2026-08-19**
 
+Current-team roster fallback audit: **2026-09-02** — 53 Active players plus 7 reserve-list players; the 17-player practice squad is tracked separately.
+
 The site is a fan-built product, but factual team information should be held to a newsroom/data-product standard. A polished UI is not permission to make an uncertain fact look definitive.
 
 ## Source hierarchy
