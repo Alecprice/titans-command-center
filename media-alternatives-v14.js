@@ -136,12 +136,14 @@ import './media-custom-links-v14.js';
     if(note)note.insertAdjacentElement('beforebegin',section);else watch.append(section);
   }
 
+  let quickStartEpoch=0;
   async function renderQuickStart(){
     if(route()!=='media')return;
     const hero=document.querySelector('.media-hero'),watch=document.querySelector('.media-watch');
     if(!hero||!watch)return;
+    const epoch=++quickStartEpoch;
     const context=await mediaContext();
-    if(route()!=='media'||!document.body.contains(hero))return;
+    if(epoch!==quickStartEpoch||route()!=='media'||!document.body.contains(hero))return;
     const postgame=recentPostgame(context.completed);
     const game=postgame||context.game;
     const result=postgame?finalResult(postgame):null;
@@ -172,6 +174,10 @@ import './media-custom-links-v14.js';
   }
 
   function render(){renderAlternatives();renderQuickStart()}
+  const refreshTouchesMediaData=event=>{
+    const urls=Array.isArray(event?.urls)?event.urls:null;
+    return !urls||urls.includes('/api/data');
+  };
 
   let refreshTimer=null;
   function syncRefreshTimer(){
@@ -187,6 +193,12 @@ import './media-custom-links-v14.js';
   }
   function routeChanged(){syncRefreshTimer();setTimeout(render,60)}
 
+  const runtime=window.TitansRuntime;
+  if(typeof runtime?.onRefresh==='function'){
+    runtime.onRefresh(event=>{
+      if(route()==='media'&&refreshTouchesMediaData(event))renderQuickStart();
+    });
+  }
   window.addEventListener('hashchange',routeChanged);
   window.addEventListener('popstate',routeChanged);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&route()==='media')renderQuickStart()});
