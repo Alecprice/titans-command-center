@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -367,3 +368,16 @@ jobs:
             git commit -m 'chore: record Cloudflare deployment status [skip ci]'
             git push origin main
           fi
+
+      - name: Dispatch Current Experience audit for workflow-dispatched releases
+        if: ${{ github.event_name == 'workflow_dispatch' && steps.quality.outcome == 'success' && steps.creds.outputs.cloudflare == 'true' && steps.source_guard.outputs.current == 'true' && steps.deploy.outcome == 'success' && steps.frontdoor.outcome == 'success' && steps.smoke.outcome == 'success' && steps.fan_events_smoke.outcome == 'success' && steps.browser.outcome == 'success' && steps.media_browser.outcome == 'success' && steps.market_browser.outcome == 'success' && steps.tickets_browser.outcome == 'success' && steps.command_browser.outcome == 'success' && steps.player_gameday_browser.outcome == 'success' && steps.ask_browser.outcome == 'success' && steps.change_browser.outcome == 'success' && steps.runtime_365_browser.outcome == 'success' && steps.freshness_browser.outcome == 'success' && steps.account_browser.outcome == 'success' && steps.analytics_browser.outcome == 'success' && steps.headshot_browser.outcome == 'success' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          jq -n --arg ref main --arg expected_sha "$GITHUB_SHA" \
+            '{ref:$ref,inputs:{expected_sha:$expected_sha}}' \
+            | gh api -X POST \
+                "repos/${GITHUB_REPOSITORY}/actions/workflows/current-experience-browser.yml/dispatches" \
+                --input -
+          echo "Dispatched Titans Current Experience Audit for deployed SHA $GITHUB_SHA."
