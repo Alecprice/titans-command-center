@@ -133,13 +133,18 @@ jobs:
               -f sha="$head_sha"
           )"
           merged="$(jq -r '.merged // false' <<<"$merge_json")"
+          merge_sha="$(jq -r '.sha // empty' <<<"$merge_json")"
           message="$(jq -r '.message // ""' <<<"$merge_json")"
           if [[ "$merged" != "true" ]]; then
             echo "TENX auto-merge failed closed: ${message}"
             exit 1
           fi
+          if [[ ! "$merge_sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo 'TENX auto-merge failed closed: merge API did not return the new main commit SHA.'
+            exit 1
+          fi
 
-          echo "TENX auto-merged PR #${pr_number} at ${head_sha}: ${message}"
+          echo "TENX auto-merged PR #${pr_number}: green PR head ${head_sha} became main merge commit ${merge_sha}: ${message}"
 
           deploy_dispatch_json="$(
             gh api \
@@ -153,10 +158,11 @@ jobs:
             echo 'TENX release handoff failed closed: Cloudflare dispatch did not return a workflow_run_id.'
             exit 1
           fi
-          echo "Dispatched Titans Cloudflare Deploy run ${deploy_run_id} for the new main revision."
+          echo "Dispatched Titans Cloudflare Deploy run ${deploy_run_id} for main merge commit ${merge_sha}."
 
           deploy_status='queued'
           deploy_conclusion=''
+          deploy_head_sha=''
           for attempt in $(seq 1 150); do
             deploy_run_json="$(
               gh api \
@@ -165,6 +171,7 @@ jobs:
             )"
             deploy_status="$(jq -r '.status // "unknown"' <<<"$deploy_run_json")"
             deploy_conclusion="$(jq -r '.conclusion // ""' <<<"$deploy_run_json")"
+            deploy_head_sha="$(jq -r '.head_sha // ""' <<<"$deploy_run_json")"
             if [[ "$deploy_status" == 'completed' ]]; then
               break
             fi
@@ -173,6 +180,10 @@ jobs:
 
           if [[ "$deploy_status" != 'completed' ]]; then
             echo "TENX release handoff failed closed: Cloudflare run ${deploy_run_id} did not complete within the controller lease."
+            exit 1
+          fi
+          if [[ "$deploy_head_sha" != "$merge_sha" ]]; then
+            echo "TENX release handoff failed closed: Cloudflare run ${deploy_run_id} tested ${deploy_head_sha:-unknown}, expected merge commit ${merge_sha}."
             exit 1
           fi
           if [[ "$deploy_conclusion" != 'success' ]]; then
@@ -185,5 +196,5 @@ jobs:
             -X POST \
             "repos/${GITHUB_REPOSITORY}/actions/workflows/tenx-postdeploy-verification.yml/dispatches" \
             -f ref='main' \
-            -F "inputs[source_sha]=${head_sha}" >/dev/null
-          echo "Dispatched exact-sha TENX Current Experience / post-deploy verification for ${head_sha} after successful Cloudflare run ${deploy_run_id}."
+            -F "inputs[source_sha]=${merge_sha}" >/dev/null
+          echo "Dispatched exact-sha TENX Current Experience / post-deploy verification for deployed merge commit ${merge_sha} after successful Cloudflare run ${deploy_run_id}."
