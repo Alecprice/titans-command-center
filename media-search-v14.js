@@ -4,16 +4,25 @@ import './media-affiliates-v14.js';
   'use strict';
   const app=document.querySelector('#app');
   const TERMS=/\b(?:listen|watch|radio|affiliate|station|stream|streaming|tv|television|broadcast|kickoff|am|fm|call sign|104\.5|wgfx|where to watch|where to listen)\b/i;
+  const RADIO_CONTEXT=/\b(?:radio|affiliate|station|am|fm|call sign)\b/i;
   const RADIO_CALLSIGN=/\b[WK][A-Z]{3}\b/i;
   const RADIO_FREQUENCY=/\b(?:\d{3,4}\s*(?:AM|FM)|\d{2,3}\.\d\s*(?:AM|FM)?)\b/i;
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const params=()=>new URLSearchParams(location.hash.split('?')[1]||'');
   const query=()=>params().get('q')||'';
-  const mediaIntent=value=>TERMS.test(value)||RADIO_CALLSIGN.test(value)||RADIO_FREQUENCY.test(value);
+  const callsignHandoff=value=>{
+    const source=String(value||'').trim();
+    const call=source.match(RADIO_CALLSIGN)?.[0];
+    if(!call)return'';
+    const exact=source.toUpperCase()===call.toUpperCase();
+    const contextual=RADIO_CONTEXT.test(source)||RADIO_FREQUENCY.test(source);
+    return exact||contextual?call.toUpperCase():'';
+  };
+  const mediaIntent=value=>TERMS.test(value)||Boolean(callsignHandoff(value))||RADIO_FREQUENCY.test(value);
   const affiliateHandoff=value=>{
     const source=String(value||'');
-    const call=source.match(RADIO_CALLSIGN)?.[0];
-    if(call)return call.toUpperCase();
+    const call=callsignHandoff(source);
+    if(call)return call;
     const frequency=source.match(RADIO_FREQUENCY)?.[0];
     return frequency?frequency.trim().toUpperCase():'';
   };
