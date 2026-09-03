@@ -6,10 +6,18 @@ import {WEEK1_OPPONENT_INTEL_2026,opponentIntelSourceTruth} from './src/week1-op
   const app=document.querySelector('#app');
   const intel=WEEK1_OPPONENT_INTEL_2026;
   const VERSION=String(intel.version||'2026-w1');
+  const WEEK1_WINDOW_MS=21*24*60*60*1000;
+  const POSTGAME_GRACE_MS=8*60*60*1000;
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safeArr=value=>Array.isArray(value)?value:[];
   const safeUrl=source=>{try{const url=new URL(source?.url,location.href);return url.protocol==='https:'?url.href:''}catch{return''}};
+
+  function withinWeek1Window(now=Date.now()){
+    const kickoff=Date.parse(String(intel?.game?.kickoff||''));
+    if(!Number.isFinite(kickoff))return false;
+    return now>=kickoff-WEEK1_WINDOW_MS&&now<=kickoff+POSTGAME_GRACE_MS;
+  }
 
   function sourceLinks(){
     const keys=['jetsRoster','jetsTransactions','jetsPracticeSquad','jetsWeek1Prep'];
@@ -27,14 +35,10 @@ import {WEEK1_OPPONENT_INTEL_2026,opponentIntelSourceTruth} from './src/week1-op
   }
 
   function matchingDesk(){
-    if(route()!=='command')return null;
+    if(route()!=='command'||!withinWeek1Window())return null;
     const root=app?.querySelector('.v15-addon-root[data-tab="changes"]');
     const desk=root?.querySelector('.v15-intel-desk:not(.v161-opponent-scout)');
-    if(!root||!desk)return null;
-    const text=String(desk.textContent||'').toLowerCase();
-    if(!text.includes(String(intel.opponent||'').toLowerCase()))return null;
-    if(!text.includes(`week ${String(intel.game?.week||'')}`.toLowerCase()))return null;
-    return desk;
+    return root&&desk?desk:null;
   }
 
   function render(){
