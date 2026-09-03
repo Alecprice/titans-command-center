@@ -33,8 +33,36 @@ test('schedule calendar keeps official schedule provenance and safe calendar tex
   assert.match(feature,/target="_blank" rel="noopener noreferrer"/);
 });
 
+test('TENX schedule refresh captures a publication revision before the shared API read',()=>{
+  assert.match(feature,/let data=null,loading=null,publicationRevision=0/);
+  const capture=feature.indexOf('const revision=publicationRevision;');
+  const request=feature.indexOf("runtime?.apiJson?.('/api/data',{ttl:30000,force})");
+  assert.ok(capture>=0&&request>capture,'publication revision must be captured before the request starts');
+});
+
+test('TENX stale schedule success and failure cannot publish into a refreshed view',()=>{
+  assert.match(feature,/\.then\(value=>\{if\(revision===publicationRevision\)data=value\?\.ok\?value:\{\};return data;\}\)/);
+  assert.match(feature,/\.catch\(\(\)=>\{if\(revision===publicationRevision\)data=\{\};return data;\}\)/);
+});
+
+test('TENX stale schedule loads restart the current generation before any empty-state render',()=>{
+  const lifecycle=feature.slice(feature.indexOf('.finally(()=>{'),feature.indexOf('return loading;',feature.indexOf('.finally(()=>{')));
+  assert.match(lifecycle,/const stale=revision!==publicationRevision/);
+  assert.match(lifecycle,/loading=null/);
+  assert.match(lifecycle,/if\(stale\)\{if\(route\(\)==='games'\)load\(true\);return;\}/);
+  assert.ok(lifecycle.indexOf("if(stale){if(route()==='games')load(true);return;}")<lifecycle.indexOf('queueMicrotask(render)'),'stale generation must restart before render');
+});
+
+test('TENX shared refresh invalidates Schedule publication before requesting refreshed data',()=>{
+  const refresh="runtime.onRefresh(()=>{data=null;publicationRevision++;if(route()==='games')load(true);});";
+  assert.ok(feature.includes(refresh));
+  assert.equal((feature.match(/runtime\.onRefresh/g)||[]).length,1);
+  assert.equal((feature.match(/runtime\?\.apiJson\?\./g)||[]).length,1);
+  assert.doesNotMatch(feature,/\bfetch\s*\(/);
+});
+
 test('schedule calendar load lifecycle returns to the real render function without an undefined mount callback',()=>{
-  assert.match(feature,/\.finally\(\(\)=>\{loading=null;queueMicrotask\(render\);\}\)/);
+  assert.match(feature,/queueMicrotask\(render\)/);
   assert.doesNotMatch(feature,/queueMicrotask\(mount\)/);
 });
 
