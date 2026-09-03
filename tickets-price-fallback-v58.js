@@ -1,10 +1,11 @@
+import './tickets-decision-bus-v156.js';
 import './tickets-tenx-v123.js';
 import './tickets-trend-v124.js';
 import './tickets-compare-v125.js';
 import './tickets-finalists-v127.js';
 import './tickets-signal-lens-v128.js';
 import './tickets-decision-settle-v149.js';
-import './tickets-decision-rehydrate-v155.js';
+import './tickets-decision-rehydrate-v156.js';
 import './tickets-target-price-watch-v143.js';
 import './tickets-outing-budget-v134.js';
 import './tickets-actual-cost-compare-v135.js';
