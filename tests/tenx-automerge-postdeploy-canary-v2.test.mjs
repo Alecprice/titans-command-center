@@ -11,9 +11,12 @@ test('TENX autonomous merge has permission to dispatch both release workflows', 
   assert.match(controller, /tenx-postdeploy-verification\.yml\/dispatches/);
 });
 
-test('TENX postdeploy handoff is pinned to the exact green PR head', () => {
-  assert.match(controller, /inputs\[source_sha\]=\$\{head_sha\}/);
+test('TENX merge stays pinned to the green PR head while postdeploy pins the resulting main merge commit', () => {
   assert.match(controller, /-f sha="\$head_sha"/);
+  assert.match(controller, /merge_sha=.*\.sha/);
+  assert.match(controller, /inputs\[source_sha\]=\$\{merge_sha\}/);
+  assert.match(controller, /deploy_head_sha/);
+  assert.match(controller, /deploy_head_sha\" != \"\$merge_sha/);
   assert.match(verifier, /SOURCE_SHA: \$\{\{ inputs\.source_sha \}\}/);
   assert.match(verifier, /ref: \$\{\{ inputs\.source_sha \}\}/);
   assert.match(verifier, /last === expected/);
