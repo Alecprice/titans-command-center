@@ -50,3 +50,6 @@
     openGuide();
   },true);
 })();
+
+// Lightweight fan-experience enhancements that do not need to block the app shell.
+import('./roster-practice-squad-v0.js').catch(()=>{});
