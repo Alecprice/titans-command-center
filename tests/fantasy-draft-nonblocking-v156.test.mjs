@@ -20,9 +20,9 @@ test('valid league roster and matchup render before optional draft requests star
 
 test('Sleeper Connect copy no longer claims optional draft data blocks the matchup',()=>{
   assert.match(js,/Previous league and matchup data stays hidden until Sleeper returns this selection\./);
-  assert.doesNotMatch(js,/Previous league, matchup and draft data stays hidden/);
-  assert.match(js,/!sleeper\.loading&&league/);
-  assert.match(js,/id="sleeper-league"\$\{sleeper\.loading\?' disabled':''\}/);
+  assert.doesNotMatch(js,/Previous league, matchup and draft data stays hidden until Sleeper returns this selection\./);
+  assert.match(js,/\$\{!sleeper\.connecting&&!sleeper\.loading&&league\?/);
+  assert.match(js,/id="sleeper-league"\$\{sleeper\.connecting\|\|sleeper\.loading\?' disabled':''\}/);
 });
 
 test('Draft Command exposes progressive optional loading without fake zero picks',()=>{
