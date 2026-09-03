@@ -1,11 +1,11 @@
 # Cloudflare deployment status
 
-- Status: **deployed + runtime / 365 Mode browser regression failure**
-- Source commit: `ba7eed16f66e72b6b2df47e17caf82ef4910ef08`
+- Status: **deployed + canonical front door + full production + browser + media + market + tickets + command intelligence + fan events + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
+- Source commit: `43dea02161708068c6e908bdd3a8006a1c2111c5`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `ba7eed16f66e72b6b2df47e17caf82ef4910ef08`
+- Main SHA observed before deploy: `43dea02161708068c6e908bdd3a8006a1c2111c5`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers staged in GitHub: SeatGeek=false, Ticketmaster=false, StubHub=false
@@ -23,14 +23,14 @@
 - Player Intelligence / Game Day browser regression: success
 - Ask Titans browser regression: success
 - Change Intelligence browser regression: success
-- Runtime / 365 Mode browser regression: failure
-- Data freshness browser regression: skipped
-- Account / Guest browser regression: skipped
-- Advanced analytics browser regression: skipped
-- Player headshot browser regression: skipped
+- Runtime / 365 Mode browser regression: success
+- Data freshness browser regression: success
+- Account / Guest browser regression: success
+- Advanced analytics browser regression: success
+- Player headshot browser regression: success
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-03T13:47:42Z
+- Recorded: 2026-09-03T13:54:23Z
 
 ## Canonical front door regression
 
@@ -42,7 +42,7 @@
   "deployedCommit": "ba7eed16f66e72b6b2df47e17caf82ef4910ef08",
   "version": "1.0.0",
   "revisionAttempts": 1,
-  "shellPropagationAttempts": 2,
+  "shellPropagationAttempts": 1,
   "shellPaths": [
     "/",
     "/index.html",
@@ -88,9 +88,9 @@
     }
   },
   "cloudFront": {
-    "requestId": "y5yuvJrpx3ldOoe1jAGwltBmmAqJYY1j6cPXKMu72X_vluC-ig4PPA==",
-    "pop": "SFO5-P1",
-    "via": "1.1 f7597cc90ba7218b20a85a0785996e1c.cloudfront.net (CloudFront)",
+    "requestId": "2G-eMdrkuya_FgATWXSKVBJyNspfMb5lcGI0Gx-KP8eMlo-8dbpz3A==",
+    "pop": "IAD55-P2",
+    "via": "1.1 114d05cae4b477890685343cc9b5a720.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -109,13 +109,13 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 172,
-    "originMeta": 130,
-    "canonicalRoot": 24,
-    "originRoot": 16,
-    "health": 199
+    "canonicalMeta": 174,
+    "originMeta": 113,
+    "canonicalRoot": 101,
+    "originRoot": 51,
+    "health": 167
   },
-  "testedAt": "2026-09-03T13:46:28.900Z"
+  "testedAt": "2026-09-03T13:53:07.096Z"
 }```
 
 ## Production regression
@@ -175,19 +175,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "ba7eed16f66e72b6b2df47e17caf82ef4910ef08",
-    "builtAt": "2026-09-03T13:46:09.458Z"
+    "commit": "43dea02161708068c6e908bdd3a8006a1c2111c5",
+    "builtAt": "2026-09-03T13:52:51.802Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 3,
   "responseMs": {
-    "root": 30,
-    "health": 126,
-    "data": 56,
-    "stats": 308,
-    "market": 82,
-    "analytics": 180
+    "root": 94,
+    "health": 108,
+    "data": 52,
+    "stats": 187,
+    "market": 2077,
+    "analytics": 157
   },
-  "testedAt": "2026-09-03T13:46:34.099Z",
+  "testedAt": "2026-09-03T13:53:19.838Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-snapshot",
@@ -198,8 +198,8 @@
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 203,
-    "testedAt": "2026-09-03T13:46:34.522Z"
+    "responseMs": 231,
+    "testedAt": "2026-09-03T13:53:20.354Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -207,17 +207,17 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 115,
-    "warmHitMs": 115,
+    "coldOrInitialMs": 113,
+    "warmHitMs": 113,
     "rows": 608,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 115,
+        "durationMs": 113,
         "rows": 608
       }
     ],
-    "testedAt": "2026-09-03T13:46:34.668Z"
+    "testedAt": "2026-09-03T13:53:20.497Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -260,8 +260,8 @@
     "Eventbrite",
     "Skiddle"
   ],
-  "fetchedAt": "2026-09-03T13:46:35.206Z",
-  "testedAt": "2026-09-03T13:46:35.577Z"
+  "fetchedAt": "2026-09-03T13:53:21.073Z",
+  "testedAt": "2026-09-03T13:53:21.466Z"
 }```
 
 ## Player headshot production regression
@@ -302,8 +302,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 127,
-  "testedAt": "2026-09-03T13:46:35.084Z"
+  "durationMs": 144,
+  "testedAt": "2026-09-03T13:53:20.893Z"
 }```
 
 ## Browser navigation regression
@@ -349,11 +349,11 @@
       "width": 69.8125
     }
   ],
-  "maxLongTaskMs": 181,
+  "maxLongTaskMs": 127,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 18.98,
-  "testedAt": "2026-09-03T13:46:59Z"
+  "durationSeconds": 16.44,
+  "testedAt": "2026-09-03T13:53:42Z"
 }```
 
 ## Listen Watch browser regression
@@ -431,13 +431,13 @@
   "browserWarnings": [
     {
       "level": "WARNING",
-      "message": "https://www.youtube.com/s/player/f572e43c/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
+      "message": "https://www.youtube.com/s/player/9470c977/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1788443221847
+      "timestamp": 1788443624649
     }
   ],
-  "durationSeconds": 2.53,
-  "testedAt": "2026-09-03T13:47:02Z"
+  "durationSeconds": 2.44,
+  "testedAt": "2026-09-03T13:53:45Z"
 }```
 
 ## Market Pulse browser regression
@@ -710,8 +710,8 @@
     ]
   },
   "browserWarnings": [],
-  "durationSeconds": 6.24,
-  "testedAt": "2026-09-03T13:47:09Z"
+  "durationSeconds": 8.49,
+  "testedAt": "2026-09-03T13:53:54Z"
 }```
 
 ## Ticket Center browser regression
@@ -1096,8 +1096,8 @@
   },
   "browserWarnings": [],
   "eligibleFallbackGames": 17,
-  "durationSeconds": 3.06,
-  "testedAt": "2026-09-03T13:47:12Z"
+  "durationSeconds": 2.84,
+  "testedAt": "2026-09-03T13:53:57Z"
 }```
 
 ## Command Intelligence browser regression
@@ -1155,8 +1155,8 @@
   ],
   "mobileViewport": 375,
   "browserWarnings": [],
-  "durationSeconds": 2.25,
-  "testedAt": "2026-09-03T13:47:14Z"
+  "durationSeconds": 2.02,
+  "testedAt": "2026-09-03T13:53:59Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -1302,8 +1302,8 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 4.39,
-  "testedAt": "2026-09-03T13:47:19Z"
+  "durationSeconds": 4.16,
+  "testedAt": "2026-09-03T13:54:04Z"
 }```
 
 ## Ask Titans browser regression
@@ -1409,8 +1409,8 @@
     "viewport": 375
   },
   "browserWarnings": [],
-  "durationSeconds": 1.89,
-  "testedAt": "2026-09-03T13:47:22Z"
+  "durationSeconds": 1.84,
+  "testedAt": "2026-09-03T13:54:06Z"
 }```
 
 ## Change Intelligence browser regression
@@ -1447,22 +1447,493 @@
     "width": 351
   },
   "browserWarnings": [],
-  "durationSeconds": 2.49,
-  "testedAt": "2026-09-03T13:47:24Z"
+  "durationSeconds": 2.39,
+  "testedAt": "2026-09-03T13:54:08Z"
 }```
 
 ## Runtime / 365 Mode browser regression
 
 ```json
 {
-  "ok": false,
+  "ok": true,
   "base": "https://titans.alecjprice.com",
-  "desktop": {},
-  "mobile": {},
+  "desktop": {
+    "phase": "regular",
+    "cards": 2,
+    "mode": "season-lens",
+    "runtimeVersion": "1.10.0",
+    "teamTimeZone": "America/Chicago",
+    "teamTimeLabel": "Nashville time",
+    "routeCycle": true,
+    "singlePanel": true,
+    "cacheUrls": [
+      "/api/data",
+      "/api/fan-intel",
+      "/api/social-pulse"
+    ],
+    "readiness": {
+      "availability": null,
+      "changes": {
+        "copy": "On Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.",
+        "title": "Review team changes"
+      },
+      "mode": "season-lens",
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      },
+      "teamStatus": {
+        "copy": "We do not assume an empty feed means no injuries",
+        "title": "Report awaiting update"
+      }
+    },
+    "panel": {
+      "cards": 2,
+      "display": "block",
+      "height": 366.0625,
+      "homeNow": true,
+      "labels": [
+        "AFC SOUTH",
+        "WHAT CHANGED?"
+      ],
+      "mode": "season-lens",
+      "opacity": "1",
+      "text": "SEASON LENS365 MODE \u00b7 REGULAR SEASONGame week firstA tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.Review changes \u2192AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesOn Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "refresh": {
+      "cache": [
+        {
+          "expiresAt": 1788443680520,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1788443650520,
+          "url": "/api/data"
+        },
+        {
+          "expiresAt": 1788443680602,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1788443650602,
+          "url": "/api/fan-intel"
+        }
+      ],
+      "epoch": 1,
+      "last": {
+        "at": "2026-09-03T13:54:10.478Z",
+        "epoch": 1,
+        "reason": "scoreboard-control",
+        "urls": null
+      }
+    },
+    "refreshedReadiness": {
+      "availability": null,
+      "changes": {
+        "copy": "On Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.",
+        "title": "Review team changes"
+      },
+      "mode": "season-lens",
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      },
+      "teamStatus": {
+        "copy": "We do not assume an empty feed means no injuries",
+        "title": "Report awaiting update"
+      }
+    },
+    "refreshedPanel": {
+      "cards": 2,
+      "display": "block",
+      "height": 366.0625,
+      "homeNow": true,
+      "labels": [
+        "AFC SOUTH",
+        "WHAT CHANGED?"
+      ],
+      "mode": "season-lens",
+      "opacity": "1",
+      "text": "SEASON LENS365 MODE \u00b7 REGULAR SEASONGame week firstA tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.Review changes \u2192AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesOn Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "returnReadiness": {
+      "availability": null,
+      "changes": {
+        "copy": "On Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.",
+        "title": "Review team changes"
+      },
+      "mode": "season-lens",
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      },
+      "teamStatus": {
+        "copy": "We do not assume an empty feed means no injuries",
+        "title": "Report awaiting update"
+      }
+    },
+    "returnPanel": {
+      "cards": 2,
+      "display": "block",
+      "height": 366.0625,
+      "homeNow": true,
+      "labels": [
+        "AFC SOUTH",
+        "WHAT CHANGED?"
+      ],
+      "mode": "season-lens",
+      "opacity": "1",
+      "text": "SEASON LENS365 MODE \u00b7 REGULAR SEASONGame week firstA tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.Review changes \u2192AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesOn Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    }
+  },
+  "mobile": {
+    "layout": {
+      "dock": {
+        "display": "grid",
+        "h": 72,
+        "w": 465,
+        "x": 10,
+        "y": 621
+      },
+      "dockTargets": [
+        {
+          "h": 58,
+          "label": "Home",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Roster",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Game",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Search",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "More",
+          "w": 89.8125
+        }
+      ],
+      "overflow": false,
+      "panelHeight": 432.890625,
+      "panelWidth": 457,
+      "reviewHeight": 44,
+      "targets": [
+        {
+          "h": 186.953125,
+          "label": "AFC SOUTH",
+          "w": 320
+        },
+        {
+          "h": 186.953125,
+          "label": "WHAT CHANGED?",
+          "w": 320
+        }
+      ],
+      "viewport": 500
+    },
+    "readiness": {
+      "availability": null,
+      "changes": {
+        "copy": "On Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.",
+        "title": "Review team changes"
+      },
+      "mode": "season-lens",
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      },
+      "teamStatus": {
+        "copy": "We do not assume an empty feed means no injuries",
+        "title": "Report awaiting update"
+      }
+    },
+    "panelState": {
+      "cards": 2,
+      "display": "block",
+      "height": 432.890625,
+      "homeNow": true,
+      "labels": [
+        "AFC SOUTH",
+        "WHAT CHANGED?"
+      ],
+      "mode": "season-lens",
+      "opacity": "1",
+      "text": "SEASON LENS365 MODE \u00b7 REGULAR SEASONGame week firstA tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.Review changes \u2192AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesOn Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 457
+    },
+    "sheet": {
+      "bottom": 611,
+      "dockTop": 621,
+      "height": 504.71875,
+      "links": 15,
+      "top": 106.28125
+    },
+    "smartSearch": {
+      "height": 110,
+      "left": 10,
+      "right": 475,
+      "rows": 1,
+      "targets": [
+        58
+      ],
+      "width": 465
+    }
+  },
   "browserWarnings": [],
-  "stage": "desktop:wait-365-panel",
-  "error": "TimeoutException: Message: \n",
-  "durationSeconds": 16.55
+  "durationSeconds": 3.58
+}```
+
+## Data freshness browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "desktop": {
+    "detail": "Roster verified Sep 2 \u00b7 Moves 23 hours ago \u00b7 Intel 23 hours ago",
+    "overflow": false,
+    "rect": {
+      "bottom": 1729.5,
+      "height": 139.578125,
+      "left": 915.328125,
+      "right": 1216.984375,
+      "top": 1589.921875,
+      "width": 301.65625
+    },
+    "state": "fallback",
+    "strong": "Verified backup \u00b7 Sep 2",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Sep 2Roster verified Sep 2 \u00b7 Moves 23 hours ago \u00b7 Intel 23 hours agoSee sources \u2192",
+    "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Sep 2.",
+    "viewport": {
+      "height": 757,
+      "width": 1280
+    }
+  },
+  "mobile": {
+    "detail": "Roster verified Sep 2 \u00b7 Moves 23 hours ago \u00b7 Intel 23 hours ago",
+    "overflow": false,
+    "rect": {
+      "bottom": 2985.765625,
+      "height": 148.359375,
+      "left": 12,
+      "right": 363,
+      "top": 2837.40625,
+      "width": 351
+    },
+    "state": "fallback",
+    "strong": "Verified backup \u00b7 Sep 2",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Sep 2Roster verified Sep 2 \u00b7 Moves 23 hours ago \u00b7 Intel 23 hours agoSee sources \u2192",
+    "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Sep 2.",
+    "viewport": {
+      "height": 701,
+      "width": 390
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 1.58,
+  "testedAt": "2026-09-03T13:54:14Z"
+}```
+
+## Account / Guest browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "browserWarnings": [],
+  "guest": {
+    "accountGuest": true,
+    "route": "#home",
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "mobileShell": {
+    "dock": {
+      "h": 72,
+      "top": 621,
+      "w": 465
+    },
+    "more": {
+      "bottom": 686,
+      "h": 58,
+      "top": 628,
+      "w": 89.8125
+    },
+    "runtime": "1.10.0",
+    "sidebarHidden": "true",
+    "sidebarInert": true
+  },
+  "sheet": {
+    "bottom": 611,
+    "dockTop": 621,
+    "top": 106.28125
+  },
+  "accountEntry": {
+    "bottom": 290.53125,
+    "h": 44,
+    "parent": "sidebar",
+    "top": 246.53125,
+    "visibleBottom": 611,
+    "visibleTop": 106.28125,
+    "w": 390
+  },
+  "panel": {
+    "bottom": 701,
+    "h": 602.859375,
+    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordLog inContinue as guestGUEST DATAThese settings exist only on this device.Export this deviceImport backupReset this deviceReset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.",
+    "vh": 701,
+    "w": 485
+  },
+  "portabilityTools": {
+    "exportHeight": 50,
+    "exportLabel": "Export this device",
+    "guest": true,
+    "importHeight": 50,
+    "importLabel": "Import backup",
+    "resetHeight": 50,
+    "resetLabel": "Reset this device"
+  },
+  "importPreview": {
+    "applyHeight": 46,
+    "favorite": null,
+    "pending": {
+      "accountEmail": "",
+      "exportedAt": "2026-08-22T12:00:00Z",
+      "keys": [
+        "titans:v15MyTitans"
+      ],
+      "preferences": {
+        "titans:v15MyTitans": {
+          "favorite": "Browser Smoke"
+        }
+      },
+      "scope": "guest-device"
+    },
+    "text": "READY TO RESTORE1 setting groupAug 22, 2026, 12:00 PM \u00b7 guest-deviceNothing has changed yet. Applying restores only recognized Titans preferences from this file.Apply imported settingsCancel"
+  },
+  "resetArmed": {
+    "guest": true,
+    "hash": "#home",
+    "hint": "Tap Confirm reset again within 6 seconds.",
+    "label": "Confirm reset"
+  },
+  "authOutage": {
+    "guest": true,
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "roster": {
+    "route": "#roster",
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
+  },
+  "durationSeconds": 2.11
+}```
+
+## Advanced analytics browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "mode": "cloudflare-d1",
+  "healthStatus": "healthy",
+  "analyticsStorage": "cloudflare-d1",
+  "analyticsSnapshotSource": "nflreadpy-d1-snapshot",
+  "analyticsSnapshotStale": false,
+  "seasonContext": {
+    "bannerRole": "note",
+    "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "bannerVisible": true,
+    "dataSeason": "2025",
+    "heading": "2025 advanced analytics baseline",
+    "requestedSeason": "2026",
+    "seasonFallback": "true"
+  },
+  "mobileSeasonContext": {
+    "fallback": "true",
+    "text": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "visible": true
+  },
+  "metricCount": 4,
+  "metricValues": [
+    {
+      "detail": "#30 of 32",
+      "label": "Offensive EPA / play",
+      "value": "-0.148"
+    },
+    {
+      "detail": "#28 of 32",
+      "label": "Defensive EPA / play allowed",
+      "value": "+0.104"
+    },
+    {
+      "detail": "#11 of 32",
+      "label": "Pace",
+      "value": "28.9 sec/play"
+    },
+    {
+      "detail": "Latest loaded week: 18",
+      "label": "Rest days",
+      "value": "7 days"
+    }
+  ],
+  "situationFields": [
+    "Down & distance",
+    "Field position",
+    "Formation",
+    "Personnel",
+    "Score diff",
+    "TEN EPA",
+    "Time remaining"
+  ],
+  "initialPlayCards": 60,
+  "offenseFilteredPlayCards": 39,
+  "mobileMetricCount": 4,
+  "browserWarnings": [],
+  "durationSeconds": 1.79,
+  "testedAt": "2026-09-03T13:54:19Z"
+}```
+
+## Player headshot browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "expectedCurrentRoster": 60,
+  "minimumCurrentRosterHeadshots": 51,
+  "minimumHeadshotCoveragePct": 85.0,
+  "rosterCards": 60,
+  "rosterDecoratedHeadshots": 60,
+  "rosterHeadshotCoveragePct": 100.0,
+  "rosterLoadedHeadshots": 3,
+  "statsPlayerRows": 60,
+  "statsDecoratedHeadshots": 60,
+  "statsHeadshotCoveragePct": 100.0,
+  "statsLoadedHeadshots": 51,
+  "formerPreseasonParticipantRows": 29,
+  "mobileLoadedHeadshots": 52,
+  "richPlayer": "Tony Adams",
+  "richPlayerHeadshotLoaded": true,
+  "browserWarnings": [],
+  "durationSeconds": 3.85,
+  "testedAt": "2026-09-03T13:54:23Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
