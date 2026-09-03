@@ -145,3 +145,9 @@ jobs:
             "repos/${GITHUB_REPOSITORY}/actions/workflows/cloudflare-deploy.yml/dispatches" \
             -f ref='main'
           echo "Dispatched Titans Cloudflare Deploy for the new main revision."
+
+          gh api -X POST \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/tenx-postdeploy-verification.yml/dispatches" \
+            -f ref='main' \
+            -F "inputs[source_sha]=${head_sha}"
+          echo "Dispatched exact-sha TENX Current Experience / post-deploy verification for ${head_sha}."
