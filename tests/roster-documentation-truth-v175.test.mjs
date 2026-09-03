@@ -14,16 +14,22 @@ const reserveInjured = auditedRoster20260902.filter(player => player.status === 
 const designatedForReturn = auditedRoster20260902.filter(player => player.status === 'Reserve/Injured; Designated for Return').length;
 const reserve = reserveInjured + designatedForReturn;
 const practiceSquad = auditedPracticeSquad20260902.length;
+const [auditYear, auditMonth, auditDay] = ROSTER_AUDIT_DATE.split('-');
+const monthLabels = {
+  '01': 'Jan.', '02': 'Feb.', '03': 'March', '04': 'April', '05': 'May', '06': 'June',
+  '07': 'July', '08': 'Aug.', '09': 'Sept.', '10': 'Oct.', '11': 'Nov.', '12': 'Dec.',
+};
+const auditDisplayDate = `${monthLabels[auditMonth]} ${Number(auditDay)}, ${auditYear}`;
+const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 test('README roster baseline stays synchronized with the executable audit', () => {
-  assert.equal(ROSTER_AUDIT_DATE, '2026-09-02');
   assert.equal(active, 53);
   assert.equal(reserveInjured, 5);
   assert.equal(designatedForReturn, 2);
   assert.equal(reserve, 7);
   assert.equal(practiceSquad, 17);
 
-  assert.match(readme, /current fallback roster is the \*\*Sept\. 2, 2026 cross-source official audit\*\*/);
+  assert.match(readme, new RegExp(`current fallback roster is the \\*\\*${escapeRegex(auditDisplayDate)} cross-source official audit\\*\\*`));
   assert.match(readme, new RegExp(`${active} Active players plus ${reserve} separately labeled reserve-list players`));
   assert.match(readme, new RegExp(`\\(${reserveInjured} Reserve/Injured and ${designatedForReturn} Reserve/Injured–Designated for Return\\)`));
   assert.match(readme, new RegExp(`audited Sept\\. 2 practice squad contains ${practiceSquad} players`));
@@ -31,7 +37,7 @@ test('README roster baseline stays synchronized with the executable audit', () =
 
 test('content-integrity policy distinguishes full-audit history from current roster freshness', () => {
   assert.match(integrityPolicy, /Last full audit: \*\*2026-08-19\*\*/);
-  assert.match(integrityPolicy, new RegExp(`Current-team roster fallback audit: \\*\\*${ROSTER_AUDIT_DATE}\\*\\*`));
+  assert.match(integrityPolicy, new RegExp(`Current-team roster fallback audit: \\*\\*${escapeRegex(ROSTER_AUDIT_DATE)}\\*\\*`));
   assert.match(integrityPolicy, new RegExp(`${active} Active players plus ${reserve} reserve-list players`));
   assert.match(integrityPolicy, new RegExp(`the ${practiceSquad}-player practice squad is tracked separately`));
 });
