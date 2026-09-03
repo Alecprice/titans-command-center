@@ -16,6 +16,7 @@
   const rows=v=>Array.isArray(v)?v:[];
   const route=()=>runtime.route();
   const deadlineMs=()=>Date.parse(DEADLINE);
+  const pastDeadline=()=>Date.now()>=deadlineMs();
   const remaining=()=>{
     const diff=deadlineMs()-Date.now();
     if(diff<=0)return 'Deadline reached';
@@ -251,11 +252,11 @@
   }
 
   function rosterPanel(){
-    const s=snapshot(),past=Date.now()>=deadlineMs();
+    const s=snapshot(),past=pastDeadline();
     return `<div class="cutdown-command" data-cutdown-command>
       <header class="cutdown-command-head">
-        <div><small>53-MAN CUTDOWN COMMAND</small><h2>${past?'Deadline tracker':'Final roster clock'}</h2><p>Facts from the loaded Titans roster and transaction feed. This does <strong>not</strong> rank bubble players or predict cuts.</p></div>
-        <div class="cutdown-clock"><small>${past?'LEAGUE DEADLINE':'TIME REMAINING'}</small><strong>${esc(remaining())}</strong><span>${esc(deadlineLabel())}</span></div>
+        <div><small>53-MAN CUTDOWN COMMAND</small><h2 data-cutdown-clock-title>${past?'Deadline tracker':'Final roster clock'}</h2><p>Facts from the loaded Titans roster and transaction feed. This does <strong>not</strong> rank bubble players or predict cuts.</p></div>
+        <div class="cutdown-clock"><small data-cutdown-clock-label>${past?'LEAGUE DEADLINE':'TIME REMAINING'}</small><strong data-cutdown-clock-value>${esc(remaining())}</strong><span>${esc(deadlineLabel())}</span></div>
       </header>
       <div class="cutdown-scoreboard">
         <article><small>Loaded roster</small><strong>${s.roster.length||'—'}</strong><span>All current rows</span></article>
@@ -273,9 +274,9 @@
   }
 
   function homeCard(){
-    const s=snapshot(),past=Date.now()>=deadlineMs();
+    const s=snapshot(),past=pastDeadline();
     return `<section class="cutdown-home-card" data-cutdown-home>
-      <div><small>${past?'ROSTER CUTDOWN':'CUTDOWN CLOCK'}</small><strong>${past?'Track the official 53-man moves':`${esc(remaining())} to the 53-man deadline`}</strong><span>${s.active.length||'—'} loaded active · ${s.reserve.length} reserve/other · ${esc(deadlineLabel())}</span></div>
+      <div><small data-cutdown-home-label>${past?'ROSTER CUTDOWN':'CUTDOWN CLOCK'}</small><strong data-cutdown-home-value>${past?'Track the official 53-man moves':`${esc(remaining())} to the 53-man deadline`}</strong><span>${s.active.length||'—'} loaded active · ${s.reserve.length} reserve/other · ${esc(deadlineLabel())}</span></div>
       <a href="#roster?view=cutdown">Open Cutdown Command →</a>
     </section>`;
   }
@@ -315,18 +316,40 @@
     if(route()==='roster'&&!mountRoster())setTimeout(mountRoster,0);
   }
 
-  function refreshClock(){
-    const home=document.querySelector('[data-cutdown-home]');
-    const panel=document.querySelector('[data-cutdown-command]');
-    if((home||panel)&&data){
-      if(route()==='home'){home?.remove();mountHome();}
-      if(route()==='roster')mountRoster();
+  function stopClockTimer(){
+    if(!timer)return;
+    clearInterval(timer);
+    timer=null;
+  }
+
+  function updateClock(){
+    const past=pastDeadline(),value=remaining();
+    document.querySelectorAll('[data-cutdown-clock-title]').forEach(element=>{element.textContent=past?'Deadline tracker':'Final roster clock';});
+    document.querySelectorAll('[data-cutdown-clock-label]').forEach(element=>{element.textContent=past?'LEAGUE DEADLINE':'TIME REMAINING';});
+    document.querySelectorAll('[data-cutdown-clock-value]').forEach(element=>{element.textContent=value;});
+    document.querySelectorAll('[data-cutdown-home-label]').forEach(element=>{element.textContent=past?'ROSTER CUTDOWN':'CUTDOWN CLOCK';});
+    document.querySelectorAll('[data-cutdown-home-value]').forEach(element=>{element.textContent=past?'Track the official 53-man moves':`${value} to the 53-man deadline`;});
+    if(past)stopClockTimer();
+  }
+
+  function ensureClockTimer(){
+    if(timer||pastDeadline())return;
+    timer=setInterval(updateClock,60000);
+  }
+
+  function refreshDataViews(){
+    if(!data)return;
+    if(route()==='home'){
+      document.querySelector('[data-cutdown-home]')?.remove();
+      mountHome();
     }
+    if(route()==='roster')mountRoster();
   }
 
   runtime.onAppRender(()=>queueMicrotask(mount),{immediate:true});
   runtime.onRoute(()=>queueMicrotask(mount));
-  runtime.onRefresh(()=>{data=null;load(true).then(()=>refreshClock());});
-  timer=setInterval(refreshClock,60000);
-  addEventListener('pagehide',()=>{if(timer)clearInterval(timer);},{once:true});
+  runtime.onRefresh(()=>{data=null;load(true).then(()=>refreshDataViews());});
+  ensureClockTimer();
+  addEventListener('pagehide',stopClockTimer);
+  addEventListener('pageshow',()=>{updateClock();ensureClockTimer();});
 })();
