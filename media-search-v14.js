@@ -24,6 +24,15 @@ import './media-affiliates-v14.js';
     const rest=next.toString();
     history.replaceState(null,'',`#media${rest?`?${rest}`:''}`);
   }
+  function revealAffiliateFinder(details){
+    requestAnimationFrame(()=>{
+      if(route()!=='media'||!details?.isConnected)return;
+      const summary=details.querySelector('summary');
+      summary?.focus?.({preventScroll:true});
+      const reduced=Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
+      details.scrollIntoView?.({block:'center',behavior:reduced?'auto':'smooth'});
+    });
+  }
   function applyAffiliateHandoff(){
     if(route()!=='media')return false;
     const requested=affiliateHandoff(params().get('affiliate')||'');
@@ -37,6 +46,7 @@ import './media-affiliates-v14.js';
     details.dataset.searchHandoff=requested;
     input.dispatchEvent(new Event('input',{bubbles:true}));
     consumeAffiliateHandoff();
+    revealAffiliateFinder(details);
     return true;
   }
   function enhance(){
