@@ -19,8 +19,8 @@ test('Game Day leader cards expose the category and only verified category metri
   const js=read('gameday-v16.js');
   assert.match(js,/x\.label/);
   assert.match(js,/metricLabel\(k\)/);
-  assert.match(js,/Game leaders so far/);
-  assert.match(js,/By category · Available stats only/);
+  assert.match(js,/Game leaders by category/);
+  assert.match(js,/Available category stats only/);
   assert.match(js,/\$\{top\.length\} categories/);
   assert.match(js,/No live leader is guessed/);
   assert.match(js,/Postgame player stats are not available yet/);
