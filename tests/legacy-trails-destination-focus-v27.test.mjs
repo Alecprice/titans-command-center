@@ -33,6 +33,13 @@ test('Exit Trail restores focus to the Trail chooser that launched the path',()=
   assert.match(js,/if\(event\.target\.closest\('\[data-legacy-trail-exit\]'\)\)\{\s*const trailId=active\?\.id\|\|null;\s*deactivate\(\);\s*focusTrailChooser\(root,trailId\);\s*\}/);
 });
 
+test('Passport reset restores focus to the newly rendered primary action',()=>{
+  assert.match(js,/function focusPassportPrimary\(passportHost\)/);
+  assert.match(js,/passportHost\.querySelector\('\[data-legacy-passport-continue\]'\)/);
+  assert.match(js,/target\.focus\(\{preventScroll:true\}\)/);
+  assert.match(js,/if\(event\.target\.closest\('\[data-legacy-passport-reset\]'\)\)\{[^]*?passport=resetPassport\(\);\s*paint\(\);\s*focusPassportPrimary\(passportHost\);[^]*?return;/);
+});
+
 test('Trail focus handoff does not create another data or lifecycle owner',()=>{
   assert.doesNotMatch(js,/\bfetch\s*\(/);
   assert.doesNotMatch(js,/\bsetTimeout\s*\(/);

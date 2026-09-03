@@ -48,7 +48,7 @@ test('Passport copy is truthful when storage is unavailable and reset is explici
   assert.match(trails,/Storage unavailable · progress lasts this visit only/);
   assert.match(trails,/data-legacy-passport-reset/);
   assert.match(trails,/globalThis\.confirm\?\.\('Reset your Legacy Museum Passport on this browser\?'\)/);
-  assert.match(trails,/passport=resetPassport\(\);paint\(\)/);
+  assert.match(trails,/passport=resetPassport\(\);\s*paint\(\);\s*focusPassportPrimary\(passportHost\)/);
 });
 
 test('Passport adds no provider traffic remote preference sync or lifecycle owner',()=>{

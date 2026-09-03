@@ -202,6 +202,12 @@ function focusTrailChooser(root,trailId){
   try{chooser.focus({preventScroll:true});}catch{chooser.focus();}
 }
 
+function focusPassportPrimary(passportHost){
+  const target=passportHost.querySelector('[data-legacy-passport-continue]');
+  if(!target)return;
+  try{target.focus({preventScroll:true});}catch{target.focus();}
+}
+
 function scrollToMatch(page){
   const target=page.querySelector('.legacy-finder-match');
   if(!target)return;
@@ -269,7 +275,11 @@ export function ensureLegacyTrails(page,controller){
     const continueButton=event.target.closest('[data-legacy-passport-continue]');
     if(continueButton){activate(continueButton.dataset.trail,Number.parseInt(continueButton.dataset.step||'0',10));return;}
     if(event.target.closest('[data-legacy-passport-reset]')){
-      if(globalThis.confirm?.('Reset your Legacy Museum Passport on this browser?')){passport=resetPassport();paint();}
+      if(globalThis.confirm?.('Reset your Legacy Museum Passport on this browser?')){
+        passport=resetPassport();
+        paint();
+        focusPassportPrimary(passportHost);
+      }
       return;
     }
     const card=event.target.closest('[data-legacy-trail]');
