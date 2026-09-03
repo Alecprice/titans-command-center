@@ -172,7 +172,8 @@ function passportMarkup(passport){
 function playerMarkup(trail,step){
   const stop=trail.stops[step];
   const pct=Math.round(((step+1)/trail.stops.length)*100);
-  return `<div><small>${trail.eyebrow} · ${trail.title}</small><h3>${stop.label}</h3><div class="legacy-trail-progress"><div class="legacy-trail-progress-bar" aria-hidden="true"><span style="width:${pct}%"></span></div><strong>STOP ${step+1} / ${trail.stops.length}</strong></div><div class="legacy-trail-stop">Showing this stop through Legacy Finder · ${stop.scope}</div></div><div class="legacy-trail-actions"><button type="button" data-legacy-trail-prev ${step===0?'disabled':''}>← Previous</button><button type="button" data-legacy-trail-next ${step===trail.stops.length-1?'disabled':''}>Next →</button><button type="button" data-legacy-trail-exit>Exit trail</button></div>`;
+  const nextAction=step===trail.stops.length-1?'<button type="button" data-legacy-trail-finish>Finish trail</button>':'<button type="button" data-legacy-trail-next>Next →</button>';
+  return `<div><small>${trail.eyebrow} · ${trail.title}</small><h3>${stop.label}</h3><div class="legacy-trail-progress"><div class="legacy-trail-progress-bar" aria-hidden="true"><span style="width:${pct}%"></span></div><strong>STOP ${step+1} / ${trail.stops.length}</strong></div><div class="legacy-trail-stop">Showing this stop through Legacy Finder · ${stop.scope}</div></div><div class="legacy-trail-actions"><button type="button" data-legacy-trail-prev ${step===0?'disabled':''}>← Previous</button>${nextAction}<button type="button" data-legacy-trail-exit>Exit trail</button></div>`;
 }
 
 function clearTrailDestinationFocus(page){
@@ -286,6 +287,12 @@ export function ensureLegacyTrails(page,controller){
     if(card){activate(card.dataset.legacyTrail,0);return;}
     if(event.target.closest('[data-legacy-trail-prev]')&&active&&step>0){activate(active.id,step-1);return;}
     if(event.target.closest('[data-legacy-trail-next]')&&active&&step<active.stops.length-1){activate(active.id,step+1);return;}
+    if(event.target.closest('[data-legacy-trail-finish]')&&active&&step===active.stops.length-1){
+      const trailId=active.id;
+      deactivate();
+      focusTrailChooser(root,trailId);
+      return;
+    }
     if(event.target.closest('[data-legacy-trail-exit]')){
       const trailId=active?.id||null;
       deactivate();
