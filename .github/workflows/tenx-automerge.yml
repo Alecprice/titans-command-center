@@ -191,6 +191,12 @@ jobs:
             exit 1
           fi
 
+          current_main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          if [[ "$current_main_sha" != "$merge_sha" ]]; then
+            echo "TENX post-deploy verification skipped: merge commit ${merge_sha} was superseded by newer main ${current_main_sha} before verification dispatch."
+            exit 0
+          fi
+
           gh api \
             -H 'X-GitHub-Api-Version: 2026-03-10' \
             -X POST \
