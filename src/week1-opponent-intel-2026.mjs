@@ -1,4 +1,4 @@
-const SOURCE_CHECKED_AT='2026-09-03T14:16:00Z';
+const SOURCE_CHECKED_AT='2026-09-03T15:51:00Z';
 
 const sources={
   titansSchedule:{
@@ -31,11 +31,46 @@ const sources={
     url:'https://www.newyorkjets.com/team/depth-chart',
     checkedAt:SOURCE_CHECKED_AT,
     qualification:'The Jets label this page an unofficial depth chart.'
+  },
+  jetsOssai:{
+    tier:'official-team-reporting',
+    publisher:'New York Jets',
+    label:"Edge Joseph Ossai is 'Week to Week' After Foot Injury",
+    publishedAt:'2026-09-03T12:10:00Z',
+    url:'https://www.newyorkjets.com/news/joseph-ossai-adding-explosive-element-to-jets-defense-09-02-2026',
+    checkedAt:SOURCE_CHECKED_AT,
+    qualification:'Coach-reported recovery status; not a formal Week 1 game designation.'
+  },
+  jetsHall:{
+    tier:'official-team-reporting',
+    publisher:'New York Jets',
+    label:"Jets RB Braelon Allen: 'I'm Always Ready'",
+    publishedAt:'2026-09-01T16:00:00Z',
+    url:'https://www.newyorkjets.com/news/jets-rb-braelon-allen-breece-hall-working-towards-regular-season',
+    checkedAt:SOURCE_CHECKED_AT,
+    qualification:'Team expectation and recovery context; not a formal Week 1 game designation.'
+  },
+  jetsPractice:{
+    tier:'official-practice-observation',
+    publisher:'New York Jets',
+    label:'Aaron Glenn Shares Tip He Learned From Sean Payton When Scripting Practices',
+    publishedAt:'2026-09-02T20:00:00Z',
+    url:'https://www.newyorkjets.com/news/aaron-glenn-sean-payton-share-tips-final-practice-before-game-week-09-02-2026',
+    checkedAt:SOURCE_CHECKED_AT,
+    qualification:'Official team practice observations; not a formal Week 1 injury report.'
+  },
+  jetsCaptains:{
+    tier:'official',
+    publisher:'New York Jets',
+    label:'Jets Announce 6 Captains for 2026 Season',
+    publishedAt:'2026-09-03T14:29:00Z',
+    url:'https://www.newyorkjets.com/news/jets-2026-captains-geno-smith-joe-tippmann-demario-davis-minkah-fitzpatrick-harrison-phillips-isaiah-williams-09-03-2026',
+    checkedAt:SOURCE_CHECKED_AT
   }
 };
 
 export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
-  version:'2026-w1-20260903.1',
+  version:'2026-w1-20260903.2',
   opponent:'New York Jets',
   opponentAbbr:'NYJ',
   asOf:'2026-09-03',
@@ -48,7 +83,9 @@ export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
     network:'CBS'
   }),
   leadership:Object.freeze({
-    headCoach:'Aaron Glenn'
+    headCoach:'Aaron Glenn',
+    captains:Object.freeze(['Geno Smith','Joe Tippmann','Demario Davis','Minkah Fitzpatrick','Harrison Phillips','Isaiah Williams']),
+    sourceKey:'jetsCaptains'
   }),
   activeRosterSpine:Object.freeze({
     quarterback:Object.freeze({starter:'Geno Smith',backup:'Cade Klubnik'}),
@@ -86,18 +123,60 @@ export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
   availability:Object.freeze({
     status:'pre-game-week',
     confidence:'limited',
-    note:'Do not convert camp/practice expectations into official Week 1 game-status labels. Re-audit against the NFL/Jets injury report during game week.'
+    note:'Official team reporting supplies recovery and practice context, but no formal Week 1 NYJ game-status designation is loaded in this snapshot. Do not infer final availability.',
+    signals:Object.freeze([
+      Object.freeze({
+        subjects:Object.freeze(['Joseph Ossai']),
+        evidenceKind:'coach-status',
+        label:'Coach report',
+        status:'week-to-week',
+        detail:'Aaron Glenn said Ossai is week to week after a plantar-fascia rupture suffered in the final preseason game.',
+        formalGameStatus:false,
+        sourceKey:'jetsOssai'
+      }),
+      Object.freeze({
+        subjects:Object.freeze(['Breece Hall']),
+        evidenceKind:'team-expectation',
+        label:'Team expectation',
+        status:'working-back',
+        detail:'Hall is working back from a groin issue; Jets team reporting says he is expected back for the opener.',
+        formalGameStatus:false,
+        sourceKey:'jetsHall'
+      }),
+      Object.freeze({
+        subjects:Object.freeze(['Jeremy Ruckert','Jelani Woods']),
+        evidenceKind:'practice-observation',
+        label:'Practice observation',
+        status:'did-not-practice-wednesday',
+        detail:'Ruckert and Woods did not practice Wednesday in the Jets’ final practice before game-week focus.',
+        formalGameStatus:false,
+        sourceKey:'jetsPractice'
+      }),
+      Object.freeze({
+        subjects:Object.freeze(['Kenyon Sadiq']),
+        evidenceKind:'practice-observation',
+        label:'Practice observation',
+        status:'position-drills',
+        detail:'Sadiq worked through position drills for a second consecutive practice Wednesday.',
+        formalGameStatus:false,
+        sourceKey:'jetsPractice'
+      })
+    ])
   }),
   sources:Object.freeze(sources)
 });
 
 export function opponentIntelSourceTruth(intel=WEEK1_OPPONENT_INTEL_2026){
   const conflicts=Array.isArray(intel?.depthChart?.conflicts)?intel.depthChart.conflicts:[];
+  const signals=Array.isArray(intel?.availability?.signals)?intel.availability.signals:[];
   return Object.freeze({
     checkedAt:intel?.checkedAt||null,
     status:conflicts.length?'qualified-conflict':'cross-source-confirmed',
     conflictCount:conflicts.length,
     hasHighSeverityConflict:conflicts.some(item=>item?.severity==='high'),
+    availabilitySignalCount:signals.length,
+    formalGameStatusCount:signals.filter(item=>item?.formalGameStatus===true).length,
+    availabilityIsInferred:false,
     controllingSourceOrder:Object.freeze(['official-transaction','official-active-roster','official-unofficial-depth-chart'])
   });
 }
