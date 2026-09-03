@@ -10,7 +10,7 @@ test('core Watch Listen follows the existing shared refresh bus',()=>{
   assert.match(media,/typeof runtime\?\.onRefresh==='function'/);
   assert.match(media,/runtime\.onRefresh\(event=>/);
   assert.match(media,/if\(Array\.isArray\(urls\)&&urls\.length&&!urls\.includes\('\/api\/data'\)\)return/);
-  assert.match(media,/if\(route\(\)==='media'\)queueMicrotask\(render\)/);
+  assert.match(media,/if\(route\(\)==='media'\|\|route\(\)==='home'\)queueMicrotask\(render\)/);
 });
 
 test('refresh clears only the media snapshot while preserving runtime network ownership',()=>{

@@ -123,7 +123,19 @@
   function syncChrome(){document.querySelectorAll('[data-route]').forEach(a=>{const active=a.dataset.route===route();a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});const sidebar=document.querySelector('#sidebar');sidebar?.classList.remove('open');if(sidebar&&matchMedia('(max-width: 759px)').matches)sidebar.inert=true;const more=document.querySelector('#mobile-more-button');if(more){more.setAttribute('aria-expanded','false');more.setAttribute('aria-pressed','false')}}
   function mediaPage(){if(!app)return;const g=focusedGame();app.innerHTML=`<section class="media-page"><header class="media-hero"><div><div class="eyebrow">TITANS MEDIA CENTER</div><h1>Watch / Listen</h1><p>Match the current or next Titans game to the right TV, stream or radio option — then stay connected with official team video and audio all week.</p>${areaSwitch()}</div><div class="media-next"><small>CURRENT / NEXT GAME</small><strong>${esc(gameLabel(g))}</strong><span>${g?fmt(g.date):'Schedule loading'}</span><em>${esc(g?.network||'Network TBD')}</em></div></header>${radioSection(g)}${watchSection(g)}${fanMediaSection()}</section>`;syncChrome()}
 
-  function homeCard(){if(route()!=='home'||document.querySelector('.media-home-card'))return;const hero=document.querySelector('.fan-hero');if(!hero)return;const g=focusedGame(),card=document.createElement('section');card.className='media-home-card';const scheduleLine=g?`${fmt(g.date)} · ${esc(g.network||'Network TBD')}`:'Find the authorized radio or streaming option.';card.innerHTML=`<div><small>WATCH / LISTEN</small><strong>${esc(g?gameLabel(g):'Titans media')}</strong><span>${scheduleLine}</span></div><a href="#media">Open media center →</a>`;hero.insertAdjacentElement('afterend',card)}
+  function homeCard(){
+    if(route()!=='home')return;
+    const hero=document.querySelector('.fan-hero');
+    if(!hero)return;
+    const g=focusedGame();
+    const signature=[g?.id||g?.date||'none',g?.opponent||g?.opponentAbbr||'Opponent',g?.network||'Network TBD'].join('|');
+    let card=document.querySelector('.media-home-card');
+    if(card?.dataset.signature===signature)return;
+    if(!card){card=document.createElement('section');card.className='media-home-card';hero.insertAdjacentElement('afterend',card)}
+    card.dataset.signature=signature;
+    const scheduleLine=g?`${fmt(g.date)} · ${esc(g.network||'Network TBD')}`:'Find the authorized radio or streaming option.';
+    card.innerHTML=`<div><small>WATCH / LISTEN</small><strong>${esc(g?gameLabel(g):'Titans media')}</strong><span>${scheduleLine}</span></div><a href="#media">Open media center →</a>`;
+  }
 
   document.addEventListener('click',event=>{
     const areaButton=event.target instanceof Element?event.target.closest('[data-media-area]'):null;
@@ -152,7 +164,7 @@
     state.loadEpoch+=1;
     state.data=null;
     state.loading=null;
-    if(route()==='media')queueMicrotask(render);
+    if(route()==='media'||route()==='home')queueMicrotask(render);
   });
   window.addEventListener('hashchange',()=>setTimeout(render,0));
   window.addEventListener('popstate',()=>setTimeout(render,0));
