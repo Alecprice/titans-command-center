@@ -14,11 +14,12 @@ test('TENX Legacy finder keeps phone search and controls readable',()=>{
   assert.match(css,/\.legacy-finder-feedback\{[^}]*font-size:12px/);
 });
 
-test('TENX Legacy museum raises narrative and metadata floors on phones',()=>{
+test('TENX Legacy museum raises narrative metadata and source-link floors on phones',()=>{
   assert.match(css,/\.legacy-page \.legacy-museum-kicker,[^}]*font-size:12px/);
   assert.match(css,/\.legacy-page \.legacy-museum-hero-copy>p,[^}]*font-size:14px;line-height:1\.6/);
   assert.match(css,/\.legacy-page \.legacy-museum-actions button,[^}]*min-height:48px;font-size:13px/);
-  assert.match(css,/\.legacy-page \.legacy-history-sources a,[^}]*min-height:44px;font-size:12px/);
+  assert.match(css,/\.legacy-page \.legacy-history-sources a,\.legacy-page \.legacy-record-source a\{[^}]*min-height:48px;font-size:12px/);
+  assert.doesNotMatch(css,/\.legacy-page \.legacy-history-sources a,\.legacy-page \.legacy-record-source a\{[^}]*min-height:(?:4[0-7])px/);
   assert.match(css,/\.legacy-page \.legacy-story-tags span,[^}]*font-size:12px/);
 });
 
