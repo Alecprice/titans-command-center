@@ -19,8 +19,9 @@ test('radio callsign and frequency shapes can surface the Media route without du
   assert.doesNotMatch(js,/WIKQ|WXSM|WCRK|WOKI|WKFN|WAIN/);
 });
 
-test('search enhancement remains route-scoped and idempotent',()=>{
-  assert.match(js,/route\(\)!=='search'\|\|!mediaIntent\(query\(\)\)/);
+test('search enhancement remains route-scoped and idempotent while supporting Media handoff',()=>{
+  assert.match(js,/if\(route\(\)==='media'\)\{applyAffiliateHandoff\(\);return\}/);
+  assert.match(js,/if\(route\(\)!=='search'\|\|!mediaIntent\(value\)\)return/);
   assert.match(js,/links\.querySelector\('\[data-media-search-link\]'\)/);
   assert.match(js,/a\.href='#media'/);
   assert.equal((js.match(/new MutationObserver\(/g)||[]).length,1);
