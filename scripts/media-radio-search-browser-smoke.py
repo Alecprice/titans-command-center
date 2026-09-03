@@ -67,7 +67,7 @@ try:
     wait_for(driver, "document.querySelector('.media-affiliate-finder')?.getBoundingClientRect().top < innerHeight")
 
     stage = 'lowercase-callsign:result'
-    state = driver.execute_script("""
+    state = driver.execute_script(r"""
       const details=document.querySelector('.media-affiliate-finder');
       const input=details?.querySelector('[data-affiliate-search-input]');
       const summary=details?.querySelector('summary');
