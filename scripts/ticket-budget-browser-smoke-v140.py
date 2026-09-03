@@ -31,6 +31,27 @@ def driver_for(width=1280,height=1000):
     return driver
 
 
+def set_css_viewport(driver,width,height):
+    driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride',{
+        'width':width,
+        'height':height,
+        'deviceScaleFactor':1,
+        'mobile':False,
+    })
+    metrics=driver.execute_script("""
+      return {
+        innerWidth:window.innerWidth,
+        innerHeight:window.innerHeight,
+        clientWidth:document.documentElement.clientWidth,
+        phoneMedia:matchMedia('(max-width:620px)').matches
+      };
+    """)
+    should_match=width<=620
+    if metrics['innerWidth']!=width or metrics['innerHeight']!=height or metrics['phoneMedia']!=should_match:
+        raise RuntimeError(f'CSS viewport override failed: requested {width}x{height}, got {metrics}')
+    return metrics
+
+
 def load(driver,url):
     try:
         driver.get(url)
@@ -114,6 +135,8 @@ def snapshot(driver):
       const costCards=cost?[...cost.querySelectorAll('[data-ticket-cost-key]')]:[];
       return {
         viewport,
+        innerWidth:window.innerWidth,
+        phoneMedia:matchMedia('(max-width:620px)').matches,
         overflow:document.documentElement.scrollWidth>viewport+3,
         shortlistCount:(()=>{try{return JSON.parse(localStorage.getItem(arguments[0])||'[]').length}catch{return -1}})(),
         budget:Boolean(budget),
@@ -218,10 +241,16 @@ def exercise_budget(driver):
       return picker?.value===arguments[0]&&input===document.activeElement;
     """,'tenx-budget-a'))
 
-    driver.set_window_size(390,844)
-    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:d.execute_script('return document.documentElement.clientWidth<=390'))
+    mobile_metrics=set_css_viewport(driver,390,844)
+    WebDriverWait(driver,5,poll_frequency=.1).until(lambda d:d.execute_script("""
+      return window.innerWidth===390
+        && window.innerHeight===844
+        && matchMedia('(max-width:620px)').matches;
+    """))
     mobile=snapshot(driver)
     assert_truth(mobile,'mobile')
+    if mobile['innerWidth']!=390 or not mobile['phoneMedia']:
+        raise RuntimeError(f'mobile CSS viewport contract did not hold: {mobile}')
     if mobile['overflow']:raise RuntimeError(f'mobile budget flow creates root overflow: {mobile}')
     if not mobile['picker'] or mobile['picker']['height']<48:
         raise RuntimeError(f'mobile budget picker below 48px: {mobile}')
@@ -260,7 +289,7 @@ def exercise_budget(driver):
         'lowestEnteredOuting':'tenx-budget-b',
         'editFocusVerified':True,
         'clearLifecycleVerified':True,
-        'mobileViewport':390,
+        'mobileViewport':mobile_metrics,
         'mobileTouchFloor':48,
         'truthCopyVerified':True
     }
