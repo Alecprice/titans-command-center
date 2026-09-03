@@ -27,27 +27,40 @@ test('opponent roster spine uses post-cutdown active-roster evidence',()=>{
   assert.equal(spine.kicker,'Blake Grupe');
 });
 
-test('source truth qualifies stale unofficial depth-chart claims',()=>{
+test('source truth distinguishes active roster from practice squad when the depth chart is stale',()=>{
   const truth=opponentIntelSourceTruth();
   assert.equal(truth.status,'qualified-conflict');
   assert.equal(truth.conflictCount,2);
   assert.equal(truth.hasHighSeverityConflict,true);
   assert.deepEqual(truth.controllingSourceOrder,[
     'official-transaction',
-    'official-active-roster',
+    'official-roster-group',
     'official-unofficial-depth-chart'
   ]);
 
   const conflicts=WEEK1_OPPONENT_INTEL_2026.depthChart.conflicts;
-  assert.ok(conflicts.some(item=>item.subject==='Jason Sanders'&&item.severity==='high'));
-  assert.ok(conflicts.some(item=>item.subject==='Kohl Levao'));
+  const sanders=conflicts.find(item=>item.subject==='Jason Sanders');
+  const levao=conflicts.find(item=>item.subject==='Kohl Levao');
+  assert.equal(sanders?.severity,'high');
+  assert.equal(sanders?.currentGroup,'practice-squad');
+  assert.match(sanders?.resolution||'',/Blake Grupe/i);
+  assert.equal(levao?.currentGroup,'practice-squad');
+  assert.deepEqual(WEEK1_OPPONENT_INTEL_2026.rosterGroupContext.practiceSquad,['Jason Sanders','Kohl Levao']);
   assert.equal(WEEK1_OPPONENT_INTEL_2026.depthChart.authority,'unofficial');
+});
+
+test('opponent source registry carries official practice-squad and Week 1 prep provenance',()=>{
+  assert.match(WEEK1_OPPONENT_INTEL_2026.sources.jetsPracticeSquad?.url||'',/^https:\/\/www\.newyorkjets\.com\/news\//);
+  assert.match(WEEK1_OPPONENT_INTEL_2026.sources.jetsWeek1Prep?.url||'',/^https:\/\/www\.newyorkjets\.com\/news\//);
+  assert.equal(WEEK1_OPPONENT_INTEL_2026.sources.jetsPracticeSquad?.tier,'official');
+  assert.equal(WEEK1_OPPONENT_INTEL_2026.sources.jetsWeek1Prep?.tier,'official');
 });
 
 test('pre-game-week availability cannot masquerade as an injury designation',()=>{
   assert.equal(WEEK1_OPPONENT_INTEL_2026.availability.status,'pre-game-week');
   assert.equal(WEEK1_OPPONENT_INTEL_2026.availability.confidence,'limited');
   assert.match(WEEK1_OPPONENT_INTEL_2026.availability.note,/Do not convert/i);
+  assert.match(WEEK1_OPPONENT_INTEL_2026.availability.note,/re-audit/i);
 });
 
 test('consumer clones cannot mutate the frozen source snapshot',()=>{
