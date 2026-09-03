@@ -5,13 +5,14 @@ import fs from 'node:fs';
 const controller = fs.readFileSync('.github/workflows/tenx-automerge.yml', 'utf8');
 const verification = fs.readFileSync('.github/workflows/tenx-postdeploy-verification.yml', 'utf8');
 
-test('TENX auto-merge dispatches exact-sha postdeploy verification after production deploy', () => {
+test('TENX auto-merge dispatches exact deployed merge-sha postdeploy verification after production deploy', () => {
   assert.match(controller, /cloudflare-deploy\.yml\/dispatches/);
   assert.match(controller, /tenx-postdeploy-verification\.yml\/dispatches/);
-  assert.match(controller, /inputs\[source_sha\].*head_sha/);
+  assert.match(controller, /merge_sha=.*\.sha/);
+  assert.match(controller, /inputs\[source_sha\].*merge_sha/);
   assert.ok(
     controller.indexOf('cloudflare-deploy.yml/dispatches') < controller.indexOf('tenx-postdeploy-verification.yml/dispatches'),
-    'production deploy must be dispatched before the verification waiter'
+    'production deploy must be dispatched before exact-sha verification'
   );
 });
 
