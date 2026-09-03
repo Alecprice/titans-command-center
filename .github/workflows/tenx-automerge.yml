@@ -6,7 +6,7 @@ on:
     types: [completed]
 
 permissions:
-  actions: read
+  actions: write
   contents: write
   pull-requests: write
 
@@ -143,3 +143,11 @@ jobs:
           fi
 
           echo "TENX auto-merged PR #${pr_number} at ${head_sha}: ${message}"
+
+          # GitHub suppresses most workflow events caused by GITHUB_TOKEN writes.
+          # Explicit workflow_dispatch is an allowed exception, so always dispatch
+          # the existing production pipeline after a token-driven autonomous merge.
+          gh api -X POST \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/cloudflare-deploy.yml/dispatches" \
+            -f ref='main'
+          echo "Dispatched Titans Cloudflare Deploy for the new main revision."

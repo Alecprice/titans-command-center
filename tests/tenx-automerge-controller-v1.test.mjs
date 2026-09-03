@@ -12,8 +12,8 @@ test('TENX auto-merge only follows the completed Titans Quality Gate',()=>{
   assert.doesNotMatch(workflow,/pull_request_target:/);
 });
 
-test('TENX auto-merge has minimal explicit write permissions and never checks out PR code',()=>{
-  assert.match(workflow,/actions: read/);
+test('TENX auto-merge has explicit least-purpose write permissions and never checks out PR code',()=>{
+  assert.match(workflow,/actions: write/);
   assert.match(workflow,/contents: write/);
   assert.match(workflow,/pull-requests: write/);
   assert.match(workflow,/GH_TOKEN: \$\{\{ github\.token \}\}/);
@@ -43,4 +43,10 @@ test('TENX auto-merge pins the merge to the exact green head SHA',()=>{
   assert.match(workflow,/-f merge_method='merge'/);
   assert.match(workflow,/-f sha="\$head_sha"/);
   assert.match(workflow,/merged.*true/);
+});
+
+test('TENX autonomous merge explicitly dispatches the production pipeline',()=>{
+  assert.match(workflow,/actions\/workflows\/cloudflare-deploy\.yml\/dispatches/);
+  assert.match(workflow,/-f ref='main'/);
+  assert.match(workflow,/Dispatched Titans Cloudflare Deploy/);
 });
