@@ -11,11 +11,13 @@ test('Listen Watch search bridge recognizes radio affiliate language',()=>{
 });
 
 test('radio callsign and frequency shapes can surface the Media route without duplicating the station registry',()=>{
+  assert.match(js,/const RADIO_CONTEXT=/);
   assert.match(js,/const RADIO_CALLSIGN=\/\\b\[WK\]\[A-Z\]\{3\}\\b\/i/);
   assert.match(js,/const RADIO_FREQUENCY=/);
   assert.match(js,/\\d\{3,4\}\\s\*\(\?:AM\|FM\)/);
   assert.match(js,/\\d\{2,3\}\\\.\\d/);
-  assert.match(js,/const mediaIntent=value=>TERMS\.test\(value\)\|\|RADIO_CALLSIGN\.test\(value\)\|\|RADIO_FREQUENCY\.test\(value\)/);
+  assert.match(js,/const callsignHandoff=value=>/);
+  assert.match(js,/const mediaIntent=value=>TERMS\.test\(value\)\|\|Boolean\(callsignHandoff\(value\)\)\|\|RADIO_FREQUENCY\.test\(value\)/);
   assert.doesNotMatch(js,/WIKQ|WXSM|WCRK|WOKI|WKFN|WAIN/);
 });
 

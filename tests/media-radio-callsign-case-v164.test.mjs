@@ -4,14 +4,16 @@ import {readFile} from 'node:fs/promises';
 
 const js=await readFile(new URL('../media-search-v14.js',import.meta.url),'utf8');
 
-test('radio callsign discovery is case-insensitive',()=>{
+test('radio callsign discovery remains case-insensitive through constrained intent',()=>{
   assert.match(js,/const RADIO_CALLSIGN=\/\\b\[WK\]\[A-Z\]\{3\}\\b\/i/);
-  assert.match(js,/const mediaIntent=value=>TERMS\.test\(value\)\|\|RADIO_CALLSIGN\.test\(value\)\|\|RADIO_FREQUENCY\.test\(value\)/);
+  assert.match(js,/const callsignHandoff=value=>/);
+  assert.match(js,/Boolean\(callsignHandoff\(value\)\)/);
 });
 
 test('lowercase callsign handoff is normalized before entering the canonical finder',()=>{
   assert.match(js,/const call=source\.match\(RADIO_CALLSIGN\)\?\.\[0\]/);
-  assert.match(js,/if\(call\)return call\.toUpperCase\(\)/);
+  assert.match(js,/return exact\|\|contextual\?call\.toUpperCase\(\):''/);
+  assert.match(js,/const call=callsignHandoff\(source\)/);
   assert.match(js,/encodeURIComponent\(handoff\)/);
   assert.match(js,/input\.value=requested/);
 });
