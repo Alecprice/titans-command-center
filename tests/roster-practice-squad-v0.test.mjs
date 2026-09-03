@@ -27,6 +27,24 @@ test('roster enhancement keeps practice squad distinct from active and reserve',
   assert.doesNotMatch(source,/player-card[^\n]*href=/);
 });
 
+test('Game Day eligibility guide explains the NFL roster boundary without promoting practice-squad players',()=>{
+  assert.match(source,/NFL_ROSTER_RULES_SOURCE_URL='https:\/\/operations\.nfl\.com\//);
+  assert.match(source,/Practice Squad is separate from the 53-player Active\/Inactive list/);
+  assert.match(source,/standard-elevate up to two practice-squad players for a week/);
+  assert.match(source,/expanding that list to 54 or 55/);
+  assert.match(source,/47 players may be active, or 48 when at least eight offensive linemen are active/);
+  assert.match(source,/17-player Titans practice squad includes one International player exception/);
+  assert.match(source,/Practice Squad · International/);
+  assert.match(source,/target="_blank" rel="noopener noreferrer"/);
+});
+
+test('eligibility education adds no new provider, polling, persistence, or competing roster data owner',()=>{
+  assert.doesNotMatch(source,/\bfetch\s*\(|XMLHttpRequest|WebSocket|EventSource|setInterval|setTimeout/);
+  assert.doesNotMatch(source,/localStorage|sessionStorage|indexedDB/);
+  assert.match(source,/auditedPracticeSquad20260902/);
+  assert.match(source,/PRACTICE_SQUAD_SOURCE_URL/);
+});
+
 test('roster enhancement reuses existing roster search and unit filters',()=>{
   assert.match(source,/root\.querySelector\('#rs'\)/);
   assert.match(source,/root\.querySelector\('#ru'\)/);
@@ -35,8 +53,12 @@ test('roster enhancement reuses existing roster search and unit filters',()=>{
   assert.match(source,/unit\?\.addEventListener\('input',draw\)/);
 });
 
-test('enhancement is mobile-aware, route-scoped and bootstrapped fail-soft',()=>{
+test('enhancement is mobile-aware, accessible, route-scoped and bootstrapped fail-soft',()=>{
   assert.match(source,/@media\(max-width:620px\)/);
+  assert.match(source,/roster-eligibility-guide a\{min-height:44px/);
+  assert.match(source,/roster-eligibility-guide a\{min-height:48px/);
+  assert.match(source,/focus-visible/);
+  assert.match(source,/@media\(forced-colors:active\)/);
   assert.match(source,/if\(route\(\)!=='roster'\)return/);
   assert.match(source,/MutationObserver\(queueEnhance\)/);
   assert.match(bootstrap,/import\('\.\/roster-practice-squad-v0\.js'\)\.catch\(\(\)=>\{\}\)/);
