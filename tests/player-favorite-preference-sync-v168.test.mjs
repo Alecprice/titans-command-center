@@ -40,5 +40,5 @@ test('TENX Player Favorite adds no network or background lifecycle owner',()=>{
 test('TENX Player Favorite is loaded by the shell and packaged offline',()=>{
   assert.match(index,/player-favorite-sync-v168\.js\?v=1/);
   assert.match(sw,/'\/player-favorite-sync-v168\.js'/);
-  assert.match(sw,/titans-cc-brand-2026-v84/);
+  assert.match(sw,/titans-cc-brand-2026-v85/);
 });
