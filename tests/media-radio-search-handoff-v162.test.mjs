@@ -25,7 +25,7 @@ test('Media route applies the handoff through the canonical finder input event',
 test('handoff is fail-closed and does not overwrite a later manual filter',()=>{
   assert.match(js,/const requested=affiliateHandoff\(params\(\)\.get\('affiliate'\)\|\|''\)/);
   assert.match(js,/if\(!requested\)return false/);
-  assert.match(js,/if\(details\.dataset\.searchHandoff===requested\)return true/);
+  assert.match(js,/if\(details\.dataset\.searchHandoff===requested\)\{consumeAffiliateHandoff\(\);return true\}/);
   assert.match(js,/details\.dataset\.searchHandoff=requested/);
   assert.equal((js.match(/new MutationObserver\(/g)||[]).length,1);
 });
