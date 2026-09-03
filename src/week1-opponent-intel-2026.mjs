@@ -1,4 +1,4 @@
-const SOURCE_CHECKED_AT='2026-09-03T14:16:00Z';
+const SOURCE_CHECKED_AT='2026-09-03T15:45:00Z';
 
 const sources={
   titansSchedule:{
@@ -24,6 +24,32 @@ const sources={
     url:'https://www.newyorkjets.com/news/jets-awarded-blake-grupe-trevin-wallace-off-waivers-08-31-2026',
     checkedAt:SOURCE_CHECKED_AT
   },
+  jetsPracticeSquad:{
+    tier:'official',
+    publisher:'New York Jets',
+    label:'Jets Add 16 Players to Practice Squad',
+    publishedAt:'2026-08-31T22:09:00Z',
+    url:'https://www.newyorkjets.com/news/jets-practice-squad-2026-season',
+    checkedAt:SOURCE_CHECKED_AT,
+    qualification:'The Aug. 31 official practice-squad announcement lists Jason Sanders.'
+  },
+  jetsLevaoPracticeSquad:{
+    tier:'official',
+    publisher:'New York Jets',
+    label:'Jets Sign OL Kohl Levao to Practice Squad',
+    publishedOn:'2026-09-01',
+    url:'https://www.newyorkjets.com/news/all-news',
+    checkedAt:SOURCE_CHECKED_AT,
+    qualification:'The official Jets All News roster feed lists the Sept. 1 signing of Kohl Levao to the practice squad and the release of WR Cam Camper.'
+  },
+  jetsWeek1Prep:{
+    tier:'official',
+    publisher:'New York Jets',
+    label:'Final practice before full Week 1 focus',
+    publishedAt:'2026-09-02T20:00:00Z',
+    url:'https://www.newyorkjets.com/news/aaron-glenn-sean-payton-share-tips-final-practice-before-game-week-09-02-2026',
+    checkedAt:SOURCE_CHECKED_AT
+  },
   jetsDepthChart:{
     tier:'official-unofficial-depth-chart',
     publisher:'New York Jets Communications Department',
@@ -35,7 +61,7 @@ const sources={
 };
 
 export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
-  version:'2026-w1-20260903.1',
+  version:'2026-w1-20260903.3',
   opponent:'New York Jets',
   opponentAbbr:'NYJ',
   asOf:'2026-09-03',
@@ -61,24 +87,32 @@ export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
     secondary:Object.freeze(['Jarvis Brownlee Jr.','Brandon Stephens','Azareye’h Thomas','Nahshon Wright','Minkah Fitzpatrick','Andre Cisco']),
     kicker:'Blake Grupe'
   }),
+  rosterGroupContext:Object.freeze({
+    practiceSquad:Object.freeze(['Jason Sanders','Kohl Levao']),
+    note:'Jason Sanders and Kohl Levao are not part of the audited active-roster spine. Separate official Jets roster reports place each player on the practice squad after the Aug. 31 active-roster moves.'
+  }),
   depthChart:Object.freeze({
     status:'qualified-conflict',
     authority:'unofficial',
     safeUse:'role-ordering-only-after-roster-cross-check',
-    note:'Use the Jets depth chart as a role-ordering signal only. Newer official roster/transaction evidence controls active membership when sources disagree.',
+    note:'Use the Jets depth chart as a role-ordering signal only. Newer official roster, transaction and roster-group evidence controls current membership when sources disagree.',
     conflicts:Object.freeze([
       Object.freeze({
         subject:'Jason Sanders',
         depthChartClaim:'Listed as first-team kicker.',
-        controllingEvidence:'Jets released Jason Sanders on Aug. 31 and added Blake Grupe; the Sept. 1 active-roster article lists Grupe.',
-        resolution:'Do not surface Sanders as the current Jets kicker.',
+        controllingEvidence:'Jets released Sanders from the active roster on Aug. 31, added Blake Grupe, and then listed Sanders on the practice squad. The Sept. 1 active-roster article lists Grupe as the kicker.',
+        resolution:'Surface Blake Grupe as the active-roster kicker; Sanders may be identified only with his practice-squad context.',
+        currentGroup:'practice-squad',
+        sourceKey:'jetsPracticeSquad',
         severity:'high'
       }),
       Object.freeze({
         subject:'Kohl Levao',
         depthChartClaim:'Listed as second-team right guard.',
-        controllingEvidence:'Jets waived Levao from the active roster on Aug. 31; he is not part of the Sept. 1 active-roster offensive-line group.',
-        resolution:'Do not infer active-roster membership from the depth chart.',
+        controllingEvidence:'Jets waived Levao from the active roster on Aug. 31; the official Sept. 1 Jets roster feed reports that he signed to the practice squad.',
+        resolution:'Do not infer active-roster membership from the depth chart; identify Levao as practice squad when roster group matters.',
+        currentGroup:'practice-squad',
+        sourceKey:'jetsLevaoPracticeSquad',
         severity:'medium'
       })
     ])
@@ -86,7 +120,7 @@ export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
   availability:Object.freeze({
     status:'pre-game-week',
     confidence:'limited',
-    note:'Do not convert camp/practice expectations into official Week 1 game-status labels. Re-audit against the NFL/Jets injury report during game week.'
+    note:'The Jets described Sept. 2 as their final practice before full Week 1 focus. Do not convert practice or camp reporting into official Week 1 game-status labels; re-audit against the NFL/Jets injury report during game week.'
   }),
   sources:Object.freeze(sources)
 });
@@ -98,7 +132,7 @@ export function opponentIntelSourceTruth(intel=WEEK1_OPPONENT_INTEL_2026){
     status:conflicts.length?'qualified-conflict':'cross-source-confirmed',
     conflictCount:conflicts.length,
     hasHighSeverityConflict:conflicts.some(item=>item?.severity==='high'),
-    controllingSourceOrder:Object.freeze(['official-transaction','official-active-roster','official-unofficial-depth-chart'])
+    controllingSourceOrder:Object.freeze(['official-transaction','official-roster-group','official-unofficial-depth-chart'])
   });
 }
 

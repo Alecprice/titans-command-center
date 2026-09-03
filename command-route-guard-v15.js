@@ -1,3 +1,5 @@
+import './command-opponent-scout-v161.js';
+
 (() => {
   'use strict';
 
