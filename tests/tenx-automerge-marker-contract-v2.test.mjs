@@ -25,6 +25,12 @@ test('autonomous merge explicitly dispatches the existing production owner',()=>
   assert.match(deploy,/name: Titans Cloudflare Deploy/);
 });
 
+test('autonomous merge keeps the repaired blocking-review gate compatible with GitHub CLI',()=>{
+  assert.match(workflow,/gh api --paginate .*reviews\?per_page=100/);
+  assert.match(workflow,/\| jq -s/);
+  assert.doesNotMatch(workflow,/--paginate --slurp/);
+});
+
 test('autonomous merge remains exact-SHA gated and privileged workflow never executes PR code',()=>{
   assert.match(workflow,/-f sha="\$head_sha"/);
   assert.match(workflow,/pr_head_sha.*head_sha/);
