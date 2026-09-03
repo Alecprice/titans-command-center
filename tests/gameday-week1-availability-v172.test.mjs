@@ -60,9 +60,10 @@ test('Game Day availability context inherits mobile touch, focus, reduced-motion
   assert.match(feature,/@media\(forced-colors:active\)/);
 });
 
-test('shared runtime loads the feature and the existing v85 network-first PWA shell packages it without a cache-generation churn',()=>{
+test('shared runtime loads the feature and the current main v86 network-first PWA shell packages it without rolling back newer shell assets',()=>{
   assert.match(runtime,/import\('\.\/gameday-week1-availability-v172\.js'\)/);
-  assert.match(sw,/titans-cc-brand-2026-v85/);
+  assert.match(sw,/titans-cc-brand-2026-v86/);
+  assert.match(sw,/'\/account-interaction-v117\.js'/);
   assert.match(sw,/'\/gameday-week1-availability-v172\.js'/);
   assert.match(sw,/NETWORK_FIRST/);
 });
