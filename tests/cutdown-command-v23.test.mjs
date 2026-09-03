@@ -60,3 +60,21 @@ test('Home card deep-links directly into the Team Room-owned Cutdown view',()=>{
   assert.match(teamRoom,/setRosterView\(initialView,\{persist:false\}\)/);
   assert.doesNotMatch(js,/syncCutdownView/);
 });
+
+test('Cutdown clock updates in place without remounting My 53 and stops after the deadline',()=>{
+  assert.match(js,/data-cutdown-clock-title/);
+  assert.match(js,/data-cutdown-clock-label/);
+  assert.match(js,/data-cutdown-clock-value/);
+  assert.match(js,/data-cutdown-home-label/);
+  assert.match(js,/data-cutdown-home-value/);
+  assert.match(js,/function ensureClockTimer\(\)\{\s*if\(timer\|\|pastDeadline\(\)\)return;/);
+  assert.match(js,/if\(past\)stopClockTimer\(\);/);
+  assert.match(js,/addEventListener\('pagehide',stopClockTimer\)/);
+  assert.match(js,/addEventListener\('pageshow',\(\)=>\{updateClock\(\);ensureClockTimer\(\);\}\)/);
+  const body=js.match(/function updateClock\(\)\{([\s\S]*?)\n  \}\n\n  function ensureClockTimer/)?.[1]||'';
+  assert.ok(body,'clock updater should be independently inspectable');
+  assert.match(body,/textContent/);
+  assert.doesNotMatch(body,/mountHome|mountRoster|innerHTML|\.remove\(/);
+  assert.doesNotMatch(js,/function refreshClock\(/);
+  assert.match(js,/runtime\.onRefresh\(\(\)=>\{data=null;load\(true\)\.then\(\(\)=>refreshDataViews\(\)\);\}\)/);
+});
