@@ -113,6 +113,16 @@ def wait_guest_tools(driver,timeout=8):
       return {exportLabel:exp.textContent.trim(),importLabel:imp.textContent.trim(),resetLabel:reset.textContent.trim(),exportHeight:er.height,importHeight:ir.height,resetHeight:rr.height,guest:Boolean(window.TitansAccount?.guest)};
     """))
 
+def wait_password_control(driver,expected_type='password',expected_text='Show',expected_autocomplete=None,timeout=5):
+    return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script("""
+      const input=document.querySelector('.account-form input[name="password"]'),toggle=document.querySelector('[data-account-password-toggle]');
+      if(!input||!toggle||input.type!==arguments[0]||toggle.textContent.trim()!==arguments[1])return null;
+      if(arguments[2]&&input.autocomplete!==arguments[2])return null;
+      const r=toggle.getBoundingClientRect(),fieldLabel=document.querySelector(`label[for="${input.id}"]`);
+      if(r.width<44||r.height<48)return null;
+      return {type:input.type,autocomplete:input.autocomplete,text:toggle.textContent.trim(),name:toggle.getAttribute('aria-label'),pressed:toggle.getAttribute('aria-pressed'),controls:toggle.getAttribute('aria-controls'),inputId:input.id,fieldLabel:fieldLabel?.textContent?.trim()||'',width:r.width,height:r.height,valueLength:input.value.length};
+    """,expected_type,expected_text,expected_autocomplete))
+
 def state(driver):
     try:
         return driver.execute_script("""
@@ -131,6 +141,7 @@ def state(driver):
             accountCardAtSidebarTop:Boolean(document.querySelector('#sidebar > .account-sheet-card')),
             accountEntry:er?{top:er.top,bottom:er.bottom,width:er.width,height:er.height}:null,
             accountPanel:ar?{top:ar.top,bottom:ar.bottom,width:ar.width,height:ar.height,text:(account?.textContent||'').slice(0,260)}:null,
+            passwordControl:document.querySelector('[data-account-password-toggle]')?.textContent?.trim()||'',
             importPreview:document.querySelector('.account-import-preview')?.textContent?.trim()||'',
             sidebar:{open:Boolean(sidebar?.classList.contains('open')),inert:Boolean(sidebar?.inert),ariaHidden:sidebar?.getAttribute('aria-hidden')||null,rect:sr?{top:sr.top,bottom:sr.bottom,width:sr.width,height:sr.height}:null},
             moreExpanded:document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded')||null,
@@ -159,6 +170,28 @@ try:
     stage='open-account';entry=open_account_from_sheet(d)
     stage='wait-account-panel';panel=wait_account_panel(d)
     if 'Continue as guest' not in panel['text']: raise RuntimeError(f'account panel unusable: {panel}')
+
+    stage='password-initial';password_initial=wait_password_control(d,'password','Show','current-password')
+    if password_initial['name']!='Show password' or password_initial['pressed'] is not None or password_initial['controls']!=password_initial['inputId'] or password_initial['fieldLabel']!='Password': raise RuntimeError(f'password control initial semantics invalid: {password_initial}')
+    d.find_element(By.CSS_SELECTOR,'.account-form input[name="password"]').send_keys('SmokePass123!')
+    password_initial=wait_password_control(d,'password','Show','current-password')
+    if password_initial['valueLength']!=13: raise RuntimeError(f'password smoke value was not entered: {password_initial}')
+
+    stage='password-reveal';d.find_element(By.CSS_SELECTOR,'[data-account-password-toggle]').click()
+    password_revealed=wait_password_control(d,'text','Hide','current-password')
+    if password_revealed['name']!='Hide password' or password_revealed['pressed'] is not None or password_revealed['valueLength']!=13: raise RuntimeError(f'password reveal semantics invalid: {password_revealed}')
+
+    stage='password-hide';d.find_element(By.CSS_SELECTOR,'[data-account-password-toggle]').click()
+    password_hidden=wait_password_control(d,'password','Show','current-password')
+    if password_hidden['name']!='Show password' or password_hidden['pressed'] is not None or password_hidden['valueLength']!=13: raise RuntimeError(f'password hide semantics invalid: {password_hidden}')
+
+    stage='password-signup-remount';d.find_element(By.CSS_SELECTOR,'[data-account-mode="signup"]').click()
+    password_signup=wait_password_control(d,'password','Show','new-password')
+    if password_signup['name']!='Show password' or password_signup['pressed'] is not None: raise RuntimeError(f'sign-up password control invalid: {password_signup}')
+
+    stage='password-signin-remount';d.find_element(By.CSS_SELECTOR,'[data-account-mode="signin"]').click()
+    password_signin=wait_password_control(d,'password','Show','current-password')
+    if password_signin['name']!='Show password' or password_signin['pressed'] is not None: raise RuntimeError(f'log-in password control invalid: {password_signin}')
 
     stage='guest-portability-tools';tools=wait_guest_tools(d)
     if tools['exportLabel']!='Export this device' or tools['importLabel']!='Import backup' or tools['resetLabel']!='Reset this device' or not tools['guest']: raise RuntimeError(f'guest portability tools invalid: {tools}')
@@ -190,7 +223,7 @@ try:
     if roster['route']!='#roster': raise RuntimeError(f'guest navigation blocked: {roster}')
     stage='console';result['browserWarnings']=severe(d)
     if result['browserWarnings']: raise RuntimeError(f'Browser console errors: {result["browserWarnings"][:5]}')
-    result.update({'ok':True,'guest':guest,'mobileShell':shell,'sheet':sheet,'accountEntry':entry,'panel':panel,'portabilityTools':tools,'importPreview':import_preview,'resetArmed':armed,'authOutage':outage,'roster':roster});stage='complete'
+    result.update({'ok':True,'guest':guest,'mobileShell':shell,'sheet':sheet,'accountEntry':entry,'panel':panel,'passwordInitial':password_initial,'passwordRevealed':password_revealed,'passwordHidden':password_hidden,'passwordSignup':password_signup,'passwordSignin':password_signin,'portabilityTools':tools,'importPreview':import_preview,'resetArmed':armed,'authOutage':outage,'roster':roster});stage='complete'
 except Exception as exc:
     result['stage']=stage;result['error']=f'{type(exc).__name__}: {exc}'
     if d is not None:result['state']=state(d)
