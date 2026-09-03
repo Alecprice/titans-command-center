@@ -14,7 +14,7 @@ const ownerSelectors=[
 
 test('Saved Compare preserves selected party truth when a live starting price is unavailable',()=>{
   assert.ok(compare.includes("`${party} ticket${party===1?'':'s'}: current starting price unavailable before fees · ${sources}`"));
-  assert.ok(compare.includes("`${party} ticket${party===1?'':'s'}: ${money(total)} before fees · ${sources}`"));
+  assert.ok(compare.includes("`Current start: ${money(item.price)} · ${party} ticket${party===1?'':'s'}: ${money(total)} before fees · ${sources}`"));
   assert.doesNotMatch(compare,/current starting price unavailable[^\n]*\$0/i);
   assert.doesNotMatch(compare,/current starting price unavailable[^\n]*money\(0\)/i);
   assert.ok(smoke.includes("'3 tickets:'"));
