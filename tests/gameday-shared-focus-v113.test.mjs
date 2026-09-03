@@ -13,9 +13,10 @@ test('stable Game Day consumes the shared schedule focus contract',()=>{
 });
 
 test('kickoff-window matchup stays pregame until provider explicitly confirms LIVE',()=>{
-  assert.match(js,/const eg=espnGame\(\),focus=gameFocus\(\)/);
+  assert.match(js,/const focus=gameFocus\(\),eg=espnGame\(focus\)/);
   assert.match(js,/if\(focus\.game\)return\['pregame',focus\.game,eg\]/);
-  assert.match(js,/eg&&\/in progress\|halftime\|end of\/i\.test/);
+  assert.match(js,/const providerLiveStatus=eg=>Boolean\(eg&&\/in progress\|halftime\|end of\/i\.test/);
+  assert.match(js,/if\(providerLiveStatus\(eg\)\)return\['live'/);
   assert.doesNotMatch(js,/focus\.state==='game-window'.*\['live'/s);
 });
 
