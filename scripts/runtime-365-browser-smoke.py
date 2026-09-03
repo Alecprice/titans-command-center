@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -47,6 +48,23 @@ def disable_sidebar_motion(driver):
     """)
 
 
+def panel_diag(driver):
+    return driver.execute_script(r"""
+      const panel=document.querySelector('.v19-365');
+      const style=panel?getComputedStyle(panel):null;
+      const rect=panel?panel.getBoundingClientRect():null;
+      return {
+        present:Boolean(panel),
+        connected:Boolean(panel?.isConnected),
+        mode:panel?.dataset.v19Mode||'',
+        cards:panel?.querySelectorAll('.v19-365-grid>a').length||0,
+        premiumPresent:Boolean(document.querySelector('.v14-now')),
+        visible:Boolean(panel&&panel.isConnected&&style&&style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>0&&rect&&rect.width>0&&rect.height>0&&panel.getClientRects().length>0),
+        text:(panel?.textContent||'').replace(/\s+/g,' ').trim().slice(0,240)
+      };
+    """)
+
+
 def wait_365_panel(driver,timeout=15):
     def read_state(d):
         return d.execute_script(r"""
@@ -55,21 +73,48 @@ def wait_365_panel(driver,timeout=15):
           const style=getComputedStyle(panel),rect=panel.getBoundingClientRect();
           const cards=[...panel.querySelectorAll('.v19-365-grid>a')];
           const text=(panel.textContent||'').replace(/\s+/g,' ').trim();
+          const mode=panel.dataset.v19Mode||'full';
+          const premiumPresent=Boolean(document.querySelector('.v14-now'));
           const visible=style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>0&&rect.width>0&&rect.height>0&&panel.getClientRects().length>0;
-          if(!visible||!text.includes('365 MODE')||cards.length!==4)return null;
-          return {text,visible,display:style.display,visibility:style.visibility,opacity:style.opacity,width:rect.width,height:rect.height,cards:cards.length};
+          const validMode=mode==='season-lens'?premiumPresent&&cards.length===2:mode==='full'&&!premiumPresent&&cards.length===4;
+          if(!visible||!text.includes('365 MODE')||!validMode)return null;
+          return {text,visible,display:style.display,visibility:style.visibility,opacity:style.opacity,width:rect.width,height:rect.height,cards:cards.length,mode,premiumPresent};
         """)
-    return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_state)
+    try:
+        return WebDriverWait(driver,timeout,poll_frequency=0.1).until(read_state)
+    except TimeoutException as exc:
+        raise RuntimeError(f'365 panel failed mode/count readiness: {panel_diag(driver)}') from exc
+
+
+def assert_mode_contract(panel_state,label):
+    if not panel_state: raise RuntimeError(f'{label}: 365 panel state missing')
+    mode=panel_state.get('mode')
+    cards=panel_state.get('cards')
+    premium=bool(panel_state.get('premiumPresent'))
+    expected=2 if mode=='season-lens' else 4 if mode=='full' else None
+    if expected is None or cards!=expected:
+        raise RuntimeError(f'{label}: invalid 365 mode/card contract: {panel_state}')
+    if premium and mode!='season-lens':
+        raise RuntimeError(f'{label}: Premium is mounted but 365 still owns the full command set: {panel_state}')
+    if not premium and mode!='full':
+        raise RuntimeError(f'{label}: Season Lens rendered without its Premium owner: {panel_state}')
 
 
 def read_regular_readiness(driver):
     return driver.execute_script("""
-      const cards=[...document.querySelectorAll('.v19-365-grid>a')];
+      const panel=document.querySelector('.v19-365');
+      const cards=[...panel?.querySelectorAll('.v19-365-grid>a')||[]];
       const row=label=>{
         const card=cards.find(x=>(x.querySelector('small')?.textContent||'').trim()===label);
         return card?{title:(card.querySelector('strong')?.textContent||'').trim(),copy:(card.querySelector('span')?.textContent||'').trim()}:null;
       };
-      return {availability:row('AVAILABILITY'),standings:row('AFC SOUTH')};
+      return {
+        mode:panel?.dataset.v19Mode||'',
+        premiumPresent:Boolean(document.querySelector('.v14-now')),
+        availability:row('AVAILABILITY'),
+        standings:row('AFC SOUTH'),
+        changes:row('WHAT CHANGED?')
+      };
     """)
 
 
@@ -78,13 +123,16 @@ def assert_regular_readiness(phase,panel_state,readiness):
     text=panel_state.get('text','')
     if 'Weekly report not loaded' in text or 'Standings not loaded' in text:
         raise RuntimeError(f'Regular-season 365 Mode exposes stale broken-state copy: {readiness}')
+    mode=(readiness or {}).get('mode')
+    if mode=='season-lens': required=('standings','changes')
+    elif mode=='full': required=('availability','standings')
+    else: raise RuntimeError(f'Regular-season 365 Mode has unknown ownership mode: {readiness}')
+    for key in required:
+        row=(readiness or {}).get(key) or {}
+        if not row.get('title') or not row.get('copy'):
+            raise RuntimeError(f'Regular-season {key} readiness is incomplete for {mode}: {readiness}')
     availability=(readiness or {}).get('availability') or {}
-    standings=(readiness or {}).get('standings') or {}
-    if not availability.get('title') or not availability.get('copy'):
-        raise RuntimeError(f'Regular-season availability readiness is incomplete: {readiness}')
-    if not standings.get('title') or not standings.get('copy'):
-        raise RuntimeError(f'Regular-season standings readiness is incomplete: {readiness}')
-    if 'all-clear' in availability.get('copy','').lower() and 'not treated' not in availability.get('copy','').lower():
+    if availability and 'all-clear' in availability.get('copy','').lower() and 'not treated' not in availability.get('copy','').lower():
         raise RuntimeError(f'Availability fallback overclaims certainty: {readiness}')
 
 
@@ -121,7 +169,7 @@ def mobile_state(driver):
             hash:location.hash,
             viewport:{w:innerWidth,h:innerHeight},
             onboarding:Boolean(document.querySelector('#v10-onboarding')),
-            panel:{count:document.querySelectorAll('.v19-365').length,rect:pr?{top:pr.top,bottom:pr.bottom,width:pr.width,height:pr.height}:null},
+            panel:{count:document.querySelectorAll('.v19-365').length,mode:panel?.dataset.v19Mode||'',cards:panel?.querySelectorAll('.v19-365-grid>a').length||0,premiumPresent:Boolean(document.querySelector('.v14-now')),rect:pr?{top:pr.top,bottom:pr.bottom,width:pr.width,height:pr.height}:null},
             sidebar:{className:sidebar?.className||'',open:Boolean(sidebar?.classList.contains('open')),inert:Boolean(sidebar?.inert),rect:sr?{top:sr.top,bottom:sr.bottom,width:sr.width,height:sr.height}:null},
             moreExpanded:document.querySelector('#mobile-more-button')?.getAttribute('aria-expanded')||null,
             dock:{rect:dr?{top:dr.top,bottom:dr.bottom,width:dr.width,height:dr.height}:null,targets:document.querySelectorAll('.mobile-nav a,.mobile-nav button').length},
@@ -142,15 +190,15 @@ try:
         stage='desktop:load-home';d.get(f'{BASE}/#home')
         stage='desktop:prepare-returning-user';prepare_returning_user(d)
         stage='desktop:wait-365-panel';panel_state=wait_365_panel(d)
+        assert_mode_contract(panel_state,'desktop')
         stage='desktop:read-runtime'
         runtime=d.execute_script("return window.TitansRuntime ? {version:window.TitansRuntime.version,route:window.TitansRuntime.route(),teamTimeZone:window.TitansRuntime.teamTimeZone,teamTimeLabel:window.TitansRuntime.teamTimeLabel,cache:window.TitansRuntime.apiCacheInfo(),refresh:window.TitansRuntime.refreshInfo()} : null")
         phase=d.execute_script("return document.body.dataset.v19Phase || ''")
-        cards=d.find_elements(By.CSS_SELECTOR,'.v19-365-grid > a')
         readiness=read_regular_readiness(d)
         if not runtime or runtime.get('version')!='1.10.0': raise RuntimeError(f'Runtime missing or wrong version: {runtime}')
         if runtime.get('route')!='home': raise RuntimeError(f'Runtime route mismatch: {runtime}')
         if runtime.get('teamTimeZone')!='America/Chicago' or runtime.get('teamTimeLabel')!='Nashville time': raise RuntimeError(f'Team-time runtime contract missing: {runtime}')
-        if not phase or len(cards)!=4: raise RuntimeError(f'365 panel contract failed: phase={phase} cards={len(cards)} state={panel_state}')
+        if not phase: raise RuntimeError(f'365 phase contract failed: phase={phase} state={panel_state}')
         assert_regular_readiness(phase,panel_state,readiness)
         if 'NEXT GAME' in panel_state['text'] and 'Next game TBD' not in panel_state['text']:
             if ' UTC' in panel_state['text'] or not ('CDT' in panel_state['text'] or 'CST' in panel_state['text']):
@@ -165,17 +213,19 @@ try:
         refresh_button.click()
         stage='desktop:wait-refresh';refresh_state=wait_refresh(d,previous_epoch)
         stage='desktop:wait-refreshed-panel';refreshed_panel=wait_365_panel(d)
+        assert_mode_contract(refreshed_panel,'desktop refreshed')
         refreshed_readiness=read_regular_readiness(d)
         assert_regular_readiness(phase,refreshed_panel,refreshed_readiness)
         if refresh_state['epoch']!=previous_epoch+1: raise RuntimeError(f'Unexpected refresh epoch: before={previous_epoch} after={refresh_state}')
 
         stage='desktop:command-route';d.execute_script("location.hash='#command'");wait_css(d,'.v15-command')
         stage='desktop:return-home';d.execute_script("location.hash='#home'");return_state=wait_365_panel(d)
+        assert_mode_contract(return_state,'desktop return')
         return_readiness=read_regular_readiness(d)
         assert_regular_readiness(phase,return_state,return_readiness)
         count=d.execute_script("return document.querySelectorAll('.v19-365').length")
         if count!=1: raise RuntimeError(f'365 panel duplicated after route cycle: {count}')
-        result['desktop']={'phase':phase,'cards':len(cards),'runtimeVersion':runtime['version'],'teamTimeZone':runtime['teamTimeZone'],'teamTimeLabel':runtime['teamTimeLabel'],'routeCycle':True,'singlePanel':True,'cacheUrls':sorted(urls),'readiness':readiness,'panel':panel_state,'refresh':refresh_state,'refreshedReadiness':refreshed_readiness,'refreshedPanel':refreshed_panel,'returnReadiness':return_readiness,'returnPanel':return_state}
+        result['desktop']={'phase':phase,'cards':panel_state['cards'],'mode':panel_state['mode'],'premiumPresent':panel_state['premiumPresent'],'runtimeVersion':runtime['version'],'teamTimeZone':runtime['teamTimeZone'],'teamTimeLabel':runtime['teamTimeLabel'],'routeCycle':True,'singlePanel':True,'cacheUrls':sorted(urls),'readiness':readiness,'panel':panel_state,'refresh':refresh_state,'refreshedReadiness':refreshed_readiness,'refreshedPanel':refreshed_panel,'returnReadiness':return_readiness,'returnPanel':return_state}
         result['browserWarnings'].extend(severe_logs(d))
     finally:
         d.quit();d=None
@@ -185,8 +235,10 @@ try:
     stage='mobile:prepare-returning-user';prepare_returning_user(m)
     stage='mobile:disable-sidebar-motion';disable_sidebar_motion(m)
     stage='mobile:wait-365-panel';mobile_panel=wait_365_panel(m)
+    assert_mode_contract(mobile_panel,'mobile')
+    mobile_phase=m.execute_script("return document.body.dataset.v19Phase || ''")
     stage='mobile:read-readiness';mobile_readiness=read_regular_readiness(m)
-    assert_regular_readiness(phase,mobile_panel,mobile_readiness)
+    assert_regular_readiness(mobile_phase,mobile_panel,mobile_readiness)
     stage='mobile:read-layout'
     mobile=m.execute_script("""
       const panel=document.querySelector('.v19-365');
@@ -213,6 +265,9 @@ try:
     dock_labels={x['label'] for x in mobile['dockTargets']}
     if not {'Home','Roster','Game','Search','More'}.issubset(dock_labels): raise RuntimeError(f'Mobile five-action dock labels invalid: {mobile}')
     result['mobile']['layout']=mobile
+    result['mobile']['phase']=mobile_phase
+    result['mobile']['mode']=mobile_panel['mode']
+    result['mobile']['premiumPresent']=mobile_panel['premiumPresent']
     result['mobile']['readiness']=mobile_readiness
     result['mobile']['panelState']=mobile_panel
 
@@ -248,6 +303,7 @@ except Exception as exc:
     result['stage']=stage
     result['error']=f'{type(exc).__name__}: {exc}'
     if m is not None: result['mobileState']=mobile_state(m)
+    elif d is not None: result['desktopState']=panel_diag(d)
 finally:
     if m is not None:
         try:m.quit()
