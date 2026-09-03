@@ -37,7 +37,7 @@ test('Signal Lens keeps bounded focus settlement and the production acceptance c
 });
 
 test('production failure state is specifically guarded by canonical Finalists resets',()=>{
-  assert.match(smoke,/\[data-ticket-finalists-view=\\"all\\"\]/);
-  assert.match(smoke,/\[data-ticket-finalists-budget=\\"all\\"\]/);
+  assert.ok(smoke.includes(String.raw`[data-ticket-finalists-view=\"all\"]`));
+  assert.ok(smoke.includes(String.raw`[data-ticket-finalists-budget=\"all\"]`));
   assert.match(signal,/center=requestCanonicalFilters\(center\)\|\|liveCenter\(\)\|\|center;/);
 });
