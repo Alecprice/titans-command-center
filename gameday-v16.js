@@ -132,11 +132,58 @@
     return {plays:rows,wpa:wpa.length?wpaSum:null,epa:epa.length?epaSum:null,label:wpa.length?(wpaSum>0.04?'Titans momentum':wpaSum<-0.04?'Opponent momentum':'Even stretch'):(epa.length?(epaSum>0?'Positive offensive stretch':'Negative offensive stretch'):'No model signal')};
   }
 
-  function leaders(g){
-    const rows=relevantRows(playerStats(),g);if(!rows.length)return[];
+  const LEADER_GROUPS=[
+    {label:'Passing',positions:['QB'],primary:[['passing_yards','pass_yards'],['passing_touchdowns','passing_tds','pass_touchdowns','pass_tds'],['completions','passing_completions']],details:[['passing_yards','pass_yards'],['passing_touchdowns','passing_tds','pass_touchdowns','pass_tds'],['completions','passing_completions'],['attempts','passing_attempts']]},
+    {label:'Rushing',positions:['QB','RB','FB','WR','TE'],primary:[['rushing_yards','rush_yards'],['rushing_touchdowns','rushing_tds','rush_touchdowns','rush_tds'],['carries','rushing_attempts']],details:[['rushing_yards','rush_yards'],['rushing_touchdowns','rushing_tds','rush_touchdowns','rush_tds'],['carries','rushing_attempts']]},
+    {label:'Receiving',positions:['WR','TE','RB','FB'],primary:[['receiving_yards','rec_yards'],['receptions'],['receiving_touchdowns','receiving_tds','rec_touchdowns','rec_tds'],['targets']],details:[['receiving_yards','rec_yards'],['receptions'],['receiving_touchdowns','receiving_tds','rec_touchdowns','rec_tds'],['targets']]},
+    {label:'Defense',positions:['DL','DE','DT','NT','EDGE','LB','ILB','OLB','CB','DB','S','FS','SS'],primary:[['sacks'],['defensive_interceptions','def_interceptions'],['tackles_for_loss','tfl'],['forced_fumbles'],['total_tackles','tackles_combined','tackles']],details:[['sacks'],['defensive_interceptions','def_interceptions'],['total_tackles','tackles_combined','tackles'],['tackles_for_loss','tfl'],['forced_fumbles'],['qb_hits']]},
+    {label:'Kicking',positions:['K','PK'],primary:[['field_goals_made','fg_made'],['kicking_points'],['extra_points_made','xp_made']],details:[['field_goals_made','fg_made'],['field_goals_attempted','fg_attempted'],['extra_points_made','xp_made'],['kicking_points']]}
+  ];
+  const METRIC_LABELS={passing_yards:'pass yds',pass_yards:'pass yds',passing_touchdowns:'pass TD',passing_tds:'pass TD',pass_touchdowns:'pass TD',pass_tds:'pass TD',completions:'completions',passing_completions:'completions',attempts:'attempts',passing_attempts:'attempts',rushing_yards:'rush yds',rush_yards:'rush yds',rushing_touchdowns:'rush TD',rushing_tds:'rush TD',rush_touchdowns:'rush TD',rush_tds:'rush TD',carries:'carries',rushing_attempts:'carries',receiving_yards:'rec yds',rec_yards:'rec yds',receptions:'receptions',receiving_touchdowns:'rec TD',receiving_tds:'rec TD',rec_touchdowns:'rec TD',rec_tds:'rec TD',targets:'targets',sacks:'sacks',defensive_interceptions:'INT',def_interceptions:'INT',total_tackles:'tackles',tackles_combined:'tackles',tackles:'tackles',tackles_for_loss:'TFL',tfl:'TFL',forced_fumbles:'forced fumbles',qb_hits:'QB hits',field_goals_made:'FG made',fg_made:'FG made',field_goals_attempted:'FG att',fg_attempted:'FG att',extra_points_made:'XP made',xp_made:'XP made',kicking_points:'kicking pts'};
+  const normalizeStatKey=key=>String(key||'').replace(/([a-z0-9])([A-Z])/g,'$1_$2').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'').toLowerCase();
+  const metricLabel=key=>METRIC_LABELS[key]||String(key||'stat').replace(/_/g,' ');
+
+  function normalizedStats(row){
+    const stats=new Map();
+    for(const [key,value] of Object.entries(row?.stats||{})){
+      const normalized=normalizeStatKey(key),n=num(value);if(!normalized||n==null)continue;
+      const current=stats.get(normalized);if(current==null||Math.abs(n)>Math.abs(current))stats.set(normalized,n);
+    }
+    return stats;
+  }
+
+  function playerLeaderRows(g){
     const byPlayer=new Map();
-    for(const row of rows){const key=row.playerId||row.name;if(!byPlayer.has(key))byPlayer.set(key,{name:row.name||'Player',position:row.position||'',values:[]});const holder=byPlayer.get(key);for(const [k,v] of Object.entries(row.stats||{})){if(num(v)!=null)holder.values.push([k,num(v)])}}
-    return [...byPlayer.values()].map(x=>{x.values.sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));return x}).sort((a,b)=>(b.values[0]?.[1]||0)-(a.values[0]?.[1]||0)).slice(0,5);
+    for(const row of relevantRows(playerStats(),g)){
+      const key=String(row.playerId||row.name||'').trim();if(!key)continue;
+      if(!byPlayer.has(key))byPlayer.set(key,{name:row.name||'Player',position:String(row.position||'').toUpperCase(),stats:new Map()});
+      const holder=byPlayer.get(key);
+      for(const [metric,value] of normalizedStats(row)){
+        const current=holder.stats.get(metric);if(current==null||Math.abs(value)>Math.abs(current))holder.stats.set(metric,value);
+      }
+    }
+    return [...byPlayer.values()];
+  }
+
+  function playerMetric(player,aliases){for(const key of aliases){if(player.stats.has(key))return[key,player.stats.get(key)]}return null}
+  function positionEligible(player,group){return !player.position||group.positions.includes(player.position)}
+
+  function groupLeader(players,group){
+    const eligible=players.filter(player=>positionEligible(player,group));if(!eligible.length)return null;
+    for(const primaryAliases of group.primary){
+      const candidates=eligible.map(player=>({player,metric:playerMetric(player,primaryAliases)})).filter(row=>row.metric&&row.metric[1]>0);
+      if(!candidates.length)continue;
+      candidates.sort((a,b)=>b.metric[1]-a.metric[1]||a.player.name.localeCompare(b.player.name));
+      const winner=candidates[0].player,values=[];
+      for(const aliases of group.details){const found=playerMetric(winner,aliases);if(!found||found[1]===0)continue;values.push(found);if(values.length===3)break}
+      return {name:winner.name,position:winner.position,label:group.label,values};
+    }
+    return null;
+  }
+
+  function leaders(g){
+    const players=playerLeaderRows(g);if(!players.length)return[];
+    return LEADER_GROUPS.map(group=>groupLeader(players,group)).filter(Boolean);
   }
 
   function feedStatus(mode){
@@ -167,13 +214,13 @@
 
   function live(g,eg){
     const game=g||{},m=momentum(game),rows=relevantRows(plays(),game).sort((a,b)=>(b.play||0)-(a.play||0)),last=rows[0],currentDrive=relevantRows(drives(),game).sort((a,b)=>(b.drive||0)-(a.drive||0))[0],top=leaders(game);
-    return `<section class="v16-gd-phase live"><header class="v16-live-score"><div><small>LIVE</small><h2>TEN ${esc(eg?.score??game.score??'—')} <span>—</span> ${esc(eg?.opponentAbbr||game.opponentAbbr||'OPP')} ${esc(eg?.opponentScore??game.opponentScore??'—')}</h2><p>${esc(eg?.detail||eg?.status||'Game in progress')}${eg?.clock?` · ${esc(eg.clock)}`:''}${eg?.period?` · Q${esc(eg.period)}`:''}</p></div><div><small>DOWN / FIELD</small><strong>${esc(eg?.downDistance||'Awaiting live situation')}</strong><span>${esc(eg?.yardLine||'')}</span></div></header>${broadcast(game)}<div class="v16-gd-grid two">${playCard(last)}<article class="v16-gd-panel"><small>CURRENT DRIVE</small><h3>${currentDrive?`${esc(currentDrive.team||'Team')} · ${esc(currentDrive.result||'In progress')}`:'Drive feed awaiting update'}</h3><p>${currentDrive?`${esc(currentDrive.plays??'—')} plays · ${esc(currentDrive.yards??'—')} yards · ${esc(currentDrive.start||'')} → ${esc(currentDrive.end||'')}`:'No live drive update is available yet.'}</p><div class="v16-gd-momentum"><small>MOMENTUM</small><strong>${esc(m?.label||'Not enough play data')}</strong><span>${m?.wpa!=null?`Recent model WPA ${(m.wpa*100).toFixed(1)}%`:m?.epa!=null?`Recent EPA ${m.epa.toFixed(2)}`:'No model-derived signal available'}</span></div></article></div><section class="v16-gd-panel"><header><div><small>TOP PERFORMERS</small><h3>Game leaders so far</h3></div><span>Available stats only</span></header>${top.length?`<div class="v16-gd-leaders">${top.map(x=>`<article><strong>${esc(x.name)}</strong><small>${esc(x.position||'')}</small><span>${x.values.slice(0,2).map(([k,v])=>`${esc(String(k).replace(/_/g,' '))} ${esc(v)}`).join(' · ')}</span></article>`).join('')}</div>`:'<div class="v16-gd-empty"><strong>Player leader stats are not available yet.</strong><span>No live leader is guessed.</span></div>'}</section></section>`;
+    return `<section class="v16-gd-phase live"><header class="v16-live-score"><div><small>LIVE</small><h2>TEN ${esc(eg?.score??game.score??'—')} <span>—</span> ${esc(eg?.opponentAbbr||game.opponentAbbr||'OPP')} ${esc(eg?.opponentScore??game.opponentScore??'—')}</h2><p>${esc(eg?.detail||eg?.status||'Game in progress')}${eg?.clock?` · ${esc(eg.clock)}`:''}${eg?.period?` · Q${esc(eg.period)}`:''}</p></div><div><small>DOWN / FIELD</small><strong>${esc(eg?.downDistance||'Awaiting live situation')}</strong><span>${esc(eg?.yardLine||'')}</span></div></header>${broadcast(game)}<div class="v16-gd-grid two">${playCard(last)}<article class="v16-gd-panel"><small>CURRENT DRIVE</small><h3>${currentDrive?`${esc(currentDrive.team||'Team')} · ${esc(currentDrive.result||'In progress')}`:'Drive feed awaiting update'}</h3><p>${currentDrive?`${esc(currentDrive.plays??'—')} plays · ${esc(currentDrive.yards??'—')} yards · ${esc(currentDrive.start||'')} → ${esc(currentDrive.end||'')}`:'No live drive update is available yet.'}</p><div class="v16-gd-momentum"><small>MOMENTUM</small><strong>${esc(m?.label||'Not enough play data')}</strong><span>${m?.wpa!=null?`Recent model WPA ${(m.wpa*100).toFixed(1)}%`:m?.epa!=null?`Recent EPA ${m.epa.toFixed(2)}`:'No model-derived signal available'}</span></div></article></div><section class="v16-gd-panel"><header><div><small>TOP PERFORMERS</small><h3>Game leaders by category</h3></div><span>Available category stats only</span></header>${top.length?`<div class="v16-gd-leaders">${top.map(x=>`<article><strong>${esc(x.name)}</strong><small>${esc(x.label)}${x.position?` · ${esc(x.position)}`:''}</small><span>${x.values.slice(0,2).map(([k,v])=>`${esc(metricLabel(k))} ${esc(v)}`).join(' · ')}</span></article>`).join('')}</div>`:'<div class="v16-gd-empty"><strong>Player leader stats are not available yet.</strong><span>No live leader is guessed.</span></div>'}</section></section>`;
   }
 
   function postgame(g){
     const rows=relevantRows(plays(),g).sort((a,b)=>(a.play||0)-(b.play||0)),turning=rows.filter(x=>Math.abs(num(x.winProbabilityAdded)||0)>=.08||x.explosive).sort((a,b)=>Math.abs(num(b.winProbabilityAdded)||0)-Math.abs(num(a.winProbabilityAdded)||0)).slice(0,5),top=leaders(g),m=momentum(g),next=nextGame();
     const result=g&&g.score!=null&&g.opponentScore!=null?(Number(g.score)>Number(g.opponentScore)?'Titans win':Number(g.score)<Number(g.opponentScore)?'Titans lose':'Tie'):'Final result';
-    return `<section class="v16-gd-phase post"><header><div><small>POSTGAME COMMAND</small><h2>${esc(result)} · TEN ${esc(g?.score??'—')} — ${esc(g?.opponentAbbr||'OPP')} ${esc(g?.opponentScore??'—')}</h2><p>${esc(gameLabel(g))} · ${esc(shortFmt(g?.date))}</p></div><a href="#games">Full schedule →</a></header><div class="v16-gd-grid two"><article class="v16-gd-panel"><small>TURNING POINTS</small><h3>Biggest available swings</h3>${turning.length?turning.map(x=>`<div class="v16-gd-row"><strong>${esc(x.description||x.type||'Play')}</strong><span>${num(x.winProbabilityAdded)!=null?`WPA ${(Number(x.winProbabilityAdded)*100).toFixed(1)}%`:x.explosive?'Explosive play':'High-impact play'}</span></div>`).join(''):'<p>No trustworthy turning-point data is available yet.</p>'}</article><article class="v16-gd-panel"><small>WHAT CHANGED?</small><h3>Because of this game</h3><p>${m?.label?`The final available stretch reads as “${esc(m.label)}.” `:''}Roster, injury and depth consequences populate through Command Intel as verified updates arrive.</p><a href="#command">Open Change Engine →</a></article></div><section class="v16-gd-panel"><header><div><small>TOP PERFORMERS</small><h3>Final game leaders</h3></div><span>${top.length} players</span></header>${top.length?`<div class="v16-gd-leaders">${top.map(x=>`<article><strong>${esc(x.name)}</strong><small>${esc(x.position||'')}</small><span>${x.values.slice(0,3).map(([k,v])=>`${esc(String(k).replace(/_/g,' '))} ${esc(v)}`).join(' · ')}</span></article>`).join('')}</div>`:'<div class="v16-gd-empty"><strong>Postgame player stats are not available yet.</strong><span>This section updates automatically when verified stats arrive.</span></div>'}</section>${next?`<section class="v16-next-up"><div><small>NEXT UP</small><strong>${esc(gameLabel(next))}</strong><span>${esc(fmt(next.date))} · ${esc(next.network||'Network TBD')}</span></div><a href="#media">Plan how to watch →</a></section>`:''}</section>`;
+    return `<section class="v16-gd-phase post"><header><div><small>POSTGAME COMMAND</small><h2>${esc(result)} · TEN ${esc(g?.score??'—')} — ${esc(g?.opponentAbbr||'OPP')} ${esc(g?.opponentScore??'—')}</h2><p>${esc(gameLabel(g))} · ${esc(shortFmt(g?.date))}</p></div><a href="#games">Full schedule →</a></header><div class="v16-gd-grid two"><article class="v16-gd-panel"><small>TURNING POINTS</small><h3>Biggest available swings</h3>${turning.length?turning.map(x=>`<div class="v16-gd-row"><strong>${esc(x.description||x.type||'Play')}</strong><span>${num(x.winProbabilityAdded)!=null?`WPA ${(Number(x.winProbabilityAdded)*100).toFixed(1)}%`:x.explosive?'Explosive play':'High-impact play'}</span></div>`).join(''):'<p>No trustworthy turning-point data is available yet.</p>'}</article><article class="v16-gd-panel"><small>WHAT CHANGED?</small><h3>Because of this game</h3><p>${m?.label?`The final available stretch reads as “${esc(m.label)}.” `:''}Roster, injury and depth consequences populate through Command Intel as verified updates arrive.</p><a href="#command">Open Change Engine →</a></article></div><section class="v16-gd-panel"><header><div><small>TOP PERFORMERS</small><h3>Final game leaders by category</h3></div><span>${top.length} categories</span></header>${top.length?`<div class="v16-gd-leaders">${top.map(x=>`<article><strong>${esc(x.name)}</strong><small>${esc(x.label)}${x.position?` · ${esc(x.position)}`:''}</small><span>${x.values.slice(0,3).map(([k,v])=>`${esc(metricLabel(k))} ${esc(v)}`).join(' · ')}</span></article>`).join('')}</div>`:'<div class="v16-gd-empty"><strong>Postgame player stats are not available yet.</strong><span>This section updates automatically when verified stats arrive.</span></div>'}</section>${next?`<section class="v16-next-up"><div><small>NEXT UP</small><strong>${esc(gameLabel(next))}</strong><span>${esc(fmt(next.date))} · ${esc(next.network||'Network TBD')}</span></div><a href="#media">Plan how to watch →</a></section>`:''}</section>`;
   }
 
   function render(replaceExisting=false){
