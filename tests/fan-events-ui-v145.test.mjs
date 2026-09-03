@@ -65,7 +65,7 @@ const headers=fs.readFileSync(new URL('../_headers',import.meta.url),'utf8');
 });
 
  test('runtime dependency remains packaged by the network-first PWA shell',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v84/);
+  assert.match(sw,/titans-cc-brand-2026-v85/);
   assert.match(sw,/['"]\/fan-events-v145\.js['"]/);
   assert.match(sw,/NETWORK_FIRST/);
 });
