@@ -99,9 +99,23 @@
     return null;
   }
 
+  function providerMatchesGame(eg,g){
+    if(!eg||!g)return false;
+    if(eg.opponentAbbr&&g.opponentAbbr&&eg.opponentAbbr!==g.opponentAbbr)return false;
+    const providerKickoff=Date.parse(eg.date),scheduleKickoff=Date.parse(g.date);
+    return Number.isFinite(providerKickoff)&&Number.isFinite(scheduleKickoff)&&Math.abs(providerKickoff-scheduleKickoff)<12*3600000;
+  }
+
+  function providerFinalGame(eg,focus){
+    const game=focus.current||focus.game;
+    if(!game||!eg||!(/\bfinal\b/i.test(`${eg.status} ${eg.detail}`))||eg.score==null||eg.opponentScore==null||!providerMatchesGame(eg,game))return null;
+    return {...game,score:eg.score,opponentScore:eg.opponentScore,opponent:eg.opponent||game.opponent,opponentAbbr:eg.opponentAbbr||game.opponentAbbr,homeAway:eg.homeAway||game.homeAway,date:eg.date||game.date,network:eg.network||game.network,venue:eg.venue||game.venue,status:'Final'};
+  }
+
   function phase(){
     const eg=espnGame(),focus=gameFocus();
     if(eg&&/in progress|halftime|end of/i.test(`${eg.status} ${eg.detail}`))return['live',focus.current||focus.game||latestFinal(),eg];
+    const providerFinal=providerFinalGame(eg,focus);if(providerFinal)return['postgame',providerFinal,eg];
     const justFinished=recentFinal();if(justFinished)return['postgame',justFinished,eg];
     if(focus.game)return['pregame',focus.game,eg];
     return['postgame',latestFinal(),eg];
