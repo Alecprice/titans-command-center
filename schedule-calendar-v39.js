@@ -6,7 +6,7 @@
   const app=document.querySelector('#app');
   const runtime=window.TitansRuntime;
   const OFFICIAL_SCHEDULE='https://www.tennesseetitans.com/schedule/';
-  let data=null,loading=null;
+  let data=null,loading=null,publicationRevision=0;
 
   const route=()=>runtime?.route?.()||location.hash.replace(/^#/,'').split('?')[0]||'home';
   const rows=value=>Array.isArray(value)?value:[];
@@ -19,10 +19,16 @@
   async function load(force=false){
     if(data&&!force)return data;
     if(loading)return loading;
+    const revision=publicationRevision;
     loading=Promise.resolve(runtime?.apiJson?.('/api/data',{ttl:30000,force}))
-      .then(value=>{data=value?.ok?value:{};return data;})
-      .catch(()=>{data={};return data;})
-      .finally(()=>{loading=null;queueMicrotask(render);});
+      .then(value=>{if(revision===publicationRevision)data=value?.ok?value:{};return data;})
+      .catch(()=>{if(revision===publicationRevision)data={};return data;})
+      .finally(()=>{
+        const stale=revision!==publicationRevision;
+        loading=null;
+        if(stale){if(route()==='games')load(true);return;}
+        queueMicrotask(render);
+      });
     return loading;
   }
 
@@ -108,7 +114,7 @@
     const button=event.target instanceof Element?event.target.closest('[data-v39-calendar]'):null;
     if(button&&!button.disabled)downloadCalendar();
   });
-  if(runtime){runtime.onRoute(()=>{if(route()==='games'&&!data&&!loading)load();queueMicrotask(render);},{immediate:true});runtime.onAppRender(()=>{if(route()==='games'&&!data&&!loading)load();queueMicrotask(render);},{immediate:true});runtime.onRefresh(()=>{data=null;if(route()==='games')load(true);});}
+  if(runtime){runtime.onRoute(()=>{if(route()==='games'&&!data&&!loading)load();queueMicrotask(render);},{immediate:true});runtime.onAppRender(()=>{if(route()==='games'&&!data&&!loading)load();queueMicrotask(render);},{immediate:true});runtime.onRefresh(()=>{data=null;publicationRevision++;if(route()==='games')load(true);});}
   else{addEventListener('hashchange',()=>{if(route()==='games')load();});if(route()==='games')load();}
   injectStyle();
 })();
