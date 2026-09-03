@@ -12,21 +12,21 @@ test('TENX account password visibility runtime is in the live account import cha
   assert.match(accountImport,/import ['"]\.\/account-interaction-v117\.js\?v=1['"]/);
 });
 
-test('TENX password control uses explicit accessible state and valid label structure',()=>{
+test('TENX password control uses a named native command button and valid label structure',()=>{
   assert.match(interaction,/fieldLabel\.htmlFor=input\.id/);
   assert.match(interaction,/label\.replaceWith\(field\)/);
   assert.match(interaction,/toggle\.type='button'/);
   assert.match(interaction,/toggle\.setAttribute\('aria-controls',input\.id\)/);
-  assert.match(interaction,/toggle\.setAttribute\('aria-pressed','false'\)/);
   assert.match(interaction,/toggle\.setAttribute\('aria-label','Show password'\)/);
   assert.match(interaction,/toggle\.textContent='Show'/);
+  assert.doesNotMatch(interaction,/aria-pressed/);
 });
 
-test('TENX password reveal remains presentation-only and restores editing position',()=>{
+test('TENX password reveal changes command name with visible label and restores editing position',()=>{
   assert.match(interaction,/const reveal=input\.type==='password'/);
   assert.match(interaction,/input\.type=reveal\?'text':'password'/);
   assert.match(interaction,/toggle\.textContent=reveal\?'Hide':'Show'/);
-  assert.match(interaction,/toggle\.setAttribute\('aria-pressed',String\(reveal\)\)/);
+  assert.match(interaction,/toggle\.setAttribute\('aria-label',reveal\?'Hide password':'Show password'\)/);
   assert.match(interaction,/input\.focus\(\{preventScroll:true\}\)/);
   assert.match(interaction,/input\.setSelectionRange\(start,end,direction\|\|'none'\)/);
   assert.doesNotMatch(interaction,/fetch\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|MutationObserver|setInterval|setTimeout/);
@@ -50,6 +50,8 @@ test('TENX password enhancement survives account mode replacement and programmat
   assert.match(interaction,/queueMicrotask\(enhancePassword\)/);
   assert.match(interaction,/account\.open=wrappedOpen/);
   assert.match(interaction,/requestAnimationFrame\(\(\)=>\{account\.open[\s\S]*enhancePassword\(\)/);
+  assert.match(interaction,/passwordV173/);
+  assert.match(interaction,/passwordVisibilityV173/);
 });
 
 test('TENX offline shell packages the imported interaction dependency',()=>{
