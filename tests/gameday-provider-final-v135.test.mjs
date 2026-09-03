@@ -27,7 +27,8 @@ test('provider Final carries verified scoreboard result into postgame while sche
 });
 
 test('provider Final cannot weaken provider-only LIVE or kickoff-window truth',()=>{
-  const liveIndex=js.indexOf("if(eg&&/in progress|halftime|end of/i.test");
+  assert.match(js,/const providerLiveStatus=eg=>Boolean\(eg&&\/in progress\|halftime\|end of\/i\.test/);
+  const liveIndex=js.indexOf('if(providerLiveStatus(eg))');
   const finalIndex=js.indexOf('const providerFinal=providerFinalGame(eg,focus)');
   const pregameIndex=js.indexOf("if(focus.game)return['pregame',focus.game,eg]");
   assert.ok(liveIndex>=0&&finalIndex>liveIndex&&pregameIndex>finalIndex);

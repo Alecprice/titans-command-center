@@ -85,25 +85,47 @@
   }
   function recentFinal(){const g=latestFinal(),t=Date.parse(g?.date);return g&&Number.isFinite(t)&&Date.now()>=t&&Date.now()-t<=POSTGAME_WINDOW_MS?g:null}
 
-  function espnGame(){
-    for(const event of arr(state.espn?.payload?.events)){
-      const competition=event?.competitions?.[0];if(!competition)continue;
-      const comps=arr(competition.competitors),ten=comps.find(x=>x?.team?.abbreviation==='TEN');if(!ten)continue;
-      const opp=comps.find(x=>x!==ten)||{};
-      const detail=competition.status||event.status||{};
-      return {
-        id:String(event.id||''),name:event.name||'',date:event.date||competition.date||'',status:detail.type?.description||detail.type?.name||'',detail:detail.type?.shortDetail||detail.type?.detail||'',clock:detail.displayClock||'',period:detail.period||null,
-        score:num(ten.score),opponentScore:num(opp.score),opponent:opp.team?.displayName||opp.team?.shortDisplayName||'Opponent',opponentAbbr:opp.team?.abbreviation||'',homeAway:ten.homeAway||'',network:arr(competition.broadcasts).flatMap(x=>x.names||[]).join(' / '),venue:competition.venue?.fullName||'',possession:competition.situation?.possession||'',downDistance:competition.situation?.shortDownDistanceText||'',yardLine:competition.situation?.possessionText||''
-      };
-    }
-    return null;
-  }
-
   function providerMatchesGame(eg,g){
     if(!eg||!g)return false;
     if(eg.opponentAbbr&&g.opponentAbbr&&eg.opponentAbbr!==g.opponentAbbr)return false;
     const providerKickoff=Date.parse(eg.date),scheduleKickoff=Date.parse(g.date);
     return Number.isFinite(providerKickoff)&&Number.isFinite(scheduleKickoff)&&Math.abs(providerKickoff-scheduleKickoff)<12*3600000;
+  }
+
+  const providerLiveStatus=eg=>Boolean(eg&&/in progress|halftime|end of/i.test(`${eg.status} ${eg.detail}`));
+
+  function espnGame(focus=gameFocus()){
+    const rows=[];
+    for(const event of arr(state.espn?.payload?.events)){
+      const competition=event?.competitions?.[0];if(!competition)continue;
+      const comps=arr(competition.competitors),ten=comps.find(x=>x?.team?.abbreviation==='TEN');if(!ten)continue;
+      const opp=comps.find(x=>x!==ten)||{};
+      const detail=competition.status||event.status||{};
+      rows.push({
+        id:String(event.id||''),name:event.name||'',date:event.date||competition.date||'',status:detail.type?.description||detail.type?.name||'',detail:detail.type?.shortDetail||detail.type?.detail||'',clock:detail.displayClock||'',period:detail.period||null,
+        score:num(ten.score),opponentScore:num(opp.score),opponent:opp.team?.displayName||opp.team?.shortDisplayName||'Opponent',opponentAbbr:opp.team?.abbreviation||'',homeAway:ten.homeAway||'',network:arr(competition.broadcasts).flatMap(x=>x.names||[]).join(' / '),venue:competition.venue?.fullName||'',possession:competition.situation?.possession||'',downDistance:competition.situation?.shortDownDistanceText||'',yardLine:competition.situation?.possessionText||''
+      });
+    }
+    if(!rows.length)return null;
+    const focused=focus?.current||focus?.game;
+    if(focused){
+      const matches=rows.filter(row=>providerMatchesGame(row,focused));
+      if(!matches.length)return null;
+      const kickoff=Date.parse(focused.date);
+      matches.sort((a,b)=>{
+        const at=Date.parse(a.date),bt=Date.parse(b.date);
+        const ad=Number.isFinite(at)&&Number.isFinite(kickoff)?Math.abs(at-kickoff):Infinity;
+        const bd=Number.isFinite(bt)&&Number.isFinite(kickoff)?Math.abs(bt-kickoff):Infinity;
+        return ad-bd||String(a.id).localeCompare(String(b.id));
+      });
+      return matches[0];
+    }
+    const live=rows.filter(providerLiveStatus),pool=live.length?live:rows,now=Date.now();
+    pool.sort((a,b)=>{
+      const at=Date.parse(a.date),bt=Date.parse(b.date),ad=Number.isFinite(at)?Math.abs(at-now):Infinity,bd=Number.isFinite(bt)?Math.abs(bt-now):Infinity;
+      return ad-bd||String(a.id).localeCompare(String(b.id));
+    });
+    return pool[0]||null;
   }
 
   function providerFinalGame(eg,focus){
@@ -113,8 +135,8 @@
   }
 
   function phase(){
-    const eg=espnGame(),focus=gameFocus();
-    if(eg&&/in progress|halftime|end of/i.test(`${eg.status} ${eg.detail}`))return['live',focus.current||focus.game||latestFinal(),eg];
+    const focus=gameFocus(),eg=espnGame(focus);
+    if(providerLiveStatus(eg))return['live',focus.current||focus.game||latestFinal(),eg];
     const providerFinal=providerFinalGame(eg,focus);if(providerFinal)return['postgame',providerFinal,eg];
     const justFinished=recentFinal();if(justFinished)return['postgame',justFinished,eg];
     if(focus.game)return['pregame',focus.game,eg];
