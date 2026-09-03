@@ -17,12 +17,16 @@ test('Command opponent scout imports the canonical audited source instead of dup
   assert.doesNotMatch(scout,/Geno Smith|Breece Hall|Blake Grupe|Jason Sanders|Kohl Levao/);
 });
 
-test('Command opponent scout renders only against the matching loaded Week 1 desk',()=>{
+test('Command opponent scout is route and date scoped to the Week 1 intelligence desk',()=>{
   assert.match(scout,/route\(\)!=='command'/);
+  assert.match(scout,/withinWeek1Window\(\)/);
+  assert.match(scout,/WEEK1_WINDOW_MS=21\*24\*60\*60\*1000/);
+  assert.match(scout,/POSTGAME_GRACE_MS=8\*60\*60\*1000/);
+  assert.match(scout,/kickoff-WEEK1_WINDOW_MS/);
+  assert.match(scout,/kickoff\+POSTGAME_GRACE_MS/);
   assert.match(scout,/\.v15-addon-root\[data-tab="changes"\]/);
   assert.match(scout,/\.v15-intel-desk:not\(\.v161-opponent-scout\)/);
-  assert.match(scout,/text\.includes\(String\(intel\.opponent/);
-  assert.match(scout,/text\.includes\(`week \$\{String\(intel\.game\?\.week/);
+  assert.doesNotMatch(scout,/text\.includes\(String\(intel\.opponent/);
   assert.match(scout,/desk\.insertAdjacentElement\('afterend',panel\)/);
 });
 
