@@ -17,6 +17,13 @@ import './media-affiliates-v14.js';
     const frequency=source.match(RADIO_FREQUENCY)?.[0];
     return frequency?frequency.trim().toUpperCase():'';
   };
+  function consumeAffiliateHandoff(){
+    const next=params();
+    if(!next.has('affiliate'))return;
+    next.delete('affiliate');
+    const rest=next.toString();
+    history.replaceState(null,'',`#media${rest?`?${rest}`:''}`);
+  }
   function applyAffiliateHandoff(){
     if(route()!=='media')return false;
     const requested=affiliateHandoff(params().get('affiliate')||'');
@@ -24,11 +31,12 @@ import './media-affiliates-v14.js';
     const input=app?.querySelector('[data-affiliate-search-input]');
     const details=input?.closest('.media-affiliate-finder');
     if(!input||!details)return false;
-    if(details.dataset.searchHandoff===requested)return true;
+    if(details.dataset.searchHandoff===requested){consumeAffiliateHandoff();return true}
     details.open=true;
     input.value=requested;
     details.dataset.searchHandoff=requested;
     input.dispatchEvent(new Event('input',{bubbles:true}));
+    consumeAffiliateHandoff();
     return true;
   }
   function enhance(){
