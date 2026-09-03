@@ -28,7 +28,8 @@ test('kickoff verification preserves provider-only LIVE truth',()=>{
   const stable=read('gameday-v16.js');
   const bridge=read('gameday-today-v22.js');
 
-  assert.match(stable,/if\(eg&&\/in progress\|halftime\|end of\/i\.test\(`\$\{eg\.status\} \$\{eg\.detail\}`\)\)return\['live'/);
+  assert.match(stable,/const providerLiveStatus=eg=>Boolean\(eg&&\/in progress\|halftime\|end of\/i\.test/);
+  assert.match(stable,/if\(providerLiveStatus\(eg\)\)return\['live'/);
   assert.match(bridge,/const focus=runtime\.scheduleFocus\(games\)/);
   assert.match(bridge,/if\(focus\.state!=='game-window'\|\|!focus\.current\)/);
   assert.doesNotMatch(bridge,/5\*60\*60\*1000/);
