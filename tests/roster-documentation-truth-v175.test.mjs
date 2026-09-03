@@ -19,7 +19,8 @@ const monthLabels = {
   '01': 'Jan.', '02': 'Feb.', '03': 'March', '04': 'April', '05': 'May', '06': 'June',
   '07': 'July', '08': 'Aug.', '09': 'Sept.', '10': 'Oct.', '11': 'Nov.', '12': 'Dec.',
 };
-const auditDisplayDate = `${monthLabels[auditMonth]} ${Number(auditDay)}, ${auditYear}`;
+const auditDisplayDay = `${monthLabels[auditMonth]} ${Number(auditDay)}`;
+const auditDisplayDate = `${auditDisplayDay}, ${auditYear}`;
 const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 test('README roster baseline stays synchronized with the executable audit', () => {
@@ -32,7 +33,7 @@ test('README roster baseline stays synchronized with the executable audit', () =
   assert.match(readme, new RegExp(`current fallback roster is the \\*\\*${escapeRegex(auditDisplayDate)} cross-source official audit\\*\\*`));
   assert.match(readme, new RegExp(`${active} Active players plus ${reserve} separately labeled reserve-list players`));
   assert.match(readme, new RegExp(`\\(${reserveInjured} Reserve/Injured and ${designatedForReturn} Reserve/Injured–Designated for Return\\)`));
-  assert.match(readme, new RegExp(`audited Sept\\. 2 practice squad contains ${practiceSquad} players`));
+  assert.match(readme, new RegExp(`audited ${escapeRegex(auditDisplayDay)} practice squad contains ${practiceSquad} players`));
 });
 
 test('content-integrity policy distinguishes full-audit history from current roster freshness', () => {
