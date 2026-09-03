@@ -38,6 +38,13 @@ test('TENX auto-merge rejects stale or red revisions before merge',()=>{
   assert.match(workflow,/CHANGES_REQUESTED/);
 });
 
+test('blocking-review pagination is compatible with the runner GitHub CLI',()=>{
+  assert.match(workflow,/gh api --paginate .*reviews\?per_page=100/);
+  assert.match(workflow,/\| jq -s '\[\.\[\]\[\]\]/);
+  assert.doesNotMatch(workflow,/--paginate --slurp/);
+  assert.doesNotMatch(workflow,/--slurp[\s\S]{0,80}--jq/);
+});
+
 test('TENX auto-merge pins the merge to the exact green head SHA',()=>{
   assert.match(workflow,/pulls\/\$\{pr_number\}\/merge/);
   assert.match(workflow,/-f merge_method='merge'/);

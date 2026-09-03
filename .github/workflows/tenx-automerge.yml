@@ -97,9 +97,6 @@ jobs:
             exit 0
           fi
 
-          # A Quality Gate success is necessary but not sufficient: GitHub must still
-          # report the exact PR head as mergeable, and no current reviewer may be
-          # blocking it with a latest CHANGES_REQUESTED review.
           for attempt in 1 2 3 4 5; do
             pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${pr_number}")"
             mergeable="$(jq -r 'if .mergeable == null then "unknown" else (.mergeable|tostring) end' <<<"$pr_json")"
@@ -122,8 +119,8 @@ jobs:
           fi
 
           latest_blocking_reviews="$(
-            gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/reviews" \
-              --jq '[.[][]] | sort_by(.submitted_at // "") | group_by(.user.login) | map(last) | map(select(.state == "CHANGES_REQUESTED")) | length'
+            gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/reviews?per_page=100" \
+              | jq -s '[.[][]] | sort_by(.submitted_at // "") | group_by(.user.login) | map(last) | map(select(.state == "CHANGES_REQUESTED")) | length'
           )"
           if [[ "$latest_blocking_reviews" != "0" ]]; then
             echo "TENX auto-merge withheld: ${latest_blocking_reviews} current blocking review(s)."
@@ -144,9 +141,6 @@ jobs:
 
           echo "TENX auto-merged PR #${pr_number} at ${head_sha}: ${message}"
 
-          # GitHub suppresses most workflow events caused by GITHUB_TOKEN writes.
-          # Explicit workflow_dispatch is an allowed exception, so always dispatch
-          # the existing production pipeline after a token-driven autonomous merge.
           gh api -X POST \
             "repos/${GITHUB_REPOSITORY}/actions/workflows/cloudflare-deploy.yml/dispatches" \
             -f ref='main'
