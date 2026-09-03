@@ -18,7 +18,7 @@ jobs:
   evaluate:
     if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 30
     steps:
       - name: Evaluate trusted TENX pull request
         env:
@@ -141,13 +141,49 @@ jobs:
 
           echo "TENX auto-merged PR #${pr_number} at ${head_sha}: ${message}"
 
-          gh api -X POST \
-            "repos/${GITHUB_REPOSITORY}/actions/workflows/cloudflare-deploy.yml/dispatches" \
-            -f ref='main'
-          echo "Dispatched Titans Cloudflare Deploy for the new main revision."
+          deploy_dispatch_json="$(
+            gh api \
+              -H 'X-GitHub-Api-Version: 2026-03-10' \
+              -X POST \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/cloudflare-deploy.yml/dispatches" \
+              -f ref='main'
+          )"
+          deploy_run_id="$(jq -r '.workflow_run_id // empty' <<<"$deploy_dispatch_json")"
+          if [[ ! "$deploy_run_id" =~ ^[0-9]+$ ]]; then
+            echo 'TENX release handoff failed closed: Cloudflare dispatch did not return a workflow_run_id.'
+            exit 1
+          fi
+          echo "Dispatched Titans Cloudflare Deploy run ${deploy_run_id} for the new main revision."
 
-          gh api -X POST \
+          deploy_status='queued'
+          deploy_conclusion=''
+          for attempt in $(seq 1 150); do
+            deploy_run_json="$(
+              gh api \
+                -H 'X-GitHub-Api-Version: 2026-03-10' \
+                "repos/${GITHUB_REPOSITORY}/actions/runs/${deploy_run_id}"
+            )"
+            deploy_status="$(jq -r '.status // "unknown"' <<<"$deploy_run_json")"
+            deploy_conclusion="$(jq -r '.conclusion // ""' <<<"$deploy_run_json")"
+            if [[ "$deploy_status" == 'completed' ]]; then
+              break
+            fi
+            sleep 10
+          done
+
+          if [[ "$deploy_status" != 'completed' ]]; then
+            echo "TENX release handoff failed closed: Cloudflare run ${deploy_run_id} did not complete within the controller lease."
+            exit 1
+          fi
+          if [[ "$deploy_conclusion" != 'success' ]]; then
+            echo "TENX release handoff failed closed: Cloudflare run ${deploy_run_id} concluded ${deploy_conclusion:-unknown}."
+            exit 1
+          fi
+
+          gh api \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            -X POST \
             "repos/${GITHUB_REPOSITORY}/actions/workflows/tenx-postdeploy-verification.yml/dispatches" \
             -f ref='main' \
-            -F "inputs[source_sha]=${head_sha}"
-          echo "Dispatched exact-sha TENX Current Experience / post-deploy verification for ${head_sha}."
+            -F "inputs[source_sha]=${head_sha}" >/dev/null
+          echo "Dispatched exact-sha TENX Current Experience / post-deploy verification for ${head_sha} after successful Cloudflare run ${deploy_run_id}."
