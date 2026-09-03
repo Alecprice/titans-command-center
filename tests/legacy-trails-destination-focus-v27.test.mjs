@@ -25,6 +25,14 @@ test('Trail destination focus is temporary and visibly accessible',()=>{
   assert.match(js,/forced-colors:active[^\n]*\.legacy-finder-match\[data-legacy-trail-focus\]:focus-visible\{outline:3px solid Highlight\}/);
 });
 
+test('Exit Trail restores focus to the Trail chooser that launched the path',()=>{
+  assert.match(js,/function focusTrailChooser\(root,trailId\)/);
+  assert.match(js,/root\.querySelector\(`\[data-legacy-trail="\$\{trailId\}"\]`\)/);
+  assert.match(js,/chooser\.focus\(\{preventScroll:true\}\)/);
+  assert.match(js,/catch\{chooser\.focus\(\);\}/);
+  assert.match(js,/if\(event\.target\.closest\('\[data-legacy-trail-exit\]'\)\)\{\s*const trailId=active\?\.id\|\|null;\s*deactivate\(\);\s*focusTrailChooser\(root,trailId\);\s*\}/);
+});
+
 test('Trail focus handoff does not create another data or lifecycle owner',()=>{
   assert.doesNotMatch(js,/\bfetch\s*\(/);
   assert.doesNotMatch(js,/\bsetTimeout\s*\(/);
