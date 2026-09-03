@@ -9,11 +9,11 @@ test('stable Game Day presents source truth in fan language instead of backend j
   for(const copy of [
     'Game Day 3.1 · verified updates',
     'Fan intel retrying · showing the last confirmed update',
-    'Game leaders so far',
-    'Available stats only',
+    'Game leaders by category',
+    'Available category stats only',
     'Player leader stats are not available yet.',
     'Biggest available swings',
-    'Final game leaders',
+    'Final game leaders by category',
     'This section updates automatically when verified stats arrive.'
   ])assert.match(js,new RegExp(copy.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
   assert.doesNotMatch(js,/awaiting ingest|warehouse has them|Structured stats only|source-aware|last good snapshot|Weather snapshot is not loaded|Loaded game leaders|Final loaded leaders|Biggest loaded swings|loaded play data/);
