@@ -63,7 +63,7 @@ test('same-tab repair diagnostics remain bounded counts and surface truth',()=>{
 });
 
 test('v155 is available to installed clients in the refreshed PWA shell generation',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v84/);
+  assert.match(sw,/titans-cc-brand-2026-v85/);
   assert.match(sw,/\/tickets-decision-rehydrate-v155\.js/);
   assert.doesNotMatch(sw,/\/tickets-decision-rehydrate-v151\.js/);
   assert.match(sw,/NETWORK_FIRST/);
