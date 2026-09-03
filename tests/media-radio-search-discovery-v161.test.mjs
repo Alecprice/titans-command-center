@@ -11,7 +11,7 @@ test('Listen Watch search bridge recognizes radio affiliate language',()=>{
 });
 
 test('radio callsign and frequency shapes can surface the Media route without duplicating the station registry',()=>{
-  assert.match(js,/const RADIO_CALLSIGN=\/\\b\[WK\]\[A-Z\]\{3\}\\b\//);
+  assert.match(js,/const RADIO_CALLSIGN=\/\\b\[WK\]\[A-Z\]\{3\}\\b\/i/);
   assert.match(js,/const RADIO_FREQUENCY=/);
   assert.match(js,/\\d\{3,4\}\\s\*\(\?:AM\|FM\)/);
   assert.match(js,/\\d\{2,3\}\\\.\\d/);
