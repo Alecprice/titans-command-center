@@ -123,7 +123,7 @@ export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
   availability:Object.freeze({
     status:'pre-game-week',
     confidence:'limited',
-    note:'Official team reporting supplies recovery and practice context, but no formal Week 1 NYJ game-status designation is loaded in this snapshot. Do not infer final availability.',
+    note:'Official team reporting supplies recovery and practice context, but no formal Week 1 NYJ game-status designation is loaded in this snapshot. Do not convert recovery, expectation, or practice observations into a formal game status or final availability.',
     signals:Object.freeze([
       Object.freeze({
         subjects:Object.freeze(['Joseph Ossai']),
