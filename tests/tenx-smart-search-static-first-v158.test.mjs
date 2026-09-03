@@ -44,7 +44,9 @@ test('TENX Smart Search does not move an existing keyboard highlight when roster
 });
 
 test('TENX refresh keeps the visible palette static-first while reusing the shared API cache',()=>{
-  const refresh=block('runtime.onRefresh',\n'})();');
+  const from=js.indexOf('runtime.onRefresh');
+  assert.notEqual(from,-1,'missing refresh owner');
+  const refresh=js.slice(from);
   assert.ok(refresh.indexOf('open()')<refresh.indexOf('hydrateActiveQuery(query)'),'refresh must repaint local search before roster enrichment');
   assert.equal((js.match(/runtime\.apiJson\('\/api\/data'/g)||[]).length,1);
   assert.doesNotMatch(js,/fetch\('/);
