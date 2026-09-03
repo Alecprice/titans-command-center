@@ -5,7 +5,7 @@ import fs from 'node:fs';
 const source=fs.readFileSync(new URL('../account-interaction-v117.js',import.meta.url),'utf8');
 
 test('TENX account password control is explicit and accessible',()=>{
-  assert.match(source,/data\.accountPasswordToggle=''/);
+  assert.match(source,/toggle\.dataset\.accountPasswordToggle=''/);
   assert.match(source,/toggle\.type='button'/);
   assert.match(source,/aria-pressed/);
   assert.match(source,/aria-label','Show password'/);
