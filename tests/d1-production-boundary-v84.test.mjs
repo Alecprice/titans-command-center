@@ -47,7 +47,7 @@ test('legacy rollback flags cannot re-enable warehouse access',()=>{
 });
 
 test('Worker D1 health is authoritative with a fresh bootstrap snapshot',async()=>{
-  const snapshot={cache_key:'bootstrap:v1',payload:{ok:true,dataQuality:{contentAuditAt:'2026-08-27T00:00:00.000Z'}},source:'audited-fallback',fetched_at:new Date().toISOString(),expires_at:new Date(Date.now()+60_000).toISOString()};
+  const snapshot={cache_key:'bootstrap:v1',payload:{ok:true,dataQuality:{contentAuditAt:'2026-09-02T00:00:00.000Z'}},source:'audited-fallback',fetched_at:new Date().toISOString(),expires_at:new Date(Date.now()+60_000).toISOString()};
   const env={DATABASE_URL:'postgresql://example.invalid/titans',TITANS_DB:new FakeD1(snapshot)};
   const response=await worker.fetch(new Request('https://example.test/api/health'),productionDataEnv(env),{});
   const body=await response.json();
@@ -59,11 +59,11 @@ test('Worker D1 health is authoritative with a fresh bootstrap snapshot',async()
   assert.equal(body.database.snapshotFresh,true);
   assert.equal(body.database.warehouse,undefined);
   assert.equal(body.storage.primary,'cloudflare-d1');
-  assert.equal(body.contentAudit,'2026-08-27T00:00:00.000Z');
+  assert.equal(body.contentAudit,'2026-09-02T00:00:00.000Z');
 });
 
 test('Worker D1 health remains authoritative with no warehouse secret at all',async()=>{
-  const snapshot={cache_key:'bootstrap:v1',payload:{ok:true},source:'audited-fallback',fetched_at:new Date().toISOString(),expires_at:new Date(Date.now()+60_000).toISOString()};
+  const snapshot={cache_key:'bootstrap:v1',payload:{ok:true,dataQuality:{contentAuditAt:'2026-09-02'}},source:'audited-fallback',fetched_at:new Date().toISOString(),expires_at:new Date(Date.now()+60_000).toISOString()};
   const env={TITANS_DB:new FakeD1(snapshot)};
   const response=await worker.fetch(new Request('https://example.test/api/health'),env,{});
   const body=await response.json();
