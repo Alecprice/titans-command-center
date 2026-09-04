@@ -27,6 +27,19 @@ def no_overflow(driver, label):
         raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
 
+def set_mobile_viewport(driver, width=390, height=844):
+    driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride', {
+        'width': width,
+        'height': height,
+        'deviceScaleFactor': 1,
+        'mobile': True,
+    })
+    state = driver.execute_script("return {innerWidth:innerWidth,innerHeight:innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}")
+    if state['innerWidth'] != width or state['innerHeight'] != height or state['clientWidth'] != width or not state['mobile']:
+        raise RuntimeError(f'Command Intelligence mobile viewport override did not take effect: {state}')
+    return state
+
+
 options = webdriver.ChromeOptions()
 options.add_argument('--headless=new')
 options.add_argument('--no-sandbox')
@@ -93,7 +106,7 @@ try:
     media_guide_after_pushstate = True
 
     stage = 'mobile:command'
-    driver.set_window_size(390, 844)
+    mobile_viewport = set_mobile_viewport(driver, 390, 844)
     driver.get(f'{BASE}/#command')
     wait_for(driver, "document.querySelector('.v15-command') && document.querySelectorAll('[data-v15-tab]').length === 7", timeout=14)
     # The app intentionally restores the previously selected tab. Desktop testing leaves Global Fans selected,
@@ -113,7 +126,7 @@ try:
         viewport:document.documentElement.clientWidth
       }
     """)
-    if len(mobile['tabTargets']) != 7 or any(x['h'] < 44 for x in mobile['tabTargets']):
+    if mobile['viewport'] != 390 or len(mobile['tabTargets']) != 7 or any(x['h'] < 44 for x in mobile['tabTargets']):
         raise RuntimeError(f'Mobile Command tabs invalid: {mobile}')
     if not mobile['command'] or not mobile['hero'] or not mobile['nav'] or not mobile['addons']:
         raise RuntimeError(f'Mobile Command shell incomplete: {mobile}')
@@ -135,6 +148,7 @@ try:
         'addonsVerified': addons_verified,
         'spoilerToggle': spoiler_toggled,
         'mediaTuneGuideAfterPushState': media_guide_after_pushstate,
+        'mobileViewportState': mobile_viewport,
         'mobileTabTargets': mobile['tabTargets'],
         'mobileViewport': mobile['viewport'],
         'browserWarnings': warnings[:20],
