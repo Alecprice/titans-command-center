@@ -70,6 +70,12 @@ jobs:
           WORKER_URL: https://titans.alecjprice.com
         run: python scripts/media-affiliate-browser-smoke.py
 
+      - name: Verify Search to Titans Radio affiliate handoff in production
+        if: steps.deployed.outputs.should_run == 'true'
+        env:
+          WORKER_URL: https://titans.alecjprice.com
+        run: python scripts/media-radio-search-browser-smoke.py
+
       - name: Record stale or skipped deploy
         if: steps.deployed.outputs.should_run != 'true'
-        run: echo 'Affiliate production browser check skipped because the triggering Cloudflare workflow did not deploy its source SHA.'
+        run: echo 'Affiliate production browser checks skipped because the triggering Cloudflare workflow did not deploy its source SHA.'

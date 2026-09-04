@@ -123,4 +123,6 @@ import {scheduleFocus,latestCompletedGame,sortTransactionsLatestFirst,latestTran
 
   import('./home-command-v123.js').catch(error=>console.warn('[titans-home-command]',error));
   import('./fan-events-v145.js').catch(error=>console.warn('[titans-fan-events]',error));
+  import('./command-opponent-scout-v170.js').catch(error=>console.warn('[titans-opponent-scout]',error));
+  import('./gameday-week1-availability-v172.js').catch(error=>console.warn('[titans-week1-availability]',error));
 })();

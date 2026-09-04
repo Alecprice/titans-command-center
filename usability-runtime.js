@@ -25,9 +25,13 @@ const sectionTargets=[
   {hash:'#legacy',label:'Legacy',terms:'legacy history oilers logos throwback retro'},
   {hash:'#sources',label:'Sources',terms:'sources data provenance audit'}
 ];
+const SW_UPDATE_MIN_MS=30*60*1000;
 let navWatch=0;
 let toastTimer=0;
 let hadController=Boolean(navigator.serviceWorker?.controller);
+let swRegistration=null;
+let swUpdateCheckedAt=0;
+let swUpdateInFlight=false;
 
 function showToast(message,ms=2600){
   if(!toast)return;
@@ -130,6 +134,15 @@ function showUpdateReady(){
   document.body.appendChild(banner);
 }
 
+async function checkForAppUpdate(){
+  if(!swRegistration||swUpdateInFlight||document.visibilityState!=='visible'||navigator.onLine===false)return;
+  const now=Date.now();
+  if(now-swUpdateCheckedAt<SW_UPDATE_MIN_MS)return;
+  swUpdateCheckedAt=now;
+  swUpdateInFlight=true;
+  try{await swRegistration.update();}catch{}finally{swUpdateInFlight=false;}
+}
+
 function trapMobileDrawerFocus(event){
   if(event.key!=='Tab'||!sidebar?.classList.contains('open')||!matchMedia('(max-width:760px)').matches)return;
   const focusable=[...sidebar.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>!el.hidden&&el.getClientRects().length);
@@ -161,7 +174,7 @@ document.addEventListener('keydown',event=>{
 });
 window.addEventListener('hashchange',()=>settleRoute({focus:true}));
 window.addEventListener('resize',syncSidebar,{passive:true});
-window.addEventListener('online',()=>showToast('Back online. Live data can refresh again.'));
+window.addEventListener('online',()=>{showToast('Back online. Live data can refresh again.');checkForAppUpdate();});
 window.addEventListener('offline',()=>showToast('You are offline. Showing cached Titans content.',3600));
 window.addEventListener('error',()=>setTimeout(()=>renderRecovery(route()),0));
 window.addEventListener('unhandledrejection',()=>setTimeout(()=>renderRecovery(route()),0));
@@ -171,6 +184,15 @@ if('serviceWorker'in navigator){
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
     if(hadController)showUpdateReady();
     hadController=true;
+  });
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.ready.then(registration=>{
+      swRegistration=registration;
+      swUpdateCheckedAt=Date.now();
+    }).catch(()=>{});
+  },{once:true});
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')checkForAppUpdate();
   });
 }
 

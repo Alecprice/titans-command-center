@@ -59,10 +59,13 @@ test('My Titans profile and smart alert preferences stay device-local',()=>{
   assert.match(js,/True closed-app Web Push still requires the server-side subscription\/VAPID sender that is not deployed yet/);
 });
 
-test('Trip Planner uses the loaded away-game schedule and does not guess live travel inventory',()=>{
+test('Trip Planner uses the loaded chronological away-game schedule and does not guess live travel inventory',()=>{
   const js=read('command-intelligence-addons-v15.js');
   assert.match(js,/TITANS TRIP PLANNER/);
-  assert.match(js,/g\?\.homeAway==='away'/);
+  assert.match(js,/const futureGames=\(\)=>games\(\)\.map\(game=>\(\{game,at:Date\.parse\(game\?\.date\)\}\)\)/);
+  assert.match(js,/\.filter\(row=>Number\.isFinite\(row\.at\)&&row\.at>Date\.now\(\)/);
+  assert.match(js,/\.sort\(\(a,b\)=>a\.at-b\.at\)/);
+  assert.match(js,/futureGames\(\)\.find\(row=>row\.game\?\.homeAway==='away'\)/);
   assert.match(js,/Tickets \/ entry method/);
   assert.match(js,/Travel & parking plan/);
   assert.match(js,/Live hotel, flight, restaurant and local transit recommendations should use current travel\/business data/);

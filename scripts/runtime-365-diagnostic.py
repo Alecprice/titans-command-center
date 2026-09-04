@@ -13,7 +13,13 @@ OUT=Path('/tmp/runtime-365-diagnostic.json')
 
 
 def driver_for(width=390,height=844):
-    options=Options();options.add_argument('--headless=new');options.add_argument('--no-sandbox');options.add_argument('--disable-dev-shm-usage');options.add_argument(f'--window-size={width},{height}');options.set_capability('goog:loggingPrefs',{'browser':'ALL'});return webdriver.Chrome(options=options)
+    options=Options();options.add_argument('--headless=new');options.add_argument('--no-sandbox');options.add_argument('--disable-dev-shm-usage');options.add_argument(f'--window-size={width},{height}');options.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+    driver=webdriver.Chrome(options=options)
+    driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride',{'width':width,'height':height,'deviceScaleFactor':1,'mobile':False})
+    actual=driver.execute_script('return [innerWidth,innerHeight]')
+    if actual[0]!=width or actual[1]!=height:
+        driver.quit();raise RuntimeError(f'Runtime 365 viewport mismatch: requested={width}x{height} actual={actual}')
+    return driver
 
 def wait(driver,script,timeout=15):
     return WebDriverWait(driver,timeout,poll_frequency=.1).until(lambda d:d.execute_script(script))

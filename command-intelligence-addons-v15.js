@@ -21,6 +21,7 @@
   const playerNumber=p=>p?.number??p?.jerseyNumber??p?.jersey_number??'';
   const fmtDate=value=>{try{const d=new Date(value);return Number.isNaN(d.getTime())?'TBD':new Intl.DateTimeFormat(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(d)}catch{return'TBD'}};
   const slug=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const safeSourceUrl=item=>{try{const u=new URL(item?.url,location.href);return u.protocol==='https:'?u.href:''}catch{return''}};
 
   async function load(){
     if(data||loading)return loading||{data,fan};
@@ -39,8 +40,9 @@
   const depth=()=>safeArr(fan?.depthChart?.changes);
   const plays=()=>safeArr(fan?.gameDay?.plays);
   const contracts=()=>safeArr(fan?.contracts);
-  const nextGame=()=>games().find(g=>{const t=Date.parse(g?.date);return Number.isFinite(t)&&t>Date.now()&&!/final|bye/i.test(String(g?.status||''))})||null;
-  const nextAway=()=>games().find(g=>{const t=Date.parse(g?.date);return g?.homeAway==='away'&&Number.isFinite(t)&&t>Date.now()&&!/final|bye/i.test(String(g?.status||''))})||null;
+  const futureGames=()=>games().map(game=>({game,at:Date.parse(game?.date)})).filter(row=>Number.isFinite(row.at)&&row.at>Date.now()&&!/final|bye/i.test(String(row.game?.status||''))).sort((a,b)=>a.at-b.at);
+  const nextGame=()=>futureGames()[0]?.game||null;
+  const nextAway=()=>futureGames().find(row=>row.game?.homeAway==='away')?.game||null;
 
   function tab(){return document.querySelector('[data-v15-tab][aria-selected="true"]')?.dataset.v15Tab||'changes'}
   function rootFor(name){const pane=document.querySelector('.v15-pane');if(!pane)return null;const old=pane.querySelector('.v15-addon-root');if(old?.dataset.tab===name)return null;old?.remove();const root=document.createElement('div');root.className='v15-addon-root';root.dataset.tab=name;pane.append(root);return root}
@@ -55,6 +57,25 @@
       story?`Top intel: ${story.title||story.summary||'latest feed item'}`:'No intel-feed item is loaded.'
     ];
     return `<section class="v15-addon-panel v15-minute"><header><div><small>ONE-MINUTE TITANS</small><h3>Five things to know right now</h3></div><span>${esc(new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'}).format(new Date()))}</span></header><ol>${bits.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>`
+  }
+
+  function sourceEvidenceCard(item){
+    const href=safeSourceUrl(item),summary=item?.summary||'No source summary is loaded.';
+    return `<article class="v15-intel-item"><strong>${esc(item?.title||'Official update')}</strong><p>${esc(summary)}</p>${href?`<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">Official source · ${esc(fmtDate(item?.publishedAt))}</a>`:''}</article>`
+  }
+
+  function weekIntelligence(){
+    const game=nextGame();
+    if(!game)return `<section class="v15-addon-panel v15-intel-desk"><header><div><small>INTELLIGENCE DESK</small><h3>Next-game evidence</h3></div></header><div class="v15-addon-empty"><strong>No future matchup is loaded.</strong><span>The intelligence desk will stay closed rather than attach evidence to the wrong opponent.</span></div></section>`;
+    const weekKey=`week-${game.week}`,weekFeed=feed().filter(item=>safeArr(item?.topics).includes(weekKey));
+    const confirmed=weekFeed.filter(item=>item?.evidence==='coach-confirmed');
+    const practice=weekFeed.filter(item=>item?.evidence==='practice-observation');
+    const formal=injuries();
+    const matchup=game.homeAway==='home'?`${game.opponent} at Titans`:`Titans at ${game.opponent}`;
+    const confirmedBody=confirmed.length?confirmed.slice(0,2).map(sourceEvidenceCard).join(''):`<div class="v15-intel-empty"><strong>No coach-confirmed Week ${esc(game.week)} change is loaded.</strong><span>This lane stays empty instead of promoting rumor or depth-chart inference.</span></div>`;
+    const practiceBody=practice.length?practice.slice(0,2).map(sourceEvidenceCard).join(''):`<div class="v15-intel-empty"><strong>No source-backed practice watch is loaded.</strong><span>No practice absence or return is inferred from silence.</span></div>`;
+    const formalBody=formal.length?formal.slice(0,4).map(row=>{const name=row?.name||row?.player||row?.playerName||'Player',status=row?.status||row?.designation||row?.gameStatus||'status loaded';return `<article class="v15-intel-item"><strong>${esc(name)}</strong><p>${esc(status)}</p></article>`}).join(''):`<div class="v15-intel-empty"><strong>No current regular-season injury-report rows are loaded.</strong><span>Do not infer Week ${esc(game.week)} availability from practice observations.</span></div>`;
+    return `<section class="v15-addon-panel v15-intel-desk"><header><div><small>WEEK ${esc(game.week)} INTELLIGENCE DESK</small><h3>${esc(matchup)} · evidence ranked</h3></div><span class="v15-intel-network">${esc(game.network||'Network TBD')}</span></header><p class="v15-intel-kickoff">${esc(fmtDate(game.date))} · ${esc(game.venue||'Venue TBD')}</p><div class="v15-intel-grid"><section class="v15-intel-lane confirmed"><div class="v15-intel-status">CONFIRMED</div>${confirmedBody}</section><section class="v15-intel-lane practice"><div class="v15-intel-status">PRACTICE WATCH</div>${practiceBody}</section><section class="v15-intel-lane ${formal.length?'formal':'unknown'}"><div class="v15-intel-status">${formal.length?'FORMAL STATUS':'NOT YET CONFIRMED'}</div>${formalBody}</section></div><p class="v15-addon-note"><b>Evidence boundary:</b> coach-confirmed role news, practice observations and formal injury-report rows stay separate. Practice reporting is context, not an injury designation or availability prediction.</p></section>`
   }
 
   function battleTracker(){
@@ -73,7 +94,7 @@
     return `<section class="v15-addon-panel"><header><div><small>TITANS KNOWLEDGE GRAPH</small><h3>Explore roster relationships</h3></div><select data-v15-graph-player>${players.map(x=>`<option ${playerName(x)===name?'selected':''}>${esc(playerName(x))}</option>`).join('')}</select></header><div class="v15-graph-focus"><strong>#${esc(playerNumber(p)||'—')} ${esc(name)}</strong><span>${esc(pos||'Position TBD')}${exp?` · experience ${esc(exp)}`:''}</span></div><div class="v15-addon-grid"><div><h4>Same position room</h4><p>${samePos.length?samePos.map(x=>esc(playerName(x))).join(' · '):'No peers loaded.'}</p></div><div><h4>Same experience marker</h4><p>${sameExp.length?sameExp.map(x=>esc(playerName(x))).join(' · '):'Experience metadata is not available for a useful match.'}</p></div><div><h4>Loaded intel connections</h4><p>${mentions.length?mentions.map(x=>esc(x.title||x.summary)).join(' · '):'No matching feed mentions loaded.'}</p></div></div><p class="v15-addon-note">Relationships come only from loaded roster and feed metadata. This does not infer personal relationships or unseen team data.</p></section>`
   }
 
-  function changesAddons(){const root=rootFor('changes');if(!root)return;root.innerHTML=oneMinute()+`<div class="v15-addon-grid two">${battleTracker()}${graphPanel()}</div>`}
+  function changesAddons(){const root=rootFor('changes');if(!root)return;root.innerHTML=oneMinute()+weekIntelligence()+`<div class="v15-addon-grid two">${battleTracker()}${graphPanel()}</div>`}
 
   function explainPlay(play){
     if(!play)return{headline:'No play selected',body:'No play-level data is loaded.',evidence:''};

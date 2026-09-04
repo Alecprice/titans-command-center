@@ -18,7 +18,7 @@
     if(document.querySelector('link[data-tickets-finalists-v127]'))return;
     const link=document.createElement('link');
     link.rel='stylesheet';
-    link.href='/tickets-finalists-v127.css?v=1';
+    link.href='/tickets-finalists-v127.css?v=2';
     link.dataset.ticketsFinalistsV127='1';
     document.head.append(link);
   }

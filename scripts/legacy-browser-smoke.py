@@ -91,8 +91,9 @@ try:
     result['stage']='desktop:inventory'
     inventory=d.execute_script("""return {trails:document.querySelectorAll('[data-legacy-trail]').length,indexed:document.querySelectorAll('[data-legacy-finder-item="true"]').length,heritage:document.querySelectorAll('.legacy-venue-card,.legacy-honor-card').length,exhibits:document.querySelectorAll('[data-legacy-exhibit-key]').length,passport:(document.querySelector('[data-legacy-passport]')?.innerText||''),museum:(document.querySelector('[data-legacy-my-museum]')?.innerText||'')};""")
     if inventory['trails']<5 or inventory['indexed']<20 or inventory['heritage']<20 or inventory['exhibits']<40: raise RuntimeError(f'Legacy inventory incomplete: {inventory}')
-    if '0 / 19 stamps' not in inventory['passport']: raise RuntimeError(f'Fresh Passport count incorrect: {inventory}')
-    if '0 / 12 saved' not in inventory['museum'] or 'Start your shelf' not in inventory['museum']: raise RuntimeError(f'Fresh My Museum state incorrect: {inventory}')
+    if '0 / 19 stamps' not in inventory['passport'].casefold(): raise RuntimeError(f'Fresh Passport count incorrect: {inventory}')
+    museum_text=inventory['museum'].casefold()
+    if '0 / 12 saved' not in museum_text or 'start your shelf' not in museum_text: raise RuntimeError(f'Fresh My Museum state incorrect: {inventory}')
 
     result['stage']='desktop:trail-start'
     d.find_element(By.CSS_SELECTOR,'[data-legacy-trail="1999-run"]').click()
@@ -114,7 +115,8 @@ try:
     wait_for(d,"return !location.hash.includes('trail=')&&!document.querySelector('[data-legacy-trail-player]:not([hidden])')")
     d.get(f'{BASE}/#legacy');prepare_returning_user(d);legacy_ready(d)
     passport_text=wait_for(d,"return document.querySelector('[data-legacy-passport]')?.innerText||''")
-    if '2 / 19 stamps' not in passport_text or 'Continue The Super Bowl run' not in passport_text:raise RuntimeError(f'Passport return state missing: {passport_text}')
+    passport_folded=passport_text.casefold()
+    if '2 / 19 stamps' not in passport_folded or 'continue the super bowl run' not in passport_folded:raise RuntimeError(f'Passport return state missing: {passport_text}')
     d.find_element(By.CSS_SELECTOR,'[data-legacy-passport-continue]').click()
     wait_for(d,"return location.hash.includes('trail=1999-run')&&location.hash.includes('step=2')&&document.querySelector('[data-legacy-trail-player]')?.innerText.includes('Steve McNair')")
     resume_hash=d.execute_script('return location.hash')
@@ -141,7 +143,7 @@ try:
     saved_card=wait_for(d,"""const card=document.querySelector('[data-legacy-my-museum-item="honor-mike-keith"]');const save=document.querySelector('[data-legacy-exhibit-save="honor-mike-keith"]');return card?{text:card.innerText,pressed:save?.getAttribute('aria-pressed'),count:document.querySelector('[data-legacy-my-museum-count]')?.textContent||''}:null;""")
     saved_state=museum_state(d)
     if saved_state.get('version')!=1 or saved_state.get('keys')!=['honor-mike-keith']:raise RuntimeError(f'My Museum stored wrong bounded identity: {saved_state}')
-    if saved_card.get('pressed')!='true' or 'Mike Keith' not in saved_card.get('text','') or '1 / 12 saved' not in saved_card.get('count',''):raise RuntimeError(f'My Museum UI did not reflect save: {saved_card}')
+    if saved_card.get('pressed')!='true' or 'mike keith' not in saved_card.get('text','').casefold() or '1 / 12 saved' not in saved_card.get('count','').casefold():raise RuntimeError(f'My Museum UI did not reflect save: {saved_card}')
     if passport_state(d)!=before_manual:raise RuntimeError('Saving an exhibit changed Museum Passport progress')
     if d.execute_script('return location.hash')!=raw3:raise RuntimeError('Saving an exhibit mutated the active Finder URL')
 
@@ -175,7 +177,8 @@ try:
     d.find_element(By.CSS_SELECTOR,'[data-legacy-my-museum-remove="honor-mike-keith"]').click()
     empty_museum=wait_for(d,"""const root=document.querySelector('[data-legacy-my-museum]');return !document.querySelector('[data-legacy-my-museum-item]')?{text:root?.innerText||'',count:document.querySelector('[data-legacy-my-museum-count]')?.textContent||''}:null;""")
     removed_state=museum_state(d)
-    if removed_state.get('keys')!=[] or '0 / 12 saved' not in empty_museum.get('count','') or 'Start your shelf' not in empty_museum.get('text',''):raise RuntimeError(f'My Museum remove did not restore empty state: state={removed_state} ui={empty_museum}')
+    empty_count=empty_museum.get('count','').casefold();empty_text=empty_museum.get('text','').casefold()
+    if removed_state.get('keys')!=[] or '0 / 12 saved' not in empty_count or 'start your shelf' not in empty_text:raise RuntimeError(f'My Museum remove did not restore empty state: state={removed_state} ui={empty_museum}')
     if passport_state(d)!=before_manual:raise RuntimeError('Removing a saved exhibit changed Passport progress')
 
     result['desktop']={'inventory':inventory,'trailStart':raw,'trailNext':raw2,'passportAfterTwo':passport_after_two,'passportReturn':passport_text,'resumeHash':resume_hash,'passportAfterResume':passport_after_resume,'finder':raw3,'matched':matched[:3],'saved':saved_state,'savedCard':saved_card,'exhibitShare':share_payload,'exactHash':exact_hash,'exact':exact,'removed':removed_state}
@@ -191,7 +194,7 @@ try:
     if not mobile['trailRect'] or mobile['trailRect']['left']<-1 or mobile['trailRect']['right']>mobile['viewport']+1:raise RuntimeError(f'Legacy Trails outside mobile viewport: {mobile}')
     if any(a['h']<44 or a['w']<44 for a in mobile['actions']):raise RuntimeError(f'Legacy mobile action too small: {mobile}')
     active=m.execute_script("""const p=document.querySelector('[data-legacy-trail-player]');return {text:p?.innerText||'',passport:document.querySelector('[data-legacy-passport]')?.innerText||'',museum:document.querySelector('[data-legacy-my-museum]')?.innerText||'',matches:document.querySelectorAll('.legacy-finder-match').length,hash:location.hash};""")
-    if 'Steve McNair' not in active['text'] or active['matches']<1 or '1 / 19 stamps' not in active['passport'] or '0 / 12 saved' not in active['museum']:raise RuntimeError(f'Deep-linked mobile trail did not hydrate isolated state: {active}')
+    if 'Steve McNair' not in active['text'] or active['matches']<1 or '1 / 19 stamps' not in active['passport'].casefold() or '0 / 12 saved' not in active['museum'].casefold():raise RuntimeError(f'Deep-linked mobile trail did not hydrate isolated state: {active}')
     m.find_element(By.CSS_SELECTOR,'[data-legacy-trail-next]').click()
     wait_for(m,"return location.hash.includes('step=3')&&document.querySelector('[data-legacy-trail-player]')?.innerText.includes('Eddie George')")
     mobile_passport=passport_state(m)
@@ -211,7 +214,7 @@ try:
     m.find_element(By.CSS_SELECTOR,'[data-legacy-exhibit-save="moment-music-city-miracle"]').click()
     mobile_saved=wait_for(m,"""const card=document.querySelector('[data-legacy-my-museum-item="moment-music-city-miracle"]');const b=card?.querySelector('[data-legacy-my-museum-open]');const r=b?.getBoundingClientRect();return card&&b?{text:card.innerText,button:{w:r.width,h:r.height},count:document.querySelector('[data-legacy-my-museum-count]')?.textContent||''}:null;""")
     mobile_saved_geometry=geometry(m)
-    if 'Music City Miracle' not in mobile_saved.get('text','') or '1 / 12 saved' not in mobile_saved.get('count',''):raise RuntimeError(f'Mobile My Museum did not render saved exhibit: {mobile_saved}')
+    if 'Music City Miracle' not in mobile_saved.get('text','') or '1 / 12 saved' not in mobile_saved.get('count','').casefold():raise RuntimeError(f'Mobile My Museum did not render saved exhibit: {mobile_saved}')
     if mobile_saved['button']['w']<44 or mobile_saved['button']['h']<44:raise RuntimeError(f'Mobile My Museum action too small: {mobile_saved}')
     if mobile_saved_geometry['overflow']:raise RuntimeError(f'My Museum caused mobile overflow: {mobile_saved_geometry}')
     if museum_state(m).get('keys')!=['moment-music-city-miracle']:raise RuntimeError(f'Mobile My Museum persisted wrong key: {museum_state(m)}')

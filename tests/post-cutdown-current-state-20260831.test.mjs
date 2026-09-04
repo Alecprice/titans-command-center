@@ -58,11 +58,14 @@ test('preseason final and regular-season next-game metrics agree with schedule t
   assert.equal(metrics.find(metric=>metric.label==='Audited roster')?.value,'53');
 });
 
-test('current feed leads with Sept 2 and Sept 1 post-cutdown evidence',()=>{
-  const latestDates=feed.slice(0,4).map(item=>item.publishedAt.slice(0,10));
-  assert.deepEqual(latestDates,['2026-09-02','2026-09-01','2026-08-31','2026-08-31']);
-  assert.ok(feed.some(item=>/add four to practice squad/i.test(item.title)));
-  assert.ok(feed.some(item=>/Sept\. 1 roster transactions/i.test(item.title)));
-  assert.ok(feed.some(item=>/Updated 53-man roster/i.test(item.title)));
+test('current feed preserves newest-first Sept 2 and Sept 1 evidence plus post-cutdown history',()=>{
+  const lead=feed.slice(0,6),leadTimes=lead.map(item=>Date.parse(item.publishedAt));
+  assert.ok(leadTimes.every(Number.isFinite),'leading feed rows must have valid publication timestamps');
+  assert.deepEqual(leadTimes,[...leadTimes].sort((a,b)=>b-a),'leading current feed should remain newest-first');
+  assert.equal(feed[0]?.id,'n17','latest Sept. 2 transaction remains the lead current-team item');
+  assert.ok(feed.slice(0,4).every(item=>Date.parse(item.publishedAt)>=Date.parse('2026-09-01T00:00:00Z')),'newer official Week 1 evidence may expand the Sept. 2/Sept. 1 lead without displacing current post-cutdown truth');
+  assert.ok(feed.some(item=>item.id==='n17'&&/add four to practice squad/i.test(item.title)));
+  assert.ok(feed.some(item=>item.id==='n16'&&/Sept\. 1 roster transactions/i.test(item.title)));
+  assert.ok(feed.some(item=>item.id==='n14'&&/Updated 53-man roster/i.test(item.title)));
   assert.ok(feed.some(item=>/Bears 24, Titans 15/i.test(item.title)));
 });

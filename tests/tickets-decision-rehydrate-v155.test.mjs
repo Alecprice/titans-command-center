@@ -62,8 +62,8 @@ test('same-tab repair diagnostics remain bounded counts and surface truth',()=>{
   assert.doesNotMatch(repair,/api[_-]?key|client[_-]?secret|access[_-]?token|authorization|offer\.url|href/i);
 });
 
-test('v155 is available to installed clients in the refreshed PWA shell generation',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v84/);
+test('v155 is available to installed clients in a versioned network-first PWA shell',()=>{
+  assert.match(sw,/titans-cc-brand-2026-v\d+/);
   assert.match(sw,/\/tickets-decision-rehydrate-v155\.js/);
   assert.doesNotMatch(sw,/\/tickets-decision-rehydrate-v151\.js/);
   assert.match(sw,/NETWORK_FIRST/);

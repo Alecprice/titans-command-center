@@ -7,8 +7,9 @@ import './account-import-v116.js?v=1';
   const AUTH='/api/account/auth';
   const phone=matchMedia('(max-width:760px)');
   const state={session:null,loading:true,mode:'signin',sync:{state:'idle',message:'Selected settings can sync when account storage is available.'}};
-  let resetTimer=0;
+  let resetTimer=0,returnFocus=null;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const focusableSelector='button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])';
   async function auth(path,{method='GET',body}={}){
     const res=await fetch(`${AUTH}/${path}`,{method,credentials:'same-origin',cache:'no-store',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});
     let data={};try{data=await res.json()}catch{}
@@ -37,17 +38,28 @@ import './account-import-v116.js?v=1';
   function syncStatusMarkup(){return `<div class="account-sync-status ${esc(state.sync.state)}" role="status" aria-live="polite"><i aria-hidden="true"></i><span>${esc(state.sync.message)}</span></div>`;}
   function accountTools(signedIn){return `<section class="account-tools" aria-label="Settings tools"><div class="account-tools-head"><small>${signedIn?'ACCOUNT DATA':'GUEST DATA'}</small><span>${signedIn?'Portable settings only — not your password or session.':'These settings exist only on this device.'}</span></div><div class="account-tool-grid">${signedIn?'<button class="account-primary" data-account-sync type="button">Sync now</button>':''}<button class="account-tool" data-account-export type="button">${signedIn?'Export settings':'Export this device'}</button><button class="account-danger" data-account-reset type="button">${signedIn?'Reset synced settings':'Reset this device'}</button></div><div class="account-reset-hint" role="status" aria-live="polite"></div>${signedIn?'<p class="account-tool-note">Reset clears synced Titans preferences and returns this device to defaults. It does not delete your account.</p>':'<p class="account-tool-note">Reset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.</p>'}</section>`;}
   function refreshOpenStatus(){const el=document.querySelector('.account-sync-status');if(!el)return;el.className=`account-sync-status ${state.sync.state}`;el.querySelector('span').textContent=state.sync.message;}
-  function close(){clearTimeout(resetTimer);resetTimer=0;document.querySelector('.account-modal')?.remove();document.body.classList.remove('account-open');}
+  function close({restoreFocus=true}={}){
+    clearTimeout(resetTimer);resetTimer=0;document.querySelector('.account-modal')?.remove();document.body.classList.remove('account-open');
+    if(restoreFocus){const target=returnFocus;returnFocus=null;if(target?.isConnected){try{target.focus({preventScroll:true});}catch{target.focus();}}}
+  }
   function open(mode='signin'){
-    state.mode=mode;close();
+    const replacing=Boolean(document.querySelector('.account-modal'));
+    if(!replacing) returnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    state.mode=mode;close({restoreFocus:false});
     const u=user(),modal=document.createElement('div');modal.className='account-modal';modal.innerHTML=`<div class="account-backdrop" data-account-close></div><section class="account-panel" role="dialog" aria-modal="true" aria-labelledby="account-title"><button class="account-close" data-account-close aria-label="Close account">×</button>${u?`<small class="account-eyebrow">YOUR TITANS ACCOUNT</small><h2 id="account-title">${esc(u.name||'Signed in')}</h2><p>${esc(u.email||'')}</p>${syncStatusMarkup()}<div class="account-benefits"><span>Favorite player can sync across signed-in devices when account storage is available.</span><span>Smart alert and display preferences can follow your account.</span><span>Saved personal media links can follow your account.</span><span>Guest browsing and device-local settings always remain available.</span></div>${accountTools(true)}<button class="account-guest account-signout" data-account-signout type="button">Sign out</button>`:`<small class="account-eyebrow">OPTIONAL ACCOUNT</small><h2 id="account-title">${mode==='signup'?'Create your account':'Welcome back'}</h2><p>Everything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.</p><div class="account-tabs" role="tablist"><button type="button" data-account-mode="signin" class="${mode==='signin'?'active':''}">Log in</button><button type="button" data-account-mode="signup" class="${mode==='signup'?'active':''}">Sign up</button></div><form class="account-form">${mode==='signup'?'<label>Name<input name="name" autocomplete="name" required maxlength="80"></label>':''}<label>Email<input name="email" type="email" autocomplete="email" required></label><label>Password<input name="password" type="password" autocomplete="${mode==='signup'?'new-password':'current-password'}" required minlength="8"></label><div class="account-error" role="alert"></div><button class="account-primary" type="submit">${mode==='signup'?'Create account':'Log in'}</button><button class="account-guest" type="button" data-account-close>Continue as guest</button></form>${accountTools(false)}`}</section>`;
     document.body.appendChild(modal);document.body.classList.add('account-open');
     const panel=modal.querySelector('.account-panel');
     panel?.scrollTo?.({top:0,left:0,behavior:'instant'});
-    if(!phone.matches){
-      const firstInput=modal.querySelector('input');
-      try{firstInput?.focus({preventScroll:true});}catch{firstInput?.focus();}
-    }
+    const initialFocus=phone.matches?modal.querySelector('.account-close'):modal.querySelector('input')||modal.querySelector('.account-close');
+    try{initialFocus?.focus({preventScroll:true});}catch{initialFocus?.focus();}
+  }
+  function trapFocus(event,modal){
+    if(event.key!=='Tab')return;
+    const focusables=[...modal.querySelectorAll(focusableSelector)].filter(el=>el instanceof HTMLElement&&!el.hidden&&el.getAttribute('aria-hidden')!=='true');
+    if(!focusables.length)return;
+    const first=focusables[0],last=focusables[focusables.length-1],active=document.activeElement;
+    if(event.shiftKey&&(active===first||!modal.contains(active))){event.preventDefault();last.focus();}
+    else if(!event.shiftKey&&(active===last||!modal.contains(active))){event.preventDefault();first.focus();}
   }
   async function refresh(){state.loading=true;try{state.session=await auth('get-session');}catch{state.session=null;}state.loading=false;renderEntry();announce();}
   function armReset(button){
@@ -77,7 +89,7 @@ import './account-import-v116.js?v=1';
   });
   addEventListener('titans:sync-status',event=>{state.sync={state:event.detail?.state||'idle',message:event.detail?.message||'Sync status unavailable.'};renderEntry();refreshOpenStatus();});
   phone.addEventListener?.('change',()=>{const card=document.querySelector('.account-sheet-card');if(card)placeEntryCard(card);});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.account-modal'))close();});
+  document.addEventListener('keydown',e=>{const modal=document.querySelector('.account-modal');if(!modal)return;if(e.key==='Escape'){e.preventDefault();close();return;}trapFocus(e,modal);});
   ensureCss();refresh();
   window.TitansAccount={open,refresh,get user(){return user();},get guest(){return !user();},get syncStatus(){return {...state.sync}}};
 })();
