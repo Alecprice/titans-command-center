@@ -74,7 +74,7 @@ test('near-live scheduler preserves an already-fresh bootstrap snapshot',async()
   const database=new FakeD1();
   const env={TITANS_DB:database};
   const fetchedAt='2026-09-01T20:00:00.000Z';
-  await putD1Snapshot(env,'bootstrap:v1',{ok:true,mode:'live-database',databaseAvailable:true,games:[{id:'keep-me'}]},{source:'verified-live-materialization',fetchedAt,ttlSeconds:86400});
+  await putD1Snapshot(env,'bootstrap:v1',{ok:true,mode:'live-database',databaseAvailable:true,dataQuality:{contentAuditAt:'2026-09-02'},games:[{id:'keep-me'}]},{source:'verified-live-materialization',fetchedAt,ttlSeconds:86400});
   const before=await getD1Snapshot(env,'bootstrap:v1',{allowExpired:true});
 
   const originalFetch=globalThis.fetch;
