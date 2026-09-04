@@ -46,6 +46,19 @@ def assert_no_horizontal_overflow(driver, label):
         raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
 
+def set_mobile_viewport(driver, width, height):
+    driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride', {
+        'width': width,
+        'height': height,
+        'deviceScaleFactor': 1,
+        'mobile': True,
+    })
+    state = driver.execute_script("return {innerWidth:innerWidth,innerHeight:innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}")
+    if state['innerWidth'] != width or state['innerHeight'] != height or state['clientWidth'] != width or not state['mobile']:
+        raise RuntimeError(f'Navigation mobile viewport override did not take effect: {state}')
+    return state
+
+
 def browser_state(driver):
     try:
         return driver.execute_script("""
@@ -144,8 +157,8 @@ try:
 
     desktop_long_tasks = driver.execute_script('return window.__titansLongTasks || []') or []
 
-    stage = 'mobile:resize'
-    driver.set_window_size(390, 844)
+    stage = 'mobile:viewport'
+    mobile_viewport = set_mobile_viewport(driver, 390, 844)
     driver.get(f'{BASE}/#home')
     stage = 'mobile:wait-home'
     wait_for(driver, "document.readyState === 'complete' && document.querySelector('.fan-hero')")
@@ -274,7 +287,7 @@ try:
     assert_no_horizontal_overflow(driver, 'mobile Roster filters cleared')
 
     stage = 'small-phone:320'
-    driver.set_window_size(320, 760)
+    small_phone_viewport = set_mobile_viewport(driver, 320, 760)
     driver.get(f'{BASE}/#home')
     wait_for(driver, "document.readyState === 'complete' && document.querySelector('.fan-hero')")
     assert_no_horizontal_overflow(driver, '320px Home')
@@ -314,6 +327,8 @@ try:
         'teamRoomChecks': 4,
         'rosterFilterReset': True,
         'rosterTotal': roster_total,
+        'mobileViewportState': mobile_viewport,
+        'smallPhoneViewportState': small_phone_viewport,
         'mobileTargets': mobile_targets,
         'maxLongTaskMs': round(max_long_task, 1),
         'longTasksOver250ms': len([x for x in all_long_tasks if x >= 250]),
