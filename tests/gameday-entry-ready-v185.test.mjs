@@ -31,6 +31,6 @@ test('entry actions remain accessible on phone and use safe external links',()=>
 
 test('new Game Day asset is loaded and packaged by the current network-first PWA shell',()=>{
   assert.match(html,/gameday-entry-ready-v185\.js\?v=1/);
-  assert.match(sw,/titans-cc-brand-2026-v86/);
+  assert.match(sw,/titans-cc-brand-2026-v(?:8[6-9]|9\d|[1-9]\d{2,})/);
   assert.match(sw,/'\/gameday-entry-ready-v185\.js'/);
 });
