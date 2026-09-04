@@ -80,7 +80,7 @@ test('TENX opponent scout ships through the stable runtime and offline shell',()
   assert.match(runtime,/import\('\.\/command-opponent-scout-v170\.js'\)/);
   assert.match(sw,/command-opponent-scout-v170\.js/);
   assert.match(sw,/src\/week1-opponent-intel-2026\.mjs/);
-  assert.match(sw,/titans-cc-brand-2026-v86/);
+  assert.match(sw,/titans-cc-brand-2026-v(?:8[6-9]|9\d|[1-9]\d{2,})/);
   assert.match(build,/src\/week1-opponent-intel-2026\.mjs/);
 });
 
