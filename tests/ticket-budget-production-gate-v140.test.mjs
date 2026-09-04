@@ -42,7 +42,7 @@ test('browser gate exercises actual checkout inputs and ranking without dependin
   assert.doesNotMatch(browser,/ticketmaster|seatgeek|stubhub/i);
 });
 
-test('browser gate locks state-aware truth, edit/clear lifecycle, mobile geometry, and cleanup',()=>{
+test('browser gate locks state-aware truth, edit/clear lifecycle, deterministic mobile geometry, and cleanup',()=>{
   assert.match(browser,/Ticket Center never guesses fees\./);
   assert.match(browser,/This reference is not used as your checkout total\./);
   assert.match(browser,/No fee, parking, food, or merch estimate is generated\./);
@@ -55,7 +55,10 @@ test('browser gate locks state-aware truth, edit/clear lifecycle, mobile geometr
   assert.match(browser,/data-ticket-outing-clear/);
   assert.match(browser,/NEEDS CHECKOUT/);
   assert.match(browser,/1\/2 actual totals ready/);
-  assert.match(browser,/driver\.set_window_size\(390,844\)/);
+  assert.match(browser,/Emulation\.setDeviceMetricsOverride/);
+  assert.match(browser,/set_css_viewport\(driver,390,844\)/);
+  assert.match(browser,/matchMedia\('\(max-width:620px\)'\)\.matches/);
+  assert.doesNotMatch(browser,/driver\.set_window_size\(390,844\)/);
   assert.match(browser,/mobileTouchFloor':48/);
   assert.match(browser,/fontSize.*16/);
   assert.match(browser,/document\.documentElement\.scrollWidth>viewport\+3/);

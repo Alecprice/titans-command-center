@@ -21,12 +21,16 @@ test('custom-domain verification is manual-only, read-only, and targets the cano
   assert.doesNotMatch(workflow,/\baws\s+(?:cloudfront|route53|acm|cloudformation)\b/i);
 });
 
-test('custom-domain probe proves CloudFront fronts the live Worker without weakening staging or D1 truth',()=>{
+test('custom-domain probe proves CloudFront fronts the exact canonical release without weakening rollback or D1 truth',()=>{
   const probe=read('scripts/custom-domain-regression.mjs');
   assert.match(probe,/EXPECTED_CUSTOM_HOST='titans\.alecjprice\.com'/);
   assert.match(probe,/EXPECTED_ORIGIN_HOST='titans-command-center\.alecjordanprice\.workers\.dev'/);
-  assert.match(probe,/canonicalMeta\.body\.commit===originMeta\.body\.commit/);
-  assert.match(probe,/canonicalMeta\.body\?\.version===originMeta\.body\?\.version/);
+  assert.match(probe,/process\.env\.EXPECTED_SHA\|\|process\.env\.GITHUB_SHA/);
+  assert.match(probe,/canonicalMeta\.commit===EXPECTED_SHA/);
+  assert.match(probe,/rollbackCommit:originMeta\.commit/);
+  assert.match(probe,/rollbackCurrent:originMeta\.commit===EXPECTED_SHA/);
+  assert.doesNotMatch(probe,/canonicalMeta\.body\.commit===originMeta\.body\.commit/);
+  assert.doesNotMatch(probe,/canonicalMeta\.body\?\.version===originMeta\.body\?\.version/);
   assert.match(probe,/originHeaders\.robots\.includes\('noindex'\)/);
   assert.match(probe,/!canonicalHeaders\.robots\.includes\('noindex'\)/);
   assert.match(probe,/x-amz-cf-id/);
@@ -37,22 +41,24 @@ test('custom-domain probe proves CloudFront fronts the live Worker without weake
   assert.match(probe,/frame-ancestors 'none'/);
   assert.match(probe,/database\?\.provider==='cloudflare-d1'/);
   assert.match(probe,/database\?\.configured===true/);
+  assert.match(probe,/validateHealth\(originHealth,'Worker rollback'\)/);
   assert.match(probe,/custom-domain-smoke\.json/);
   assert.doesNotMatch(probe,/DATABASE_URL/);
 });
 
-test('custom-domain revision comparison tolerates bounded edge propagation but still fails closed',()=>{
+test('canonical revision comparison tolerates bounded edge propagation but still fails closed',()=>{
   const probe=read('scripts/custom-domain-regression.mjs');
   assert.match(probe,/REVISION_CONVERGENCE_ATTEMPTS=6/);
   assert.match(probe,/REVISION_CONVERGENCE_DELAY_MS=2500/);
-  assert.match(probe,/async function waitForRevisionConvergence\(\)/);
+  assert.match(probe,/async function waitForCanonicalRevision\(\)/);
   assert.match(probe,/for\(let attempt=1;attempt<=REVISION_CONVERGENCE_ATTEMPTS;attempt\+\+\)/);
-  assert.match(probe,/if\(customCommit===originCommit\)return \{\.\.\.pair,attempts:attempt\}/);
+  assert.match(probe,/if\(meta\.commit===EXPECTED_SHA\)return \{meta,attempts:attempt\}/);
   assert.match(probe,/await wait\(REVISION_CONVERGENCE_DELAY_MS\)/);
-  assert.match(probe,/did not converge after \$\{REVISION_CONVERGENCE_ATTEMPTS\} attempts/);
-  assert.match(probe,/const \{canonicalMeta,originMeta,attempts:revisionAttempts\}=await waitForRevisionConvergence\(\)/);
+  assert.match(probe,/Canonical hostname did not reach expected release/);
+  assert.match(probe,/const \{meta:canonicalMeta,attempts:revisionAttempts\}=await waitForCanonicalRevision\(\)/);
   assert.match(probe,/revisionAttempts,/);
-  assert.match(probe,/assert\(canonicalMeta\.body\.commit===originMeta\.body\.commit/);
+  assert.match(probe,/assert\(canonicalMeta\.commit===EXPECTED_SHA/);
+  assert.doesNotMatch(probe,/assert\(canonicalMeta\.body\.commit===originMeta\.body\.commit/);
 });
 
 test('custom-domain workflow reuses the established production and browser gates',()=>{

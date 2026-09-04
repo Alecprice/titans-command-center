@@ -143,6 +143,14 @@
     ];
   }
 
+  function isRegularSeasonOpener(game){
+    return Boolean(game&&String(game.week)==='1'&&game.status!=='final'&&!String(game.week).startsWith('P'));
+  }
+
+  function officialScheduleUrl(){
+    return 'https://www.tennesseetitans.com/schedule/';
+  }
+
   function focusMarkup(){
     const games=rows(data?.games);
     const focus=runtime.scheduleFocus?.(games)||{state:'none',game:null};
@@ -151,21 +159,22 @@
     const opponent=String(game?.opponent||'').trim();
     const abbr=String(game?.opponentAbbr||'').trim()||'—';
     const home=game?.homeAway==='home';
+    const opener=isRegularSeasonOpener(game);
     const matchup=game?`Titans ${home?'vs':'at'} ${opponent||abbr}`:'Your Titans command center';
     const description=game
       ?`${kickoffLabel(game)} · ${home?'Home':'Road'}${game?.network?` · ${String(game.network)}`:''}`
       :'No upcoming kickoff is loaded right now. The core fan tools stay one tap away.';
     const meta=game
-      ?[weekLabel(game),countdown(game,state),game?.venue||null].filter(Boolean)
+      ?[weekLabel(game),opener?'Regular-season opener':null,countdown(game,state),game?.venue||null].filter(Boolean)
       :['Schedule status','Fan tools ready'];
     const actions=focusActions(game,state);
     return `<article class="home-command-v123-focus" aria-label="Next Titans action">
       <div class="home-command-v123-matchup">
-        <div><span class="home-command-v123-kicker">${state==='game-window'?'GAME WINDOW':game?'NEXT TITANS ACTION':'FAN COMMAND'}</span><h3>${esc(matchup)}</h3><p>${esc(description)}</p></div>
+        <div><span class="home-command-v123-kicker">${state==='game-window'?'GAME WINDOW':opener?'SEASON OPENER':game?'NEXT TITANS ACTION':'FAN COMMAND'}</span><h3>${esc(matchup)}</h3><p>${esc(description)}</p></div>
         <div class="home-command-v123-opponent" aria-label="${game?`${esc(abbr)} opponent abbreviation`:'Titans'}">${game?esc(abbr):'TEN'}</div>
       </div>
       <div class="home-command-v123-meta">${meta.map(item=>`<span>${esc(item)}</span>`).join('')}</div>
-      <div class="home-command-v123-actions">${actions.map(action=>`<a class="home-command-v123-action${action.secondary?' secondary':''}" href="${action.href}">${esc(action.label)} →</a>`).join('')}</div>
+      <div class="home-command-v123-actions">${actions.map(action=>`<a class="home-command-v123-action${action.secondary?' secondary':''}" href="${action.href}">${esc(action.label)} →</a>`).join('')}<a class="home-command-v123-action secondary" href="${officialScheduleUrl()}" target="_blank" rel="noopener noreferrer" aria-label="Open official Tennessee Titans schedule">Official schedule ↗</a></div>
     </article>`;
   }
 
@@ -186,7 +195,7 @@
     const games=rows(data?.games);
     const focus=runtime.scheduleFocus?.(games)||{};
     const game=focus.game||{};
-    return JSON.stringify([focus.state||'none',game.id||'',game.date||'',game.status||'',game.opponentAbbr||'',game.network||'',Boolean(data),Boolean(compact)]);
+    return JSON.stringify([focus.state||'none',game.id||'',game.date||'',game.status||'',game.opponentAbbr||'',game.network||'',isRegularSeasonOpener(game),Boolean(data),Boolean(compact)]);
   }
 
   function placeRoot(root,hero,deck){
