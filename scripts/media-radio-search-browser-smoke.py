@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 BASE = os.environ.get('WORKER_URL', 'https://titans.alecjprice.com').rstrip('/')
 REPORT = Path('/tmp/media-radio-search-browser-smoke.json')
+MOBILE_VIEWPORT = {'width': 390, 'height': 844}
 
 
 def wait_for(driver, predicate, timeout=12):
@@ -37,6 +38,24 @@ started = time.time()
 try:
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(20)
+    driver.execute_cdp_cmd(
+        'Emulation.setDeviceMetricsOverride',
+        {
+            'width': MOBILE_VIEWPORT['width'],
+            'height': MOBILE_VIEWPORT['height'],
+            'deviceScaleFactor': 1,
+            'mobile': False,
+        },
+    )
+    viewport = driver.execute_script("""
+      return {
+        width: innerWidth,
+        height: innerHeight,
+        phone: matchMedia('(max-width: 759px)').matches,
+      };
+    """)
+    if viewport != {'width': 390, 'height': 844, 'phone': True}:
+        raise RuntimeError(f'Headless Chrome did not honor the required mobile viewport: {viewport}')
 
     stage = 'false-positive:week-1'
     load_search(driver, 'week%201')
@@ -99,6 +118,7 @@ try:
     result = {
         'ok': True,
         'base': BASE,
+        'viewport': viewport,
         'falsePositiveWeekOne': False,
         'searchLink': link,
         'handoff': state,
