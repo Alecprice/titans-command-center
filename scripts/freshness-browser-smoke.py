@@ -21,6 +21,19 @@ def driver_for(width=1280,height=900):
     return webdriver.Chrome(options=options)
 
 
+def set_mobile_viewport(driver,width=390,height=844):
+    driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride',{
+        'width':width,
+        'height':height,
+        'deviceScaleFactor':1,
+        'mobile':True,
+    })
+    state=driver.execute_script("return {innerWidth:innerWidth,innerHeight:innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}")
+    if state['innerWidth']!=width or state['innerHeight']!=height or state['clientWidth']!=width or not state['mobile']:
+        raise RuntimeError(f'Freshness mobile viewport override did not take effect: {state}')
+    return state
+
+
 def prepare_returning_user(driver):
     driver.get(f'{BASE}/')
     driver.execute_script("localStorage.setItem('titans:v10Onboarded','1')")
@@ -99,14 +112,16 @@ try:
     stage='desktop-home';prepare_returning_user(driver)
     stage='desktop-freshness';desktop=wait_card(driver);assert_card(desktop,'desktop')
 
-    stage='mobile-resize';driver.set_window_size(390,844);time.sleep(.25)
+    stage='mobile-viewport';mobile_viewport=set_mobile_viewport(driver,390,844);prepare_returning_user(driver)
     stage='mobile-freshness';mobile=wait_card(driver);assert_card(mobile,'mobile')
+    if mobile['viewport']['width']!=390 or mobile['viewport']['height']!=844:
+        raise RuntimeError(f'Mobile freshness card did not render at the pinned viewport: {mobile}')
 
     stage='console';warnings=severe_logs(driver)
     if warnings:raise RuntimeError(f'Freshness regression has severe browser errors: {warnings[:3]}')
 
     result={
-      'ok':True,'base':BASE,'desktop':desktop,'mobile':mobile,
+      'ok':True,'base':BASE,'desktop':desktop,'mobile':mobile,'mobileViewportState':mobile_viewport,
       'browserWarnings':warnings,'durationSeconds':round(time.time()-started,2),
       'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
     }
