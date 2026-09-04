@@ -21,14 +21,15 @@ test('stable browser code paths must revalidate instead of hiding a new Worker r
   assert.equal((headers.match(/Cache-Control: public, max-age=0, must-revalidate/g)||[]).length,5);
 });
 
-test('custom-domain gate compares critical canonical assets to the checked-out release',()=>{
+test('custom-domain gate compares canonical critical assets to the checked-out release and keeps rollback reachable',()=>{
   for(const path of ['/', '/index.html','/sw.js','/app.js','/tickets-price-fallback-v58.js','/tickets-tenx-v123.js','/tickets-compare-v125.js','/tickets-compare-cache-bridge-v141.js']){
     assert.ok(audit.includes(`'${path}'`),`missing critical shell path ${path}`);
   }
   assert.match(audit,/function expectedStaticBody\(path\)\{return fs\.readFileSync\(localPath\(path\),'utf8'\);\}/);
   assert.match(audit,/pair\.canonical\.body!==body/);
-  assert.match(audit,/pair\.origin\.body!==body/);
-  assert.match(audit,/Canonical shell did not converge to checked-out release assets/);
+  assert.match(audit,/pair\.origin\.status!==200/);
+  assert.doesNotMatch(audit,/pair\.origin\.body!==body/);
+  assert.match(audit,/Canonical shell did not match checked-out release or rollback shell was unavailable/);
 });
 
 test('front-door gate proves shell cache policy before browser regressions',()=>{
