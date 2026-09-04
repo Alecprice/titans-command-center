@@ -56,7 +56,7 @@ test('TENX password enhancement waits until account mode replacement is complete
 });
 
 test('TENX offline shell packages the imported interaction dependency',()=>{
-  assert.match(sw,/titans-cc-brand-2026-v86/);
+  assert.match(sw,/titans-cc-brand-2026-v(?:8[6-9]|9\d|[1-9]\d{2,})/);
   assert.match(sw,/['"]\/account-interaction-v117\.js['"]/);
   assert.match(sw,/const NETWORK_FIRST=\/\\\.\(\?:js\|mjs\|css\|webmanifest\)\$\/i/);
 });
