@@ -36,14 +36,14 @@ try:
     result['stage']='load-home';d.get(f'{BASE}/#home')
     result['stage']='prepare-returning-user';d.execute_script("localStorage.setItem('titans:v10Onboarded','1');document.querySelector('#v10-onboarding [data-v10-close]')?.click()")
     wait(d,"return !document.querySelector('#v10-onboarding')",5);result['states'].append({'stage':result['stage'],'state':snapshot(d)})
-    result['stage']='wait-365';wait(d,"return Boolean(document.querySelector('.v19-365')&&document.querySelectorAll('.v19-365-grid>a').length===4)");result['states'].append({'stage':result['stage'],'state':snapshot(d)})
+    result['stage']='wait-365';mode_state=wait(d,"""const p=document.querySelector('.v19-365');if(!p)return null;const mode=p.dataset.v19Mode||'full',count=p.querySelectorAll('.v19-365-grid>a').length,expected=mode==='season-lens'?2:4;return count===expected?{mode,count,expected}:null""");result['states'].append({'stage':result['stage'],'state':snapshot(d),'mode':mode_state})
     result['stage']='open-more';d.find_element(By.ID,'mobile-more-button').click()
     result['stage']='wait-sheet-settled';sheet=wait(d,"""const s=document.querySelector('#sidebar'),dock=document.querySelector('.mobile-nav'),r=s?.getBoundingClientRect(),dr=dock?.getBoundingClientRect();return s?.classList.contains('open')&&r&&dr&&r.bottom<=dr.top+2?{top:r.top,bottom:r.bottom,dockTop:dr.top,transform:getComputedStyle(s).transform}:null""",15);result['states'].append({'stage':result['stage'],'state':snapshot(d)})
     result['stage']='close-more';d.execute_script("document.querySelector('#app').click()")
     result['stage']='wait-sheet-closed';wait(d,"return !document.querySelector('#sidebar')?.classList.contains('open')",10);result['states'].append({'stage':result['stage'],'state':snapshot(d)})
     result['stage']='focus-search';search=d.find_element(By.ID,'global-search');search.click();search.send_keys('roster')
     result['stage']='wait-search-results';search_state=wait(d,"""const p=document.querySelector('.v111-search-panel'),rows=[...p?.querySelectorAll('[data-v111-index]')||[]];return p&&!p.hidden&&rows.length?{rows:rows.length,labels:rows.map(x=>x.textContent.trim()).slice(0,4)}:null""",15);result['states'].append({'stage':result['stage'],'state':snapshot(d)})
-    result['sheet']=sheet;result['search']=search_state;result['ok']=True
+    result['mode365']=mode_state;result['sheet']=sheet;result['search']=search_state;result['ok']=True
 except Exception as exc:
     result['error']=f'{type(exc).__name__}: {exc}'
     try: result['failureState']=snapshot(d)
