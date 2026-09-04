@@ -1,3 +1,4 @@
+import './tickets-budget-touch-guard-v192.js';
 import './tickets-tenx-v123.js';
 import './tickets-trend-v124.js';
 import './tickets-compare-v125.js';
