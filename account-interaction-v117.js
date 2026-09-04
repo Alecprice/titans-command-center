@@ -59,7 +59,10 @@
     const toggle=target?.closest('[data-account-password-toggle]');
     if(toggle){event.preventDefault();togglePasswordVisibility(toggle);return;}
 
-    if(target?.closest('[data-account-mode]')){queueMicrotask(enhancePassword);return;}
+    if(target?.closest('[data-account-mode]')){
+      requestAnimationFrame(enhancePassword);
+      return;
+    }
 
     const trigger=target?.closest('#account-button,[data-account-open]');
     const account=window.TitansAccount;

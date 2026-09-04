@@ -45,9 +45,10 @@ test('TENX password control meets mobile touch and focus contracts',()=>{
   assert.match(interaction,/@media\(forced-colors:active\)/);
 });
 
-test('TENX password enhancement survives account mode replacement and programmatic opens',()=>{
-  assert.match(interaction,/closest\('\[data-account-mode\]'\)/);
-  assert.match(interaction,/queueMicrotask\(enhancePassword\)/);
+test('TENX password enhancement waits until account mode replacement is complete and still covers programmatic opens',()=>{
+  assert.match(interaction,/if\(target\?\.closest\('\[data-account-mode\]'\)\)\{\s*requestAnimationFrame\(enhancePassword\);\s*return;\s*\}/);
+  assert.doesNotMatch(interaction,/if\(target\?\.closest\('\[data-account-mode\]'\)\)\{?queueMicrotask\(enhancePassword\)/);
+  assert.match(account,/const mode=t\.closest\('\[data-account-mode\]'\)\?\.dataset\.accountMode;if\(mode\)\{open\(mode\);return;\}/);
   assert.match(interaction,/account\.open=wrappedOpen/);
   assert.match(interaction,/requestAnimationFrame\(\(\)=>\{account\.open[\s\S]*enhancePassword\(\)/);
   assert.match(interaction,/passwordV173/);

@@ -28,7 +28,7 @@ test('saved compare convergence owns state-to-view recovery without polling',asy
   assert.doesNotMatch(source,/\bsetTimeout\s*\(/);
 });
 
-test('saved compare convergence remains a direct, release-verified shell asset',async()=>{
+test('saved compare convergence remains a direct, release-verified canonical shell asset',async()=>{
   const [html,sw,regression]=await Promise.all([
     read('index.html'),
     read('sw.js'),
@@ -41,5 +41,6 @@ test('saved compare convergence remains a direct, release-verified shell asset',
   assert.ok(bridge>aggregate,'Convergence owner must load directly after the Ticket aggregate');
   assert.match(sw,/['"]\/tickets-compare-cache-bridge-v141\.js['"]/);
   assert.match(regression,/['"]\/tickets-compare-cache-bridge-v141\.js['"]/);
-  assert.match(regression,/Canonical shell did not converge to checked-out release assets/);
+  assert.match(regression,/pair\.canonical\.body!==body/);
+  assert.match(regression,/Canonical shell did not match checked-out release or rollback shell was unavailable/);
 });
