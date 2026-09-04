@@ -31,7 +31,7 @@ try:
     WebDriverWait(driver,15,poll_frequency=.1).until(lambda d:d.execute_script("return document.readyState==='complete'&&Boolean(window.TitansRuntime)&&Boolean(document.querySelector('#app'))"))
     WebDriverWait(driver,15,poll_frequency=.1).until(lambda d:d.execute_script("return Boolean(document.querySelector('.gameday-v16,.v22-home-guide'))"))
 
-    state=driver.execute_script("""
+    state=driver.execute_script(r"""
       const guide=document.querySelector('.v22-home-guide');
       const entry=document.querySelector('.v185-entry-ready');
       const links=[...entry?.querySelectorAll('a')||[]].map(a=>({
