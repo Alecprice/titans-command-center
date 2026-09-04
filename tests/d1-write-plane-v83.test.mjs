@@ -99,6 +99,7 @@ test('D1 final-score reconciliation patches one unambiguous pending Titans game'
   const fetchedAt='2026-08-29T21:00:00.000Z';
   await putD1Snapshot(env,'bootstrap:v1',{
     ok:true,
+    dataQuality:{contentAuditAt:'2026-09-02'},
     games:[{id:'game-1',date:'2026-09-13T17:00:00.000Z',opponentAbbr:'DAL',homeAway:'home',status:'scheduled',score:null,opponentScore:null}],
     fetchedAt
   },{source:'neon-bootstrap',fetchedAt,ttlSeconds:900});
@@ -122,6 +123,7 @@ test('D1 final-score reconciliation fails closed on a conflicting final',async()
   const env={TITANS_DB:new FakeD1()};
   await putD1Snapshot(env,'bootstrap:v1',{
     ok:true,
+    dataQuality:{contentAuditAt:'2026-09-02'},
     games:[{id:'game-1',date:'2026-09-13T17:00:00.000Z',opponentAbbr:'DAL',homeAway:'home',status:'final',score:21,opponentScore:20}]
   },{ttlSeconds:900});
 
