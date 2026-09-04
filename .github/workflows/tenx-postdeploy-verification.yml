@@ -1,0 +1,225 @@
+name: TENX Post-Deploy Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact auto-merged revision expected in production
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: tenx-postdeploy-${{ inputs.source_sha }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WORKER_URL: https://titans.alecjprice.com
+      SOURCE_SHA: ${{ inputs.source_sha }}
+    steps:
+      - name: Validate requested revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'source_sha must be a full Git commit SHA'; exit 1; }
+
+      - name: Checkout exact deployed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+
+      - name: Use Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Wait for exact revision to be live
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const base = process.env.WORKER_URL.replace(/\/$/, '');
+          const expected = process.env.SOURCE_SHA;
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          let last = 'unavailable';
+          for (let attempt = 1; attempt <= 45; attempt++) {
+            try {
+              const response = await fetch(`${base}/build-meta.json?tenx=${Date.now()}-${attempt}`, {
+                cache: 'no-store',
+                headers: {'user-agent': 'Titans-TENX-PostDeploy/1.0'},
+              });
+              if (response.ok) {
+                const meta = await response.json();
+                last = String(meta?.commit || 'unknown');
+                if (last === expected) {
+                  console.log(`Exact TENX revision is live: ${expected}`);
+                  process.exit(0);
+                }
+              } else {
+                last = `HTTP ${response.status}`;
+              }
+            } catch (error) {
+              last = error?.message || String(error);
+            }
+            await sleep(2000);
+          }
+          console.error(`Expected ${expected} in production; last observed ${last}`);
+          process.exit(1);
+          NODE
+
+      - name: Install Selenium
+        run: python -m pip install --disable-pip-version-check 'selenium>=4.25,<5'
+
+      - name: Current Experience runtime and 365 diagnostic
+        id: current_runtime
+        continue-on-error: true
+        run: python scripts/runtime-365-diagnostic.py
+
+      - name: Current Experience Smart Search
+        id: current_search
+        continue-on-error: true
+        run: python scripts/smart-search-browser-smoke.py
+
+      - name: Current Experience mobile navigation
+        id: current_mobile
+        continue-on-error: true
+        run: python scripts/mobile-navigation-browser-smoke.py
+
+      - name: Current Experience Fantasy Command
+        id: current_fantasy
+        continue-on-error: true
+        run: python scripts/fantasy-browser-smoke.py
+
+      - name: Current Experience Fantasy Decision Center
+        id: current_decisions
+        continue-on-error: true
+        run: python scripts/fantasy-decision-browser-smoke.py
+
+      - name: Current Experience Account and Guest
+        id: current_account
+        continue-on-error: true
+        run: python scripts/account-browser-smoke.py
+
+      - name: Current Experience Market
+        id: current_market
+        continue-on-error: true
+        run: python scripts/market-browser-smoke.py
+
+      - name: Current Experience Legacy
+        id: current_legacy
+        continue-on-error: true
+        run: python scripts/legacy-browser-smoke.py
+
+      - name: Post-deploy navigation
+        id: post_navigation
+        continue-on-error: true
+        run: python scripts/browser-navigation-smoke.py
+
+      - name: Post-deploy Listen Watch
+        id: post_media
+        continue-on-error: true
+        run: python scripts/media-browser-smoke.py
+
+      - name: Post-deploy Command Intelligence
+        id: post_command
+        continue-on-error: true
+        run: python scripts/command-intelligence-browser-smoke.py
+
+      - name: Post-deploy Player Intelligence and Game Day
+        id: post_player
+        continue-on-error: true
+        run: python scripts/player-gameday-browser-smoke-resilient.py
+
+      - name: Post-deploy Ask Titans
+        id: post_ask
+        continue-on-error: true
+        run: python scripts/ask-titans-browser-smoke.py
+
+      - name: Post-deploy Change Intelligence
+        id: post_change
+        continue-on-error: true
+        run: python scripts/change-intelligence-browser-smoke.py
+
+      - name: Post-deploy 365 Mode
+        id: post_365
+        continue-on-error: true
+        run: python scripts/runtime-365-browser-smoke.py
+
+      - name: Post-deploy freshness
+        id: post_freshness
+        continue-on-error: true
+        run: python scripts/freshness-browser-smoke.py
+
+      - name: Post-deploy analytics
+        id: post_analytics
+        continue-on-error: true
+        run: python scripts/analytics-browser-smoke-resilient.py
+
+      - name: Post-deploy headshots
+        id: post_headshots
+        continue-on-error: true
+        run: python scripts/headshot-browser-smoke.py
+
+      - name: Post-deploy responsive matrix
+        id: post_responsive
+        continue-on-error: true
+        run: python scripts/responsive-matrix-smoke.py
+
+      - name: Post-deploy readability
+        id: post_readability
+        continue-on-error: true
+        run: python scripts/readability-browser-smoke.py
+
+      - name: Publish exact-sha Current Experience status
+        if: always()
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          OUTCOMES: >-
+            ${{ steps.current_runtime.outcome }} ${{ steps.current_search.outcome }} ${{ steps.current_mobile.outcome }}
+            ${{ steps.current_fantasy.outcome }} ${{ steps.current_decisions.outcome }} ${{ steps.current_account.outcome }}
+            ${{ steps.current_market.outcome }} ${{ steps.current_legacy.outcome }} ${{ steps.post_navigation.outcome }}
+            ${{ steps.post_media.outcome }} ${{ steps.post_command.outcome }} ${{ steps.post_player.outcome }}
+            ${{ steps.post_ask.outcome }} ${{ steps.post_change.outcome }} ${{ steps.post_365.outcome }}
+            ${{ steps.post_freshness.outcome }} ${{ steps.post_analytics.outcome }} ${{ steps.post_headshots.outcome }}
+            ${{ steps.post_responsive.outcome }} ${{ steps.post_readability.outcome }}
+        with:
+          script: |
+            const outcomes = String(process.env.OUTCOMES || '').trim().split(/\s+/).filter(Boolean);
+            const failed = outcomes.filter(value => value !== 'success');
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: process.env.SOURCE_SHA,
+              state: failed.length ? 'failure' : 'success',
+              context: 'TENX Current Experience / Post-Deploy',
+              description: failed.length ? `${failed.length} verification check(s) failed` : 'Exact deployed revision passed Current Experience and post-deploy checks',
+              target_url: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`,
+            });
+
+      - name: Fail closed when any verification check failed
+        if: always()
+        env:
+          OUTCOMES: >-
+            ${{ steps.current_runtime.outcome }} ${{ steps.current_search.outcome }} ${{ steps.current_mobile.outcome }}
+            ${{ steps.current_fantasy.outcome }} ${{ steps.current_decisions.outcome }} ${{ steps.current_account.outcome }}
+            ${{ steps.current_market.outcome }} ${{ steps.current_legacy.outcome }} ${{ steps.post_navigation.outcome }}
+            ${{ steps.post_media.outcome }} ${{ steps.post_command.outcome }} ${{ steps.post_player.outcome }}
+            ${{ steps.post_ask.outcome }} ${{ steps.post_change.outcome }} ${{ steps.post_365.outcome }}
+            ${{ steps.post_freshness.outcome }} ${{ steps.post_analytics.outcome }} ${{ steps.post_headshots.outcome }}
+            ${{ steps.post_responsive.outcome }} ${{ steps.post_readability.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for outcome in $OUTCOMES; do
+            [[ "$outcome" == "success" ]] || { echo "TENX post-deploy verification failed closed: $OUTCOMES"; exit 1; }
+          done
+          echo 'TENX exact-sha Current Experience and post-deploy verification passed.'

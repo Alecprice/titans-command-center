@@ -22,7 +22,7 @@ test('stable Game Day keeps degraded-source truth when the runtime returns an ol
   assert.match(stable,/fresh:Number\.isFinite\(age\)&&age<=Math\.max\(1000,ttl\)/);
   assert.match(stable,/const readHealthy=read=>read\?\.fresh!==false&&available\(read\?\.value\)/);
   assert.match(stable,/if\(available\(fan\)\)state\.fan=fan/);
-  assert.match(stable,/Fan intel retrying · showing last good snapshot/);
+  assert.match(stable,/Fan intel retrying · showing the last confirmed update/);
 });
 
 test('manual Game Day refresh still forces the shared cache while automatic reads remain bounded',()=>{

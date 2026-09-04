@@ -42,8 +42,8 @@ test('heritage controls, source links and stadium rail are accessible and mobile
   assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-filters button\{min-height:48px/);
   assert.doesNotMatch(js,/\.legacy-honor-filters button\{min-height:(?:4[0-3]|4[5-7])px/);
   assert.match(js,/\.legacy-heritage-sources a\{display:inline-flex;align-items:center;min-height:44px/);
-  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-sources a\{min-height:48px!important;font-size:9px/);
-  assert.doesNotMatch(js,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-sources a\{min-height:48px;font-size:9px/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-sources a\{min-height:48px!important;font-size:12px/);
+  assert.doesNotMatch(js,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-sources a\{min-height:48px;font-size:12px/);
   assert.doesNotMatch(js,/\.legacy-heritage-sources a\{[^}]*font-size:7px/);
   assert.match(js,/\.legacy-heritage-sources a:hover/);
   assert.match(js,/\.legacy-heritage-sources a:focus-visible/);
@@ -56,14 +56,14 @@ test('heritage controls, source links and stadium rail are accessible and mobile
   assert.match(js,/forced-colors:active/);
 });
 
-test('heritage phone typography lifts metadata above desktop microtype',()=>{
+test('heritage phone typography stays above the desktop readability floor',()=>{
   const js=read('legacy-heritage-v3.js');
-  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-now small\{font-size:9px\}/);
-  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-venue-index,.legacy-venue-city\{font-size:9px\}/);
-  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honors-head small\{font-size:9px\}/);
-  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-filters button\{min-height:48px;flex:0 0 auto;font-size:9px\}/);
-  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-card p\{font-size:10px\}/);
-  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-card small,.legacy-honor-card strong\{font-size:9px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-heritage-now small\{font-size:12px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-venue-index,.legacy-venue-city\{font-size:12px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honors-head small\{font-size:12px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-filters button\{min-height:48px;flex:0 0 auto;font-size:13px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-card p\{font-size:13px\}/);
+  assert.match(js,/@media\(max-width:760px\)[\s\S]*\.legacy-honor-card small,.legacy-honor-card strong\{font-size:12px\}/);
   assert.doesNotMatch(js,/\.legacy-heritage-now strong\{margin-top:3px;font-size:9px\}/);
 });
 

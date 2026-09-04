@@ -18,10 +18,11 @@ test('only the newest exact league and week request may publish returned data',(
 });
 
 test('changing league or week hides stale league matchup and draft data while the new request is pending',()=>{
-  assert.match(js,/const clearLeagueData=\(\)=>\{sleeper\.league=null;sleeper\.rosters=\[\];sleeper\.users=\[\];sleeper\.matchups=\[\];sleeper\.drafts=\[\];sleeper\.picks=\[\];\}/);
+  assert.match(js,/const clearLeagueData=\(\)=>\{sleeper\.league=null;sleeper\.rosters=\[\];sleeper\.users=\[\];sleeper\.matchups=\[\];sleeper\.drafts=\[\];sleeper\.picks=\[\];sleeper\.draftLoading=false;\}/);
   assert.match(js,/sleeper\.loading=true;clearLeagueData\(\);render\(\);/);
-  assert.match(js,/Previous league, matchup and draft data stays hidden until Sleeper returns this selection/);
-  assert.match(js,/\$\{!sleeper\.loading&&league\?/);
+  assert.match(js,/Previous league and matchup data stays hidden until Sleeper returns this selection/);
+  assert.doesNotMatch(js,/Previous league, matchup and draft data stays hidden until Sleeper returns this selection/);
+  assert.match(js,/\$\{!sleeper\.connecting&&!sleeper\.loading&&league\?/);
   assert.match(js,/Previous draft data stays hidden until the current league request finishes/);
 });
 

@@ -20,20 +20,31 @@ function normalizeRow(row){
   return out;
 }
 
-function dateFloor(value){
-  if(!value)return null;
-  const text=String(value).slice(0,10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(text)?text:null;
+function auditDay(value){
+  const text=String(value||'').trim();
+  const match=text.match(/^(\d{4}-\d{2}-\d{2})(?:T|\s|$)/);
+  if(!match)return null;
+  const parsed=Date.parse(`${match[1]}T00:00:00Z`);
+  if(!Number.isFinite(parsed))return null;
+  const normalized=new Date(parsed).toISOString().slice(0,10);
+  return normalized===match[1]?normalized:null;
 }
 
 function snapshotContentAudit(row){
   const payload=row?.payload;
   if(!payload||typeof payload!=='object')return null;
-  return dateFloor(payload?.dataQuality?.contentAuditAt||payload?.meta?.content_audit_at||payload?.meta?.contentAuditAt||payload?.contentAudit||payload?.fallback?.auditedAt||null);
+  return auditDay(
+    payload?.dataQuality?.contentAuditAt||
+    payload?.meta?.content_audit_at||
+    payload?.meta?.contentAuditAt||
+    payload?.contentAudit||
+    payload?.fallback?.auditedAt||
+    null
+  );
 }
 
 function bundledContentAudit(){
-  return dateFloor(auditedTeam?.rosterCoverage?.asOf||auditedTeam?.auditedAt||null);
+  return auditDay(auditedTeam?.rosterCoverage?.asOf||auditedTeam?.auditedAt||null);
 }
 
 export function snapshotMeetsBundledAudit(row,key){
