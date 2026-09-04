@@ -85,9 +85,15 @@
   }
   function recentFinal(){const g=latestFinal(),t=Date.parse(g?.date);return g&&Number.isFinite(t)&&Date.now()>=t&&Date.now()-t<=POSTGAME_WINDOW_MS?g:null}
 
+  const normalizeOpponent=value=>String(value||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'');
+  function providerOpponentMatches(eg,g){
+    const providerAbbr=String(eg?.opponentAbbr||'').trim().toUpperCase(),scheduleAbbr=String(g?.opponentAbbr||'').trim().toUpperCase();
+    if(providerAbbr&&scheduleAbbr)return providerAbbr===scheduleAbbr;
+    const providerName=normalizeOpponent(eg?.opponent),scheduleName=normalizeOpponent(g?.opponent);
+    return Boolean(providerName&&scheduleName&&providerName===scheduleName);
+  }
   function providerMatchesGame(eg,g){
-    if(!eg||!g)return false;
-    if(eg.opponentAbbr&&g.opponentAbbr&&eg.opponentAbbr!==g.opponentAbbr)return false;
+    if(!eg||!g||!providerOpponentMatches(eg,g))return false;
     const providerKickoff=Date.parse(eg.date),scheduleKickoff=Date.parse(g.date);
     return Number.isFinite(providerKickoff)&&Number.isFinite(scheduleKickoff)&&Math.abs(providerKickoff-scheduleKickoff)<12*3600000;
   }

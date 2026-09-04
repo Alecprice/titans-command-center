@@ -12,9 +12,11 @@ test('explicit matched provider Final can promote the focused Titans game to pos
   assert.match(js,/const providerFinal=providerFinalGame\(eg,focus\);if\(providerFinal\)return\['postgame',providerFinal,eg\]/);
 });
 
-test('provider Final is matched to the current schedule game by opponent and kickoff proximity',()=>{
-  assert.match(js,/function providerMatchesGame\(eg,g\)/);
-  assert.match(js,/eg\.opponentAbbr&&g\.opponentAbbr&&eg\.opponentAbbr!==g\.opponentAbbr/);
+test('provider Final is matched to the current schedule game by opponent identity and kickoff proximity',()=>{
+  assert.match(js,/function providerOpponentMatches\(eg,g\)/);
+  assert.match(js,/if\(providerAbbr&&scheduleAbbr\)return providerAbbr===scheduleAbbr/);
+  assert.match(js,/providerName&&scheduleName&&providerName===scheduleName/);
+  assert.match(js,/if\(!eg\|\|!g\|\|!providerOpponentMatches\(eg,g\)\)return false/);
   assert.match(js,/Math\.abs\(providerKickoff-scheduleKickoff\)<12\*3600000/);
   assert.match(js,/Number\.isFinite\(providerKickoff\)&&Number\.isFinite\(scheduleKickoff\)/);
 });
