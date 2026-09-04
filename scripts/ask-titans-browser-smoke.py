@@ -18,6 +18,18 @@ def no_overflow(driver,label):
     state=driver.execute_script("return {w:document.documentElement.clientWidth,s:document.documentElement.scrollWidth}")
     if state['s']>state['w']+3: raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
+def set_mobile_viewport(driver,width=390,height=844):
+    driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride',{
+        'width':width,
+        'height':height,
+        'deviceScaleFactor':1,
+        'mobile':True,
+    })
+    state=driver.execute_script("return {innerWidth:innerWidth,innerHeight:innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}")
+    if state['innerWidth']!=width or state['innerHeight']!=height or state['clientWidth']!=width or not state['mobile']:
+        raise RuntimeError(f'Ask Titans mobile viewport override did not take effect: {state}')
+    return state
+
 def write(payload):
     REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
 
@@ -130,7 +142,7 @@ try:
     wait_for(driver,"document.querySelector('.v17-ask-answer h4')?.textContent?.includes('could not map')")
 
     stage='mobile'
-    driver.set_window_size(390,844)
+    mobile_viewport=set_mobile_viewport(driver,390,844)
     no_overflow(driver,'Ask Titans 390px')
     mobile=driver.execute_script("""
       return {
@@ -141,7 +153,7 @@ try:
         viewport:document.documentElement.clientWidth
       }
     """)
-    if any(x['h']<44 for x in mobile['quick']) or mobile['askButton']<44 or mobile['input']<44:
+    if mobile['viewport']!=390 or any(x['h']<44 for x in mobile['quick']) or mobile['askButton']<44 or mobile['input']<44:
         raise RuntimeError(f'Ask Titans mobile targets invalid: {mobile}')
 
     stage='fantasy-handoff:mobile'
@@ -161,7 +173,7 @@ try:
     severe=[x for x in warnings if x.get('level')=='SEVERE']
     if severe: raise RuntimeError(f'Ask Titans console has severe errors: {severe[:4]}')
 
-    result={'ok':True,'base':BASE,'answers':answers,'teamTimeVerified':team_time_verified,'fantasyHandoff':handoff,'fantasyCarried':carried,'unsupportedRefused':True,'mobileTargets':mobile,'mobileFantasyHandoff':mobile_handoff,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    result={'ok':True,'base':BASE,'answers':answers,'teamTimeVerified':team_time_verified,'fantasyHandoff':handoff,'fantasyCarried':carried,'unsupportedRefused':True,'mobileViewport':mobile_viewport,'mobileTargets':mobile,'mobileFantasyHandoff':mobile_handoff,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     write(result);print(json.dumps(result,indent=2))
 except Exception as exc:
     result={'ok':False,'base':BASE,'stage':stage,'error':f'{type(exc).__name__}: {exc}','durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
