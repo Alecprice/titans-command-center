@@ -193,8 +193,13 @@ jobs:
 
           current_main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
           if [[ "$current_main_sha" != "$merge_sha" ]]; then
-            echo "TENX post-deploy verification skipped: merge commit ${merge_sha} was superseded by newer main ${current_main_sha} before verification dispatch."
-            exit 0
+            compare_json="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${merge_sha}...${current_main_sha}")"
+            unexpected_files="$(jq '[.files[]? | select(.filename != "docs/CLOUDFLARE_STATUS.md")] | length' <<<"$compare_json")"
+            if [[ "$unexpected_files" != "0" ]]; then
+              echo "TENX post-deploy verification skipped: merge commit ${merge_sha} was superseded by newer main ${current_main_sha} with non-status changes."
+              exit 0
+            fi
+            echo "TENX post-deploy verification continuing: main advanced from ${merge_sha} to ${current_main_sha} only through deployment-status bookkeeping."
           fi
 
           gh api \
