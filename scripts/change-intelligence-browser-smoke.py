@@ -17,6 +17,18 @@ def no_overflow(driver,label):
     state=driver.execute_script("return {w:document.documentElement.clientWidth,s:document.documentElement.scrollWidth}")
     if state['s']>state['w']+3: raise RuntimeError(f'Horizontal overflow on {label}: {state}')
 
+def set_mobile_viewport(driver,width=390,height=844):
+    driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride',{
+        'width':width,
+        'height':height,
+        'deviceScaleFactor':1,
+        'mobile':True,
+    })
+    state=driver.execute_script("return {innerWidth:innerWidth,innerHeight:innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}")
+    if state['innerWidth']!=width or state['innerHeight']!=height or state['clientWidth']!=width or not state['mobile']:
+        raise RuntimeError(f'Change Intelligence mobile viewport override did not take effect: {state}')
+    return state
+
 def write(payload): REPORT.write_text(json.dumps(payload,indent=2),encoding='utf-8')
 
 options=webdriver.ChromeOptions()
@@ -55,7 +67,7 @@ try:
     if visible_roster<1: raise RuntimeError('Roster filter returned no visible changes')
 
     stage='mobile'
-    driver.set_window_size(390,844);no_overflow(driver,'Change Intelligence 390px')
+    mobile_viewport=set_mobile_viewport(driver,390,844);no_overflow(driver,'Change Intelligence 390px')
     mobile=driver.execute_script("""
       return {
         filters:[...document.querySelectorAll('[data-v18-filter]')].map(x=>({label:x.textContent.trim(),h:x.getBoundingClientRect().height})),
@@ -64,7 +76,7 @@ try:
         viewport:document.documentElement.clientWidth
       }
     """)
-    if any(x['h']<44 for x in mobile['filters']) or mobile['review']<44: raise RuntimeError(f'Mobile targets invalid: {mobile}')
+    if mobile['viewport']!=390 or any(x['h']<44 for x in mobile['filters']) or mobile['review']<44: raise RuntimeError(f'Mobile targets invalid: {mobile}')
 
     stage='mark-reviewed'
     driver.execute_script("document.querySelector('[data-v18-filter=\"All\"]')?.click();document.querySelector('[data-v18-review]')?.click()")
@@ -79,7 +91,7 @@ try:
     severe=[x for x in warnings if x.get('level')=='SEVERE']
     if severe: raise RuntimeError(f'Change Intelligence console has severe errors: {severe[:4]}')
 
-    result={'ok':True,'base':BASE,'detectedBeforeReview':before['count'],'categories':before['categories'],'favoritePriority':before['favorite'],'rosterFilterVisible':visible_roster,'clearedAfterReview':remaining==0,'mobileTargets':mobile,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
+    result={'ok':True,'base':BASE,'detectedBeforeReview':before['count'],'categories':before['categories'],'favoritePriority':before['favorite'],'rosterFilterVisible':visible_roster,'clearedAfterReview':remaining==0,'mobileViewport':mobile_viewport,'mobileTargets':mobile,'browserWarnings':warnings[:20],'durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
     write(result);print(json.dumps(result,indent=2))
 except Exception as exc:
     result={'ok':False,'base':BASE,'stage':stage,'error':f'{type(exc).__name__}: {exc}','durationSeconds':round(time.time()-started,2),'testedAt':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}
