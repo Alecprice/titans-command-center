@@ -19,7 +19,10 @@ test('freshness production smoke validates rendered truth states on desktop and 
   assert.match(smoke,/more than 48 hours old/);
   assert.match(smoke,/backend jargon leaked into fan freshness UI/);
   assert.match(smoke,/null roster timestamp was coerced to epoch time/);
-  assert.match(smoke,/set_window_size\(390,844\)/);
+  assert.match(smoke,/Emulation\.setDeviceMetricsOverride/);
+  assert.match(smoke,/set_mobile_viewport\(driver,390,844\)/);
+  assert.match(smoke,/max-width:759px/);
+  assert.doesNotMatch(smoke,/set_window_size\(390,844\)/);
   assert.match(smoke,/horizontal overflow/);
   assert.match(smoke,/titans:v10Onboarded/);
   assert.match(smoke,/\/tmp\/freshness-browser-smoke\.json/);
