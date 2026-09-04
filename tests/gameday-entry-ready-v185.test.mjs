@@ -29,8 +29,8 @@ test('entry actions remain accessible on phone and use safe external links',()=>
   assert.match(js,/aria-label="Nissan Stadium mobile entry readiness"/);
 });
 
-test('new Game Day asset is loaded and packaged by the PWA shell',()=>{
+test('new Game Day asset is loaded and packaged by the current network-first PWA shell',()=>{
   assert.match(html,/gameday-entry-ready-v185\.js\?v=1/);
-  assert.match(sw,/titans-cc-brand-2026-v87/);
+  assert.match(sw,/titans-cc-brand-2026-v86/);
   assert.match(sw,/'\/gameday-entry-ready-v185\.js'/);
 });
