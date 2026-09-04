@@ -6,11 +6,11 @@ const source=fs.readFileSync('market-hub.js','utf8');
 
 test('Market Pulse shared HTML escape helper uses complete named and numeric entities',()=>{
   const helper=source.match(/const mhEsc=v=>[^\n]+/s)?.[0]||'';
-  assert.match(helper,/'&':'&amp;'/);
-  assert.match(helper,/'<':'&lt;'/);
-  assert.match(helper,/'\\"':'&quot;'/);
-  assert.match(helper,/"'":'&#39;'/);
-  assert.doesNotMatch(helper,/'\\"':'&quot'(?!;)/);
+  assert.ok(helper.includes("'&':'&amp;'"));
+  assert.ok(helper.includes("'<':'&lt;'"));
+  assert.ok(helper.includes("'\"':'&quot;'"));
+  assert.ok(helper.includes('"\'":\'&#39;\''));
+  assert.ok(!helper.includes("'\"':'&quot',"));
 });
 
 test('Market Pulse keeps dynamic provider, event, market, side, source, and diagnostic copy behind mhEsc',()=>{
