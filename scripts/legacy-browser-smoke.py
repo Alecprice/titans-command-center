@@ -220,7 +220,9 @@ try:
     m.execute_script("arguments[0].scrollIntoView({block:'center',inline:'nearest'})",save_button)
     save_click=wait_for(m,"""const b=document.querySelector('[data-legacy-exhibit-save="moment-music-city-miracle"]');if(!b)return null;const r=b.getBoundingClientRect();const x=r.left+r.width/2,y=r.top+r.height/2;const owner=document.elementFromPoint(x,y);return owner&&(owner===b||b.contains(owner))?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,x,y,owner:owner.id||owner.tagName}:null;""")
     if save_click['top']<0 or save_click['bottom']>844:raise RuntimeError(f'Legacy mobile Save exhibit did not scroll into a clear viewport position: {save_click}')
-    save_button.click()
+    pointer={'x':round(save_click['x']),'y':round(save_click['y']),'button':'left','clickCount':1}
+    m.execute_cdp_cmd('Input.dispatchMouseEvent',{'type':'mousePressed',**pointer})
+    m.execute_cdp_cmd('Input.dispatchMouseEvent',{'type':'mouseReleased',**pointer})
     mobile_saved=wait_for(m,"""const card=document.querySelector('[data-legacy-my-museum-item="moment-music-city-miracle"]');const b=card?.querySelector('[data-legacy-my-museum-open]');const r=b?.getBoundingClientRect();return card&&b?{text:card.innerText,button:{w:r.width,h:r.height},count:document.querySelector('[data-legacy-my-museum-count]')?.textContent||''}:null;""")
     mobile_saved_geometry=geometry(m)
     if 'Music City Miracle' not in mobile_saved.get('text','') or '1 / 12 saved' not in mobile_saved.get('count','').casefold():raise RuntimeError(f'Mobile My Museum did not render saved exhibit: {mobile_saved}')
