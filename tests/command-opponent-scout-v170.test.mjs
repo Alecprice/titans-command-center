@@ -8,16 +8,28 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const intel=WEEK1_OPPONENT_INTEL_2026;
 const truth=opponentIntelSourceTruth(intel);
 
-test('TENX opponent scout keeps the Sept 3 official Jets research current and source-backed',()=>{
-  assert.equal(intel.version,'2026-w1-20260903.2');
-  assert.ok(Date.parse(intel.checkedAt)>=Date.parse('2026-09-03T15:50:00Z'));
+test('TENX opponent scout keeps the Sept 5 official Jets research current and source-backed',()=>{
+  assert.equal(intel.version,'2026-w1-20260905.1');
+  assert.ok(Date.parse(intel.checkedAt)>=Date.parse('2026-09-05T11:00:00Z'));
   assert.deepEqual(intel.leadership.captains,['Geno Smith','Joe Tippmann','Demario Davis','Minkah Fitzpatrick','Harrison Phillips','Isaiah Williams']);
-  for(const key of ['jetsRoster','jetsTransactions','jetsDepthChart','jetsOssai','jetsHall','jetsPractice','jetsCaptains']){
+  for(const key of ['jetsRoster','jetsRosterAnalysis','jetsTransactions','jetsDepthChart','jetsOssai','jetsHall','jetsPractice','jetsCaptains']){
     assert.match(intel.sources[key]?.publisher||'',/^New York Jets(?: Communications Department)?$/,`${key} should stay on the official Jets source boundary`);
     assert.match(intel.sources[key]?.url||'',/^https:\/\/www\.newyorkjets\.com\//);
   }
   assert.equal(truth.conflictCount,2);
   assert.equal(truth.hasHighSeverityConflict,true);
+});
+
+test('TENX opponent special teams truth keeps active-roster status separate from the unsettled Week 1 starter job',()=>{
+  const kicker=intel.specialTeams.kicker;
+  assert.equal(intel.activeRosterSpine.kicker,'Blake Grupe');
+  assert.equal(kicker.activeRoster,'Blake Grupe');
+  assert.equal(kicker.practiceSquad,'Jason Sanders');
+  assert.equal(kicker.competitionStatus,'open');
+  assert.equal(kicker.settledStarter,false);
+  assert.equal(kicker.sourceKey,'jetsRosterAnalysis');
+  assert.match(kicker.note,/competition remains ongoing/i);
+  assert.match(intel.depthChart.conflicts.find(item=>item.subject==='Jason Sanders')?.resolution||'',/Do not surface Sanders as an active-roster kicker or Grupe as a settled Week 1 starter/);
 });
 
 test('TENX opponent availability signals never masquerade as formal Week 1 game statuses',()=>{
@@ -47,10 +59,14 @@ test('TENX opponent scout attaches only to the exact loaded Week 1 matchup',()=>
   assert.match(js,/runtime\.scheduleFocus\?\.\(safeArr\(payload\?\.games\),new Date\(\)\)\?\.next/);
 });
 
-test('TENX opponent scout renders source-ranked fan context without availability prediction language',()=>{
+test('TENX opponent scout renders source-ranked fan context without overstating the kicker or availability',()=>{
   const js=read('command-opponent-scout-v170.js');
   assert.match(js,/OPPONENT SCOUT · WEEK/);
   assert.match(js,/CURRENT ROSTER/);
+  assert.match(js,/Special teams truth/);
+  assert.match(js,/Week 1 competition remains open/);
+  assert.match(js,/kicker\?\.competitionStatus==='open'&&!kicker\?\.settledStarter/);
+  assert.match(js,/sourceLink\(kicker\?\.sourceKey,'Kicker source'\)/);
   assert.match(js,/TEAM-ELECTED CAPTAINS/);
   assert.match(js,/AVAILABILITY WATCH/);
   assert.match(js,/not formal Week 1 game-status designations/);
