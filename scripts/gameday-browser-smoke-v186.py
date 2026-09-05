@@ -30,6 +30,8 @@ try:
     driver.get(f'{BASE}/#live')
     WebDriverWait(driver,15,poll_frequency=.1).until(lambda d:d.execute_script("return document.readyState==='complete'&&Boolean(window.TitansRuntime)&&Boolean(document.querySelector('#app'))"))
     WebDriverWait(driver,15,poll_frequency=.1).until(lambda d:d.execute_script("return Boolean(document.querySelector('.gameday-v16,.v22-home-guide'))"))
+    if driver.execute_script("return Boolean(document.querySelector('.v22-home-guide'))"):
+        WebDriverWait(driver,15,poll_frequency=.1).until(lambda d:d.execute_script("const guide=document.querySelector('.v22-home-guide');const entry=guide?.querySelector('.v185-entry-ready');return Boolean(entry&&entry.querySelectorAll('a').length>=3)"))
 
     state=driver.execute_script(r"""
       const guide=document.querySelector('.v22-home-guide');
