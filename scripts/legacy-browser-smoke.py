@@ -225,7 +225,7 @@ try:
     m.execute_cdp_cmd('Input.dispatchMouseEvent',{'type':'mouseReleased',**pointer})
     mobile_saved=wait_for(m,"""const card=document.querySelector('[data-legacy-my-museum-item="moment-music-city-miracle"]');const b=card?.querySelector('[data-legacy-my-museum-open]');const r=b?.getBoundingClientRect();return card&&b?{text:card.innerText,button:{w:r.width,h:r.height},count:document.querySelector('[data-legacy-my-museum-count]')?.textContent||''}:null;""")
     mobile_saved_geometry=geometry(m)
-    if 'Music City Miracle' not in mobile_saved.get('text','') or '1 / 12 saved' not in mobile_saved.get('count','').casefold():raise RuntimeError(f'Mobile My Museum did not render saved exhibit: {mobile_saved}')
+    if 'music city miracle' not in mobile_saved.get('text','').casefold() or '1 / 12 saved' not in mobile_saved.get('count','').casefold():raise RuntimeError(f'Mobile My Museum did not render saved exhibit: {mobile_saved}')
     if mobile_saved['button']['w']<44 or mobile_saved['button']['h']<44:raise RuntimeError(f'Mobile My Museum action too small: {mobile_saved}')
     if mobile_saved_geometry['overflow']:raise RuntimeError(f'My Museum caused mobile overflow: {mobile_saved_geometry}')
     if museum_state(m).get('keys')!=['moment-music-city-miracle']:raise RuntimeError(f'Mobile My Museum persisted wrong key: {museum_state(m)}')
