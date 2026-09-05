@@ -1,4 +1,4 @@
-const SOURCE_CHECKED_AT='2026-09-03T15:51:00Z';
+const SOURCE_CHECKED_AT='2026-09-05T11:20:00Z';
 
 const sources={
   titansSchedule:{
@@ -15,6 +15,15 @@ const sources={
     publishedAt:'2026-09-01T18:38:00Z',
     url:'https://www.newyorkjets.com/news/jets-53-man-roster-position-breakdown-09-01-2026',
     checkedAt:SOURCE_CHECKED_AT
+  },
+  jetsRosterAnalysis:{
+    tier:'official-team-reporting',
+    publisher:'New York Jets',
+    label:"What Are Your Thoughts On The Jets' Initial 53-Man Roster?",
+    publishedAt:'2026-09-04T12:10:00Z',
+    url:'https://www.newyorkjets.com/news/what-are-your-thoughts-on-the-jets-initial-53-man-roster-09-04-2026',
+    checkedAt:SOURCE_CHECKED_AT,
+    qualification:'Official team reporting says Blake Grupe is on the active roster and Jason Sanders is on the practice squad, while the Week 1 kicker competition remains ongoing.'
   },
   jetsTransactions:{
     tier:'official',
@@ -70,10 +79,10 @@ const sources={
 };
 
 export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
-  version:'2026-w1-20260903.2',
+  version:'2026-w1-20260905.1',
   opponent:'New York Jets',
   opponentAbbr:'NYJ',
-  asOf:'2026-09-03',
+  asOf:'2026-09-05',
   checkedAt:SOURCE_CHECKED_AT,
   game:Object.freeze({
     week:1,
@@ -98,6 +107,16 @@ export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
     secondary:Object.freeze(['Jarvis Brownlee Jr.','Brandon Stephens','Azareye’h Thomas','Nahshon Wright','Minkah Fitzpatrick','Andre Cisco']),
     kicker:'Blake Grupe'
   }),
+  specialTeams:Object.freeze({
+    kicker:Object.freeze({
+      activeRoster:'Blake Grupe',
+      practiceSquad:'Jason Sanders',
+      competitionStatus:'open',
+      settledStarter:false,
+      note:'Blake Grupe is on the active roster and Jason Sanders is on the practice squad, but Jets team reporting says the Week 1 kicking competition remains ongoing.',
+      sourceKey:'jetsRosterAnalysis'
+    })
+  }),
   depthChart:Object.freeze({
     status:'qualified-conflict',
     authority:'unofficial',
@@ -107,8 +126,8 @@ export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
       Object.freeze({
         subject:'Jason Sanders',
         depthChartClaim:'Listed as first-team kicker.',
-        controllingEvidence:'Jets released Jason Sanders on Aug. 31 and added Blake Grupe; the Sept. 1 active-roster article lists Grupe.',
-        resolution:'Do not surface Sanders as the current Jets kicker.',
+        controllingEvidence:'Jets released Jason Sanders on Aug. 31, added Blake Grupe to the active roster, and later placed Sanders on the practice squad. Sept. 4 team reporting says the Week 1 kicker competition is still ongoing.',
+        resolution:'Do not surface Sanders as an active-roster kicker or Grupe as a settled Week 1 starter.',
         severity:'high'
       }),
       Object.freeze({
