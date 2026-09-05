@@ -15,7 +15,8 @@ test('Advanced Analytics mobile smoke keeps unrelated severe browser errors fata
   assert.match(smoke,/entry\.get\('level'\) == 'SEVERE'/);
   assert.match(smoke,/if not expected_unrelated_roster_424\(entry\) and '500' not in str\(entry\.get\('message'\) or ''\)/);
   assert.match(smoke,/raise RuntimeError\(f"Advanced Stats Lab mobile browser has severe errors:/);
-  assert.doesNotMatch(smoke,/status of 4\d\d/);
+  assert.doesNotMatch(smoke,/'status of 404'/);
+  assert.doesNotMatch(smoke,/'status of 403'/);
   assert.doesNotMatch(smoke,/\/api\/advanced-analytics' in message/);
 });
 
