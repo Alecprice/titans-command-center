@@ -196,8 +196,12 @@ try:
     if any(a['h']<44 or a['w']<44 for a in mobile['actions']):raise RuntimeError(f'Legacy mobile action too small: {mobile}')
     active=m.execute_script("""const p=document.querySelector('[data-legacy-trail-player]');return {text:p?.innerText||'',passport:document.querySelector('[data-legacy-passport]')?.innerText||'',museum:document.querySelector('[data-legacy-my-museum]')?.innerText||'',matches:document.querySelectorAll('.legacy-finder-match').length,hash:location.hash};""")
     if 'steve mcnair' not in active['text'].casefold() or active['matches']<1 or '1 / 19 stamps' not in active['passport'].casefold() or '0 / 12 saved' not in active['museum'].casefold():raise RuntimeError(f'Deep-linked mobile trail did not hydrate isolated state: {active}')
-    m.find_element(By.CSS_SELECTOR,'[data-legacy-trail-next]').click()
-    wait_for(m,"return location.hash.includes('step=3')&&document.querySelector('[data-legacy-trail-player]')?.innerText.includes('Eddie George')")
+    next_button=m.find_element(By.CSS_SELECTOR,'[data-legacy-trail-next]')
+    m.execute_script("arguments[0].scrollIntoView({block:'center',inline:'nearest'})",next_button)
+    next_click=wait_for(m,"""const b=document.querySelector('[data-legacy-trail-next]');if(!b)return null;const r=b.getBoundingClientRect();const x=r.left+r.width/2,y=r.top+r.height/2;const owner=document.elementFromPoint(x,y);return owner&&(owner===b||b.contains(owner))?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,x,y,owner:owner.id||owner.tagName}:null;""")
+    if next_click['top']<0 or next_click['bottom']>844:raise RuntimeError(f'Legacy mobile Next did not scroll into a clear viewport position: {next_click}')
+    next_button.click()
+    wait_for(m,"return location.hash.includes('step=3')&&((document.querySelector('[data-legacy-trail-player]')?.innerText||'').toLowerCase().includes('eddie george'))")
     mobile_passport=passport_state(m)
     if mobile_passport.get('visited')!=['1999-run:2','1999-run:3']:raise RuntimeError(f'Mobile Passport progress wrong: {mobile_passport}')
 
@@ -221,7 +225,7 @@ try:
     if museum_state(m).get('keys')!=['moment-music-city-miracle']:raise RuntimeError(f'Mobile My Museum persisted wrong key: {museum_state(m)}')
     if passport_state(m)!=mobile_passport:raise RuntimeError('Mobile My Museum save changed Passport progress')
 
-    result['mobile']={'geometry':mobile,'active':active,'afterNext':'#legacy?trail=1999-run&step=3','passport':mobile_passport,'exact':mobile_exact,'exactGeometry':exact_mobile_geometry,'saved':mobile_saved,'savedGeometry':mobile_saved_geometry,'museum':museum_state(m)}
+    result['mobile']={'geometry':mobile,'active':active,'nextClick':next_click,'afterNext':'#legacy?trail=1999-run&step=3','passport':mobile_passport,'exact':mobile_exact,'exactGeometry':exact_mobile_geometry,'saved':mobile_saved,'savedGeometry':mobile_saved_geometry,'museum':museum_state(m)}
     result['browserWarnings']+=severe_logs(m);m.quit();m=None
 
     result['stage']='console'
