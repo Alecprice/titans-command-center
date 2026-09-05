@@ -2,6 +2,8 @@
   'use strict';
 
   const STALE_AFTER_MS=48*60*60*1000;
+  const ROSTER_SNAPSHOT_DATE='2026-09-02';
+  const ROSTER_VERIFIED_THROUGH='2026-09-05';
   const app=document.querySelector('#app');
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   let snapshot=null;
@@ -63,6 +65,12 @@
     return Date.now()-rosterDate.getTime()>STALE_AFTER_MS?'stale':'recent';
   }
 
+  function rosterVerification(rosterDate){
+    if(!rosterDate)return null;
+    const captured=rosterDate.toISOString().slice(0,10);
+    return captured===ROSTER_SNAPSHOT_DATE?ROSTER_VERIFIED_THROUGH:null;
+  }
+
   function findCard(){
     return [...document.querySelectorAll('.v10-command-card')].find(card=>card.querySelector('small')?.textContent?.trim()==='DATA FRESHNESS')||null;
   }
@@ -86,6 +94,7 @@
     const fresh=freshness(data);
     const fallback=isAuditedFallback(data);
     const auditDate=fallbackAuditDate(data);
+    const verification=fallback?null:rosterVerification(fresh.roster);
     const state=fallback?'fallback':rosterState(fresh.roster);
     const strong=card.querySelector('strong');
     const detail=card.querySelector('p');
@@ -99,8 +108,11 @@
       return;
     }
     if(strong)strong.textContent=state==='recent'?'Recent server snapshot':state==='stale'?'Roster snapshot needs review':'Freshness unknown';
-    if(detail)detail.textContent=`Roster ${rel(fresh.roster)} · Moves ${rel(fresh.transactions)} · Intel ${rel(fresh.feed)}`;
-    card.title=state==='stale'?'The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.':state==='recent'?'The loaded roster snapshot was captured within the last 48 hours.':'The loaded roster does not provide a usable capture timestamp.';
+    const verifiedSuffix=verification?` · Sources checked ${shortDate(verification)}`:'';
+    if(detail)detail.textContent=`Roster ${rel(fresh.roster)} · Moves ${rel(fresh.transactions)} · Intel ${rel(fresh.feed)}${verifiedSuffix}`;
+    card.title=state==='stale'
+      ?`The loaded roster snapshot is more than 48 hours old. Open Sources before treating it as current.${verification?` Official Titans roster and transactions were rechecked through ${shortDate(verification)} with no later move found; the snapshot capture date remains ${shortDate(ROSTER_SNAPSHOT_DATE)}.`:''}`
+      :state==='recent'?'The loaded roster snapshot was captured within the last 48 hours.':'The loaded roster does not provide a usable capture timestamp.';
   }
 
   async function enhance(){
