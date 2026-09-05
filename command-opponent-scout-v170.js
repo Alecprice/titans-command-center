@@ -43,17 +43,20 @@ import {WEEK1_OPPONENT_INTEL_2026,opponentIntelSourceTruth} from './src/week1-op
   }
 
   function panelMarkup(game){
-    const spine=intel.activeRosterSpine||{},captains=safeArr(intel?.leadership?.captains),signals=safeArr(intel?.availability?.signals);
+    const spine=intel.activeRosterSpine||{},captains=safeArr(intel?.leadership?.captains),signals=safeArr(intel?.availability?.signals),kicker=intel?.specialTeams?.kicker||{};
     const qb=spine?.quarterback||{},rb=spine?.runningBack||{};
     const defensiveRoster=new Set([...safeArr(spine?.defensiveFront),...safeArr(spine?.linebackers),...safeArr(spine?.secondary)]);
     const defensiveCaptains=captains.filter(name=>defensiveRoster.has(name));
     const conflictCount=Number(sourceTruth?.conflictCount)||0;
     const formalCount=Number(sourceTruth?.formalGameStatusCount)||0;
+    const kickerTruth=kicker?.competitionStatus==='open'&&!kicker?.settledStarter
+      ?`Active roster: ${kicker.activeRoster||'unavailable'} · practice squad: ${kicker.practiceSquad||'unavailable'} · Week 1 competition remains open.`
+      :`Current kicker: ${kicker.activeRoster||spine.kicker||'Unavailable'}.`;
     return `<section class="v15-addon-panel v15-intel-desk" data-v170-opponent-scout>
       <header><div><small>OPPONENT SCOUT · WEEK ${esc(game.week)}</small><h3>${esc(intel.opponent)} · source-qualified snapshot</h3></div><span class="v15-intel-network">${esc(game.network||intel?.game?.network||'Network TBD')}</span></header>
       <p class="v15-intel-kickoff">${esc(formatKickoff(game.date))} · audited ${esc(intel.asOf||'date unavailable')}</p>
       <div class="v15-intel-grid">
-        <section class="v15-intel-lane confirmed"><span class="v15-intel-status">CURRENT ROSTER</span><article class="v15-intel-item"><strong>Offensive spine</strong><p>QB ${esc(qb.starter||'Unavailable')} · backup ${esc(qb.backup||'Unavailable')}<br>RB ${esc(rb.lead||'Unavailable')}<br>WR ${esc(safeArr(spine.receivers).join(' · ')||'Unavailable')}</p>${sourceLink('jetsRoster')}</article><article class="v15-intel-item"><strong>Defensive captains</strong><p>${esc(defensiveCaptains.join(' · ')||'No defensive captain identities are loaded.')}</p>${sourceLink(intel?.leadership?.sourceKey,'Captain source')}</article></section>
+        <section class="v15-intel-lane confirmed"><span class="v15-intel-status">CURRENT ROSTER</span><article class="v15-intel-item"><strong>Offensive spine</strong><p>QB ${esc(qb.starter||'Unavailable')} · backup ${esc(qb.backup||'Unavailable')}<br>RB ${esc(rb.lead||'Unavailable')}<br>WR ${esc(safeArr(spine.receivers).join(' · ')||'Unavailable')}</p>${sourceLink('jetsRoster')}</article><article class="v15-intel-item"><strong>Special teams truth</strong><p>${esc(kickerTruth)}</p>${sourceLink(kicker?.sourceKey,'Kicker source')}</article><article class="v15-intel-item"><strong>Defensive captains</strong><p>${esc(defensiveCaptains.join(' · ')||'No defensive captain identities are loaded.')}</p>${sourceLink(intel?.leadership?.sourceKey,'Captain source')}</article></section>
         <section class="v15-intel-lane confirmed"><span class="v15-intel-status">TEAM-ELECTED CAPTAINS</span><article class="v15-intel-item"><strong>2026 leadership group</strong><p>${esc(captains.join(' · ')||'Captain list unavailable.')}</p>${sourceLink(intel?.leadership?.sourceKey,'Captain source')}</article><article class="v15-intel-item"><strong>Depth-chart caution</strong><p>${conflictCount?`${esc(conflictCount)} conflicts are already reconciled. Current roster and transactions control when the Jets’ unofficial depth chart disagrees.`:'No source conflict is loaded.'}</p>${sourceLink('jetsDepthChart','Unofficial depth chart')}</article></section>
         <section class="v15-intel-lane practice"><span class="v15-intel-status">AVAILABILITY WATCH</span>${signals.length?signals.map(signalCard).join(''):`<div class="v15-intel-empty"><strong>No qualified opponent availability signals loaded.</strong><span>The scout will not turn missing reporting into a healthy roster claim.</span></div>`}</section>
       </div>
