@@ -7,6 +7,7 @@ from pathlib import Path
 
 REPORT = Path('/tmp/analytics-browser-smoke.json')
 STRICT_SMOKE = Path(__file__).with_name('analytics-browser-smoke.py')
+MOBILE_SMOKE = Path(__file__).with_name('analytics-mobile-browser-smoke-v202.py')
 MAX_ATTEMPTS = 2
 ROUTE_LOAD_STAGES = {'desktop:load-stats', 'mobile:resize', 'mobile:degraded-analytics'}
 RENDERER_TIMEOUT_MARKER = 'timed out receiving message from renderer'
@@ -34,6 +35,10 @@ def run_strict_smoke():
     return subprocess.run([sys.executable, str(STRICT_SMOKE)], env=os.environ.copy(), check=False)
 
 
+def run_mobile_smoke():
+    return subprocess.run([sys.executable, str(MOBILE_SMOKE)], env=os.environ.copy(), check=False)
+
+
 def main():
     for attempt in range(1, MAX_ATTEMPTS + 1):
         result = run_strict_smoke()
@@ -43,6 +48,10 @@ def main():
                     f'Advanced analytics browser smoke recovered after {attempt - 1} bounded renderer retry.',
                     file=sys.stderr,
                 )
+            mobile = run_mobile_smoke()
+            if mobile.returncode != 0:
+                print('Deterministic Advanced Analytics mobile smoke failed.', file=sys.stderr)
+                return mobile.returncode or 1
             return 0
 
         report = load_report()
