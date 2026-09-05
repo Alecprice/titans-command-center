@@ -195,7 +195,7 @@ try:
     if not mobile['trailRect'] or mobile['trailRect']['left']<-1 or mobile['trailRect']['right']>mobile['viewport']+1:raise RuntimeError(f'Legacy Trails outside mobile viewport: {mobile}')
     if any(a['h']<44 or a['w']<44 for a in mobile['actions']):raise RuntimeError(f'Legacy mobile action too small: {mobile}')
     active=m.execute_script("""const p=document.querySelector('[data-legacy-trail-player]');return {text:p?.innerText||'',passport:document.querySelector('[data-legacy-passport]')?.innerText||'',museum:document.querySelector('[data-legacy-my-museum]')?.innerText||'',matches:document.querySelectorAll('.legacy-finder-match').length,hash:location.hash};""")
-    if 'Steve McNair' not in active['text'] or active['matches']<1 or '1 / 19 stamps' not in active['passport'].casefold() or '0 / 12 saved' not in active['museum'].casefold():raise RuntimeError(f'Deep-linked mobile trail did not hydrate isolated state: {active}')
+    if 'steve mcnair' not in active['text'].casefold() or active['matches']<1 or '1 / 19 stamps' not in active['passport'].casefold() or '0 / 12 saved' not in active['museum'].casefold():raise RuntimeError(f'Deep-linked mobile trail did not hydrate isolated state: {active}')
     m.find_element(By.CSS_SELECTOR,'[data-legacy-trail-next]').click()
     wait_for(m,"return location.hash.includes('step=3')&&document.querySelector('[data-legacy-trail-player]')?.innerText.includes('Eddie George')")
     mobile_passport=passport_state(m)
