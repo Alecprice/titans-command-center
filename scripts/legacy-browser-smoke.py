@@ -216,7 +216,11 @@ try:
     if passport_state(m)!=mobile_passport:raise RuntimeError('Mobile exact exhibit changed Passport progress')
 
     result['stage']='mobile:my-museum-save'
-    m.find_element(By.CSS_SELECTOR,'[data-legacy-exhibit-save="moment-music-city-miracle"]').click()
+    save_button=m.find_element(By.CSS_SELECTOR,'[data-legacy-exhibit-save="moment-music-city-miracle"]')
+    m.execute_script("arguments[0].scrollIntoView({block:'center',inline:'nearest'})",save_button)
+    save_click=wait_for(m,"""const b=document.querySelector('[data-legacy-exhibit-save="moment-music-city-miracle"]');if(!b)return null;const r=b.getBoundingClientRect();const x=r.left+r.width/2,y=r.top+r.height/2;const owner=document.elementFromPoint(x,y);return owner&&(owner===b||b.contains(owner))?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,x,y,owner:owner.id||owner.tagName}:null;""")
+    if save_click['top']<0 or save_click['bottom']>844:raise RuntimeError(f'Legacy mobile Save exhibit did not scroll into a clear viewport position: {save_click}')
+    save_button.click()
     mobile_saved=wait_for(m,"""const card=document.querySelector('[data-legacy-my-museum-item="moment-music-city-miracle"]');const b=card?.querySelector('[data-legacy-my-museum-open]');const r=b?.getBoundingClientRect();return card&&b?{text:card.innerText,button:{w:r.width,h:r.height},count:document.querySelector('[data-legacy-my-museum-count]')?.textContent||''}:null;""")
     mobile_saved_geometry=geometry(m)
     if 'Music City Miracle' not in mobile_saved.get('text','') or '1 / 12 saved' not in mobile_saved.get('count','').casefold():raise RuntimeError(f'Mobile My Museum did not render saved exhibit: {mobile_saved}')
@@ -225,7 +229,7 @@ try:
     if museum_state(m).get('keys')!=['moment-music-city-miracle']:raise RuntimeError(f'Mobile My Museum persisted wrong key: {museum_state(m)}')
     if passport_state(m)!=mobile_passport:raise RuntimeError('Mobile My Museum save changed Passport progress')
 
-    result['mobile']={'geometry':mobile,'active':active,'nextClick':next_click,'afterNext':'#legacy?trail=1999-run&step=3','passport':mobile_passport,'exact':mobile_exact,'exactGeometry':exact_mobile_geometry,'saved':mobile_saved,'savedGeometry':mobile_saved_geometry,'museum':museum_state(m)}
+    result['mobile']={'geometry':mobile,'active':active,'nextClick':next_click,'afterNext':'#legacy?trail=1999-run&step=3','passport':mobile_passport,'exact':mobile_exact,'exactGeometry':exact_mobile_geometry,'saveClick':save_click,'saved':mobile_saved,'savedGeometry':mobile_saved_geometry,'museum':museum_state(m)}
     result['browserWarnings']+=severe_logs(m);m.quit();m=None
 
     result['stage']='console'
