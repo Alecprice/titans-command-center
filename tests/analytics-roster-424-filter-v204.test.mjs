@@ -5,8 +5,10 @@ import {readFileSync} from 'node:fs';
 const smoke=readFileSync(new URL('../scripts/analytics-mobile-browser-smoke-v202.py',import.meta.url),'utf8');
 
 test('Advanced Analytics mobile smoke tolerates only the known unrelated roster 424',()=>{
+  assert.match(smoke,/import re/);
   assert.match(smoke,/def expected_unrelated_roster_424\(entry\):/);
-  assert.match(smoke,/return '\/api\/roster' in message and 'status of 424' in message/);
+  assert.match(smoke,/return '\/api\/roster' in message and re\.search\(r'\(\?<\!\\d\)424\(\?!\\d\)', message\) is not None/);
+  assert.doesNotMatch(smoke,/status of 424/);
   assert.match(smoke,/toleratedRoster424/);
   assert.match(smoke,/browser_errors\['fatal'\]/);
 });
@@ -23,4 +25,5 @@ test('Advanced Analytics mobile smoke keeps unrelated severe browser errors fata
 test('roster 424 tolerance is retained as evidence rather than silently discarded',()=>{
   assert.match(smoke,/'toleratedRoster424': browser_errors\['toleratedRoster424'\]/);
   assert.match(smoke,/'browserWarnings': browser_errors\['fatal'\]/);
+  assert.match(smoke,/'allSevere': browser_errors\['allSevere'\]/);
 });
