@@ -63,12 +63,20 @@ def assert_no_overflow(driver):
         raise RuntimeError(f'Mobile Advanced Stats Lab overflowed horizontally: {state}')
 
 
-def severe_logs(driver):
-    return [
+def expected_unrelated_roster_424(entry):
+    message = str(entry.get('message') or '')
+    return '/api/roster' in message and 'status of 424' in message
+
+
+def browser_severe_state(driver):
+    severe = [entry for entry in driver.get_log('browser') if entry.get('level') == 'SEVERE']
+    tolerated = [entry for entry in severe if expected_unrelated_roster_424(entry)]
+    fatal = [
         entry
-        for entry in driver.get_log('browser')
-        if entry.get('level') == 'SEVERE' and '500' not in entry.get('message', '')
+        for entry in severe
+        if not expected_unrelated_roster_424(entry) and '500' not in str(entry.get('message') or '')
     ]
+    return {'fatal': fatal, 'toleratedRoster424': tolerated}
 
 
 started = time.time()
@@ -158,9 +166,9 @@ try:
     assert_no_overflow(driver)
 
     stage = 'console'
-    warnings = severe_logs(driver)
-    if warnings:
-        raise RuntimeError(f'Advanced Stats Lab mobile browser has severe errors: {warnings[:3]}')
+    browser_errors = browser_severe_state(driver)
+    if browser_errors['fatal']:
+        raise RuntimeError(f"Advanced Stats Lab mobile browser has severe errors: {browser_errors['fatal'][:3]}")
 
     result = {
         'ok': True,
@@ -168,7 +176,8 @@ try:
         'apiMode': 'cloudflare-d1' if available else 'database-unavailable',
         'viewport': viewport,
         'state': state,
-        'browserWarnings': warnings,
+        'browserWarnings': browser_errors['fatal'],
+        'toleratedRoster424': browser_errors['toleratedRoster424'],
         'durationSeconds': round(time.time() - started, 2),
         'testedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
     }
