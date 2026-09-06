@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -154,11 +154,30 @@ def severe_logs(driver):
     return [row.get('message','') for row in driver.get_log('browser') if row.get('level')=='SEVERE' and 'favicon' not in row.get('message','').lower()]
 
 
+def load_desktop_market(driver):
+    attempts=0
+    while attempts<2:
+        attempts+=1
+        try:
+            prepare_returning_user(driver)
+            wait_settled(driver)
+            return attempts
+        except TimeoutException:
+            if attempts>=2:
+                raise
+            summary=read_summary(driver)
+            warnings=severe_logs(driver)
+            if summary is not None or warnings:
+                raise
+            time.sleep(.75)
+    return attempts
+
+
 result={'ok':False,'base':BASE,'desktop':{},'mobile':{},'browserWarnings':[]}
 started=time.time();driver=None;stage='starting'
 try:
     stage='desktop:launch';driver=driver_for();driver.set_script_timeout(10)
-    stage='desktop:load';prepare_returning_user(driver);wait_settled(driver)
+    stage='desktop:load';result['desktopLoadAttempts']=load_desktop_market(driver)
     stage='desktop:truth';summary=read_summary(driver);state=assert_truthful_state(summary,'desktop')
     result['desktop']['initial']={'state':state,'summary':summary}
 
