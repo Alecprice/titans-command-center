@@ -1,4 +1,4 @@
-const SOURCE_CHECKED_AT='2026-09-05T11:20:00Z';
+const SOURCE_CHECKED_AT='2026-09-06T19:48:00Z';
 
 const sources={
   titansSchedule:{
@@ -7,6 +7,14 @@ const sources={
     label:'2026 Titans schedule',
     url:'https://www.tennesseetitans.com/schedule/',
     checkedAt:SOURCE_CHECKED_AT
+  },
+  jetsNewsIndex:{
+    tier:'official',
+    publisher:'New York Jets',
+    label:'Jets all news',
+    url:'https://www.newyorkjets.com/news/all-news',
+    checkedAt:SOURCE_CHECKED_AT,
+    qualification:'Official Jets news was rechecked through Sept. 6. No newer football personnel or availability report than the Sept. 4 roster analysis was published in the official news stream at audit time.'
   },
   jetsRoster:{
     tier:'official',
@@ -79,11 +87,17 @@ const sources={
 };
 
 export const WEEK1_OPPONENT_INTEL_2026=Object.freeze({
-  version:'2026-w1-20260905.1',
+  version:'2026-w1-20260906.1',
   opponent:'New York Jets',
   opponentAbbr:'NYJ',
-  asOf:'2026-09-05',
+  asOf:'2026-09-06',
   checkedAt:SOURCE_CHECKED_AT,
+  audit:Object.freeze({
+    latestOfficialFootballUpdate:'2026-09-04',
+    recheckedThrough:'2026-09-06',
+    formalGameStatusAvailable:false,
+    sourceKey:'jetsNewsIndex'
+  }),
   game:Object.freeze({
     week:1,
     kickoff:'2026-09-13T17:00:00Z',

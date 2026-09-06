@@ -8,11 +8,14 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const intel=WEEK1_OPPONENT_INTEL_2026;
 const truth=opponentIntelSourceTruth(intel);
 
-test('TENX opponent scout keeps the Sept 5 official Jets research current and source-backed',()=>{
-  assert.equal(intel.version,'2026-w1-20260905.1');
-  assert.ok(Date.parse(intel.checkedAt)>=Date.parse('2026-09-05T11:00:00Z'));
+test('TENX opponent scout keeps the Sept 6 official Jets research current and source-backed',()=>{
+  assert.equal(intel.version,'2026-w1-20260906.1');
+  assert.ok(Date.parse(intel.checkedAt)>=Date.parse('2026-09-06T19:00:00Z'));
+  assert.equal(intel.audit?.recheckedThrough,'2026-09-06');
+  assert.equal(intel.audit?.latestOfficialFootballUpdate,'2026-09-04');
+  assert.equal(intel.audit?.formalGameStatusAvailable,false);
   assert.deepEqual(intel.leadership.captains,['Geno Smith','Joe Tippmann','Demario Davis','Minkah Fitzpatrick','Harrison Phillips','Isaiah Williams']);
-  for(const key of ['jetsRoster','jetsRosterAnalysis','jetsTransactions','jetsDepthChart','jetsOssai','jetsHall','jetsPractice','jetsCaptains']){
+  for(const key of ['jetsNewsIndex','jetsRoster','jetsRosterAnalysis','jetsTransactions','jetsDepthChart','jetsOssai','jetsHall','jetsPractice','jetsCaptains']){
     assert.match(intel.sources[key]?.publisher||'',/^New York Jets(?: Communications Department)?$/,`${key} should stay on the official Jets source boundary`);
     assert.match(intel.sources[key]?.url||'',/^https:\/\/www\.newyorkjets\.com\//);
   }
