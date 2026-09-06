@@ -4,13 +4,17 @@ import {readFileSync} from 'node:fs';
 
 const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('Advanced Analytics mobile production smoke pins real 390x844 CSS geometry with CDP',()=>{
+test('Advanced Analytics mobile production smoke pins real 390x844 CSS geometry with startup emulation and CDP fallback',()=>{
   const smoke=read('scripts/analytics-mobile-browser-smoke-v202.py');
+  assert.match(smoke,/MOBILE_WIDTH = 390/);
+  assert.match(smoke,/MOBILE_HEIGHT = 844/);
+  assert.match(smoke,/def mobile_emulation\(width=MOBILE_WIDTH, height=MOBILE_HEIGHT\):/);
+  assert.match(smoke,/options\.add_experimental_option\('mobileEmulation', mobile_emulation\(\)\)/);
   assert.match(smoke,/Emulation\.setDeviceMetricsOverride/);
-  assert.match(smoke,/'width': width/);
-  assert.match(smoke,/'height': height/);
+  assert.match(smoke,/'width': 390/);
+  assert.match(smoke,/'height': 844/);
   assert.match(smoke,/'mobile': True/);
-  assert.match(smoke,/set_mobile_viewport\(driver, 390, 844\)/);
+  assert.match(smoke,/set_mobile_viewport\(driver\)/);
   assert.match(smoke,/innerWidth/);
   assert.match(smoke,/innerHeight/);
   assert.match(smoke,/document\.documentElement\.clientWidth/);
