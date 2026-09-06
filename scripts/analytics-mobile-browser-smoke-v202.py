@@ -10,13 +10,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 BASE = os.environ.get('WORKER_URL', 'https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 REPORT = Path('/tmp/analytics-mobile-browser-smoke-v202.json')
+MOBILE_WIDTH = 390
+MOBILE_HEIGHT = 844
 
 
 def read_analytics():
     req = Request(
         f'{BASE}/api/advanced-analytics?season=2026&team=TEN&audit={int(time.time() * 1000)}',
         headers={
-            'User-Agent': 'TitansCommandCenter-AnalyticsMobileAudit/2.0.2',
+            'User-Agent': 'TitansCommandCenter-AnalyticsMobileAudit/2.0.3',
             'Cache-Control': 'no-cache, no-store',
             'Accept': 'application/json',
         },
@@ -34,28 +36,41 @@ def wait_for(driver, predicate, timeout=18):
 
 
 def set_mobile_viewport(driver, width=390, height=844):
+    """Pin mobile device metrics before navigation so viewport meta is applied on document load."""
+    if width != MOBILE_WIDTH or height != MOBILE_HEIGHT:
+        raise ValueError(f'Unsupported analytics mobile target: {width}x{height}')
     driver.execute_cdp_cmd(
         'Emulation.setDeviceMetricsOverride',
         {
+            'mobile': True,
             'width': width,
             'height': height,
             'deviceScaleFactor': 1,
-            'mobile': True,
+            'screenWidth': width,
+            'screenHeight': height,
         },
+    )
+    driver.execute_cdp_cmd(
+        'Emulation.setTouchEmulationEnabled',
+        {'enabled': True, 'maxTouchPoints': 5},
+    )
+
+
+def viewport_state(driver):
+    return driver.execute_script(
+        "return {innerWidth,innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}"
     )
 
 
 def verify_mobile_viewport(driver, width=390, height=844):
-    state = driver.execute_script(
-        "return {innerWidth,innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}"
-    )
+    state = viewport_state(driver)
     if (
         state['innerWidth'] != width
         or state['innerHeight'] != height
         or state['clientWidth'] != width
         or not state['mobile']
     ):
-        raise RuntimeError(f'Analytics mobile viewport override did not take effect: {state}')
+        raise RuntimeError(f'Analytics mobile viewport emulation did not take effect: {state}')
     return state
 
 
@@ -108,7 +123,6 @@ try:
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1440,1100')
     options.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(25)
@@ -167,7 +181,11 @@ try:
         if state['retryHeight'] < 44 or state['metricCount'] != 0 or not state['coreStats']:
             raise RuntimeError(f'Mobile degraded analytics is not usable: {state}')
 
-    if state['viewport']['width'] != 390 or state['viewport']['height'] != 844 or state['viewport']['clientWidth'] != 390:
+    if (
+        state['viewport']['width'] != MOBILE_WIDTH
+        or state['viewport']['height'] != MOBILE_HEIGHT
+        or state['viewport']['clientWidth'] != MOBILE_WIDTH
+    ):
         raise RuntimeError(f'Advanced Stats Lab did not render at the pinned mobile viewport: {state}')
     assert_no_overflow(driver)
 

@@ -4,18 +4,23 @@ import {readFileSync} from 'node:fs';
 
 const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('Advanced Analytics mobile production smoke pins real 390x844 CSS geometry with CDP',()=>{
+test('Advanced Analytics mobile production smoke pins real 390x844 CSS geometry with pre-navigation CDP',()=>{
   const smoke=read('scripts/analytics-mobile-browser-smoke-v202.py');
+  assert.match(smoke,/MOBILE_WIDTH = 390/);
+  assert.match(smoke,/MOBILE_HEIGHT = 844/);
+  assert.match(smoke,/def set_mobile_viewport\(driver, width=390, height=844\):/);
   assert.match(smoke,/Emulation\.setDeviceMetricsOverride/);
   assert.match(smoke,/'width': width/);
   assert.match(smoke,/'height': height/);
   assert.match(smoke,/'mobile': True/);
-  assert.match(smoke,/set_mobile_viewport\(driver, 390, 844\)/);
+  assert.match(smoke,/Emulation\.setTouchEmulationEnabled/);
+  assert.match(smoke,/set_mobile_viewport\(driver, 390, 844\)\s*\n\s*driver\.get\(f'\{BASE\}\/\#stats'\)/);
   assert.match(smoke,/innerWidth/);
   assert.match(smoke,/innerHeight/);
   assert.match(smoke,/document\.documentElement\.clientWidth/);
   assert.match(smoke,/matchMedia\('\(max-width:759px\)'\)\.matches/);
   assert.doesNotMatch(smoke,/set_window_size\(390,\s*844\)/);
+  assert.doesNotMatch(smoke,/add_experimental_option\('mobileEmulation'/);
 });
 
 test('Advanced Analytics mobile gate preserves D1 and explicit unavailable truth paths',()=>{
