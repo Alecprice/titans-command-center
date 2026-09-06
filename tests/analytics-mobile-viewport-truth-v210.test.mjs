@@ -14,8 +14,8 @@ test('Advanced Analytics establishes CDP mobile geometry before navigation and v
   assert.match(smoke,/set_mobile_viewport\(driver, 390, 844\)\s*\n\s*driver\.get\(f'\{BASE\}\/\#stats'\)\s*\n\s*wait_for\(driver, "document\.readyState === 'complete' && location\.hash === '#stats'"\)\s*\n\s*viewport = verify_mobile_viewport\(driver, 390, 844\)/);
 
   const setStart=smoke.indexOf('def set_mobile_viewport');
-  const verifyStart=smoke.indexOf('def verify_mobile_viewport');
-  const setBody=smoke.slice(setStart,verifyStart);
+  const viewportStateStart=smoke.indexOf('def viewport_state');
+  const setBody=smoke.slice(setStart,viewportStateStart);
   assert.doesNotMatch(setBody,/execute_script/);
   assert.doesNotMatch(setBody,/override did not take effect/);
   assert.doesNotMatch(smoke,/add_experimental_option\('mobileEmulation'/);
