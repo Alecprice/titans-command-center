@@ -117,7 +117,7 @@ def assert_no_overflow(driver):
 
 def expected_unrelated_roster_424(entry):
     message = str(entry.get('message') or '')
-    return '/api/roster' in message and re.search(r'(?<!\\d)424(?!\\d)', message) is not None
+    return '/api/roster' in message and re.search(r'(?<!\d)424(?!\d)', message) is not None
 
 
 def browser_severe_state(driver):
@@ -185,7 +185,7 @@ try:
             dataSeason:root?.dataset?.dataSeason||'',
             seasonFallback:root?.dataset?.seasonFallback||'',
             bannerVisible:Boolean(banner&&banner.getBoundingClientRect().width>0&&banner.getBoundingClientRect().height>0),
-            bannerText:(banner?.textContent||'').replace(/\\s+/g,' ').trim()
+            bannerText:(banner?.textContent||'').replace(/\s+/g,' ').trim()
           };
         """)
         if state['metricCount'] != 4 or state['playCount'] < 1:
@@ -203,7 +203,7 @@ try:
           return {
             mode:'database-unavailable',
             viewport:{width:innerWidth,height:innerHeight,clientWidth:document.documentElement.clientWidth},
-            text:(root?.querySelector('.ah-error')?.textContent||'').replace(/\\s+/g,' ').trim(),
+            text:(root?.querySelector('.ah-error')?.textContent||'').replace(/\s+/g,' ').trim(),
             retryHeight:retry?.getBoundingClientRect().height||0,
             metricCount:root?.querySelectorAll('.ah-metric').length||0,
             coreStats:Boolean(document.querySelector('.preseason-stats-hub .ps-summary'))
