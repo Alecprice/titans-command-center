@@ -217,10 +217,11 @@ try:
 
     result['stage']='mobile:my-museum-save'
     save_button=m.find_element(By.CSS_SELECTOR,'[data-legacy-exhibit-save="moment-music-city-miracle"]')
-    m.execute_script("arguments[0].scrollIntoView({block:'center',inline:'nearest'})",save_button)
-    save_click=wait_for(m,"""const b=document.querySelector('[data-legacy-exhibit-save="moment-music-city-miracle"]');if(!b)return null;const r=b.getBoundingClientRect();const x=r.left+r.width/2,y=r.top+r.height/2;const owner=document.elementFromPoint(x,y);return owner&&(owner===b||b.contains(owner))?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,x,y,owner:owner.id||owner.tagName}:null;""")
-    if save_click['top']<0 or save_click['bottom']>844:raise RuntimeError(f'Legacy mobile Save exhibit did not scroll into a clear viewport position: {save_click}')
-    pointer={'x':round(save_click['x']),'y':round(save_click['y']),'button':'left','clickCount':1}
+    m.execute_script("arguments[0].scrollIntoView({behavior:'instant',block:'center',inline:'nearest'})",save_button)
+    save_click=wait_for(m,"""const b=document.querySelector('[data-legacy-exhibit-save="moment-music-city-miracle"]');if(!b)return null;const r=b.getBoundingClientRect();const x=Math.round(r.left+r.width/2),y=Math.round(r.top+r.height/2);const owner=document.elementFromPoint(x,y);const current={left:r.left,right:r.right,top:r.top,bottom:r.bottom,x,y,owner:owner?.id||owner?.tagName||''};const previous=window.__legacySavePoint;window.__legacySavePoint=current;const stable=previous&&Math.abs(previous.left-current.left)<.5&&Math.abs(previous.top-current.top)<.5&&Math.abs(previous.right-current.right)<.5&&Math.abs(previous.bottom-current.bottom)<.5;return stable&&owner&&(owner===b||b.contains(owner))?current:null;""")
+    if save_click['top']<0 or save_click['bottom']>844:raise RuntimeError(f'Legacy mobile Save exhibit did not settle into a clear viewport position: {save_click}')
+    pointer={'x':save_click['x'],'y':save_click['y'],'button':'left','clickCount':1}
+    m.execute_cdp_cmd('Input.dispatchMouseEvent',{'type':'mouseMoved','x':pointer['x'],'y':pointer['y'],'button':'none'})
     m.execute_cdp_cmd('Input.dispatchMouseEvent',{'type':'mousePressed',**pointer})
     m.execute_cdp_cmd('Input.dispatchMouseEvent',{'type':'mouseReleased',**pointer})
     mobile_saved=wait_for(m,"""const card=document.querySelector('[data-legacy-my-museum-item="moment-music-city-miracle"]');const b=card?.querySelector('[data-legacy-my-museum-open]');const r=b?.getBoundingClientRect();return card&&b?{text:card.innerText,button:{w:r.width,h:r.height},count:document.querySelector('[data-legacy-my-museum-count]')?.textContent||''}:null;""")
