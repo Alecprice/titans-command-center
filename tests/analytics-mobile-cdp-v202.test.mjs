@@ -39,5 +39,5 @@ test('resilient analytics release wrapper runs deterministic mobile smoke after 
   assert.match(wrapper,/def run_mobile_smoke\(\):/);
   assert.match(wrapper,/mobile = run_mobile_smoke\(\)/);
   assert.match(wrapper,/if mobile\.returncode != 0:/);
-  assert.match(wrapper,/Deterministic Advanced Analytics mobile smoke failed\./);
+  assert.match(wrapper,/Deterministic Advanced Analytics mobile smoke failed at \{stage\}: \{detail\}/);
 });
