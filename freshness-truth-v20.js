@@ -3,7 +3,7 @@
 
   const STALE_AFTER_MS=48*60*60*1000;
   const ROSTER_SNAPSHOT_DATE='2026-09-02';
-  const ROSTER_VERIFIED_THROUGH='2026-09-05';
+  const ROSTER_VERIFIED_THROUGH='2026-09-06';
   const app=document.querySelector('#app');
   const route=()=>location.hash.replace(/^#/,'').split('?')[0]||'home';
   let snapshot=null;
@@ -94,7 +94,7 @@
     const fresh=freshness(data);
     const fallback=isAuditedFallback(data);
     const auditDate=fallbackAuditDate(data);
-    const verification=fallback?null:rosterVerification(fresh.roster);
+    const verification=rosterVerification(fresh.roster);
     const state=fallback?'fallback':rosterState(fresh.roster);
     const strong=card.querySelector('strong');
     const detail=card.querySelector('p');
@@ -102,9 +102,10 @@
     card.dataset.freshnessState=state;
     if(fallback){
       const verified=shortDate(auditDate);
+      const verifiedSuffix=verification?` · Sources checked ${shortDate(verification)}`:'';
       if(strong)strong.textContent=`Verified backup · ${verified}`;
-      if(detail)detail.textContent=`Roster verified ${verified} · Moves ${rel(fresh.transactions)} · Intel ${rel(fresh.feed)}`;
-      card.title=`Live roster updates are temporarily unavailable. Showing the verified roster backup audited ${verified}.`;
+      if(detail)detail.textContent=`Roster verified ${verified}${verifiedSuffix} · Moves ${rel(fresh.transactions)} · Intel ${rel(fresh.feed)}`;
+      card.title=`Live roster updates are temporarily unavailable. Showing the verified roster backup audited ${verified}.${verification?` Official Titans roster and transactions were rechecked through ${shortDate(verification)} with no later move found; the backup audit date remains ${verified}.`:''}`;
       return;
     }
     if(strong)strong.textContent=state==='recent'?'Recent server snapshot':state==='stale'?'Roster snapshot needs review':'Freshness unknown';
