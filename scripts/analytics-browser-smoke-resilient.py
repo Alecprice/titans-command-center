@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 REPORT = Path('/tmp/analytics-browser-smoke.json')
+MOBILE_REPORT = Path('/tmp/analytics-mobile-browser-smoke-v202.json')
 STRICT_SMOKE = Path(__file__).with_name('analytics-browser-smoke.py')
 MOBILE_SMOKE = Path(__file__).with_name('analytics-mobile-browser-smoke-v202.py')
 MAX_ATTEMPTS = 2
@@ -13,12 +14,24 @@ ROUTE_LOAD_STAGES = {'desktop:load-stats', 'mobile:resize', 'mobile:degraded-ana
 RENDERER_TIMEOUT_MARKER = 'timed out receiving message from renderer'
 
 
-def load_report():
+def load_json(path):
     try:
-        payload = json.loads(REPORT.read_text(encoding='utf-8'))
+        payload = json.loads(path.read_text(encoding='utf-8'))
         return payload if isinstance(payload, dict) else {}
     except Exception:
         return {}
+
+
+def load_report():
+    return load_json(REPORT)
+
+
+def retain_mobile_evidence(mobile_report):
+    strict_report = load_report()
+    if not strict_report:
+        return
+    strict_report['deterministicMobile'] = mobile_report
+    REPORT.write_text(json.dumps(strict_report, indent=2), encoding='utf-8')
 
 
 def retryable_renderer_load_timeout(report):
@@ -48,9 +61,20 @@ def main():
                     f'Advanced analytics browser smoke recovered after {attempt - 1} bounded renderer retry.',
                     file=sys.stderr,
                 )
+            try:
+                MOBILE_REPORT.unlink()
+            except FileNotFoundError:
+                pass
             mobile = run_mobile_smoke()
+            mobile_report = load_json(MOBILE_REPORT)
+            retain_mobile_evidence(mobile_report)
             if mobile.returncode != 0:
-                print('Deterministic Advanced Analytics mobile smoke failed.', file=sys.stderr)
+                detail = mobile_report.get('error') or 'mobile report unavailable'
+                stage = mobile_report.get('stage') or 'unknown'
+                print(
+                    f'Deterministic Advanced Analytics mobile smoke failed at {stage}: {detail}',
+                    file=sys.stderr,
+                )
                 return mobile.returncode or 1
             return 0
 
