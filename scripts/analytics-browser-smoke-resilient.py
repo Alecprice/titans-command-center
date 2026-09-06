@@ -31,6 +31,10 @@ def retain_mobile_evidence(mobile_report):
     if not strict_report:
         return
     strict_report['deterministicMobile'] = mobile_report
+    if mobile_report.get('ok') is False:
+        strict_report['ok'] = False
+        strict_report['stage'] = 'deterministic-mobile'
+        strict_report['error'] = mobile_report.get('error') or 'Deterministic mobile analytics smoke failed'
     REPORT.write_text(json.dumps(strict_report, indent=2), encoding='utf-8')
 
 
