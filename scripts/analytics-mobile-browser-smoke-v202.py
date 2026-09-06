@@ -36,10 +36,12 @@ def wait_for(driver, predicate, timeout=18):
 
 
 def mobile_emulation(width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
+    if width != MOBILE_WIDTH or height != MOBILE_HEIGHT:
+        raise ValueError(f'Unsupported analytics mobile target: {width}x{height}')
     return {
         'deviceMetrics': {
-            'width': width,
-            'height': height,
+            'width': 390,
+            'height': 844,
             'pixelRatio': 1.0,
             'touch': True,
             'mobile': True,
@@ -51,18 +53,58 @@ def mobile_emulation(width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
     }
 
 
-def verify_mobile_viewport(driver, width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
-    state = driver.execute_script(
+def set_mobile_viewport(driver, width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
+    """Fallback only when ChromeDriver startup mobile emulation misses the pinned geometry."""
+    if width != MOBILE_WIDTH or height != MOBILE_HEIGHT:
+        raise ValueError(f'Unsupported analytics mobile fallback target: {width}x{height}')
+    driver.execute_cdp_cmd(
+        'Emulation.setDeviceMetricsOverride',
+        {
+            'mobile': True,
+            'width': 390,
+            'height': 844,
+            'deviceScaleFactor': 1,
+            'screenWidth': 390,
+            'screenHeight': 844,
+        },
+    )
+    driver.execute_cdp_cmd(
+        'Emulation.setTouchEmulationEnabled',
+        {'enabled': True, 'maxTouchPoints': 5},
+    )
+
+
+def viewport_state(driver):
+    return driver.execute_script(
         "return {innerWidth,innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}"
     )
-    if (
-        state['innerWidth'] != width
-        or state['innerHeight'] != height
-        or state['clientWidth'] != width
-        or not state['mobile']
-    ):
+
+
+def viewport_is_exact(state, width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
+    return (
+        state['innerWidth'] == width
+        and state['innerHeight'] == height
+        and state['clientWidth'] == width
+        and state['mobile']
+    )
+
+
+def verify_mobile_viewport(driver, width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
+    state = viewport_state(driver)
+    if not viewport_is_exact(state, width, height):
         raise RuntimeError(f'Analytics mobile viewport emulation did not take effect: {state}')
     return state
+
+
+def ensure_mobile_viewport(driver):
+    state = viewport_state(driver)
+    if viewport_is_exact(state):
+        return state
+
+    set_mobile_viewport(driver)
+    driver.refresh()
+    wait_for(driver, "document.readyState === 'complete' && location.hash === '#stats'")
+    return verify_mobile_viewport(driver)
 
 
 def assert_no_overflow(driver):
@@ -123,7 +165,7 @@ try:
     stage = 'mobile-viewport'
     driver.get(f'{BASE}/#stats')
     wait_for(driver, "document.readyState === 'complete' && location.hash === '#stats'")
-    viewport = verify_mobile_viewport(driver)
+    viewport = ensure_mobile_viewport(driver)
     wait_for(driver, "document.querySelector('.preseason-stats-hub')", timeout=15)
 
     if available:
