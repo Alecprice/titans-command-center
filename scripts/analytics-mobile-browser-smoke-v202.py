@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import time
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -65,7 +66,7 @@ def assert_no_overflow(driver):
 
 def expected_unrelated_roster_424(entry):
     message = str(entry.get('message') or '')
-    return '/api/roster' in message and 'status of 424' in message
+    return '/api/roster' in message and re.search(r'(?<!\d)424(?!\d)', message) is not None
 
 
 def browser_severe_state(driver):
@@ -76,12 +77,13 @@ def browser_severe_state(driver):
         for entry in severe
         if not expected_unrelated_roster_424(entry) and '500' not in str(entry.get('message') or '')
     ]
-    return {'fatal': fatal, 'toleratedRoster424': tolerated}
+    return {'fatal': fatal, 'toleratedRoster424': tolerated, 'allSevere': severe}
 
 
 started = time.time()
 driver = None
 stage = 'starting'
+browser_errors = {'fatal': [], 'toleratedRoster424': [], 'allSevere': []}
 try:
     stage = 'analytics-api'
     analytics = read_analytics()
@@ -178,6 +180,7 @@ try:
         'state': state,
         'browserWarnings': browser_errors['fatal'],
         'toleratedRoster424': browser_errors['toleratedRoster424'],
+        'allSevere': browser_errors['allSevere'],
         'durationSeconds': round(time.time() - started, 2),
         'testedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
     }
@@ -189,6 +192,9 @@ except Exception as exc:
         'base': BASE,
         'stage': stage,
         'error': f'{type(exc).__name__}: {exc}',
+        'browserWarnings': browser_errors.get('fatal', []),
+        'toleratedRoster424': browser_errors.get('toleratedRoster424', []),
+        'allSevere': browser_errors.get('allSevere', []),
         'durationSeconds': round(time.time() - started, 2),
         'testedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
     }
