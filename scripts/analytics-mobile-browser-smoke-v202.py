@@ -43,6 +43,9 @@ def set_mobile_viewport(driver, width=390, height=844):
             'mobile': True,
         },
     )
+
+
+def verify_mobile_viewport(driver, width=390, height=844):
     state = driver.execute_script(
         "return {innerWidth,innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}"
     )
@@ -112,9 +115,10 @@ try:
     driver.set_script_timeout(5)
 
     stage = 'mobile-viewport'
-    viewport = set_mobile_viewport(driver, 390, 844)
+    set_mobile_viewport(driver, 390, 844)
     driver.get(f'{BASE}/#stats')
     wait_for(driver, "document.readyState === 'complete' && location.hash === '#stats'")
+    viewport = verify_mobile_viewport(driver, 390, 844)
     wait_for(driver, "document.querySelector('.preseason-stats-hub')", timeout=15)
 
     if available:
