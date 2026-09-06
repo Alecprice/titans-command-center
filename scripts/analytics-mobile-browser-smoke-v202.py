@@ -10,13 +10,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 BASE = os.environ.get('WORKER_URL', 'https://titans-command-center.alecjordanprice.workers.dev').rstrip('/')
 REPORT = Path('/tmp/analytics-mobile-browser-smoke-v202.json')
+MOBILE_WIDTH = 390
+MOBILE_HEIGHT = 844
 
 
 def read_analytics():
     req = Request(
         f'{BASE}/api/advanced-analytics?season=2026&team=TEN&audit={int(time.time() * 1000)}',
         headers={
-            'User-Agent': 'TitansCommandCenter-AnalyticsMobileAudit/2.0.2',
+            'User-Agent': 'TitansCommandCenter-AnalyticsMobileAudit/2.0.3',
             'Cache-Control': 'no-cache, no-store',
             'Accept': 'application/json',
         },
@@ -33,19 +35,23 @@ def wait_for(driver, predicate, timeout=18):
     )
 
 
-def set_mobile_viewport(driver, width=390, height=844):
-    driver.execute_cdp_cmd(
-        'Emulation.setDeviceMetricsOverride',
-        {
+def mobile_emulation(width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
+    return {
+        'deviceMetrics': {
             'width': width,
             'height': height,
-            'deviceScaleFactor': 1,
+            'pixelRatio': 1.0,
+            'touch': True,
             'mobile': True,
         },
-    )
+        'clientHints': {
+            'platform': 'Android',
+            'mobile': True,
+        },
+    }
 
 
-def verify_mobile_viewport(driver, width=390, height=844):
+def verify_mobile_viewport(driver, width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
     state = driver.execute_script(
         "return {innerWidth,innerHeight,clientWidth:document.documentElement.clientWidth,mobile:matchMedia('(max-width:759px)').matches}"
     )
@@ -55,7 +61,7 @@ def verify_mobile_viewport(driver, width=390, height=844):
         or state['clientWidth'] != width
         or not state['mobile']
     ):
-        raise RuntimeError(f'Analytics mobile viewport override did not take effect: {state}')
+        raise RuntimeError(f'Analytics mobile viewport emulation did not take effect: {state}')
     return state
 
 
@@ -69,7 +75,7 @@ def assert_no_overflow(driver):
 
 def expected_unrelated_roster_424(entry):
     message = str(entry.get('message') or '')
-    return '/api/roster' in message and re.search(r'(?<!\d)424(?!\d)', message) is not None
+    return '/api/roster' in message and re.search(r'(?<!\\d)424(?!\\d)', message) is not None
 
 
 def browser_severe_state(driver):
@@ -108,17 +114,16 @@ try:
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1440,1100')
+    options.add_experimental_option('mobileEmulation', mobile_emulation())
     options.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(25)
     driver.set_script_timeout(5)
 
     stage = 'mobile-viewport'
-    set_mobile_viewport(driver, 390, 844)
     driver.get(f'{BASE}/#stats')
     wait_for(driver, "document.readyState === 'complete' && location.hash === '#stats'")
-    viewport = verify_mobile_viewport(driver, 390, 844)
+    viewport = verify_mobile_viewport(driver)
     wait_for(driver, "document.querySelector('.preseason-stats-hub')", timeout=15)
 
     if available:
@@ -138,7 +143,7 @@ try:
             dataSeason:root?.dataset?.dataSeason||'',
             seasonFallback:root?.dataset?.seasonFallback||'',
             bannerVisible:Boolean(banner&&banner.getBoundingClientRect().width>0&&banner.getBoundingClientRect().height>0),
-            bannerText:(banner?.textContent||'').replace(/\s+/g,' ').trim()
+            bannerText:(banner?.textContent||'').replace(/\\s+/g,' ').trim()
           };
         """)
         if state['metricCount'] != 4 or state['playCount'] < 1:
@@ -156,7 +161,7 @@ try:
           return {
             mode:'database-unavailable',
             viewport:{width:innerWidth,height:innerHeight,clientWidth:document.documentElement.clientWidth},
-            text:(root?.querySelector('.ah-error')?.textContent||'').replace(/\s+/g,' ').trim(),
+            text:(root?.querySelector('.ah-error')?.textContent||'').replace(/\\s+/g,' ').trim(),
             retryHeight:retry?.getBoundingClientRect().height||0,
             metricCount:root?.querySelectorAll('.ah-metric').length||0,
             coreStats:Boolean(document.querySelector('.preseason-stats-hub .ps-summary'))
@@ -167,7 +172,11 @@ try:
         if state['retryHeight'] < 44 or state['metricCount'] != 0 or not state['coreStats']:
             raise RuntimeError(f'Mobile degraded analytics is not usable: {state}')
 
-    if state['viewport']['width'] != 390 or state['viewport']['height'] != 844 or state['viewport']['clientWidth'] != 390:
+    if (
+        state['viewport']['width'] != MOBILE_WIDTH
+        or state['viewport']['height'] != MOBILE_HEIGHT
+        or state['viewport']['clientWidth'] != MOBILE_WIDTH
+    ):
         raise RuntimeError(f'Advanced Stats Lab did not render at the pinned mobile viewport: {state}')
     assert_no_overflow(driver)
 
