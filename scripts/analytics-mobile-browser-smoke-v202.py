@@ -35,37 +35,19 @@ def wait_for(driver, predicate, timeout=18):
     )
 
 
-def mobile_emulation(width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
+def set_mobile_viewport(driver, width=390, height=844):
+    """Pin mobile device metrics before navigation so viewport meta is applied on document load."""
     if width != MOBILE_WIDTH or height != MOBILE_HEIGHT:
         raise ValueError(f'Unsupported analytics mobile target: {width}x{height}')
-    return {
-        'deviceMetrics': {
-            'width': 390,
-            'height': 844,
-            'pixelRatio': 1.0,
-            'touch': True,
-            'mobile': True,
-        },
-        'clientHints': {
-            'platform': 'Android',
-            'mobile': True,
-        },
-    }
-
-
-def set_mobile_viewport(driver, width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
-    """Fallback only when ChromeDriver startup mobile emulation misses the pinned geometry."""
-    if width != MOBILE_WIDTH or height != MOBILE_HEIGHT:
-        raise ValueError(f'Unsupported analytics mobile fallback target: {width}x{height}')
     driver.execute_cdp_cmd(
         'Emulation.setDeviceMetricsOverride',
         {
             'mobile': True,
-            'width': 390,
-            'height': 844,
+            'width': width,
+            'height': height,
             'deviceScaleFactor': 1,
-            'screenWidth': 390,
-            'screenHeight': 844,
+            'screenWidth': width,
+            'screenHeight': height,
         },
     )
     driver.execute_cdp_cmd(
@@ -80,31 +62,16 @@ def viewport_state(driver):
     )
 
 
-def viewport_is_exact(state, width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
-    return (
-        state['innerWidth'] == width
-        and state['innerHeight'] == height
-        and state['clientWidth'] == width
-        and state['mobile']
-    )
-
-
-def verify_mobile_viewport(driver, width=MOBILE_WIDTH, height=MOBILE_HEIGHT):
+def verify_mobile_viewport(driver, width=390, height=844):
     state = viewport_state(driver)
-    if not viewport_is_exact(state, width, height):
+    if (
+        state['innerWidth'] != width
+        or state['innerHeight'] != height
+        or state['clientWidth'] != width
+        or not state['mobile']
+    ):
         raise RuntimeError(f'Analytics mobile viewport emulation did not take effect: {state}')
     return state
-
-
-def ensure_mobile_viewport(driver):
-    state = viewport_state(driver)
-    if viewport_is_exact(state):
-        return state
-
-    set_mobile_viewport(driver)
-    driver.refresh()
-    wait_for(driver, "document.readyState === 'complete' && location.hash === '#stats'")
-    return verify_mobile_viewport(driver)
 
 
 def assert_no_overflow(driver):
@@ -156,16 +123,16 @@ try:
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
-    options.add_experimental_option('mobileEmulation', mobile_emulation())
     options.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(25)
     driver.set_script_timeout(5)
 
     stage = 'mobile-viewport'
+    set_mobile_viewport(driver, 390, 844)
     driver.get(f'{BASE}/#stats')
     wait_for(driver, "document.readyState === 'complete' && location.hash === '#stats'")
-    viewport = ensure_mobile_viewport(driver)
+    viewport = verify_mobile_viewport(driver, 390, 844)
     wait_for(driver, "document.querySelector('.preseason-stats-hub')", timeout=15)
 
     if available:
