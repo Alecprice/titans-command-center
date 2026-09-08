@@ -1,14 +1,17 @@
+import { fetchWithTransportRetry } from './lib/fetch-with-transport-retry.mjs';
+
 const base=String(process.env.WORKER_URL||process.env.PRODUCTION_URL||'https://titans-command-center.alecjordanprice.workers.dev').replace(/\/$/,'');
 const allowedHosts=new Set(['static.clubs.nfl.com','static.www.nfl.com','static.nfl.com','a.espncdn.com','a1.espncdn.com']);
 const allowedOmissionReasons=new Set(['no-approved-headshot-url','missing-player-name']);
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const started=Date.now();
+const noCache={headers:{'Cache-Control':'no-cache'}};
 
 const [manifestResponse,rootResponse,jsResponse,cssResponse]=await Promise.all([
-  fetch(`${base}/assets/data/player-headshots.json?audit=${Date.now()}`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)}),
-  fetch(`${base}/`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)}),
-  fetch(`${base}/headshot-polish.js?v=31`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)}),
-  fetch(`${base}/headshot-polish.css?v=31`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)})
+  fetchWithTransportRetry(`${base}/assets/data/player-headshots.json?audit=${Date.now()}`,noCache),
+  fetchWithTransportRetry(`${base}/`,noCache),
+  fetchWithTransportRetry(`${base}/headshot-polish.js?v=31`,noCache),
+  fetchWithTransportRetry(`${base}/headshot-polish.css?v=31`,noCache)
 ]);
 assert(manifestResponse.ok,`Headshot manifest returned ${manifestResponse.status}`);
 assert(rootResponse.ok,`Root returned ${rootResponse.status}`);
