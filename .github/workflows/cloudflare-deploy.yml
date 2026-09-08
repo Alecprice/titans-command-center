@@ -77,9 +77,12 @@ jobs:
           if [[ "$GITHUB_SHA" == "$CURRENT_MAIN_SHA" ]]; then
             echo "current=true" >> "$GITHUB_OUTPUT"
             echo "Deploy source is current main: $GITHUB_SHA"
+          elif git merge-base --is-ancestor "$GITHUB_SHA" "$CURRENT_MAIN_SHA" && git diff --quiet "$GITHUB_SHA" "$CURRENT_MAIN_SHA" -- . ':(exclude)docs/CLOUDFLARE_STATUS.md'; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+            echo "Deploy source $GITHUB_SHA is current modulo deployment-status-only commits on main $CURRENT_MAIN_SHA."
           else
             echo "current=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping stale deploy source $GITHUB_SHA; current main is $CURRENT_MAIN_SHA"
+            echo "Skipping stale deploy source $GITHUB_SHA; current main $CURRENT_MAIN_SHA contains newer source changes or is not a descendant."
           fi
 
       - name: Build Worker secret bundle
