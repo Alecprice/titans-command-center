@@ -82,6 +82,19 @@ jobs:
             echo "Skipping stale deploy source $GITHUB_SHA; current main is $CURRENT_MAIN_SHA"
           fi
 
+      - name: Record stale deploy no-op
+        if: steps.quality.outcome == 'success' && steps.source_guard.outputs.current != 'true'
+        shell: bash
+        run: |
+          {
+            echo '### Cloudflare deploy skipped as stale'
+            echo
+            echo "- Source: \`$GITHUB_SHA\`"
+            echo "- Current main: \`${{ steps.source_guard.outputs.current_main_sha }}\`"
+            echo '- No Worker deployment or production/browser regression was performed by this run.'
+            echo '- This is a safe no-op, not production verification.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Build Worker secret bundle
         if: steps.quality.outcome == 'success' && steps.creds.outputs.cloudflare == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
@@ -126,17 +139,52 @@ jobs:
           ORIGIN_URL: ${{ steps.deploy.outputs.deployment-url }}
         run: node scripts/custom-domain-regression.mjs
 
-      - name: Run production regression audit
+      - name: Run core production regression audit
         id: smoke
         if: steps.frontdoor.outcome == 'success'
         env:
           WORKER_URL: ${{ env.PRODUCTION_URL }}
           EXPECTED_SHA: ${{ github.sha }}
-        run: npm run audit:production && node scripts/advanced-analytics-regression.mjs && node scripts/headshot-production-regression.mjs
+        run: node scripts/production-regression.mjs
+
+      - name: Run regular-season production regression
+        id: regular_season_smoke
+        if: steps.smoke.outcome == 'success'
+        env:
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
+        run: node scripts/regular-season-production-regression.mjs
+
+      - name: Run health content production regression
+        id: health_content_smoke
+        if: steps.regular_season_smoke.outcome == 'success'
+        env:
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
+        run: node scripts/health-content-audit-production-regression.mjs
+
+      - name: Run Market cache production regression
+        id: market_cache_smoke
+        if: steps.health_content_smoke.outcome == 'success'
+        env:
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
+        run: node scripts/market-cache-production-regression.mjs
+
+      - name: Run advanced analytics API production regression
+        id: analytics_api_smoke
+        if: steps.market_cache_smoke.outcome == 'success'
+        env:
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
+        run: node scripts/advanced-analytics-regression.mjs
+
+      - name: Run player headshot production regression
+        id: headshot_production_smoke
+        if: steps.analytics_api_smoke.outcome == 'success'
+        env:
+          WORKER_URL: ${{ env.PRODUCTION_URL }}
+        run: node scripts/headshot-production-regression.mjs
 
       - name: Run Fan Events production regression
         id: fan_events_smoke
-        if: steps.smoke.outcome == 'success'
+        if: steps.headshot_production_smoke.outcome == 'success'
         env:
           PRODUCTION_URL: ${{ env.PRODUCTION_URL }}
         run: node scripts/fan-events-production-regression.mjs
@@ -254,6 +302,11 @@ jobs:
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
           FRONTDOOR_OUTCOME: ${{ steps.frontdoor.outcome }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          REGULAR_SEASON_OUTCOME: ${{ steps.regular_season_smoke.outcome }}
+          HEALTH_CONTENT_OUTCOME: ${{ steps.health_content_smoke.outcome }}
+          MARKET_CACHE_OUTCOME: ${{ steps.market_cache_smoke.outcome }}
+          ANALYTICS_API_OUTCOME: ${{ steps.analytics_api_smoke.outcome }}
+          HEADSHOT_PRODUCTION_OUTCOME: ${{ steps.headshot_production_smoke.outcome }}
           FAN_EVENTS_OUTCOME: ${{ steps.fan_events_smoke.outcome }}
           BROWSER_OUTCOME: ${{ steps.browser.outcome }}
           MEDIA_BROWSER_OUTCOME: ${{ steps.media_browser.outcome }}
@@ -276,7 +329,12 @@ jobs:
           elif [[ "$SOURCE_CURRENT" != "true" ]]; then STATUS="stale deploy source skipped; current main is ${CURRENT_MAIN_SHA:-unknown}";
           elif [[ "$DEPLOY_OUTCOME" != "success" ]]; then STATUS='Cloudflare deploy failed';
           elif [[ "$FRONTDOOR_OUTCOME" != "success" ]]; then STATUS="deployed + canonical front door ${FRONTDOOR_OUTCOME:-not-run}";
-          elif [[ "$SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + production regression ${SMOKE_OUTCOME:-not-run}";
+          elif [[ "$SMOKE_OUTCOME" != "success" ]]; then STATUS="deployed + core production regression ${SMOKE_OUTCOME:-not-run}";
+          elif [[ "$REGULAR_SEASON_OUTCOME" != "success" ]]; then STATUS="deployed + regular-season production regression ${REGULAR_SEASON_OUTCOME:-not-run}";
+          elif [[ "$HEALTH_CONTENT_OUTCOME" != "success" ]]; then STATUS="deployed + health content production regression ${HEALTH_CONTENT_OUTCOME:-not-run}";
+          elif [[ "$MARKET_CACHE_OUTCOME" != "success" ]]; then STATUS="deployed + market cache production regression ${MARKET_CACHE_OUTCOME:-not-run}";
+          elif [[ "$ANALYTICS_API_OUTCOME" != "success" ]]; then STATUS="deployed + advanced analytics API production regression ${ANALYTICS_API_OUTCOME:-not-run}";
+          elif [[ "$HEADSHOT_PRODUCTION_OUTCOME" != "success" ]]; then STATUS="deployed + player headshot production regression ${HEADSHOT_PRODUCTION_OUTCOME:-not-run}";
           elif [[ "$FAN_EVENTS_OUTCOME" != "success" ]]; then STATUS="deployed + Fan Events production regression ${FAN_EVENTS_OUTCOME:-not-run}";
           elif [[ "$BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + browser navigation regression ${BROWSER_OUTCOME:-not-run}";
           elif [[ "$MEDIA_BROWSER_OUTCOME" != "success" ]]; then STATUS="deployed + Listen Watch browser regression ${MEDIA_BROWSER_OUTCOME:-not-run}";
@@ -318,7 +376,12 @@ jobs:
             echo '- Fan Event runtime readiness: see the production regression evidence below; direct Worker secrets may be configured even when GitHub staging is false'
             echo "- Deploy outcome: ${DEPLOY_OUTCOME:-unknown}"
             echo "- Canonical front door: ${FRONTDOOR_OUTCOME:-not-run}"
-            echo "- Production regression: ${SMOKE_OUTCOME:-not-run}"
+            echo "- Core production regression: ${SMOKE_OUTCOME:-not-run}"
+            echo "- Regular-season production regression: ${REGULAR_SEASON_OUTCOME:-not-run}"
+            echo "- Health content production regression: ${HEALTH_CONTENT_OUTCOME:-not-run}"
+            echo "- Market cache production regression: ${MARKET_CACHE_OUTCOME:-not-run}"
+            echo "- Advanced analytics API production regression: ${ANALYTICS_API_OUTCOME:-not-run}"
+            echo "- Player headshot production regression: ${HEADSHOT_PRODUCTION_OUTCOME:-not-run}"
             echo "- Fan Events production regression: ${FAN_EVENTS_OUTCOME:-not-run}"
             echo "- Browser navigation regression: ${BROWSER_OUTCOME:-not-run}"
             echo "- Listen Watch browser regression: ${MEDIA_BROWSER_OUTCOME:-not-run}"
@@ -343,7 +406,8 @@ jobs:
               echo '```'
             fi
             if [[ -f /tmp/custom-domain-smoke.json ]]; then echo; echo '## Canonical front door regression'; echo; echo '```json'; cat /tmp/custom-domain-smoke.json; echo '```'; fi
-            if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Production regression'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
+            if [[ -f /tmp/cloudflare-smoke.json ]]; then echo; echo '## Core production regression and API truth'; echo; echo '```json'; cat /tmp/cloudflare-smoke.json; echo '```'; fi
+            if [[ -f /tmp/market-cache-production-smoke.json ]]; then echo; echo '## Market cache production regression'; echo; echo '```json'; cat /tmp/market-cache-production-smoke.json; echo '```'; fi
             if [[ -f /tmp/fan-events-production-smoke.json ]]; then echo; echo '## Fan Events production regression'; echo; echo '```json'; cat /tmp/fan-events-production-smoke.json; echo '```'; fi
             if [[ -f /tmp/headshot-production-smoke.json ]]; then echo; echo '## Player headshot production regression'; echo; echo '```json'; cat /tmp/headshot-production-smoke.json; echo '```'; fi
             if [[ -f /tmp/browser-nav-smoke.json ]]; then echo; echo '## Browser navigation regression'; echo; echo '```json'; cat /tmp/browser-nav-smoke.json; echo '```'; fi
