@@ -26,14 +26,27 @@ test('GitHub secret staging is not mislabeled as runtime provider readiness',()=
   assert.doesNotMatch(workflow,/Fan Event providers configured: Eventbrite=\$\{EVENTBRITE_GITHUB_READY/);
 });
 
-test('Fan Events production contract blocks the browser release chain',()=>{
-  const productionAudit=workflow.indexOf('- name: Run production regression audit');
-  const fanEvents=workflow.indexOf('- name: Run Fan Events production regression');
-  const selenium=workflow.indexOf('- name: Install Selenium for browser regressions');
-  const browser=workflow.indexOf('- name: Run browser navigation stress test');
-  assert.ok(productionAudit>=0&&fanEvents>productionAudit&&selenium>fanEvents&&browser>selenium);
+test('Fan Events production contract blocks the browser release chain after every server-side production gate',()=>{
+  const orderedSteps=[
+    '- name: Run core production regression audit',
+    '- name: Run regular-season production regression',
+    '- name: Run health content production regression',
+    '- name: Run Market cache production regression',
+    '- name: Run advanced analytics API production regression',
+    '- name: Run player headshot production regression',
+    '- name: Run Fan Events production regression',
+    '- name: Install Selenium for browser regressions',
+    '- name: Run browser navigation stress test'
+  ];
+  let previous=-1;
+  for(const step of orderedSteps){
+    const index=workflow.indexOf(step);
+    assert.ok(index>previous,`${step} must follow the previous release gate`);
+    previous=index;
+  }
   assert.match(workflow,/id: fan_events_smoke/);
   assert.match(workflow,/run: node scripts\/fan-events-production-regression\.mjs/);
+  assert.match(workflow,/- name: Run Fan Events production regression\s+id: fan_events_smoke\s+if: steps\.headshot_production_smoke\.outcome == 'success'/);
   assert.match(workflow,/- name: Install Selenium for browser regressions\s+if: steps\.fan_events_smoke\.outcome == 'success'/);
   assert.match(workflow,/- name: Run browser navigation stress test\s+id: browser\s+if: steps\.fan_events_smoke\.outcome == 'success'/);
 });
