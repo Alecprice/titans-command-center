@@ -1,12 +1,12 @@
-export const ROSTER_AUDIT_DATE='2026-09-02';
-export const ROSTER_SOURCE_CONFLICT='The official active roster/player pages contain the newest jersey assignments, while the official transactions log is newer than the roster table for reserve and practice-squad status on Sept. 2. Latest dated official transactions therefore override lagging roster-table membership/status.';
+export const ROSTER_AUDIT_DATE='2026-09-08';
+export const ROSTER_SOURCE_CONFLICT='The official active roster/player pages remain current on Sept. 8, while the official transactions log has no dated membership moves after Sept. 2. Latest dated official transactions therefore continue to control reserve and practice-squad membership/status when a roster table lags; current roster/player pages control jersey and bio fields.';
 export const ROSTER_SOURCE_URL='https://www.tennesseetitans.com/team/rosters';
 export const ROSTER_53_SOURCE_URL='https://www.tennesseetitans.com/news/updated-53-man-roster-for-the-titans';
 export const ROSTER_TRANSACTION_SOURCE_URL='https://www.tennesseetitans.com/team/transactions/';
 export const PRACTICE_SQUAD_SOURCE_URL='https://www.tennesseetitans.com/news/titans-add-four-to-practice-squad-waive-three-others-from-practice-squad';
 
 // Compatibility export name is retained because other runtime modules already import it.
-// Membership/status is audited through Sept. 2, 2026. The current-team fallback
+// Membership/status is audited through Sept. 8, 2026. The current-team fallback
 // intentionally contains only the 53-player Active roster plus seven reserve-list
 // players. Practice-squad players remain a separate roster class below.
 export const auditedRoster20260831=[
@@ -73,6 +73,7 @@ export const auditedRoster20260831=[
 ];
 
 export const auditedRoster20260902=auditedRoster20260831;
+export const auditedRoster20260908=auditedRoster20260831;
 
 export const auditedPracticeSquad20260902=[
   {name:'Shemar Bartholomew',number:'45',position:'CB',unit:'Defense',status:'Practice Squad'},
@@ -93,3 +94,5 @@ export const auditedPracticeSquad20260902=[
   {name:'Joel Wilson',number:'83',position:'TE',unit:'Offense',status:'Practice Squad'},
   {name:'Laki Tasi',number:'68',position:'DT',unit:'Defense',status:'Practice Squad/International'}
 ];
+
+export const auditedPracticeSquad20260908=auditedPracticeSquad20260902;
