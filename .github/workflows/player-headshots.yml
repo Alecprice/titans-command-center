@@ -12,6 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -65,12 +66,31 @@ jobs:
           PY
 
       - name: Commit refreshed manifest
+        id: commit_manifest
         shell: bash
         run: |
+          set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add assets/data/player-headshots.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'chore: refresh Titans player headshots'
-            git push
+          if git diff --cached --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          git commit -m 'chore: refresh Titans player headshots'
+          git push
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch production release for refreshed manifest
+        if: steps.commit_manifest.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            -X POST \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/cloudflare-deploy.yml/dispatches" \
+            -f ref='main' >/dev/null
+          echo 'Dispatched Titans Cloudflare Deploy for the refreshed headshot manifest on main.'
