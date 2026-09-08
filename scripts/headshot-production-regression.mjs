@@ -1,14 +1,35 @@
 const base=String(process.env.WORKER_URL||process.env.PRODUCTION_URL||'https://titans-command-center.alecjordanprice.workers.dev').replace(/\/$/,'');
 const allowedHosts=new Set(['static.clubs.nfl.com','static.www.nfl.com','static.nfl.com','a.espncdn.com','a1.espncdn.com']);
 const allowedOmissionReasons=new Set(['no-approved-headshot-url','missing-player-name']);
+const transientCodes=new Set(['ECONNRESET','ETIMEDOUT','EAI_AGAIN','ENETUNREACH','EHOSTUNREACH']);
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const started=Date.now();
+const transportRetries={manifest:0,root:0,js:0,css:0};
 
+function isTransientTransport(error){
+  const code=String(error?.cause?.code||error?.code||'').toUpperCase();
+  return transientCodes.has(code)||(error?.name==='TypeError'&&/fetch failed/i.test(String(error?.message||'')));
+}
+async function fetchAudit(path,label){
+  let lastError;
+  for(let attempt=1;attempt<=2;attempt++){
+    try{
+      return await fetch(`${base}${path}`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)});
+    }catch(error){
+      lastError=error;
+      if(attempt>=2||!isTransientTransport(error))throw error;
+      transportRetries[label]+=1;
+    }
+  }
+  throw lastError;
+}
+
+const auditNonce=Date.now();
 const [manifestResponse,rootResponse,jsResponse,cssResponse]=await Promise.all([
-  fetch(`${base}/assets/data/player-headshots.json?audit=${Date.now()}`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)}),
-  fetch(`${base}/`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)}),
-  fetch(`${base}/headshot-polish.js?v=31`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)}),
-  fetch(`${base}/headshot-polish.css?v=31`,{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(15000)})
+  fetchAudit(`/assets/data/player-headshots.json?audit=${auditNonce}`,'manifest'),
+  fetchAudit('/','root'),
+  fetchAudit('/headshot-polish.js?v=31','js'),
+  fetchAudit('/headshot-polish.css?v=31','css')
 ]);
 assert(manifestResponse.ok,`Headshot manifest returned ${manifestResponse.status}`);
 assert(rootResponse.ok,`Root returned ${rootResponse.status}`);
@@ -47,6 +68,7 @@ const result={
   omissionReasons,
   omittedPlayers:omittedPlayers.map(({name,number,position,status,reason})=>({name,number,position,status,reason})),
   allowedHosts:[...allowedHosts],
+  transportRetries,
   durationMs:Date.now()-started,
   testedAt:new Date().toISOString()
 };
