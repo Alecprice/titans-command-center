@@ -90,5 +90,11 @@ export async function* streamCsv(url, options = {}) {
   yield* streamCsvRowsFromReadable(response.body);
 }
 
-export const numberOrNull = value => value === '' || value == null || Number.isNaN(Number(value)) ? null : Number(value);
+export const numberOrNull = value => {
+  if (value == null || (typeof value !== 'string' && typeof value !== 'number')) return null;
+  const normalized = typeof value === 'string' ? value.trim() : value;
+  if (normalized === '' || (typeof normalized === 'string' && normalized.toUpperCase() === 'NA')) return null;
+  const number = Number(normalized);
+  return Number.isFinite(number) ? number : null;
+};
 export const textOrNull = value => value == null || String(value).trim() === '' || String(value).trim().toUpperCase() === 'NA' ? null : String(value).trim();
