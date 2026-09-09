@@ -4,6 +4,8 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const raw=await readFile(new URL('../media-search-v14.js',import.meta.url),'utf8');
+const affiliateRaw=await readFile(new URL('../media-affiliates-v14.js',import.meta.url),'utf8');
+const knownCallsigns=new Set([...affiliateRaw.matchAll(/call:'([A-Z]{4})'/g)].map(match=>match[1]));
 const source=raw
   .replace(/^import .*?;\n\n/,'')
   .replace("  window.addEventListener('hashchange'","  globalThis.__mediaSearchTest={mediaIntent,affiliateHandoff,callsignHandoff};\n  window.addEventListener('hashchange'");
@@ -18,7 +20,8 @@ const sandbox={
   history:{replaceState(){}},
   requestAnimationFrame(){return 0},
   Event:class{},
-  encodeURIComponent
+  encodeURIComponent,
+  TitansMediaAffiliates:{isKnownCallsign:value=>knownCallsigns.has(String(value||'').trim().toUpperCase())}
 };
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox);
