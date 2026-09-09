@@ -127,10 +127,14 @@ export function gameStatus(game, now = new Date()) {
 }
 
 export function normalizeEspnEvent(event) {
-  const competition = event?.competitions?.[0];
-  const competitors = competition?.competitors || [];
+  if (!event || typeof event !== 'object' || Array.isArray(event)) return null;
+  const competitions = Array.isArray(event.competitions) ? event.competitions : [];
+  const competition = competitions.find(value => value && typeof value === 'object' && !Array.isArray(value)) || null;
+  const competitors = Array.isArray(competition?.competitors)
+    ? competition.competitors.filter(value => value && typeof value === 'object' && !Array.isArray(value))
+    : [];
   const ten = competitors.find(c => c.team?.abbreviation === 'TEN');
-  const opp = competitors.find(c => c.team?.abbreviation !== 'TEN');
+  const opp = competitors.find(c => c.team?.abbreviation && c.team.abbreviation !== 'TEN');
   if (!ten || !opp) return null;
   return {
     id: event.id,
