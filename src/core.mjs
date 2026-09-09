@@ -71,13 +71,18 @@ export function latestTransaction(transactions) {
 }
 
 export function filterFeed(items, filters = {}) {
-  const query = (filters.query || '').trim().toLowerCase();
-  return items.filter(item => {
-    if (filters.type && filters.type !== 'all' && item.type !== filters.type) return false;
-    if (filters.tier && filters.tier !== 'all' && item.tier !== filters.tier) return false;
-    if (filters.topic && filters.topic !== 'all' && !(item.topics || []).includes(filters.topic)) return false;
+  const safeFilters = filters && typeof filters === 'object' && !Array.isArray(filters) ? filters : {};
+  const query = String(safeFilters.query ?? '').trim().toLowerCase();
+  const type = typeof safeFilters.type === 'string' ? safeFilters.type : 'all';
+  const tier = typeof safeFilters.tier === 'string' ? safeFilters.tier : 'all';
+  const topic = typeof safeFilters.topic === 'string' ? safeFilters.topic : 'all';
+  return (Array.isArray(items) ? items : []).filter(item => item && typeof item === 'object' && !Array.isArray(item)).filter(item => {
+    const topics = Array.isArray(item.topics) ? item.topics.filter(value => typeof value === 'string') : [];
+    if (type !== 'all' && item.type !== type) return false;
+    if (tier !== 'all' && item.tier !== tier) return false;
+    if (topic !== 'all' && !topics.includes(topic)) return false;
     if (query) {
-      const haystack = [item.title, item.summary, item.source, ...(item.topics || [])].join(' ').toLowerCase();
+      const haystack = [item.title, item.summary, item.source, ...topics].map(value => String(value ?? '')).join(' ').toLowerCase();
       if (!haystack.includes(query)) return false;
     }
     return true;
