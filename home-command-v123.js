@@ -10,6 +10,7 @@
 
   let data=null;
   let loading=null;
+  let clockTimer=null;
 
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const rows=value=>Array.isArray(value)?value:[];
@@ -97,6 +98,7 @@
     }).catch(()=>data).finally(()=>{
       loading=null;
       mount();
+      syncClock();
     });
     return loading;
   }
@@ -113,6 +115,8 @@
     if(!Number.isFinite(kickoff)||game?.dateTbd)return 'Kickoff TBD';
     const diff=kickoff-Date.now();
     if(diff<=0)return 'Kickoff window';
+    const minutes=Math.ceil(diff/60000);
+    if(minutes<60)return `${minutes}m to kickoff`;
     const hours=Math.ceil(diff/3600000);
     if(hours<24)return `${hours}h to kickoff`;
     const days=Math.ceil(diff/86400000);
@@ -195,7 +199,7 @@
     const games=rows(data?.games);
     const focus=runtime.scheduleFocus?.(games)||{};
     const game=focus.game||{};
-    return JSON.stringify([focus.state||'none',game.id||'',game.date||'',game.status||'',game.opponentAbbr||'',game.network||'',isRegularSeasonOpener(game),Boolean(data),Boolean(compact)]);
+    return JSON.stringify([focus.state||'none',game.id||'',game.date||'',game.status||'',game.opponentAbbr||'',game.network||'',countdown(game,focus.state||'none'),isRegularSeasonOpener(game),Boolean(data),Boolean(compact)]);
   }
 
   function placeRoot(root,hero,deck){
@@ -234,6 +238,21 @@
     root.innerHTML=`${header}<div class="home-command-v123-grid">${focusMarkup()}${launchMarkup()}</div>`;
   }
 
+  function syncClock(){
+    if(clockTimer){clearTimeout(clockTimer);clockTimer=null;}
+    if(route()!=='home')return;
+    const games=rows(data?.games);
+    const focus=runtime.scheduleFocus?.(games)||{};
+    const game=focus.game||null;
+    const kickoff=new Date(game?.date).getTime();
+    if(!game||game?.dateTbd||game?.status==='final'||!Number.isFinite(kickoff))return;
+    clockTimer=setTimeout(()=>{
+      clockTimer=null;
+      mount();
+      syncClock();
+    },60000);
+  }
+
   app.addEventListener('click',event=>{
     const trigger=event.target instanceof Element?event.target.closest('[data-home-command-customize]'):null;
     if(!trigger)return;
@@ -243,10 +262,12 @@
     if(settings instanceof HTMLElement)settings.click();
   });
 
-  runtime.onRoute(mount,{immediate:true});
-  runtime.onAppRender(mount,{immediate:true});
+  const render=()=>{mount();syncClock();};
+  runtime.onRoute(render,{immediate:true});
+  runtime.onAppRender(render,{immediate:true});
   runtime.onRefresh(()=>{
     data=null;
     if(route()==='home')load(true);
+    syncClock();
   });
 })();
