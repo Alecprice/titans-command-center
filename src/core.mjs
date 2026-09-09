@@ -143,10 +143,18 @@ export function normalizeEspnEvent(event) {
   };
 }
 
+function gameDateMs(game) {
+  const time = game?.date ? new Date(game.date).getTime() : Number.NaN;
+  return Number.isFinite(time) ? time : Number.POSITIVE_INFINITY;
+}
+
 export function mergeLiveGames(existingGames, liveGames) {
-  const merged = [...existingGames];
-  for (const live of liveGames) {
+  const merged = (Array.isArray(existingGames) ? existingGames : [])
+    .filter(game => game && typeof game === 'object');
+  for (const live of (Array.isArray(liveGames) ? liveGames : [])) {
+    if (!live || typeof live !== 'object') continue;
     const liveDate = new Date(live.date).getTime();
+    if (!Number.isFinite(liveDate) || !live.opponentAbbr || !live.homeAway) continue;
     const index = merged.findIndex(game =>
       game.date &&
       game.opponentAbbr === live.opponentAbbr &&
@@ -158,9 +166,5 @@ export function mergeLiveGames(existingGames, liveGames) {
       merged[index] = { ...canonical, ...live, id: canonical.id, week: canonical.week, source: `${canonical.source || 'verified schedule'} + ESPN` };
     } else merged.push(live);
   }
-  return merged.sort((a, b) => {
-    const aTime = a.date ? new Date(a.date).getTime() : Number.POSITIVE_INFINITY;
-    const bTime = b.date ? new Date(b.date).getTime() : Number.POSITIVE_INFINITY;
-    return aTime - bTime;
-  });
+  return merged.sort((a, b) => gameDateMs(a) - gameDateMs(b));
 }
