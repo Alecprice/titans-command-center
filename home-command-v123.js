@@ -10,8 +10,10 @@
 
   let data=null;
   let loading=null;
+  let countdownTimer=null;
+  const COUNTDOWN_REFRESH_MS=60000;
 
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
   const rows=value=>Array.isArray(value)?value:[];
   const route=()=>runtime.route();
   const customDeck=()=>app.querySelector('[data-v10-home]');
@@ -113,10 +115,28 @@
     if(!Number.isFinite(kickoff)||game?.dateTbd)return 'Kickoff TBD';
     const diff=kickoff-Date.now();
     if(diff<=0)return 'Kickoff window';
-    const hours=Math.ceil(diff/3600000);
+    const minutes=Math.ceil(diff/60000);
+    if(minutes<60)return `${minutes}m to kickoff`;
+    const hours=Math.ceil(minutes/60);
     if(hours<24)return `${hours}h to kickoff`;
-    const days=Math.ceil(diff/86400000);
+    const days=Math.ceil(hours/24);
     return `${days}d to kickoff`;
+  }
+
+  function stopCountdownTimer(){
+    if(countdownTimer==null)return;
+    clearInterval(countdownTimer);
+    countdownTimer=null;
+  }
+
+  function syncCountdownTimer(){
+    const focus=runtime.scheduleFocus?.(rows(data?.games))||{};
+    const game=focus.game||null;
+    const kickoff=new Date(game?.date).getTime();
+    const shouldRun=route()==='home'&&Boolean(game)&&game?.status!=='final'&&!game?.dateTbd&&Number.isFinite(kickoff);
+    if(!shouldRun){stopCountdownTimer();return;}
+    if(countdownTimer!=null)return;
+    countdownTimer=setInterval(()=>mount(),COUNTDOWN_REFRESH_MS);
   }
 
   function kickoffLabel(game){
@@ -195,7 +215,7 @@
     const games=rows(data?.games);
     const focus=runtime.scheduleFocus?.(games)||{};
     const game=focus.game||{};
-    return JSON.stringify([focus.state||'none',game.id||'',game.date||'',game.status||'',game.opponentAbbr||'',game.network||'',isRegularSeasonOpener(game),Boolean(data),Boolean(compact)]);
+    return JSON.stringify([focus.state||'none',game.id||'',game.date||'',game.status||'',game.opponentAbbr||'',game.network||'',countdown(game,focus.state||'none'),isRegularSeasonOpener(game),Boolean(data),Boolean(compact)]);
   }
 
   function placeRoot(root,hero,deck){
@@ -207,11 +227,12 @@
   }
 
   function mount(){
-    if(route()!=='home')return;
+    if(route()!=='home'){stopCountdownTimer();return;}
     const hero=app.querySelector('.fan-hero');
     if(!hero)return;
     ensureStyles();
     if(!data&&!loading)load();
+    syncCountdownTimer();
 
     let root=app.querySelector('.home-command-v123');
     if(!root){
