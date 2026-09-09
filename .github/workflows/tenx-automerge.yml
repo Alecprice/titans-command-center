@@ -97,6 +97,47 @@ jobs:
             exit 0
           fi
 
+          lane_status=''
+          lane_conclusion=''
+          lane_url=''
+          lane_run_id=''
+          for attempt in $(seq 1 60); do
+            lane_runs_json="$(
+              gh api \
+                -H 'X-GitHub-Api-Version: 2026-03-10' \
+                -X GET \
+                "repos/${GITHUB_REPOSITORY}/actions/workflows/tenx-lane-guard.yml/runs" \
+                -f event='pull_request' \
+                -f head_sha="$head_sha" \
+                -f per_page=100
+            )"
+            lane_run_json="$(
+              jq -c --arg sha "$head_sha" \
+                '[.workflow_runs[]? | select(.head_sha == $sha and .event == "pull_request")] | sort_by(.created_at) | last // empty' \
+                <<<"$lane_runs_json"
+            )"
+            if [[ -n "$lane_run_json" ]]; then
+              lane_status="$(jq -r '.status // ""' <<<"$lane_run_json")"
+              lane_conclusion="$(jq -r '.conclusion // ""' <<<"$lane_run_json")"
+              lane_url="$(jq -r '.html_url // ""' <<<"$lane_run_json")"
+              lane_run_id="$(jq -r '.id // ""' <<<"$lane_run_json")"
+              if [[ "$lane_status" == 'completed' ]]; then
+                break
+              fi
+            fi
+            sleep 2
+          done
+
+          if [[ "$lane_status" != 'completed' ]]; then
+            echo "TENX auto-merge withheld: exact-sha Lane Guard did not complete for ${head_sha}; last run=${lane_run_id:-none}, status=${lane_status:-missing}."
+            exit 0
+          fi
+          if [[ "$lane_conclusion" != 'success' ]]; then
+            echo "TENX auto-merge withheld: exact-sha Lane Guard run ${lane_run_id} concluded ${lane_conclusion:-unknown}. ${lane_url}"
+            exit 0
+          fi
+          echo "TENX Lane Guard confirmed collision-free for ${head_sha}: ${lane_url}"
+
           for attempt in 1 2 3 4 5; do
             pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${pr_number}")"
             mergeable="$(jq -r 'if .mergeable == null then "unknown" else (.mergeable|tostring) end' <<<"$pr_json")"
