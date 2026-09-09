@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  actions: write
   contents: write
+  actions: write
 
 concurrency:
   group: titans-player-headshots
