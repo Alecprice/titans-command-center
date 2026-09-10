@@ -2,10 +2,10 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-09-09T15:18:01.824080+00:00",
-  "rosterRows": 93,
-  "headshotCount": 91,
-  "coveragePct": 97.8,
+  "generatedAt": "2026-09-10T15:11:49.766968+00:00",
+  "rosterRows": 94,
+  "headshotCount": 92,
+  "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
     "no-approved-headshot-url": 2
@@ -92,6 +92,18 @@
       "gsisId": "00-0038620",
       "espnId": "4373320",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/hnpxgdu65sr9w51rkp6g",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Isaiah Oliver",
+      "normalizedName": "isaiaholiver",
+      "number": "34",
+      "position": "DB",
+      "status": "DEV",
+      "gsisId": "00-0034357",
+      "espnId": "3915437",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/kkjrgyvwont6cdbhu9y2",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
