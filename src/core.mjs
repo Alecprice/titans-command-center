@@ -112,13 +112,15 @@ export function relativeTime(iso, now = new Date()) {
 }
 
 export function gameStatus(game, now = new Date()) {
+  if (!game || typeof game !== 'object' || Array.isArray(game)) return 'TBD';
   if (game.status === 'bye') return 'Bye';
   if (game.status === 'final') return 'Final';
   if (game.status === 'live') return game.detail || 'Live';
   if (game.dateTbd || !game.date) return 'TBD';
-  const start = new Date(game.date);
-  const diff = start - now;
-  if (!Number.isFinite(diff)) return 'TBD';
+  const startTime = new Date(game.date).getTime();
+  const nowTime = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  if (!Number.isFinite(startTime) || !Number.isFinite(nowTime)) return 'TBD';
+  const diff = startTime - nowTime;
   if (diff <= 0) return 'Scheduled';
   const days = Math.floor(diff / 86400000);
   if (days >= 1) return `${days}d away`;
