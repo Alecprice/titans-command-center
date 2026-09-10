@@ -162,9 +162,9 @@ function gameDateMs(game) {
 
 export function mergeLiveGames(existingGames, liveGames) {
   const merged = (Array.isArray(existingGames) ? existingGames : [])
-    .filter(game => game && typeof game === 'object');
+    .filter(game => game && typeof game === 'object' && !Array.isArray(game));
   for (const live of (Array.isArray(liveGames) ? liveGames : [])) {
-    if (!live || typeof live !== 'object') continue;
+    if (!live || typeof live !== 'object' || Array.isArray(live)) continue;
     const liveDate = new Date(live.date).getTime();
     if (!Number.isFinite(liveDate) || !live.opponentAbbr || !live.homeAway) continue;
     const index = merged.findIndex(game =>
