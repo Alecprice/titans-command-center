@@ -1,11 +1,11 @@
 # Cloudflare deployment status
 
-- Status: **deployed + Ask Titans browser regression failure**
-- Source commit: `0aa5b562e759f7fec40b963b3c32f22a80ecacc9`
+- Status: **deployed + canonical front door + full production + browser + media + market + tickets + command intelligence + fan events + player intelligence + game day + Ask Titans + change intelligence + 365 mode + freshness + account + analytics + player headshot regressions passed**
+- Source commit: `39efb77267fdc02619b48124d46e9ddb146b97ad`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `0aa5b562e759f7fec40b963b3c32f22a80ecacc9`
+- Main SHA observed before deploy: `39efb77267fdc02619b48124d46e9ddb146b97ad`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers staged in GitHub: SeatGeek=false, Ticketmaster=false, StubHub=false
@@ -21,16 +21,16 @@
 - Ticket Center browser regression: success
 - Command Intelligence browser regression: success
 - Player Intelligence / Game Day browser regression: success
-- Ask Titans browser regression: failure
-- Change Intelligence browser regression: skipped
-- Runtime / 365 Mode browser regression: skipped
-- Data freshness browser regression: skipped
-- Account / Guest browser regression: skipped
-- Advanced analytics browser regression: skipped
-- Player headshot browser regression: skipped
+- Ask Titans browser regression: success
+- Change Intelligence browser regression: success
+- Runtime / 365 Mode browser regression: success
+- Data freshness browser regression: success
+- Account / Guest browser regression: success
+- Advanced analytics browser regression: success
+- Player headshot browser regression: success
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-10T00:32:19Z
+- Recorded: 2026-09-10T15:14:13Z
 
 ## Canonical front door regression
 
@@ -39,13 +39,13 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "expectedCommit": "0aa5b562e759f7fec40b963b3c32f22a80ecacc9",
-  "deployedCommit": "0aa5b562e759f7fec40b963b3c32f22a80ecacc9",
-  "rollbackCommit": "0aa5b562e759f7fec40b963b3c32f22a80ecacc9",
+  "expectedCommit": "39efb77267fdc02619b48124d46e9ddb146b97ad",
+  "deployedCommit": "39efb77267fdc02619b48124d46e9ddb146b97ad",
+  "rollbackCommit": "39efb77267fdc02619b48124d46e9ddb146b97ad",
   "rollbackCurrent": true,
   "version": "1.0.0",
   "rollbackVersion": "1.0.0",
-  "revisionAttempts": 5,
+  "revisionAttempts": 2,
   "shellPropagationAttempts": 1,
   "shellPaths": [
     "/",
@@ -92,9 +92,9 @@
     }
   },
   "cloudFront": {
-    "requestId": "eaCeoG3rM5XvQiRDKfDw3f5RYZXwQ0mptMcBRTqgZX6nbZ7ldrzEuQ==",
-    "pop": "SFO5-P1",
-    "via": "1.1 9525a1adf6d0a16da3bb7589fe5684a4.cloudfront.net (CloudFront)",
+    "requestId": "Lv2UVOblUHMTm6VD4fbHDRI6gzDnxYZLZOLv-bOZ5vtEfEzD2GJrxA==",
+    "pop": "PHX50-P1",
+    "via": "1.1 9c625a1ab662710c3b6d251a0b27b20e.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -119,14 +119,14 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 423,
-    "originMeta": 177,
-    "canonicalRoot": 124,
-    "originRoot": 53,
-    "health": 226,
-    "originHealth": 176
+    "canonicalMeta": 103,
+    "originMeta": 733,
+    "canonicalRoot": 60,
+    "originRoot": 203,
+    "health": 267,
+    "originHealth": 414
   },
-  "testedAt": "2026-09-10T00:30:50.533Z"
+  "testedAt": "2026-09-10T15:12:56.645Z"
 }```
 
 ## Production regression
@@ -186,19 +186,19 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "0aa5b562e759f7fec40b963b3c32f22a80ecacc9",
-    "builtAt": "2026-09-10T00:30:13.254Z"
+    "commit": "39efb77267fdc02619b48124d46e9ddb146b97ad",
+    "builtAt": "2026-09-10T15:12:32.208Z"
   },
-  "deploymentPropagationAttempts": 1,
+  "deploymentPropagationAttempts": 2,
   "responseMs": {
-    "root": 112,
-    "health": 188,
-    "data": 161,
-    "stats": 580,
-    "market": 1638,
-    "analytics": 292
+    "root": 37,
+    "health": 196,
+    "data": 256,
+    "stats": 508,
+    "market": 1473,
+    "analytics": 268
   },
-  "testedAt": "2026-09-10T00:31:08.305Z",
+  "testedAt": "2026-09-10T15:13:06.616Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-snapshot",
@@ -210,30 +210,25 @@
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
     "responseMs": 330,
-    "testedAt": "2026-09-10T00:31:08.983Z"
+    "testedAt": "2026-09-10T15:13:07.228Z"
   },
   "marketEdgeCache": {
     "ok": true,
     "base": "https://titans.alecjprice.com",
-    "initialStatus": "MISS",
+    "initialStatus": "HIT",
     "finalStatus": "HIT",
-    "attempts": 2,
-    "coldOrInitialMs": 751,
-    "warmHitMs": 117,
+    "attempts": 1,
+    "coldOrInitialMs": 309,
+    "warmHitMs": 309,
     "rows": 702,
     "sequence": [
       {
-        "status": "MISS",
-        "durationMs": 751,
-        "rows": 702
-      },
-      {
         "status": "HIT",
-        "durationMs": 117,
+        "durationMs": 309,
         "rows": 702
       }
     ],
-    "testedAt": "2026-09-10T00:31:10.235Z"
+    "testedAt": "2026-09-10T15:13:07.569Z"
   },
   "analyticsStatus": 200,
   "analyticsMode": "cloudflare-d1",
@@ -276,8 +271,8 @@
     "Eventbrite",
     "Skiddle"
   ],
-  "fetchedAt": "2026-09-10T00:31:10.927Z",
-  "testedAt": "2026-09-10T00:31:11.451Z"
+  "fetchedAt": "2026-09-10T15:13:08.215Z",
+  "testedAt": "2026-09-10T15:13:08.581Z"
 }```
 
 ## Player headshot production regression
@@ -287,10 +282,10 @@
   "ok": true,
   "base": "https://titans.alecjprice.com",
   "season": 2026,
-  "generatedAt": "2026-09-09T15:18:01.824080+00:00",
-  "rosterRows": 93,
-  "headshotCount": 91,
-  "coveragePct": 97.8,
+  "generatedAt": "2026-09-10T15:11:49.766968+00:00",
+  "rosterRows": 94,
+  "headshotCount": 92,
+  "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
     "no-approved-headshot-url": 2
@@ -318,8 +313,8 @@
     "a.espncdn.com",
     "a1.espncdn.com"
   ],
-  "durationMs": 182,
-  "testedAt": "2026-09-10T00:31:10.784Z"
+  "durationMs": 134,
+  "testedAt": "2026-09-10T15:13:08.041Z"
 }```
 
 ## Browser navigation regression
@@ -377,11 +372,11 @@
       "width": 72.8125
     }
   ],
-  "maxLongTaskMs": 75,
+  "maxLongTaskMs": 68,
   "longTasksOver250ms": 0,
   "browserWarnings": [],
-  "durationSeconds": 20.68,
-  "testedAt": "2026-09-10T00:31:40Z"
+  "durationSeconds": 15.77,
+  "testedAt": "2026-09-10T15:13:28Z"
 }```
 
 ## Listen Watch browser regression
@@ -424,8 +419,8 @@
       "fallbackText": "",
       "iframe": true,
       "iframeApiScript": true,
-      "iframeSrc": "https://www.youtube.com/embed/G9z7XXt9RJg?autoplay=0&playsinline=1&rel=0&origin=https%3A%2F%2Ftitans.alecjprice.com&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Ftitans.alecjprice.com%2F%23media&aoriginsup=1&vf=1",
-      "videoId": "G9z7XXt9RJg"
+      "iframeSrc": "https://www.youtube.com/embed/MvhAdxGnFZI?autoplay=0&playsinline=1&rel=0&origin=https%3A%2F%2Ftitans.alecjprice.com&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Ftitans.alecjprice.com%2F%23media&aoriginsup=1&vf=1",
+      "videoId": "MvhAdxGnFZI"
     }
   },
   "mobileAreaTargets": [
@@ -461,11 +456,11 @@
       "level": "WARNING",
       "message": "https://www.youtube.com/s/player/8c3fda2d/www-widgetapi.vflset/www-widgetapi.js 146 Unrecognized feature: 'web-share'.",
       "source": "other",
-      "timestamp": 1789000303562
+      "timestamp": 1789053212513
     }
   ],
-  "durationSeconds": 3.76,
-  "testedAt": "2026-09-10T00:31:44Z"
+  "durationSeconds": 4.07,
+  "testedAt": "2026-09-10T15:13:33Z"
 }```
 
 ## Market Pulse browser regression
@@ -479,7 +474,7 @@
       "state": {
         "quality": "Live",
         "provider": "PropLine",
-        "shown": 80,
+        "shown": 78,
         "total": 702,
         "renderedRows": 72
       },
@@ -529,7 +524,7 @@
         "quality": "Live",
         "referenceNotice": "",
         "refreshHeight": 44,
-        "result": "Matching 80 of 702 rows",
+        "result": "Matching 78 of 702 rows",
         "resultTotal": 702,
         "rowCount": 72,
         "rowSample": [
@@ -538,7 +533,7 @@
           "New York Jets at Tennessee Titans Spread \u00b7 BetRivers \u2197SideNew York JetsLine1.5Price-112Implied52.8%"
         ],
         "scrollWidth": 1265,
-        "shown": 80,
+        "shown": 78,
         "title": "Live Titans market board",
         "total": 702,
         "viewport": 1265
@@ -549,22 +544,22 @@
         "available": true,
         "options": 3,
         "selectedValue": "25077",
-        "before": "Matching 80 of 702 rows",
-        "after": "Matching 40 of 702 rows"
+        "before": "Matching 78 of 702 rows",
+        "after": "Matching 38 of 702 rows"
       },
       "book": {
         "available": true,
         "options": 12,
         "selectedValue": "betonlineag",
-        "before": "Matching 80 of 702 rows",
+        "before": "Matching 78 of 702 rows",
         "after": "Matching 10 of 702 rows"
       },
       "category": {
         "available": true,
         "options": 2,
         "selectedValue": "game_line",
-        "before": "Matching 80 of 702 rows",
-        "after": "Matching 80 of 702 rows"
+        "before": "Matching 78 of 702 rows",
+        "after": "Matching 78 of 702 rows"
       }
     },
     "alternateLines": {
@@ -739,8 +734,8 @@
   },
   "browserWarnings": [],
   "desktopLoadAttempts": 1,
-  "durationSeconds": 5.69,
-  "testedAt": "2026-09-10T00:31:50Z"
+  "durationSeconds": 6.26,
+  "testedAt": "2026-09-10T15:13:39Z"
 }```
 
 ## Ticket Center browser regression
@@ -763,7 +758,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-new-york-jets-nashville-tennessee-09-13-2026/event/1B006470D213F665"
           ],
           "right": 1217,
-          "text": "CHEAPEST TITANS TICKET NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. New York Jets Sun, Sep 13, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 MARKETPLACE AVAILABLEVERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST TITANS TICKET NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. New York Jets Sun, Sep 13, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 MARKETPLACE AVAILABLEVERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -771,7 +766,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-philadelphia-eagles-nashville-tennessee-09-20-2026/event/1B006470D219F66B"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Philadelphia Eagles Sun, Sep 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Philadelphia Eagles Sun, Sep 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -779,7 +774,7 @@
             "https://www.ticketmaster.com/new-york-giants-vs-tennessee-titans-east-rutherford-new-jersey-09-27-2026/event/00006491C2E8E049"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS New York Giants vs. Tennessee Titans Sun, Sep 27, 1:00 PMMetLife Stadium \u00b7 East Rutherford \u00b7 NJ TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS New York Giants vs. Tennessee Titans Sun, Sep 27, 1:00 PMMetLife Stadium \u00b7 East Rutherford \u00b7 NJ TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -787,7 +782,7 @@
             "https://www.ticketmaster.com/baltimore-ravens-v-tennessee-titans-baltimore-maryland-10-04-2026/event/1500648DB7AD9D7D"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace TITANS1 SOURCE WITH OFFERS Baltimore Ravens v Tennessee Titans Sun, Oct 4, 1:00 PMM&T Bank Stadium \u00b7 Baltimore \u00b7 MD TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace TITANS1 SOURCE WITH OFFERS Baltimore Ravens v Tennessee Titans Sun, Oct 4, 1:00 PMM&T Bank Stadium \u00b7 Baltimore \u00b7 MD TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -795,7 +790,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-houston-texans-nashville-tennessee-10-11-2026/event/1B006470D200F645"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Houston Texans Sun, Oct 11, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Houston Texans Sun, Oct 11, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -803,7 +798,7 @@
             "https://www.ticketmaster.com/indianapolis-colts-vs-tennessee-titans-indianapolis-indiana-10-18-2026/event/05006474BEDEA72C"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Indianapolis Colts vs. Tennessee Titans Sun, Oct 18, 1:00 PMLucas Oil Stadium \u00b7 Indianapolis \u00b7 IN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Indianapolis Colts vs. Tennessee Titans Sun, Oct 18, 1:00 PMLucas Oil Stadium \u00b7 Indianapolis \u00b7 IN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -811,7 +806,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-cleveland-browns-nashville-tennessee-10-25-2026/event/1B006470D1F8F636"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Cleveland Browns Sun, Oct 25, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Cleveland Browns Sun, Oct 25, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -819,7 +814,7 @@
             "https://www.ticketmaster.com/cincinnati-bengals-vs-tennessee-titans-cincinnati-ohio-11-01-2026/event/16006469BBD893F2"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Cincinnati Bengals vs. Tennessee Titans Sun, Nov 1, 1:00 PMPaycor Stadium \u00b7 Cincinnati \u00b7 OH TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Cincinnati Bengals vs. Tennessee Titans Sun, Nov 1, 1:00 PMPaycor Stadium \u00b7 Cincinnati \u00b7 OH TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -827,7 +822,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-jacksonville-jaguars-nashville-tennessee-11-15-2026/event/1B006470D20DF658"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Jacksonville Jaguars Sun, Nov 15, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Jacksonville Jaguars Sun, Nov 15, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -835,7 +830,7 @@
             "https://www.ticketmaster.com/dallas-cowboys-vs-tennessee-titans-arlington-texas-11-22-2026/event/0C00646CBC939043"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Dallas Cowboys vs. Tennessee Titans Sun, Nov 22, 12:00 PMAT&T Stadium \u00b7 Arlington \u00b7 TX TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Dallas Cowboys vs. Tennessee Titans Sun, Nov 22, 12:00 PMAT&T Stadium \u00b7 Arlington \u00b7 TX TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -843,7 +838,7 @@
             "https://www.ticketmaster.com/jacksonville-jaguars-vs-tennessee-titans-jacksonville-florida-11-29-2026/event/2200646A920D4DA3"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Jacksonville Jaguars vs. Tennessee Titans Sun, Nov 29, 4:05 PMEverBank Stadium \u00b7 Jacksonville \u00b7 FL TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Jacksonville Jaguars vs. Tennessee Titans Sun, Nov 29, 4:05 PMEverBank Stadium \u00b7 Jacksonville \u00b7 FL TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -851,7 +846,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-washington-commanders-nashville-tennessee-12-06-2026/event/1B006470D232F684"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Washington Commanders Sun, Dec 6, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Washington Commanders Sun, Dec 6, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -859,7 +854,7 @@
             "https://www.ticketmaster.com/detroit-lions-vs-tennessee-titans-detroit-michigan-12-13-2026/event/080064718D7239E3"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Detroit Lions vs. Tennessee Titans Sun, Dec 13, 1:00 PMFord Field \u00b7 Detroit \u00b7 MI TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Detroit Lions vs. Tennessee Titans Sun, Dec 13, 1:00 PMFord Field \u00b7 Detroit \u00b7 MI TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -867,7 +862,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-indianapolis-colts-nashville-tennessee-12-20-2026/event/1B006470D206F655"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Indianapolis Colts Sun, Dec 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Indianapolis Colts Sun, Dec 20, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -875,7 +870,7 @@
             "https://www.ticketmaster.com/las-vegas-raiders-vs-tennessee-titans-las-vegas-nevada-12-27-2026/event/1700646CC3A0C3A4"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Las Vegas Raiders vs. Tennessee Titans Sun, Dec 27, 1:05 PMAllegiant Stadium \u00b7 Las Vegas \u00b7 NV TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace AWAY1 SOURCE WITH OFFERS Las Vegas Raiders vs. Tennessee Titans Sun, Dec 27, 1:05 PMAllegiant Stadium \u00b7 Las Vegas \u00b7 NV TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         },
         {
           "left": 292,
@@ -883,7 +878,7 @@
             "https://www.ticketmaster.com/tennessee-titans-vs-pittsburgh-steelers-nashville-tennessee-01-03-2027/event/1B006470D21FF66E"
           ],
           "right": 1217,
-          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Pittsburgh Steelers Sun, Jan 3, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventoryFirst observed priceThis browser now has a baseline for this matchup.Save matchup"
+          "text": "CHEAPEST NOWCheck live pricevia TicketmasterLive price pending \u00b7 open marketplace HOME1 SOURCE WITH OFFERS Tennessee Titans vs. Pittsburgh Steelers Sun, Jan 3, 12:00 PMNissan Stadium \u00b7 Nashville \u00b7 TN TicketmasterMarketplace inventory Check live priceCHECK LIVE View \u2197 VERIFY LIVEOnly one usable starting-price source is visibleOpen a marketplace to check current price and inventorySave matchup"
         }
       ],
       "fallback": [],
@@ -1125,8 +1120,8 @@
   },
   "browserWarnings": [],
   "eligibleFallbackGames": 17,
-  "durationSeconds": 3.53,
-  "testedAt": "2026-09-10T00:31:53Z"
+  "durationSeconds": 3.39,
+  "testedAt": "2026-09-10T15:13:43Z"
 }```
 
 ## Command Intelligence browser regression
@@ -1190,8 +1185,8 @@
   ],
   "mobileViewport": 390,
   "browserWarnings": [],
-  "durationSeconds": 2.31,
-  "testedAt": "2026-09-10T00:31:56Z"
+  "durationSeconds": 2.05,
+  "testedAt": "2026-09-10T15:13:45Z"
 }```
 
 ## Player Intelligence / Game Day browser regression
@@ -1321,7 +1316,7 @@
   "gameDayMobileViewport": 375,
   "gameDayFastPass": true,
   "gameDayFastPassGameId": "wk1",
-  "gameDayFastPassText": "NEXT GAME FAST PASS\nNew York Jets at Titans\nWEEK 1\nWHEN\nSun, Sep 13, 12:00 PM CDT \u00b7 3d 16h\nWATCH / LISTEN\nCBS \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
+  "gameDayFastPassText": "NEXT GAME FAST PASS\nNew York Jets at Titans\nWEEK 1\nWHEN\nSun, Sep 13, 12:00 PM CDT \u00b7 3d 1h\nWATCH / LISTEN\nCBS \u00b7 WGFX 104.5 FM The Zone\nWHERE\nHome \u00b7 Nissan Stadium\nOpen Listen / Watch\nOfficial schedule \u2197\nStadium guide \u2197\nSchedule facts: TennesseeTitans.com",
   "gameDayFastPassMobileTargets": [
     {
       "h": 48,
@@ -1337,144 +1332,752 @@
     }
   ],
   "browserWarnings": [],
-  "durationSeconds": 4.42,
-  "testedAt": "2026-09-10T00:32:01Z"
+  "durationSeconds": 4.31,
+  "testedAt": "2026-09-10T15:13:50Z"
 }```
 
 ## Ask Titans browser regression
 
 ```json
 {
-  "ok": false,
+  "ok": true,
   "base": "https://titans.alecjprice.com",
-  "stage": "fan:load",
-  "error": "TimeoutException: Message: \n",
-  "durationSeconds": 17.07,
-  "testedAt": "2026-09-10T00:32:18Z",
-  "hash": "#fan",
-  "pageText": "",
-  "browserWarnings": [
+  "answers": [
     {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/mobile-navigation-v112.js?v=2 - Failed to load resource: net::ERR_CERT_VERIFIER_CHANGED",
-      "source": "network",
-      "timestamp": 1789000322284
+      "question": "Who is next?",
+      "action": "#live",
+      "answer": "Tennessee is next scheduled to host New York Jets on Sun, Sep 13, 12:00 PM CDT (Nashville time).",
+      "facts": 4,
+      "sources": 1,
+      "why": "That is the next non-final, non-bye game in the loaded Titans schedule. CBS is the listed network."
     },
     {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/account-sync-v112.js?v=2 - Failed to load resource: net::ERR_CERT_VERIFIER_CHANGED",
-      "source": "network",
-      "timestamp": 1789000322284
+      "question": "Cam Ward",
+      "action": "#roster",
+      "answer": "Cam Ward is listed as QB #1 with roster status Active.",
+      "facts": 2,
+      "sources": 2,
+      "why": "No recent structured player-game rows are loaded, so I am not treating missing stats as zero production."
     },
     {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/smart-search-v111.js?v=1 - Failed to load resource: net::ERR_CERT_VERIFIER_CHANGED",
-      "source": "network",
-      "timestamp": 1789000322285
+      "question": "What is EPA?",
+      "action": "#stats",
+      "answer": "EPA: Expected Points Added estimates how much a play helped or hurt scoring expectation.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Advanced metrics are context tools, not standalone player grades. Command Center labels model-derived metrics and keeps them behind plain-English explanations."
     },
     {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/usability-runtime.js?v=26 - Failed to load resource: net::ERR_CERT_VERIFIER_CHANGED",
-      "source": "network",
-      "timestamp": 1789000322286
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/account-v112.js?v=3 - Failed to load resource: net::ERR_CERT_VERIFIER_CHANGED",
-      "source": "network",
-      "timestamp": 1789000322287
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/app.js - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322288
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/legacy-polish.js?v=21 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322289
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/legacy-finder-v2.js?v=1 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322289
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/legacy-anniversary-v9.js?v=1 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322290
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/legacy-challenge-v10.js?v=1 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322291
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/fact-polish.js?v=21 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322291
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/ux-polish.js?v=29 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322293
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/player-polish.js - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322293
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/headshot-polish.js?v=31 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322294
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/fan-polish.js?v=27 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322294
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/team-room.js?v=28 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322301
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/team-room-state-repair-v54.js?v=1 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322301
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/source-activity.js?v=27 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322301
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/transactions-hub.js?v=24 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322301
-    },
-    {
-      "level": "SEVERE",
-      "message": "https://titans.alecjprice.com/stats-hub.js?v=22 - Failed to load resource: net::ERR_FAILED",
-      "source": "network",
-      "timestamp": 1789000322301
+      "question": "How do I watch?",
+      "action": "#media",
+      "answer": "The next game is Sun, Sep 13, 12:00 PM CDT (Nashville time) and the loaded TV listing is CBS. Open Listen / Watch for your device-local time, Eastern time, Nashville time, UTC, radio, and territory-specific viewing guidance.",
+      "facts": 2,
+      "sources": 1,
+      "why": "Broadcast rights vary by location, so the media center keeps viewing guidance separate by Nashville, elsewhere in the U.S., and international fans."
     }
-  ]
+  ],
+  "teamTimeVerified": [
+    "Who is next?",
+    "How do I watch?"
+  ],
+  "fantasyHandoff": {
+    "actionHeight": 46,
+    "href": "#fantasy",
+    "text": "FANTASY HANDOFFEvidence workspaceUse Fantasy Decision Center for this one.WHY IT MATTERSStart/sit and waiver choices depend on league context. Command Center will carry this question into the fantasy workspace and compare loaded evidence without inventing a point projection or guarantee.Scoring presetPPRSleeper leagueNot connectedSaved fantasy players2SOURCE + CONTEXTFantasy CommandDevice-local scoring, roster selections and read-only Sleeper context when connectedNo projection generatedOpen Decision Center \u2192",
+    "title": "Use Fantasy Decision Center for this one."
+  },
+  "fantasyCarried": {
+    "hash": "#fantasy",
+    "selected": [
+      "Decision Smoke A \u00b7 WR \u00b7 TEN",
+      "Decision Smoke B \u00b7 RB \u00b7 IND"
+    ],
+    "values": [
+      "manual:0",
+      "manual:1"
+    ],
+    "verdict": "Evidence leans Decision Smoke A, but this is not a point projection or guarantee."
+  },
+  "unsupportedRefused": true,
+  "mobileViewport": {
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "innerWidth": 390,
+    "mobile": true
+  },
+  "mobileTargets": {
+    "askButton": 44,
+    "input": 44,
+    "quick": [
+      {
+        "h": 44,
+        "label": "What changed?"
+      },
+      {
+        "h": 44,
+        "label": "Who is next?"
+      },
+      {
+        "h": 44,
+        "label": "Injuries"
+      },
+      {
+        "h": 44,
+        "label": "Watch"
+      },
+      {
+        "h": 44,
+        "label": "Cam Ward"
+      },
+      {
+        "h": 44,
+        "label": "Explain EPA"
+      }
+    ],
+    "viewport": 390,
+    "width": 366
+  },
+  "mobileFantasyHandoff": {
+    "actionHeight": 44,
+    "left": 27,
+    "overflow": false,
+    "right": 363,
+    "viewport": 390
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.56,
+  "testedAt": "2026-09-10T15:13:53Z"
+}```
+
+## Change Intelligence browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "detectedBeforeReview": 69,
+  "categories": [
+    "Roster",
+    "Transaction"
+  ],
+  "favoritePriority": "Added to loaded roster",
+  "rosterFilterVisible": 60,
+  "clearedAfterReview": true,
+  "mobileViewport": {
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "innerWidth": 390,
+    "mobile": true
+  },
+  "mobileTargets": {
+    "filters": [
+      {
+        "h": 44,
+        "label": "All"
+      },
+      {
+        "h": 44,
+        "label": "Roster \u00b7 60"
+      },
+      {
+        "h": 44,
+        "label": "Transaction \u00b7 9"
+      }
+    ],
+    "review": 44,
+    "viewport": 390,
+    "width": 366
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.4,
+  "testedAt": "2026-09-10T15:13:56Z"
+}```
+
+## Runtime / 365 Mode browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "desktop": {
+    "phase": "regular",
+    "cards": 2,
+    "mode": "season-lens",
+    "runtimeVersion": "1.10.0",
+    "teamTimeZone": "America/Chicago",
+    "teamTimeLabel": "Nashville time",
+    "routeCycle": true,
+    "singlePanel": true,
+    "cacheUrls": [
+      "/api/data",
+      "/api/fan-intel",
+      "/api/social-pulse"
+    ],
+    "readiness": {
+      "availability": null,
+      "changes": {
+        "copy": "On Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.",
+        "title": "Review team changes"
+      },
+      "mode": "season-lens",
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      },
+      "teamStatus": {
+        "copy": "We do not assume an empty feed means no injuries",
+        "title": "Report awaiting update"
+      }
+    },
+    "panel": {
+      "cards": 2,
+      "display": "block",
+      "height": 366.0625,
+      "homeNow": true,
+      "labels": [
+        "AFC SOUTH",
+        "WHAT CHANGED?"
+      ],
+      "mode": "season-lens",
+      "opacity": "1",
+      "text": "SEASON LENS365 MODE \u00b7 REGULAR SEASONGame week firstA tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.Review changes \u2192AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesOn Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "refresh": {
+      "cache": [
+        {
+          "expiresAt": 1789053267712,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1789053237712,
+          "url": "/api/data"
+        },
+        {
+          "expiresAt": 1789053267765,
+          "hasValue": true,
+          "inflight": false,
+          "updatedAt": 1789053237765,
+          "url": "/api/fan-intel"
+        }
+      ],
+      "epoch": 1,
+      "last": {
+        "at": "2026-09-10T15:13:57.616Z",
+        "epoch": 1,
+        "reason": "scoreboard-control",
+        "urls": null
+      }
+    },
+    "refreshedReadiness": {
+      "availability": null,
+      "changes": {
+        "copy": "On Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.",
+        "title": "Review team changes"
+      },
+      "mode": "season-lens",
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      },
+      "teamStatus": {
+        "copy": "We do not assume an empty feed means no injuries",
+        "title": "Report awaiting update"
+      }
+    },
+    "refreshedPanel": {
+      "cards": 2,
+      "display": "block",
+      "height": 366.0625,
+      "homeNow": true,
+      "labels": [
+        "AFC SOUTH",
+        "WHAT CHANGED?"
+      ],
+      "mode": "season-lens",
+      "opacity": "1",
+      "text": "SEASON LENS365 MODE \u00b7 REGULAR SEASONGame week firstA tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.Review changes \u2192AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesOn Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    },
+    "returnReadiness": {
+      "availability": null,
+      "changes": {
+        "copy": "On Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.",
+        "title": "Review team changes"
+      },
+      "mode": "season-lens",
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      },
+      "teamStatus": {
+        "copy": "We do not assume an empty feed means no injuries",
+        "title": "Report awaiting update"
+      }
+    },
+    "returnPanel": {
+      "cards": 2,
+      "display": "block",
+      "height": 366.0625,
+      "homeNow": true,
+      "labels": [
+        "AFC SOUTH",
+        "WHAT CHANGED?"
+      ],
+      "mode": "season-lens",
+      "opacity": "1",
+      "text": "SEASON LENS365 MODE \u00b7 REGULAR SEASONGame week firstA tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.Review changes \u2192AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesOn Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 925
+    }
+  },
+  "mobile": {
+    "layout": {
+      "dock": {
+        "display": "grid",
+        "h": 72,
+        "w": 465,
+        "x": 10,
+        "y": 621
+      },
+      "dockTargets": [
+        {
+          "h": 58,
+          "label": "Home",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Roster",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Game",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "Search",
+          "w": 89.796875
+        },
+        {
+          "h": 58,
+          "label": "More",
+          "w": 89.8125
+        }
+      ],
+      "overflow": false,
+      "panelHeight": 432.890625,
+      "panelWidth": 457,
+      "reviewHeight": 44,
+      "targets": [
+        {
+          "h": 186.953125,
+          "label": "AFC SOUTH",
+          "w": 320
+        },
+        {
+          "h": 186.953125,
+          "label": "WHAT CHANGED?",
+          "w": 320
+        }
+      ],
+      "viewport": 500
+    },
+    "readiness": {
+      "availability": null,
+      "changes": {
+        "copy": "On Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.",
+        "title": "Review team changes"
+      },
+      "mode": "season-lens",
+      "standings": {
+        "copy": "No Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.",
+        "title": "0-0 \u00b7 Week 1 ahead"
+      },
+      "teamStatus": {
+        "copy": "We do not assume an empty feed means no injuries",
+        "title": "Report awaiting update"
+      }
+    },
+    "panelState": {
+      "cards": 2,
+      "display": "block",
+      "height": 432.890625,
+      "homeNow": true,
+      "labels": [
+        "AFC SOUTH",
+        "WHAT CHANGED?"
+      ],
+      "mode": "season-lens",
+      "opacity": "1",
+      "text": "SEASON LENS365 MODE \u00b7 REGULAR SEASONGame week firstA tighter season view keeps the longer-horizon priorities here while the panel above handles what matters right now.Review changes \u2192AFC SOUTH0-0 \u00b7 Week 1 aheadNo Titans regular-season result is complete yet. Division rank will appear when a current AFC South standings snapshot is loaded.WHAT CHANGED?Review team changesOn Sept. 2, Tennessee added WR Xavier Restrepo, S Jerrick Reed II, S Erick Hallett II and LB Mohamoud Diabate to the practice squad while waiving WR Hank Beatty, DB Derrick Canteen and LB Mani Powell.Command Center mode adapts to the football calendar; it does not claim an official league transaction window.",
+      "visibility": "visible",
+      "visible": true,
+      "width": 457
+    },
+    "sheet": {
+      "bottom": 611,
+      "dockTop": 621,
+      "height": 504.71875,
+      "links": 15,
+      "top": 106.28125
+    },
+    "smartSearch": {
+      "height": 110,
+      "left": 10,
+      "right": 475,
+      "rows": 1,
+      "targets": [
+        58
+      ],
+      "width": 465
+    }
+  },
+  "browserWarnings": [],
+  "durationSeconds": 3.61
+}```
+
+## Data freshness browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "desktop": {
+    "detail": "Roster verified Sep 2 \u00b7 Moves 8 days ago \u00b7 Intel 8 days ago",
+    "overflow": false,
+    "rect": {
+      "bottom": 1729.5,
+      "height": 139.578125,
+      "left": 915.328125,
+      "right": 1216.984375,
+      "top": 1589.921875,
+      "width": 301.65625
+    },
+    "state": "fallback",
+    "strong": "Verified backup \u00b7 Sep 2",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Sep 2Roster verified Sep 2 \u00b7 Moves 8 days ago \u00b7 Intel 8 days agoSee sources \u2192",
+    "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Sep 2.",
+    "viewport": {
+      "height": 757,
+      "width": 1280
+    }
+  },
+  "mobile": {
+    "detail": "Roster verified Sep 2 \u00b7 Moves 8 days ago \u00b7 Intel 8 days ago",
+    "overflow": false,
+    "rect": {
+      "bottom": 2997.515625,
+      "height": 130.96875,
+      "left": 12,
+      "right": 378,
+      "top": 2866.546875,
+      "width": 366
+    },
+    "state": "fallback",
+    "strong": "Verified backup \u00b7 Sep 2",
+    "text": "DATA FRESHNESSVerified backup \u00b7 Sep 2Roster verified Sep 2 \u00b7 Moves 8 days ago \u00b7 Intel 8 days agoSee sources \u2192",
+    "title": "Live roster updates are temporarily unavailable. Showing the verified roster backup audited Sep 2.",
+    "viewport": {
+      "height": 844,
+      "width": 390
+    }
+  },
+  "mobileViewportState": {
+    "clientWidth": 390,
+    "innerHeight": 844,
+    "innerWidth": 390,
+    "mobile": true
+  },
+  "browserWarnings": [],
+  "durationSeconds": 2.03,
+  "testedAt": "2026-09-10T15:14:02Z"
+}```
+
+## Account / Guest browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "browserWarnings": [],
+  "guest": {
+    "accountGuest": true,
+    "route": "#home",
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "mobileShell": {
+    "dock": {
+      "h": 68,
+      "top": 770,
+      "w": 363
+    },
+    "more": {
+      "bottom": 832,
+      "h": 56,
+      "top": 776,
+      "w": 69.8125
+    },
+    "runtime": "1.10.0",
+    "sidebarHidden": "true",
+    "sidebarInert": true
+  },
+  "sheet": {
+    "bottom": 754,
+    "dockTop": 770,
+    "top": 146.328125
+  },
+  "accountEntry": {
+    "bottom": 330.578125,
+    "h": 44,
+    "parent": "sidebar",
+    "top": 286.578125,
+    "visibleBottom": 754,
+    "visibleTop": 146.328125,
+    "w": 284
+  },
+  "panel": {
+    "bottom": 844,
+    "h": 725.828125,
+    "text": "\u00d7OPTIONAL ACCOUNTWelcome backEverything is still available as a guest. Sign in only if you want favorites and selected preferences to sync when account storage is available.Log inSign upEmailPasswordShowLog inContinue as guestGUEST DATAThese settings exist only on this device.Export this deviceImport backupReset this deviceReset clears favorite, alert, display, home-layout, and saved-media preferences from this device. Your account status is unaffected.",
+    "vh": 844,
+    "w": 375
+  },
+  "passwordInitial": {
+    "autocomplete": "current-password",
+    "controls": "account-password-input",
+    "fieldLabel": "Password",
+    "height": 48,
+    "inputId": "account-password-input",
+    "name": "Show password",
+    "pressed": null,
+    "text": "Show",
+    "type": "password",
+    "valueLength": 13,
+    "width": 70
+  },
+  "passwordRevealed": {
+    "autocomplete": "current-password",
+    "controls": "account-password-input",
+    "fieldLabel": "Password",
+    "height": 48,
+    "inputId": "account-password-input",
+    "name": "Hide password",
+    "pressed": null,
+    "text": "Hide",
+    "type": "text",
+    "valueLength": 13,
+    "width": 70
+  },
+  "passwordHidden": {
+    "autocomplete": "current-password",
+    "controls": "account-password-input",
+    "fieldLabel": "Password",
+    "height": 48,
+    "inputId": "account-password-input",
+    "name": "Show password",
+    "pressed": null,
+    "text": "Show",
+    "type": "password",
+    "valueLength": 13,
+    "width": 70
+  },
+  "passwordSignup": {
+    "autocomplete": "new-password",
+    "controls": "account-password-input",
+    "fieldLabel": "Password",
+    "height": 48,
+    "inputId": "account-password-input",
+    "name": "Show password",
+    "pressed": null,
+    "text": "Show",
+    "type": "password",
+    "valueLength": 0,
+    "width": 70
+  },
+  "passwordSignin": {
+    "autocomplete": "current-password",
+    "controls": "account-password-input",
+    "fieldLabel": "Password",
+    "height": 48,
+    "inputId": "account-password-input",
+    "name": "Show password",
+    "pressed": null,
+    "text": "Show",
+    "type": "password",
+    "valueLength": 0,
+    "width": 70
+  },
+  "portabilityTools": {
+    "exportHeight": 50,
+    "exportLabel": "Export this device",
+    "guest": true,
+    "importHeight": 50,
+    "importLabel": "Import backup",
+    "resetHeight": 50,
+    "resetLabel": "Reset this device"
+  },
+  "importPreview": {
+    "applyHeight": 46,
+    "favorite": null,
+    "pending": {
+      "accountEmail": "",
+      "exportedAt": "2026-08-22T12:00:00Z",
+      "keys": [
+        "titans:v15MyTitans"
+      ],
+      "preferences": {
+        "titans:v15MyTitans": {
+          "favorite": "Browser Smoke"
+        }
+      },
+      "scope": "guest-device"
+    },
+    "text": "READY TO RESTORE1 setting groupAug 22, 2026, 12:00 PM \u00b7 guest-deviceNothing has changed yet. Applying restores only recognized Titans preferences from this file.Apply imported settingsCancel"
+  },
+  "resetArmed": {
+    "guest": true,
+    "hash": "#home",
+    "hint": "Tap Confirm reset again within 6 seconds.",
+    "label": "Confirm reset"
+  },
+  "authOutage": {
+    "guest": true,
+    "text": "VIEWING AS GUESTNo account requiredSettings stay on this device.Sign in / Sign up"
+  },
+  "roster": {
+    "route": "#roster",
+    "text": "PersonnelRosterSearch the latest verified Titans roster by name, number, position, or unit.Roster \u00b7 freshness unknown202"
+  },
+  "durationSeconds": 2.13
+}```
+
+## Advanced analytics browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "mode": "cloudflare-d1",
+  "healthStatus": "healthy",
+  "analyticsStorage": "cloudflare-d1",
+  "analyticsSnapshotSource": "nflreadpy-d1-snapshot",
+  "analyticsSnapshotStale": false,
+  "seasonContext": {
+    "bannerRole": "note",
+    "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "bannerVisible": true,
+    "dataSeason": "2025",
+    "heading": "2025 advanced analytics baseline",
+    "requestedSeason": "2026",
+    "seasonFallback": "true"
+  },
+  "mobileSeasonContext": {
+    "fallback": "true",
+    "text": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+    "visible": true
+  },
+  "metricCount": 4,
+  "metricValues": [
+    {
+      "detail": "#30 of 32",
+      "label": "Offensive EPA / play",
+      "value": "-0.148"
+    },
+    {
+      "detail": "#28 of 32",
+      "label": "Defensive EPA / play allowed",
+      "value": "+0.104"
+    },
+    {
+      "detail": "#11 of 32",
+      "label": "Pace",
+      "value": "28.9 sec/play"
+    },
+    {
+      "detail": "Latest loaded week: 18",
+      "label": "Rest days",
+      "value": "7 days"
+    }
+  ],
+  "situationFields": [
+    "Down & distance",
+    "Field position",
+    "Formation",
+    "Personnel",
+    "Score diff",
+    "TEN EPA",
+    "Time remaining"
+  ],
+  "initialPlayCards": 60,
+  "offenseFilteredPlayCards": 39,
+  "mobileMetricCount": 4,
+  "browserWarnings": [],
+  "durationSeconds": 1.79,
+  "testedAt": "2026-09-10T15:14:06Z",
+  "deterministicMobile": {
+    "ok": true,
+    "base": "https://titans.alecjprice.com",
+    "apiMode": "cloudflare-d1",
+    "viewport": {
+      "clientWidth": 390,
+      "innerHeight": 844,
+      "innerWidth": 390,
+      "mobile": true
+    },
+    "state": {
+      "bannerText": "2025 regular-season baselineNot 2026 performance. These metrics stay historical until completed 2026 regular-season play-by-play is available.",
+      "bannerVisible": true,
+      "dataSeason": "2025",
+      "metricCount": 4,
+      "mode": "available",
+      "playCount": 60,
+      "requestedSeason": "2026",
+      "seasonFallback": "true",
+      "viewport": {
+        "clientWidth": 390,
+        "height": 844,
+        "width": 390
+      }
+    },
+    "browserWarnings": [],
+    "toleratedRoster424": [],
+    "allSevere": [],
+    "durationSeconds": 1.51,
+    "testedAt": "2026-09-10T15:14:08Z"
+  }
+}```
+
+## Player headshot browser regression
+
+```json
+{
+  "ok": true,
+  "base": "https://titans.alecjprice.com",
+  "expectedCurrentRoster": 60,
+  "minimumCurrentRosterHeadshots": 51,
+  "minimumHeadshotCoveragePct": 85.0,
+  "rosterCards": 60,
+  "rosterDecoratedHeadshots": 60,
+  "rosterHeadshotCoveragePct": 100.0,
+  "rosterLoadedHeadshots": 33,
+  "statsPlayerRows": 60,
+  "statsDecoratedHeadshots": 60,
+  "statsHeadshotCoveragePct": 100.0,
+  "statsLoadedHeadshots": 51,
+  "formerPreseasonParticipantRows": 29,
+  "mobileLoadedHeadshots": 52,
+  "richPlayer": "Tony Adams",
+  "richPlayerHeadshotLoaded": true,
+  "browserWarnings": [],
+  "durationSeconds": 3.83,
+  "testedAt": "2026-09-10T15:14:12Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
