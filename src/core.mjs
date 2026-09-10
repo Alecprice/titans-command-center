@@ -55,6 +55,7 @@ function transactionDateMs(transaction) {
 
 export function sortTransactionsLatestFirst(transactions) {
   return (Array.isArray(transactions) ? transactions : [])
+    .filter(transaction => transaction && typeof transaction === 'object' && !Array.isArray(transaction))
     .map((transaction, index) => ({ transaction, index, time: transactionDateMs(transaction) }))
     .sort((a, b) => {
       const aDated = Number.isFinite(a.time), bDated = Number.isFinite(b.time);
