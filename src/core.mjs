@@ -129,23 +129,31 @@ export function gameStatus(game, now = new Date()) {
   return `${hours}h away`;
 }
 
+function plainRecord(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
 export function normalizeEspnEvent(event) {
-  if (!event || typeof event !== 'object' || Array.isArray(event)) return null;
+  if (!plainRecord(event)) return null;
+  const id = String(event.id ?? '').trim();
+  const date = String(event.date ?? '').trim();
+  if (!id || !date || !Number.isFinite(new Date(date).getTime())) return null;
   const competitions = Array.isArray(event.competitions) ? event.competitions : [];
-  const competition = competitions.find(value => value && typeof value === 'object' && !Array.isArray(value)) || null;
+  const competition = competitions.find(plainRecord) || null;
   const competitors = Array.isArray(competition?.competitors)
-    ? competition.competitors.filter(value => value && typeof value === 'object' && !Array.isArray(value))
+    ? competition.competitors.filter(plainRecord)
     : [];
-  const ten = competitors.find(c => c.team?.abbreviation === 'TEN');
-  const opp = competitors.find(c => c.team?.abbreviation && c.team.abbreviation !== 'TEN');
-  if (!ten || !opp) return null;
+  const ten = competitors.find(c => plainRecord(c.team) && c.team.abbreviation === 'TEN');
+  const opp = competitors.find(c => plainRecord(c.team) && c.team.abbreviation && c.team.abbreviation !== 'TEN');
+  const homeAway = typeof ten?.homeAway === 'string' ? ten.homeAway.toLowerCase() : '';
+  if (!ten || !opp || (homeAway !== 'home' && homeAway !== 'away')) return null;
   return {
-    id: event.id,
+    id,
     week: event.week?.number || null,
-    date: event.date,
+    date,
     opponent: opp.team?.displayName || 'Opponent',
     opponentAbbr: opp.team?.abbreviation || '',
-    homeAway: ten.homeAway,
+    homeAway,
     status: event.status?.type?.completed ? 'final' : event.status?.type?.state === 'in' ? 'live' : 'scheduled',
     detail: event.status?.type?.detail || '',
     score: ten.score,
