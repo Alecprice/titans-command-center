@@ -2,9 +2,9 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-09-10T15:11:49.766968+00:00",
-  "rosterRows": 94,
-  "headshotCount": 92,
+  "generatedAt": "2026-09-11T15:12:50.893527+00:00",
+  "rosterRows": 95,
+  "headshotCount": 93,
   "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
@@ -98,7 +98,7 @@
     {
       "name": "Isaiah Oliver",
       "normalizedName": "isaiaholiver",
-      "number": "34",
+      "number": "28",
       "position": "DB",
       "status": "DEV",
       "gsisId": "00-0034357",
@@ -110,12 +110,24 @@
     {
       "name": "Jalen McMurray",
       "normalizedName": "jalenmcmurray",
-      "number": "16",
+      "number": "47",
       "position": "DB",
       "status": "DEV",
       "gsisId": "00-0040917",
       "espnId": "4683455",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/zrwgaig57cdohkvwneex",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Jaylon Jones",
+      "normalizedName": "jaylonjones",
+      "number": "40",
+      "position": "DB",
+      "status": "ACT",
+      "gsisId": "00-0038407",
+      "espnId": "4685145",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/y5qayiucpnco15btyppy",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -192,11 +204,11 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
-      "name": "Melvin Smith Jr.",
+      "name": "Melvin Smith",
       "normalizedName": "melvinsmith",
       "number": "39",
       "position": "DB",
-      "status": "ACT",
+      "status": "CUT",
       "gsisId": "00-0040093",
       "espnId": "5278708",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ks6nnexhp5jftsjlt1ah",
@@ -218,7 +230,7 @@
     {
       "name": "Shemar Bartholomew",
       "normalizedName": "shemarbartholomew",
-      "number": "34",
+      "number": "45",
       "position": "DB",
       "status": "DEV",
       "gsisId": "00-0039292",
@@ -230,7 +242,7 @@
     {
       "name": "Terrell Burgess",
       "normalizedName": "terrellburgess",
-      "number": "26",
+      "number": "38",
       "position": "DB",
       "status": "ACT",
       "gsisId": "00-0036421",
@@ -242,7 +254,7 @@
     {
       "name": "Tony Adams",
       "normalizedName": "tonyadams",
-      "number": "38",
+      "number": "29",
       "position": "DB",
       "status": "ACT",
       "gsisId": "00-0037155",
@@ -578,7 +590,7 @@
     {
       "name": "Owen Pappoe",
       "normalizedName": "owenpappoe",
-      "number": "44",
+      "number": "40",
       "position": "LB",
       "status": "ACT",
       "gsisId": "00-0038600",
@@ -746,7 +758,7 @@
     {
       "name": "James Hudson",
       "normalizedName": "jameshudson",
-      "number": "51",
+      "number": "59",
       "position": "OL",
       "status": "ACT",
       "gsisId": "00-0036866",
@@ -1082,7 +1094,7 @@
     {
       "name": "K.J. Osborn",
       "normalizedName": "kjosborn",
-      "number": "85",
+      "number": "8",
       "position": "WR",
       "status": "DEV",
       "gsisId": "00-0036345",
