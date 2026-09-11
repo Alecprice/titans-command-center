@@ -1,14 +1,17 @@
 import {getD1Snapshot,hasD1,putD1Snapshot} from './d1-store.mjs';
 
 const text=value=>String(value??'').trim();
+const plainRecord=value=>Boolean(value)&&typeof value==='object'&&!Array.isArray(value);
 
 export function apiSnapshotKey(scope,dimensions={}){
   const base=text(scope).replace(/[^a-z0-9:_-]/gi,'-').toLowerCase();
   const parts=[base||'api-snapshot'];
-  for(const [key,value] of Object.entries(dimensions).sort(([a],[b])=>a.localeCompare(b))){
+  const safeDimensions=plainRecord(dimensions)?dimensions:{};
+  for(const [key,value] of Object.entries(safeDimensions).sort(([a],[b])=>a.localeCompare(b))){
     const normalized=text(value);
-    if(!normalized)continue;
-    parts.push(`${text(key).toLowerCase()}=${encodeURIComponent(normalized)}`);
+    const normalizedKey=text(key).toLowerCase();
+    if(!normalized||!normalizedKey)continue;
+    parts.push(`${normalizedKey}=${encodeURIComponent(normalized)}`);
   }
   return parts.join(':');
 }
