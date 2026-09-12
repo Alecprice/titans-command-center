@@ -2,9 +2,9 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-09-11T15:12:50.893527+00:00",
-  "rosterRows": 95,
-  "headshotCount": 93,
+  "generatedAt": "2026-09-12T14:22:54.627844+00:00",
+  "rosterRows": 96,
+  "headshotCount": 94,
   "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
@@ -648,6 +648,18 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
+      "name": "Atonio Mafi",
+      "normalizedName": "atoniomafi",
+      "number": "56",
+      "position": "OL",
+      "status": "ACT",
+      "gsisId": "00-0038586",
+      "espnId": "4367202",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/uvnz2p1foa0oivg3oq55",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
       "name": "Austin Deculus",
       "normalizedName": "austindeculus",
       "number": "76",
@@ -724,7 +736,7 @@
       "normalizedName": "garrettdellinger",
       "number": "71",
       "position": "OL",
-      "status": "ACT",
+      "status": "CUT",
       "gsisId": "00-0040079",
       "espnId": "4431252",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/yvxpchw3k1rzu0jq5575",
