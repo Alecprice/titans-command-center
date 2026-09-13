@@ -8,10 +8,10 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const src=read('team-room.js');
 const css=read('team-room.css');
 
-test('TENX Team Room keeps Aug 25 depth order separate from Sept 2 roster membership truth',()=>{
+test('TENX Team Room keeps Aug 25 depth order separate from Sep 8 roster membership truth',()=>{
   assert.equal(auditedTeamContext.depthChartPolicy.status,'dated-unofficial-snapshot');
   assert.equal(auditedTeamContext.depthChartPolicy.sourceDate,'2026-08-25');
-  assert.equal(team.rosterCoverage.asOf,'2026-09-02');
+  assert.equal(team.rosterCoverage.asOf,'2026-09-08');
   assert.match(auditedTeamContext.sourcePolicy.domains.find(item=>item.key==='depth-chart')?.note||'',/Preserve it as a dated snapshot/i);
   assert.match(src,/Role order stays exactly as the dated team-published snapshot/);
   assert.match(src,/Membership is checked against the .* Active\/Reserve roster/);

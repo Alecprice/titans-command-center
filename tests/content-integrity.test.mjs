@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { team, games, roster, feed } from '../src/data.mjs';
-import { auditedPracticeSquad20260902, ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260831.mjs';
+import { auditedPracticeSquad20260908, ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260831.mjs';
 import { gameStatus, mergeLiveGames } from '../src/core.mjs';
 
 test('current team metadata matches audited official facts',()=>{
@@ -50,8 +50,8 @@ test('preseason is final at 2-1 and the Jets are next',()=>{
   assert.equal(next?.network,'CBS');
 });
 
-test('fallback roster matches the Sept 2 current-team audit',()=>{
-  assert.equal(ROSTER_AUDIT_DATE,'2026-09-02');
+test('fallback roster matches the Sep 8 current-team audit',()=>{
+  assert.equal(ROSTER_AUDIT_DATE,'2026-09-08');
   assert.equal(team.rosterCoverage.fallbackType,'cross-source-audited-snapshot');
   assert.equal(team.rosterCoverage.fallbackPlayers,roster.length);
   assert.equal(roster.length,60);
@@ -61,8 +61,9 @@ test('fallback roster matches the Sept 2 current-team audit',()=>{
   assert.equal(roster.filter(p=>p.status==='Active').length,53);
   assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,5);
   assert.equal(roster.filter(p=>p.status==='Reserve/Injured; Designated for Return').length,2);
-  assert.equal(team.rosterCoverage.asOf,'2026-09-02');
-  assert.match(ROSTER_SOURCE_CONFLICT,/transactions log is newer/i);
+  assert.equal(team.rosterCoverage.asOf,'2026-09-08');
+  assert.match(ROSTER_SOURCE_CONFLICT,/no dated membership moves after Sept\. 2/i);
+  assert.match(ROSTER_SOURCE_CONFLICT,/latest dated official transactions/i);
   assert.equal(team.rosterCoverage.sourceConflict,ROSTER_SOURCE_CONFLICT);
 
   const verifiedNumbers={
@@ -78,24 +79,28 @@ test('fallback roster matches the Sept 2 current-team audit',()=>{
 });
 
 test('practice squad is tracked separately from the 53-man roster',()=>{
-  assert.equal(auditedPracticeSquad20260902.length,17);
+  assert.equal(auditedPracticeSquad20260908.length,17);
   for(const name of ['Shemar Bartholomew','Mohamoud Diabate','Erick Hallett II','Xavier Restrepo','Jerrick Reed II','Hendon Hooker','Kalel Mullings','Laki Tasi']){
-    assert.ok(auditedPracticeSquad20260902.some(p=>p.name===name),`${name} should be in the Sept. 2 practice-squad snapshot`);
+    assert.ok(auditedPracticeSquad20260908.some(p=>p.name===name),`${name} should be in the Sep. 8 revalidated practice-squad snapshot`);
   }
   for(const removed of ['Hank Beatty','Derrick Canteen','Mani Powell','Mario Goodrich III']){
-    assert.equal(auditedPracticeSquad20260902.some(p=>p.name===removed),false,`${removed} should not remain on the current practice squad`);
+    assert.equal(auditedPracticeSquad20260908.some(p=>p.name===removed),false,`${removed} should not remain on the current practice squad`);
   }
-  assert.equal(roster.some(p=>auditedPracticeSquad20260902.some(ps=>ps.name===p.name)),false,'practice squad must not be folded into current 53/reserve roster');
+  assert.equal(roster.some(p=>auditedPracticeSquad20260908.some(ps=>ps.name===p.name)),false,'practice squad must not be folded into current 53/reserve roster');
 });
 
 test('fallback roster does not use unsourced opinion tags',()=>{
   assert.equal(roster.some(p=>'tag' in p),false);
 });
 
-test('fallback feed leads with the latest official Sept 2 transactions',()=>{
+test('fallback feed leads with current official availability while preserving latest transactions',()=>{
   for(const item of feed)assert.match(item.url,/^https:\/\//);
-  assert.match(feed[0]?.title||'',/add four to practice squad/i);
-  assert.match(feed[0]?.summary||'',/Xavier Restrepo/);
+  assert.equal(feed[0]?.id,'n21');
+  assert.match(feed[0]?.title||'',/Cedric Gray.*concussion protocol/i);
+  assert.equal(feed[0]?.tier,'official');
+  const sept2=feed.find(item=>item.id==='n17');
+  assert.match(sept2?.title||'',/add four to practice squad/i);
+  assert.match(sept2?.summary||'',/Xavier Restrepo/);
   const sept1=feed.find(item=>/Sept\. 1 roster transactions/i.test(item.title));
   assert.equal(sept1?.tier,'official');
   assert.match(sept1?.summary||'',/Andre James/);
