@@ -7,7 +7,8 @@ const TRUSTED_ACCOUNT_ORIGINS=new Set([
   'https://titans-command-center.alecjordanprice.workers.dev'
 ]);
 const V10_PREF_KEY='titans:v10Prefs';
-const PREF_KEYS=new Set(['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY,'titans-fantasy-v1']);
+const PROP_WATCHLIST_KEY='titans-fantasy-prop-watchlist-v1';
+const PREF_KEYS=new Set(['titans:v15MyTitans','titans:v15SmartAlerts','titans:v14CustomMediaLinks',V10_PREF_KEY,'titans-fantasy-v1',PROP_WATCHLIST_KEY]);
 const HOME_KEYS=['game','favorites','moves','intel','markets','freshness'];
 const HOME_KEY_SET=new Set(HOME_KEYS);
 const V10_THEMES=new Set(['system','dark','light']);
@@ -15,6 +16,7 @@ const V10_DENSITIES=new Set(['comfortable','compact']);
 const V10_NOTIFICATION_KEYS=['kickoff','final','transactions','news'];
 const MAX_AUTH_BODY_BYTES=32*1024;
 const MAX_PREFERENCE_BODY_BYTES=32*1024;
+const MAX_PROP_WATCHLIST=32;
 
 function json(payload,status=200,headers={}){
   return new Response(JSON.stringify(payload),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers}});
@@ -120,6 +122,24 @@ function sanitizeV10Prefs(value){
   return clean;
 }
 
+function propSlug(value){return String(value??'').trim().toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
+
+function sanitizePropWatchlist(value){
+  if(!Array.isArray(value))return null;
+  const normalized=[];
+  for(const item of value){
+    if(!item||typeof item!=='object'||Array.isArray(item))continue;
+    const player=String(item.player??'').trim().slice(0,80),market=String(item.market??'').trim().slice(0,80);
+    if(!player||!market)continue;
+    const key=`${propSlug(player)}|${propSlug(market)}`;
+    if(key==='|')continue;
+    const rawSavedAt=Number(item.savedAt),savedAt=Number.isFinite(rawSavedAt)&&rawSavedAt>0?Math.floor(rawSavedAt):0;
+    normalized.push({key,player,market,savedAt});
+  }
+  normalized.sort((a,b)=>b.savedAt-a.savedAt);
+  return normalized.filter((item,index,list)=>list.findIndex(candidate=>candidate.key===item.key)===index).slice(0,MAX_PROP_WATCHLIST);
+}
+
 function sanitizePreferences(input){
   const source=input&&typeof input==='object'&&!Array.isArray(input)?input:{};
   const clean={};
@@ -129,6 +149,10 @@ function sanitizePreferences(input){
     if(key===V10_PREF_KEY){
       value=sanitizeV10Prefs(value);
       if(!value||!Object.keys(value).length)continue;
+    }
+    if(key===PROP_WATCHLIST_KEY){
+      value=sanitizePropWatchlist(value);
+      if(!value)continue;
     }
     const encoded=JSON.stringify(value);
     if(typeof encoded!=='string'||encoded.length>12000)continue;
