@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import {
-  auditedPracticeSquad20260902,
+  auditedPracticeSquad20260908,
   PRACTICE_SQUAD_SOURCE_URL,
   ROSTER_AUDIT_DATE
 } from '../src/roster-audit-20260831.mjs';
@@ -10,11 +10,11 @@ import {
 const source=await readFile(new URL('../roster-practice-squad-v0.js',import.meta.url),'utf8');
 const bootstrap=await readFile(new URL('../ios-home-screen.js',import.meta.url),'utf8');
 
-test('Sept. 2 audited practice squad is complete and source-backed',()=>{
-  assert.equal(ROSTER_AUDIT_DATE,'2026-09-02');
-  assert.equal(auditedPracticeSquad20260902.length,17);
+test('Sep. 8 audited practice squad is complete and source-backed',()=>{
+  assert.equal(ROSTER_AUDIT_DATE,'2026-09-08');
+  assert.equal(auditedPracticeSquad20260908.length,17);
   assert.match(PRACTICE_SQUAD_SOURCE_URL,/tennesseetitans\.com\/news\//);
-  const names=new Set(auditedPracticeSquad20260902.map(player=>player.name));
+  const names=new Set(auditedPracticeSquad20260908.map(player=>player.name));
   for(const name of ['Xavier Restrepo','Jerrick Reed II','Erick Hallett II','Mohamoud Diabate','Hendon Hooker','K.J. Osborn'])assert.ok(names.has(name),`missing ${name}`);
 });
 

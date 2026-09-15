@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { team, games, roster, sources } from '../src/data.mjs';
-import { auditedPracticeSquad20260902, ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260831.mjs';
+import { auditedPracticeSquad20260908, ROSTER_AUDIT_DATE, ROSTER_SOURCE_CONFLICT } from '../src/roster-audit-20260831.mjs';
 import { auditedTeamContext } from '../src/team-context.mjs';
 
-test('Sept 2 roster audit reflects current official membership and jersey assignments',()=>{
-  assert.equal(ROSTER_AUDIT_DATE,'2026-09-02');
+test('Sep 8 roster audit reflects current official membership and jersey assignments',()=>{
+  assert.equal(ROSTER_AUDIT_DATE,'2026-09-08');
   assert.equal(roster.length,60);
   assert.equal(roster.filter(p=>p.status==='Active').length,53);
   assert.equal(roster.filter(p=>p.status==='Reserve/Injured').length,5);
@@ -15,11 +15,12 @@ test('Sept 2 roster audit reflects current official membership and jersey assign
     assert.ok(roster.some(p=>p.name===name&&p.number===number&&p.status==='Active'),`${name} should be active as #${number}`);
   }
   assert.equal(roster.some(p=>p.name==='Andre James'),false);
-  assert.equal(auditedPracticeSquad20260902.length,17);
-  for(const name of ['Xavier Restrepo','Jerrick Reed II','Erick Hallett II','Mohamoud Diabate'])assert.ok(auditedPracticeSquad20260902.some(p=>p.name===name));
-  for(const name of ['Hank Beatty','Derrick Canteen','Mani Powell','Mario Goodrich III'])assert.equal(auditedPracticeSquad20260902.some(p=>p.name===name),false);
-  assert.match(ROSTER_SOURCE_CONFLICT,/newer than the roster table/i);
-  assert.equal(team.rosterCoverage.asOf,'2026-09-02');
+  assert.equal(auditedPracticeSquad20260908.length,17);
+  for(const name of ['Xavier Restrepo','Jerrick Reed II','Erick Hallett II','Mohamoud Diabate'])assert.ok(auditedPracticeSquad20260908.some(p=>p.name===name));
+  for(const name of ['Hank Beatty','Derrick Canteen','Mani Powell','Mario Goodrich III'])assert.equal(auditedPracticeSquad20260908.some(p=>p.name===name),false);
+  assert.match(ROSTER_SOURCE_CONFLICT,/no dated membership moves after Sept\. 2/i);
+  assert.match(ROSTER_SOURCE_CONFLICT,/latest dated official transactions/i);
+  assert.equal(team.rosterCoverage.asOf,'2026-09-08');
   assert.equal(team.rosterCoverage.fallbackPlayers,60);
   assert.equal(team.rosterCoverage.officialActivePlayersAtAudit,53);
   assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,7);
@@ -41,7 +42,9 @@ test('official schedule preserves TBD and complete current broadcast context',()
 });
 
 test('source policy is freshness-aware inside the official tier',()=>{
-  assert.match(sources.find(s=>s.name==='Tennessee Titans')?.purpose||'',/newer dated transaction controls membership\/status/i);
+  const titans=sources.find(s=>s.name==='Tennessee Titans')?.purpose||'';
+  assert.match(titans,/injury\/availability statements/i);
+  assert.match(titans,/newer dated transaction controls membership\/status/i);
   assert.match(sources.find(s=>s.name==='NFL.com')?.purpose||'',/cross-check/i);
   assert.match(sources.find(s=>s.name==='Pro Football Reference')?.purpose||'',/cannot override official/i);
   assert.match(sources.find(s=>s.name==='SportsLogos.net')?.purpose||'',/Titans official brand\/history pages remain primary/i);

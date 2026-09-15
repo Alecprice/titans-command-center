@@ -43,9 +43,9 @@ function responseHarness(){
   return {res,result:()=>({statusCode,payload,headers})};
 }
 
-const auditedOnSept2=value=>String(value||'').startsWith('2026-09-02');
+const auditedOnSept8=value=>String(value||'').startsWith('2026-09-08');
 
-test('expired 95-player bootstrap cannot override the newer Sept 2 audited current roster',async()=>{
+test('expired 95-player bootstrap cannot override the newer Sep 8 audited current roster',async()=>{
   const oldRoster=Array.from({length:95},(_,index)=>({id:`old-${index}`,name:index===0?'Xavier Restrepo':`Camp Player ${index}`,number:String(index),position:'WR',status:'Active',capturedAt:'2026-08-27T00:00:00.000Z'}));
   const stale={
     cache_key:'bootstrap:v1',
@@ -62,7 +62,7 @@ test('expired 95-player bootstrap cannot override the newer Sept 2 audited curre
   assert.equal(body.mode,'audited-fallback');
   assert.equal(body.storage,'bundled-audited-data');
   assert.equal(body.fallback.active,true);
-  assert.equal(auditedOnSept2(body.fallback.auditedAt),true);
+  assert.equal(auditedOnSept8(body.fallback.auditedAt),true);
   assert.equal(body.roster.length,60);
   assert.equal(body.roster.filter(player=>player.status==='Active').length,53);
   assert.equal(body.roster.some(player=>player.name==='Owen Pappoe'),true);
@@ -71,10 +71,10 @@ test('expired 95-player bootstrap cannot override the newer Sept 2 audited curre
   const persisted=typeof env.TITANS_DB.snapshot.payload==='string'?JSON.parse(env.TITANS_DB.snapshot.payload):env.TITANS_DB.snapshot.payload;
   assert.equal(env.TITANS_DB.snapshot.source,'audited-fallback');
   assert.equal(persisted.roster.length,60);
-  assert.equal(auditedOnSept2(persisted.fallback.auditedAt),true);
+  assert.equal(auditedOnSept8(persisted.fallback.auditedAt),true);
 });
 
-test('Stats Lab uses the current Sept 2 roster while preserving cut players as preseason history',async()=>{
+test('Stats Lab uses the current Sep 8 roster while preserving cut players as preseason history',async()=>{
   const originalFetch=globalThis.fetch;
   globalThis.fetch=async()=>({ok:false,status:503,json:async()=>({})});
   try{
@@ -83,7 +83,7 @@ test('Stats Lab uses the current Sept 2 roster while preserving cut players as p
     const result=harness.result();
     assert.equal(result.statusCode,200);
     assert.equal(result.payload.rosterMode,'audited-fallback');
-    assert.match(result.payload.rosterSource,/audited 2026-09-02/);
+    assert.match(result.payload.rosterSource,/audited 2026-09-08/);
     assert.equal(result.payload.rosterCount,60);
     assert.equal(result.payload.players.filter(player=>player.status==='Active').length,53);
     assert.equal(result.payload.players.some(player=>player.name==='Owen Pappoe'),true);

@@ -35,7 +35,8 @@ The project follows a **content-integrity first** model. Current facts are check
 
 The repository keeps dated source assertions rather than silently presenting old snapshots as live facts.
 
-- The current fallback roster is the **Sept. 2, 2026 cross-source official audit**: 53 Active players plus 7 separately labeled reserve-list players (5 Reserve/Injured and 2 Reserve/Injured–Designated for Return). Practice-squad players remain a separate roster class; the audited Sept. 2 practice squad contains 17 players.
+- The current fallback roster is the **Sept. 8, 2026 cross-source official audit**: 53 Active players plus 7 separately labeled reserve-list players (5 Reserve/Injured and 2 Reserve/Injured–Designated for Return). Practice-squad players remain a separate roster class; the audited Sept. 8 practice squad contains 17 players. The Sept. 8 recheck found no dated official membership changes after Sept. 2, so the latest dated transactions still control membership/status where an official roster table lags.
+- Current availability is separate from roster membership. The Sept. 8 fallback includes the Titans' Sept. 7 statement that Cedric Gray entered the NFL concussion protocol, without inventing an OUT/IR designation, game status, or return date.
 - The 2026 preseason is complete at **2–1** after the Aug. 29 24–15 loss to Chicago; the next scheduled game is Week 1 vs. the New York Jets on Sept. 13.
 - Week 9 is the 2026 bye; Week 18 at Houston remains **TBD** in the audited schedule baseline and the official venue name used by the project is **Reliant Stadium**.
 - Team Room includes dated official roster/depth information with ties and uncertainty preserved rather than inferred.
@@ -56,7 +57,7 @@ A reachable provider is **not** the same thing as a successful data refresh.
 
 1. **Roster / schedule / transactions / staff:** TennesseeTitans.com, with NFL.com as official cross-check where applicable.
 2. **Statistics:** structured Tennessee Titans team-stat tables first; NFL.com, Pro Football Reference and nflverse as cross-checks. Editorial recap copy does not override the structured table.
-3. **Injuries:** official Titans injury report. Reserve/Injured roster status is separate, and “no report yet” never means zero injuries.
+3. **Injuries / availability:** official Titans injury reports and explicit team medical/availability statements. Reserve/Injured roster status is separate, and “no report yet” or protocol status does not imply an OUT designation.
 4. **History:** Titans official history plus the Pro Football Hall of Fame; PFR/Wikipedia are secondary.
 5. **Visual identity:** Titans brand/history pages first, SportsLogos.net second. User-supplied art is reference material unless an exact mark/year is verified.
 
