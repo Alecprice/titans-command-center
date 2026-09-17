@@ -2,9 +2,9 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-09-16T15:33:15.857403+00:00",
-  "rosterRows": 96,
-  "headshotCount": 94,
+  "generatedAt": "2026-09-17T15:39:37.506154+00:00",
+  "rosterRows": 95,
+  "headshotCount": 93,
   "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
@@ -132,18 +132,6 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
-      "name": "Jerrick Reed II",
-      "normalizedName": "jerrickreed",
-      "number": "28",
-      "position": "DB",
-      "status": "DEV",
-      "gsisId": "00-0038613",
-      "espnId": "4570084",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jdg6nd5cot2srdfixjnv",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
       "name": "Joshua Williams",
       "normalizedName": "joshuawilliams",
       "number": "25",
@@ -200,18 +188,6 @@
       "gsisId": "00-0037136",
       "espnId": "4360318",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/uap7tsrlmrnvb8ptf02n",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Melvin Smith",
-      "normalizedName": "melvinsmith",
-      "number": "39",
-      "position": "DB",
-      "status": "CUT",
-      "gsisId": "00-0040093",
-      "espnId": "5278708",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ks6nnexhp5jftsjlt1ah",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -524,6 +500,18 @@
       "gsisId": "00-0037663",
       "espnId": "4567962",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/jj3gmudznyutylbkkqbu",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Jimmy Ciarlo",
+      "normalizedName": "jimmyciarlo",
+      "number": "35",
+      "position": "LB",
+      "status": "DEV",
+      "gsisId": "00-0039277",
+      "espnId": "4689804",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/t0hjumfjcgkggvfe2rbp",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
