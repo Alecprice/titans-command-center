@@ -1,19 +1,19 @@
 # Cloudflare deployment status
 
-- Status: **deployed + canonical front door failure**
-- Source commit: `610838819167cace6fb1e8f4e7bd5a2f7549ec7d`
+- Status: **deployed + production regression failure**
+- Source commit: `1c7ac4de89fa8f12825eeec3c5898770f0500725`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `610838819167cace6fb1e8f4e7bd5a2f7549ec7d`
+- Main SHA observed before deploy: `1c7ac4de89fa8f12825eeec3c5898770f0500725`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers staged in GitHub: SeatGeek=false, Ticketmaster=false, StubHub=false
 - Fan Event secrets staged in GitHub: Eventbrite=false, Eventbrite org IDs=false, Skiddle=false
 - Fan Event runtime readiness: see the production regression evidence below; direct Worker secrets may be configured even when GitHub staging is false
 - Deploy outcome: success
-- Canonical front door: failure
-- Production regression: skipped
+- Canonical front door: success
+- Production regression: failure
 - Fan Events production regression: skipped
 - Browser navigation regression: skipped
 - Listen Watch browser regression: skipped
@@ -30,18 +30,207 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-09-28T18:44:56Z
+- Recorded: 2026-09-29T17:03:14Z
 
 ## Canonical front door regression
 
 ```json
 {
-  "ok": false,
+  "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "expectedCommit": "610838819167cace6fb1e8f4e7bd5a2f7549ec7d",
-  "error": "Canonical hostname did not reach expected release 610838819167cace6fb1e8f4e7bd5a2f7549ec7d after 6 attempts: observed=8497286f84198f458ae82d928a6db4551cede926",
-  "testedAt": "2026-09-28T18:44:56.063Z"
+  "expectedCommit": "1c7ac4de89fa8f12825eeec3c5898770f0500725",
+  "deployedCommit": "1c7ac4de89fa8f12825eeec3c5898770f0500725",
+  "rollbackCommit": "1c7ac4de89fa8f12825eeec3c5898770f0500725",
+  "rollbackCurrent": true,
+  "version": "1.0.0",
+  "rollbackVersion": "1.0.0",
+  "revisionAttempts": 1,
+  "shellPropagationAttempts": 1,
+  "shellPaths": [
+    "/",
+    "/index.html",
+    "/sw.js",
+    "/app.js",
+    "/tickets-price-fallback-v58.js",
+    "/tickets-tenx-v123.js",
+    "/tickets-compare-v125.js",
+    "/tickets-compare-cache-bridge-v141.js"
+  ],
+  "shellCacheControl": {
+    "/": {
+      "canonical": "no-store, max-age=0, must-revalidate",
+      "origin": "no-store, max-age=0, must-revalidate"
+    },
+    "/index.html": {
+      "canonical": "no-store, max-age=0, must-revalidate",
+      "origin": "no-store, max-age=0, must-revalidate"
+    },
+    "/sw.js": {
+      "canonical": "public, max-age=0, must-revalidate, no-store, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate, no-store, max-age=0, must-revalidate"
+    },
+    "/app.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    },
+    "/tickets-price-fallback-v58.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    },
+    "/tickets-tenx-v123.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    },
+    "/tickets-compare-v125.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    },
+    "/tickets-compare-cache-bridge-v141.js": {
+      "canonical": "public, max-age=0, must-revalidate",
+      "origin": "public, max-age=0, must-revalidate"
+    }
+  },
+  "cloudFront": {
+    "requestId": "wMjDXbGJKOvdKPUwRqES7gKZPalKUaGvQA5wjjsqt7EovC7mremmTQ==",
+    "pop": "HIO52-P4",
+    "via": "1.1 93b50b5ce635a36621d7bd38d3b0d6da.cloudfront.net (CloudFront)",
+    "cache": "Miss from cloudfront"
+  },
+  "canonicalSecurity": {
+    "contentTypeOptions": "nosniff",
+    "frameOptions": "DENY",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com https://i.ytimg.com https://d1plawd8huk6hh.cloudfront.net; connect-src 'self' https://api.sleeper.app; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "robots": "",
+    "csp": true
+  },
+  "originRobots": "noindex, nofollow",
+  "health": {
+    "status": "healthy",
+    "databaseProvider": "cloudflare-d1",
+    "databaseConfigured": true,
+    "snapshotFresh": true
+  },
+  "rollbackHealth": {
+    "status": "healthy",
+    "databaseProvider": "cloudflare-d1",
+    "databaseConfigured": true,
+    "snapshotFresh": true
+  },
+  "responseMs": {
+    "canonicalMeta": 282,
+    "originMeta": 297,
+    "canonicalRoot": 64,
+    "originRoot": 96,
+    "health": 334,
+    "originHealth": 335
+  },
+  "testedAt": "2026-09-29T17:03:06.202Z"
+}```
+
+## Production regression
+
+```json
+{
+  "ok": false,
+  "base": "https://titans.alecjprice.com",
+  "rootStatus": 200,
+  "securityHeaders": {
+    "contentTypeOptions": "nosniff",
+    "frameOptions": "DENY",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com https://i.ytimg.com https://d1plawd8huk6hh.cloudfront.net; connect-src 'self' https://api.sleeper.app; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "robots": "",
+    "csp": true
+  },
+  "manifestStatus": 200,
+  "serviceWorkerStatus": 200,
+  "serviceWorkerCache": "titans-cc-brand-2026-v87",
+  "precachePaths": 151,
+  "pwaIcons": {
+    "icon192": {
+      "width": 192,
+      "height": 192,
+      "bytes": 2854
+    },
+    "icon512": {
+      "width": 512,
+      "height": 512,
+      "bytes": 5724
+    }
+  },
+  "healthStatus": 200,
+  "appStatus": "healthy",
+  "databaseProvider": "cloudflare-d1",
+  "databaseConfigured": true,
+  "databaseOk": true,
+  "snapshotFresh": true,
+  "dataMode": "audited-fallback",
+  "databaseAvailable": false,
+  "dataStatus": 200,
+  "dataRosterCount": 60,
+  "transactionCount": 9,
+  "invalidTransactionDates": 0,
+  "statsStatus": 200,
+  "statsRosterCount": 60,
+  "statsRosterMode": "d1-snapshot",
+  "statsRosterSource": "Tennessee Titans official roster / transaction snapshot · Cloudflare D1",
+  "completedPreseasonGamebooks": 3,
+  "completedPreseasonGames": 3,
+  "completedPreseasonGamesWithPlayerStats": 3,
+  "completedPreseasonGamesMissingPlayerStats": 0,
+  "marketStatus": 200,
+  "marketRows": 606,
+  "marketMode": "configured-provider",
+  "buildMeta": {
+    "app": "titans-command-center",
+    "version": "1.0.0",
+    "commit": "1c7ac4de89fa8f12825eeec3c5898770f0500725",
+    "builtAt": "2026-09-29T17:02:49.057Z"
+  },
+  "deploymentPropagationAttempts": 1,
+  "responseMs": {
+    "root": 42,
+    "health": 118,
+    "data": 189,
+    "stats": 315,
+    "market": 667
+  },
+  "testedAt": "2026-09-29T17:03:13.414Z",
+  "healthTruth": {
+    "ok": true,
+    "mode": "d1-snapshot",
+    "status": 200,
+    "healthStatus": "healthy",
+    "contentAudit": "2026-09-02",
+    "dataAudit": "2026-09-29",
+    "databaseProvider": "cloudflare-d1",
+    "snapshotFresh": true,
+    "edgeCacheStatus": "HIT",
+    "responseMs": 228,
+    "testedAt": "2026-09-29T17:03:13.870Z"
+  },
+  "marketEdgeCache": {
+    "ok": true,
+    "base": "https://titans.alecjprice.com",
+    "initialStatus": "HIT",
+    "finalStatus": "HIT",
+    "attempts": 1,
+    "coldOrInitialMs": 120,
+    "warmHitMs": 120,
+    "rows": 606,
+    "sequence": [
+      {
+        "status": "HIT",
+        "durationMs": 120,
+        "rows": 606
+      }
+    ],
+    "testedAt": "2026-09-29T17:03:14.024Z"
+  },
+  "analyticsError": "Personnel package analytics are missing",
+  "analyticsTestedAt": "2026-09-29T17:03:14.331Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
