@@ -2,9 +2,9 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-09-30T17:00:11.515888+00:00",
-  "rosterRows": 96,
-  "headshotCount": 94,
+  "generatedAt": "2026-10-01T17:29:44.728499+00:00",
+  "rosterRows": 94,
+  "headshotCount": 92,
   "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
@@ -516,18 +516,6 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
-      "name": "Jimmy Ciarlo",
-      "normalizedName": "jimmyciarlo",
-      "number": "35",
-      "position": "LB",
-      "status": "CUT",
-      "gsisId": "00-0039277",
-      "espnId": "4689804",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/t0hjumfjcgkggvfe2rbp",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
       "name": "Keldric Faulk",
       "normalizedName": "keldricfaulk",
       "number": "15",
@@ -632,18 +620,6 @@
       "gsisId": "00-0040921",
       "espnId": null,
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/webk4td1tz8hyezcimaa",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Andre James",
-      "normalizedName": "andrejames",
-      "number": "61",
-      "position": "OL",
-      "status": "CUT",
-      "gsisId": "00-0035127",
-      "espnId": "3932244",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/cliagitqwyz5snrphj2c",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
