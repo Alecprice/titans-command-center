@@ -2,9 +2,9 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-10-06T17:25:22.507015+00:00",
-  "rosterRows": 94,
-  "headshotCount": 92,
+  "generatedAt": "2026-10-07T17:57:57.117401+00:00",
+  "rosterRows": 95,
+  "headshotCount": 93,
   "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
@@ -76,7 +76,7 @@
       "normalizedName": "derrickcanteen",
       "number": "42",
       "position": "DB",
-      "status": "CUT",
+      "status": "DEV",
       "gsisId": "00-0040659",
       "espnId": "4429366",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/vfpxchkywc1vt3yeom9q",
@@ -432,6 +432,18 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
+      "name": "Chase Wilson",
+      "normalizedName": "chasewilson",
+      "number": "53",
+      "position": "LB",
+      "status": "DEV",
+      "gsisId": "00-0041515",
+      "espnId": null,
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/fukmduvoolyuhzmcq7zl",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
       "name": "Cody Barton",
       "normalizedName": "codybarton",
       "number": "50",
@@ -636,18 +648,6 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
-      "name": "Austin Deculus",
-      "normalizedName": "austindeculus",
-      "number": "76",
-      "position": "OL",
-      "status": "CUT",
-      "gsisId": "00-0037302",
-      "espnId": "4242229",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/da3gpuvmzfoc7tnn5nut",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
       "name": "Austin Schlottmann",
       "normalizedName": "austinschlottmann",
       "number": "51",
@@ -668,6 +668,18 @@
       "gsisId": "00-0040512",
       "espnId": "4426987",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/hggljfh39iorav9j5mpw",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Chandler Zavala",
+      "normalizedName": "chandlerzavala",
+      "number": "62",
+      "position": "OL",
+      "status": "DEV",
+      "gsisId": "00-0038536",
+      "espnId": "4710661",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/h1jwlle0qeo7mtax2pc9",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -760,7 +772,7 @@
       "normalizedName": "nickbroeker",
       "number": "65",
       "position": "OL",
-      "status": "DEV",
+      "status": "TRD",
       "gsisId": "00-0038633",
       "espnId": "4426498",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ho1hflkakgdwhwzj7eyu",
