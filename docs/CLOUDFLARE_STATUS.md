@@ -1,11 +1,11 @@
 # Cloudflare deployment status
 
 - Status: **deployed + production regression failure**
-- Source commit: `f97c1051a357ce6b330d79370bd77e45b6ad81d2`
+- Source commit: `e9ccafddbdf8c3484deca638a9d062b427127c0a`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `f97c1051a357ce6b330d79370bd77e45b6ad81d2`
+- Main SHA observed before deploy: `e9ccafddbdf8c3484deca638a9d062b427127c0a`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers staged in GitHub: SeatGeek=false, Ticketmaster=false, StubHub=false
@@ -30,7 +30,7 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-10-10T16:24:16Z
+- Recorded: 2026-10-11T16:47:52Z
 
 ## Canonical front door regression
 
@@ -39,13 +39,13 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "expectedCommit": "f97c1051a357ce6b330d79370bd77e45b6ad81d2",
-  "deployedCommit": "f97c1051a357ce6b330d79370bd77e45b6ad81d2",
-  "rollbackCommit": "f97c1051a357ce6b330d79370bd77e45b6ad81d2",
+  "expectedCommit": "e9ccafddbdf8c3484deca638a9d062b427127c0a",
+  "deployedCommit": "e9ccafddbdf8c3484deca638a9d062b427127c0a",
+  "rollbackCommit": "e9ccafddbdf8c3484deca638a9d062b427127c0a",
   "rollbackCurrent": true,
   "version": "1.0.0",
   "rollbackVersion": "1.0.0",
-  "revisionAttempts": 2,
+  "revisionAttempts": 1,
   "shellPropagationAttempts": 1,
   "shellPaths": [
     "/",
@@ -92,9 +92,9 @@
     }
   },
   "cloudFront": {
-    "requestId": "G3u5QxvnZ1LjSpHxkh0RBpJm0qTyMr26kzgNtQzbhPyO3RQ9lVYdeA==",
-    "pop": "PHX50-P1",
-    "via": "1.1 475b5af14d0e61a492d23f6a5c7a1370.cloudfront.net (CloudFront)",
+    "requestId": "tTP1pqqy-3mkLUAJwJi6nmewsQNZy98yS8x1dSO2RD_peY9prInu6Q==",
+    "pop": "HIO52-P4",
+    "via": "1.1 cb2339b8008ceeabfc2dd9e6cfbc465c.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -107,26 +107,26 @@
   },
   "originRobots": "noindex, nofollow",
   "health": {
-    "status": "degraded",
+    "status": "healthy",
     "databaseProvider": "cloudflare-d1",
     "databaseConfigured": true,
-    "snapshotFresh": false
+    "snapshotFresh": true
   },
   "rollbackHealth": {
-    "status": "degraded",
+    "status": "healthy",
     "databaseProvider": "cloudflare-d1",
     "databaseConfigured": true,
-    "snapshotFresh": false
+    "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 64,
-    "originMeta": 136,
-    "canonicalRoot": 51,
-    "originRoot": 77,
-    "health": 321,
-    "originHealth": 326
+    "canonicalMeta": 463,
+    "originMeta": 144,
+    "canonicalRoot": 63,
+    "originRoot": 152,
+    "health": 287,
+    "originHealth": 423
   },
-  "testedAt": "2026-10-10T16:24:03.961Z"
+  "testedAt": "2026-10-11T16:47:39.026Z"
 }```
 
 ## Production regression
@@ -161,11 +161,11 @@
     }
   },
   "healthStatus": 200,
-  "appStatus": "degraded",
+  "appStatus": "healthy",
   "databaseProvider": "cloudflare-d1",
   "databaseConfigured": true,
-  "databaseOk": false,
-  "snapshotFresh": false,
+  "databaseOk": true,
+  "snapshotFresh": true,
   "dataMode": "audited-fallback",
   "databaseAvailable": false,
   "dataStatus": 200,
@@ -186,30 +186,30 @@
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "f97c1051a357ce6b330d79370bd77e45b6ad81d2",
-    "builtAt": "2026-10-10T16:23:45.819Z"
+    "commit": "e9ccafddbdf8c3484deca638a9d062b427127c0a",
+    "builtAt": "2026-10-11T16:47:17.840Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 22,
-    "health": 99,
-    "data": 330,
-    "stats": 228,
-    "market": 1839
+    "root": 48,
+    "health": 129,
+    "data": 148,
+    "stats": 289,
+    "market": 1305
   },
-  "testedAt": "2026-10-10T16:24:15.712Z",
+  "testedAt": "2026-10-11T16:47:51.258Z",
   "healthTruth": {
     "ok": true,
-    "mode": "d1-primary-cached-fallback",
+    "mode": "d1-snapshot",
     "status": 200,
     "healthStatus": "healthy",
     "contentAudit": "2026-09-02",
-    "dataAudit": "2026-09-02",
+    "dataAudit": "2026-10-11",
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 264,
-    "testedAt": "2026-10-10T16:24:16.169Z"
+    "responseMs": 234,
+    "testedAt": "2026-10-11T16:47:51.739Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -217,20 +217,20 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 96,
-    "warmHitMs": 96,
+    "coldOrInitialMs": 135,
+    "warmHitMs": 135,
     "rows": 1200,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 96,
+        "durationMs": 135,
         "rows": 1200
       }
     ],
-    "testedAt": "2026-10-10T16:24:16.295Z"
+    "testedAt": "2026-10-11T16:47:51.907Z"
   },
   "analyticsError": "Personnel package analytics are missing",
-  "analyticsTestedAt": "2026-10-10T16:24:16.578Z"
+  "analyticsTestedAt": "2026-10-11T16:47:52.197Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
