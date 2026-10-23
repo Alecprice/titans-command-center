@@ -1,11 +1,11 @@
 # Cloudflare deployment status
 
 - Status: **deployed + production regression failure**
-- Source commit: `735d0cd12f1978de34f7a329a509670053c92207`
+- Source commit: `d4d4bd11708904896b13345a93aee8990bccf9f9`
 - Quality gate: success
 - Cloudflare credentials available: true
 - Source still current main: true
-- Main SHA observed before deploy: `735d0cd12f1978de34f7a329a509670053c92207`
+- Main SHA observed before deploy: `d4d4bd11708904896b13345a93aee8990bccf9f9`
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers staged in GitHub: SeatGeek=false, Ticketmaster=false, StubHub=false
@@ -30,7 +30,7 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-10-22T16:03:42Z
+- Recorded: 2026-10-23T15:56:58Z
 
 ## Canonical front door regression
 
@@ -39,13 +39,13 @@
   "ok": true,
   "canonical": "https://titans.alecjprice.com",
   "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "expectedCommit": "735d0cd12f1978de34f7a329a509670053c92207",
-  "deployedCommit": "735d0cd12f1978de34f7a329a509670053c92207",
-  "rollbackCommit": "735d0cd12f1978de34f7a329a509670053c92207",
+  "expectedCommit": "d4d4bd11708904896b13345a93aee8990bccf9f9",
+  "deployedCommit": "d4d4bd11708904896b13345a93aee8990bccf9f9",
+  "rollbackCommit": "d4d4bd11708904896b13345a93aee8990bccf9f9",
   "rollbackCurrent": true,
   "version": "1.0.0",
   "rollbackVersion": "1.0.0",
-  "revisionAttempts": 1,
+  "revisionAttempts": 2,
   "shellPropagationAttempts": 1,
   "shellPaths": [
     "/",
@@ -92,9 +92,9 @@
     }
   },
   "cloudFront": {
-    "requestId": "MzO9ejddAStakxLIjz9dZ5cxCsnD6rCWZCfIZ5ZSq_AejB2OfxjTAg==",
-    "pop": "PHX50-P1",
-    "via": "1.1 a3fcfc1aa68473c1f8608ba55a0e426e.cloudfront.net (CloudFront)",
+    "requestId": "JbBRFlKxbbbugnvBqE4M4S-HIV5k6XxEraDcptZ5z_9w4xmwA6qyog==",
+    "pop": "SFO53-P11",
+    "via": "1.1 83bbe8ec13945c8323d729afb8ddf238.cloudfront.net (CloudFront)",
     "cache": "Miss from cloudfront"
   },
   "canonicalSecurity": {
@@ -119,14 +119,14 @@
     "snapshotFresh": true
   },
   "responseMs": {
-    "canonicalMeta": 303,
-    "originMeta": 174,
-    "canonicalRoot": 75,
-    "originRoot": 114,
-    "health": 156,
-    "originHealth": 175
+    "canonicalMeta": 99,
+    "originMeta": 114,
+    "canonicalRoot": 116,
+    "originRoot": 115,
+    "health": 372,
+    "originHealth": 374
   },
-  "testedAt": "2026-10-22T16:03:26.524Z"
+  "testedAt": "2026-10-23T15:56:40.315Z"
 }```
 
 ## Production regression
@@ -181,35 +181,35 @@
   "completedPreseasonGamesWithPlayerStats": 3,
   "completedPreseasonGamesMissingPlayerStats": 0,
   "marketStatus": 200,
-  "marketRows": 600,
+  "marketRows": 1200,
   "marketMode": "configured-provider",
   "buildMeta": {
     "app": "titans-command-center",
     "version": "1.0.0",
-    "commit": "735d0cd12f1978de34f7a329a509670053c92207",
-    "builtAt": "2026-10-22T16:03:08.961Z"
+    "commit": "d4d4bd11708904896b13345a93aee8990bccf9f9",
+    "builtAt": "2026-10-23T15:56:18.858Z"
   },
   "deploymentPropagationAttempts": 1,
   "responseMs": {
-    "root": 38,
-    "health": 183,
-    "data": 191,
-    "stats": 259,
-    "market": 7951
+    "root": 28,
+    "health": 159,
+    "data": 198,
+    "stats": 284,
+    "market": 1426
   },
-  "testedAt": "2026-10-22T16:03:41.410Z",
+  "testedAt": "2026-10-23T15:56:57.471Z",
   "healthTruth": {
     "ok": true,
     "mode": "d1-snapshot",
     "status": 200,
     "healthStatus": "healthy",
     "contentAudit": "2026-09-02",
-    "dataAudit": "2026-10-22",
+    "dataAudit": "2026-10-23",
     "databaseProvider": "cloudflare-d1",
     "snapshotFresh": true,
     "edgeCacheStatus": "HIT",
-    "responseMs": 217,
-    "testedAt": "2026-10-22T16:03:41.827Z"
+    "responseMs": 227,
+    "testedAt": "2026-10-23T15:56:57.946Z"
   },
   "marketEdgeCache": {
     "ok": true,
@@ -217,20 +217,20 @@
     "initialStatus": "HIT",
     "finalStatus": "HIT",
     "attempts": 1,
-    "coldOrInitialMs": 107,
-    "warmHitMs": 107,
-    "rows": 600,
+    "coldOrInitialMs": 206,
+    "warmHitMs": 206,
+    "rows": 1200,
     "sequence": [
       {
         "status": "HIT",
-        "durationMs": 107,
-        "rows": 600
+        "durationMs": 206,
+        "rows": 1200
       }
     ],
-    "testedAt": "2026-10-22T16:03:41.963Z"
+    "testedAt": "2026-10-23T15:56:58.187Z"
   },
   "analyticsError": "Personnel package analytics are missing",
-  "analyticsTestedAt": "2026-10-22T16:03:42.203Z"
+  "analyticsTestedAt": "2026-10-23T15:56:58.458Z"
 }```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
