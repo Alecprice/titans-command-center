@@ -20,8 +20,21 @@ test('post-deploy production and browser gates use the canonical hostname',()=>{
   assert.equal(directAssignments.length,0,'post-deploy gates must not bypass the canonical front door');
 
   const canonicalAssignments=[...workflow.matchAll(/WORKER_URL:\s*\$\{\{\s*env\.PRODUCTION_URL\s*\}\}/g)];
-  assert.equal(canonicalAssignments.length,14,'production plus all browser regressions, including Ticket Center, must use the canonical hostname');
-  assert.match(workflow,/Run Ticket Center browser regression[\s\S]*WORKER_URL:\s*\$\{\{\s*env\.PRODUCTION_URL\s*\}\}/);
+  assert.equal(canonicalAssignments.length,19,'all explicit production and browser regressions must use the canonical hostname');
+  for(const step of [
+    'Run core production regression audit',
+    'Run regular-season production regression',
+    'Run health content production regression',
+    'Run Market cache production regression',
+    'Run advanced analytics API production regression',
+    'Run player headshot production regression',
+    'Run Ticket Center browser regression',
+    'Run Account and Guest browser regression',
+    'Run advanced analytics browser regression',
+    'Run player headshot browser regression'
+  ]){
+    assert.match(workflow,new RegExp(`${step}[\\s\\S]*?WORKER_URL:\\s*\\$\\{\\{\\s*env\\.PRODUCTION_URL\\s*\\}\\}`),`${step} must use canonical production`);
+  }
   assert.match(workflow,/EXPECTED_SHA:\s*\$\{\{\s*github\.sha\s*\}\}/);
 });
 
