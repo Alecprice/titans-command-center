@@ -87,6 +87,27 @@
     });
   }
 
+  function shareUrl(){return `${location.origin}${location.pathname}#tickets`;}
+
+  function shareText(items,party){
+    const lines=['Tennessee Titans saved game actual-cost plan'];
+    items.forEach((item,index)=>{
+      lines.push('');
+      lines.push(`${index+1}. ${item.title}`);
+      lines.push(item.date);
+      if(item.ready){
+        lines.push(`Actual ticket checkout: ${money(item.checkout)}`);
+        lines.push(`Entered extras: ${money(item.extras)}`);
+        lines.push(`Outing total: ${money(item.total)} · ${party} ticket${party===1?'':'s'} · ${money(item.perPerson)} per person`);
+      }else{
+        lines.push('Actual ticket checkout: not entered · outing total not ranked');
+      }
+    });
+    lines.push('');
+    lines.push('Amounts above are user-entered in Ticket Center. Starting prices, unentered fees, seat quality, and projected spending are excluded.');
+    return lines.join('\n');
+  }
+
   function cardMarkup(item,readyCount,party,lowestTotal){
     const badge=!item.ready
       ?'NEEDS CHECKOUT'
@@ -120,7 +141,8 @@
     return `<section class="tickets-cost-v135" data-ticket-cost-compare-v135 aria-label="Actual saved game cost comparison">
       <header><div><small>TENX · ACTUAL COST COMPARE</small><h2>Compare what the saved games really cost.</h2><p>${esc(lead)}</p></div><span>${ready.length}/${saved.length} actual totals ready</span></header>
       <div class="tickets-cost-v135-grid">${cards}</div>
-      <footer><span>Ranking uses actual ticket checkout plus only the optional extras you entered. Starting prices, unentered fees, seat quality, and projected spending are excluded.</span></footer>
+      <footer class="tickets-cost-v135-panel-footer"><span>Ranking uses actual ticket checkout plus only the optional extras you entered. Starting prices, unentered fees, seat quality, and projected spending are excluded.</span><button type="button" data-ticket-cost-share aria-label="Share saved game actual-cost plan" ${ready.length?'':'disabled'}>Share actual costs</button></footer>
+      <p class="tickets-cost-v135-status" data-ticket-cost-status role="status" aria-live="polite"></p>
     </section>`;
   }
 
@@ -146,6 +168,42 @@
 
   function schedule(){if(queued)return;queued=true;queueMicrotask(render);}
 
+  function setStatus(center,message){
+    const node=center.querySelector('[data-ticket-cost-status]');
+    if(node)node.textContent=message;
+  }
+
+  async function shareActualCosts(center){
+    const saved=readSaved();
+    if(saved.length<2){setStatus(center,'Save at least two matchups before sharing an actual-cost comparison.');return;}
+    const plans=readPlans(saved);
+    const party=partySize(center);
+    const items=rows(center,saved,plans);
+    if(!items.some(item=>item.ready)){setStatus(center,'Enter at least one actual ticket checkout total before sharing.');return;}
+    const text=shareText(items,party);
+    const url=shareUrl();
+    try{
+      if(typeof navigator.share==='function'){
+        await navigator.share({title:'Titans actual-cost plan',text,url});
+        setStatus(center,'Shared the saved-game actual-cost plan.');
+        return;
+      }
+    }catch(error){
+      if(error?.name==='AbortError'){
+        setStatus(center,'Share canceled. Your actual-cost plans are unchanged.');
+        return;
+      }
+    }
+    try{
+      if(navigator.clipboard?.writeText){
+        await navigator.clipboard.writeText(`${text}\n\nOpen Ticket Center: ${url}`);
+        setStatus(center,'Share is unavailable here, so the actual-cost plan was copied to your clipboard.');
+        return;
+      }
+    }catch{}
+    setStatus(center,'Sharing is unavailable in this browser. Your actual-cost plans are unchanged.');
+  }
+
   function editBudget(center,key){
     const picker=center.querySelector('[data-ticket-outing-game]');
     const panel=center.querySelector('[data-ticket-outing-v134]');
@@ -164,10 +222,11 @@
   app.addEventListener('click',event=>{
     const target=event.target instanceof Element?event.target:null;
     if(!target)return;
+    const center=target.closest('[data-ticket-center]');
+    if(!center)return;
+    if(target.closest('[data-ticket-cost-share]')){shareActualCosts(center);return;}
     const button=target.closest('[data-ticket-cost-edit]');
     if(!button)return;
-    const center=button.closest('[data-ticket-center]');
-    if(!center)return;
     editBudget(center,button.dataset.ticketCostEdit||'');
   });
 
