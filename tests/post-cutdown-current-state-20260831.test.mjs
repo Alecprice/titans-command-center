@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {team,games,roster,feed,metrics} from '../src/data.mjs';
-import {ROSTER_AUDIT_DATE,ROSTER_SOURCE_URL,ROSTER_53_SOURCE_URL,auditedRoster20260831,auditedPracticeSquad20260902} from '../src/roster-audit-20260831.mjs';
+import {ROSTER_AUDIT_DATE,ROSTER_SOURCE_URL,ROSTER_53_SOURCE_URL,auditedRoster20260831,auditedPracticeSquad20260908} from '../src/roster-audit-20260831.mjs';
 
 const byName=name=>roster.find(player=>player.name===name);
 
-test('Sept 2 audited fallback keeps Active, reserve, and practice-squad lists distinct',()=>{
-  assert.equal(ROSTER_AUDIT_DATE,'2026-09-02');
+test('Sep 8 audited fallback keeps Active, reserve, and practice-squad lists distinct',()=>{
+  assert.equal(ROSTER_AUDIT_DATE,'2026-09-08');
   assert.match(ROSTER_SOURCE_URL,/tennesseetitans\.com\/team\/rosters/);
   assert.match(ROSTER_53_SOURCE_URL,/updated-53-man-roster-for-the-titans/);
   assert.equal(auditedRoster20260831.length,60);
@@ -14,27 +14,27 @@ test('Sept 2 audited fallback keeps Active, reserve, and practice-squad lists di
   assert.equal(roster.filter(player=>player.status==='Active').length,53);
   assert.equal(roster.filter(player=>player.status==='Reserve/Injured').length,5);
   assert.equal(roster.filter(player=>player.status==='Reserve/Injured; Designated for Return').length,2);
-  assert.equal(auditedPracticeSquad20260902.length,17);
+  assert.equal(auditedPracticeSquad20260908.length,17);
   assert.equal(team.rosterCoverage.officialActivePlayersAtAudit,53);
   assert.equal(team.rosterCoverage.officialReservePlayersAtAudit,7);
   assert.equal(team.rosterCoverage.practiceSquadPlayersAtAudit,17);
   assert.equal(team.rosterCoverage.fallbackPlayers,60);
-  assert.equal(team.rosterCoverage.asOf,'2026-09-02');
+  assert.equal(team.rosterCoverage.asOf,'2026-09-08');
 });
 
-test('Sept 2 waiver, signing, and injury-settlement changes are represented without stale membership',()=>{
+test('Sept 2 waiver, signing, and injury-settlement changes remain represented without stale membership',()=>{
   for(const name of ['Owen Pappoe','Melvin Smith Jr.','Nazir Stackhouse','Terrell Burgess','James Hudson III']){
     assert.equal(byName(name)?.status,'Active',`${name} should be active`);
   }
   for(const name of ['Xavier Restrepo','Jerrick Reed II','Erick Hallett II','Mohamoud Diabate']){
     assert.equal(byName(name),undefined,`${name} belongs to the separate current practice-squad snapshot`);
-    assert.ok(auditedPracticeSquad20260902.some(player=>player.name===name),`${name} should be on the Sept. 2 practice squad`);
+    assert.ok(auditedPracticeSquad20260908.some(player=>player.name===name),`${name} should remain on the Sep. 8 revalidated practice squad`);
   }
   for(const name of ['Will Levis','Cordell Volson','Andre James']){
     assert.equal(byName(name),undefined,`${name} should not remain on the current Active/reserve fallback`);
   }
   for(const name of ['Hank Beatty','Derrick Canteen','Mani Powell','Mario Goodrich III']){
-    assert.equal(auditedPracticeSquad20260902.some(player=>player.name===name),false,`${name} should not remain on the current practice squad`);
+    assert.equal(auditedPracticeSquad20260908.some(player=>player.name===name),false,`${name} should not remain on the current practice squad`);
   }
 });
 
@@ -58,12 +58,12 @@ test('preseason final and regular-season next-game metrics agree with schedule t
   assert.equal(metrics.find(metric=>metric.label==='Audited roster')?.value,'53');
 });
 
-test('current feed preserves newest-first Sept 2 and Sept 1 evidence plus post-cutdown history',()=>{
-  const lead=feed.slice(0,6),leadTimes=lead.map(item=>Date.parse(item.publishedAt));
+test('current feed preserves newest-first Week 1 availability plus Sept 2 and Sept 1 roster evidence',()=>{
+  const lead=feed.slice(0,8),leadTimes=lead.map(item=>Date.parse(item.publishedAt));
   assert.ok(leadTimes.every(Number.isFinite),'leading feed rows must have valid publication timestamps');
   assert.deepEqual(leadTimes,[...leadTimes].sort((a,b)=>b-a),'leading current feed should remain newest-first');
-  assert.equal(feed[0]?.id,'n17','latest Sept. 2 transaction remains the lead current-team item');
-  assert.ok(feed.slice(0,4).every(item=>Date.parse(item.publishedAt)>=Date.parse('2026-09-01T00:00:00Z')),'newer official Week 1 evidence may expand the Sept. 2/Sept. 1 lead without displacing current post-cutdown truth');
+  assert.equal(feed[0]?.id,'n21','Sept. 7 Cedric Gray team statement should lead current fallback news');
+  assert.equal(feed[0]?.evidence,'team-statement');
   assert.ok(feed.some(item=>item.id==='n17'&&/add four to practice squad/i.test(item.title)));
   assert.ok(feed.some(item=>item.id==='n16'&&/Sept\. 1 roster transactions/i.test(item.title)));
   assert.ok(feed.some(item=>item.id==='n14'&&/Updated 53-man roster/i.test(item.title)));

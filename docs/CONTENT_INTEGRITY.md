@@ -2,7 +2,7 @@
 
 Last full audit: **2026-08-19**
 
-Current-team roster fallback audit: **2026-09-02** — 53 Active players plus 7 reserve-list players; the 17-player practice squad is tracked separately.
+Current-team roster fallback audit: **2026-09-08** — 53 Active players plus 7 reserve-list players; the 17-player practice squad is tracked separately. The Sept. 8 recheck found no dated official membership changes after Sept. 2, so the latest dated transactions remain the membership/status authority when an official roster table lags.
 
 The site is a fan-built product, but factual team information should be held to a newsroom/data-product standard. A polished UI is not permission to make an uncertain fact look definitive.
 
@@ -10,13 +10,15 @@ The site is a fan-built product, but factual team information should be held to 
 
 ### Current and fast-changing facts
 
-For current roster, jersey numbers, coaching staff, front office, transactions, schedule, game status, depth chart and current brand details:
+For current roster, jersey numbers, coaching staff, front office, transactions, schedule, game status, injury/availability statements, depth chart and current brand details:
 
 1. **TennesseeTitans.com** — primary source of truth.
 2. **NFL.com / official NFL records** — schedule and league-status cross-check.
 3. Structured free data sources such as nflverse — analytics/data enrichment after identity/date checks.
 4. Reputable secondary references — context only.
 5. Wikipedia — useful cross-check, not authoritative for live roster/personnel.
+
+Roster membership and current availability are separate facts. An Active player can simultaneously be in a medical protocol or otherwise have uncertain game availability. Protocol language, practice observations and team medical statements must not be converted into an OUT, IR, inactive, or return-date claim unless an authoritative source explicitly supplies that status.
 
 ### Stable historical facts
 
@@ -43,6 +45,7 @@ The active visual metadata catalog is `src/visual-audit.mjs`; see `docs/VISUAL_A
 - TBD dates/times/networks remain **TBD**. Do not create placeholder timestamps that look official.
 - Bye weeks are represented as bye weeks, not as an opponent named “BYE.”
 - Current news fallback items must link to a verifiable source and must not contain invented reporter/social placeholders.
+- Injury and availability copy must preserve the source's actual status. Medical protocol or practice-observation language alone cannot be promoted to OUT, IR, inactive, or cleared-to-play status.
 - Subjective tags such as “leader,” “core,” “watch,” or “new” are editorial labels, not roster facts. Do not display them as factual metadata unless the label is explicitly defined and sourced.
 - Historical images must be labeled by what the image actually depicts. Decorative/fan artwork must not be presented as an official period logo.
 - Historical visuals use one of three verification classes: **verified**, **representative**, or **reference composite**.
