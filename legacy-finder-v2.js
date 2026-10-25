@@ -194,6 +194,7 @@ function createController(page,finder,index){
   const empty=finder.querySelector('[data-legacy-finder-empty]');
   const exhibitClear=finder.querySelector('[data-legacy-exhibit-clear]');
   const sectionNodes=Object.fromEntries(Object.entries(SECTION_MAP).map(([key,section])=>[key,page.querySelector(`#${CSS.escape(section.id)}`)]));
+  const exhibitOrder=[...index.byExhibit.keys()];
   let state={q:'',scope:'all'},spotlight=null,myMuseum=readMyMuseum(index),myMuseumRoot=null;
 
   function updateSections(active){
@@ -205,8 +206,33 @@ function createController(page,finder,index){
     });
   }
 
+  function clearExhibitNavigator(item=spotlight){
+    const actions=item?.querySelector('.legacy-exhibit-actions');
+    actions?.querySelectorAll('[data-legacy-exhibit-prev],[data-legacy-exhibit-next]').forEach(button=>button.remove());
+  }
+
+  function renderExhibitNavigator(item){
+    const key=item?.dataset.legacyExhibitKey||'';
+    const position=exhibitOrder.indexOf(key);
+    const actions=item?.querySelector('.legacy-exhibit-actions');
+    if(position<0||!actions)return;
+    clearExhibitNavigator(item);
+    const prevKey=position>0?exhibitOrder[position-1]:'';
+    const nextKey=position<exhibitOrder.length-1?exhibitOrder[position+1]:'';
+    const prevLabel=prevKey?(index.byExhibit.get(prevKey)?.dataset.legacyExhibitLabel||'Legacy exhibit'):'';
+    const nextLabel=nextKey?(index.byExhibit.get(nextKey)?.dataset.legacyExhibitLabel||'Legacy exhibit'):'';
+    actions.insertAdjacentHTML('afterbegin',`<button type="button" data-legacy-exhibit-prev="${esc(prevKey)}" ${prevKey?'':'disabled'} aria-label="${prevKey?`Previous Legacy exhibit: ${esc(prevLabel)}`:'No previous Legacy exhibit'}">Previous</button>`);
+    actions.insertAdjacentHTML('beforeend',`<button type="button" data-legacy-exhibit-next="${esc(nextKey)}" ${nextKey?'':'disabled'} aria-label="${nextKey?`Next Legacy exhibit: ${esc(nextLabel)}`:'No next Legacy exhibit'}">Next</button>`);
+    const label=item.dataset.legacyExhibitLabel||'Legacy exhibit';
+    const type=EXHIBIT_TYPE_LABEL[exhibitType(key)]||'Exhibit';
+    count.textContent=`Exhibit ${position+1} of ${exhibitOrder.length} · ${type} · ${label}`;
+  }
+
   function clearSpotlight({syncUrl=true,announce=true}={}){
-    if(spotlight)spotlight.classList.remove('legacy-exhibit-focus');
+    if(spotlight){
+      clearExhibitNavigator(spotlight);
+      spotlight.classList.remove('legacy-exhibit-focus');
+    }
     spotlight=null;
     page.classList.remove('legacy-exhibit-active');
     exhibitClear.hidden=true;
@@ -227,9 +253,8 @@ function createController(page,finder,index){
     item.classList.add('legacy-exhibit-focus');
     page.classList.add('legacy-exhibit-active');
     exhibitClear.hidden=false;
-    const label=item.dataset.legacyExhibitLabel||'Legacy exhibit';
-    count.textContent=`Exhibit spotlight · ${label}`;
-    action.textContent='Exact exhibit link loaded.';
+    renderExhibitNavigator(item);
+    action.textContent='Exact exhibit link loaded. Use Previous or Next to walk the museum.';
     if(syncUrl)writeExhibitState(item.dataset.legacyExhibitKey);
     if(scroll)requestAnimationFrame(()=>{
       const reduced=matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -237,6 +262,12 @@ function createController(page,finder,index){
       try{item.focus({preventScroll:true});}catch{item.focus();}
     });
     return true;
+  }
+
+  function moveExhibit(button){
+    const targetKey=button?.dataset.legacyExhibitPrev||button?.dataset.legacyExhibitNext||'';
+    if(!targetKey||button.disabled)return;
+    if(focusExhibit(targetKey,{syncUrl:true,scroll:true}))action.textContent='Museum walkthrough · exact exhibit link updated.';
   }
 
   function apply(next,{syncUrl=true,announce=true,preserveSpotlight=false}={}){
@@ -384,6 +415,10 @@ function createController(page,finder,index){
   });
 
   page.addEventListener('click',event=>{
+    const exhibitPrev=event.target.closest('[data-legacy-exhibit-prev]');
+    if(exhibitPrev){event.preventDefault();event.stopPropagation();moveExhibit(exhibitPrev);return;}
+    const exhibitNext=event.target.closest('[data-legacy-exhibit-next]');
+    if(exhibitNext){event.preventDefault();event.stopPropagation();moveExhibit(exhibitNext);return;}
     const exhibitSave=event.target.closest('[data-legacy-exhibit-save]');
     if(exhibitSave){event.preventDefault();event.stopPropagation();toggleSaved(exhibitSave);return;}
     const exhibitShare=event.target.closest('[data-legacy-exhibit-share]');
@@ -426,6 +461,7 @@ function enhanceLegacy(){
   controller.ensureMyMuseum();
   page.dataset.legacyFinderReady='true';
   page.dataset.legacyExhibitLinksReady='true';
+  page.dataset.legacyExhibitNavigatorReady='true';
   page._legacyFinderController=controller;
 }
 
