@@ -83,8 +83,9 @@ import('./fantasy-prop-review-v138.js').catch(()=>{});
         button.textContent=isWatched?'Watching':'Watch prop';
         button.setAttribute('aria-label',`${isWatched?'Remove':'Add'} ${identity.player} ${identity.market} ${isWatched?'from':'to'} watched props`);
       }
-      const tools=ensureTools(root);
-      const markup=`<div class="fpw-copy"><strong>${items.length} watched prop${items.length===1?'':'s'} saved on this browser</strong><span>${boardWatched} on this board · ${movedWatched} currently show browser-observed movement. Watching never triggers background refreshes.</span></div><button type="button" class="fpw-only" aria-pressed="${state.only?'true':'false'}"${items.length?'':' disabled'}>${state.only?'Show all props':'Watched only'}</button>`;
+      const tools=ensureTools(root),signedIn=Boolean(window.TitansAccount?.user);
+      const storageTruth=signedIn?'Watch targets are included in your Titans account settings when account sync is available. Observed line history and review checkpoints stay on this browser.':'Watch targets stay on this browser until you sign in. Observed line history and review checkpoints always stay browser-local.';
+      const markup=`<div class="fpw-copy"><strong>${items.length} watched prop${items.length===1?'':'s'} ${signedIn?'saved in your watchlist':'saved on this browser'}</strong><span>${boardWatched} on this board · ${movedWatched} currently show browser-observed movement. ${storageTruth} Watching never triggers background refreshes.</span></div><button type="button" class="fpw-only" aria-pressed="${state.only?'true':'false'}"${items.length?'':' disabled'}>${state.only?'Show all props':'Watched only'}</button>`;
       if(tools.dataset.signature!==markup){tools.innerHTML=markup;tools.dataset.signature=markup}
       tools.querySelector('.fpw-only')?.addEventListener('click',()=>{if(!items.length)return;state.only=!state.only;decorate()},{once:true});
     }finally{resumeObserver()}
@@ -94,6 +95,8 @@ import('./fantasy-prop-review-v138.js').catch(()=>{});
   observer=new MutationObserver(queue);resumeObserver();
   addEventListener('hashchange',()=>{if(route()!==ROUTE)state.only=false;queue()});
   addEventListener('storage',event=>{if(event.key===STORE)queue()});
+  addEventListener('titans:account',queue);
+  addEventListener('titans:preferences-synced',event=>{if(event.detail?.keys?.includes(STORE))queue()});
   queue();
   window.TitansFantasyPropWatchlist={load,keyFor,toggle,setOnly:value=>{state.only=Boolean(value);decorate()}};
 })();
