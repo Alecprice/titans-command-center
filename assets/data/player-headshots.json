@@ -2,9 +2,9 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-10-27T16:52:14.340819+00:00",
-  "rosterRows": 95,
-  "headshotCount": 93,
+  "generatedAt": "2026-10-28T17:24:47.945748+00:00",
+  "rosterRows": 94,
+  "headshotCount": 92,
   "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
@@ -212,18 +212,6 @@
       "gsisId": "00-0040020",
       "espnId": "4695280",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/wvznn64nnfj4emumr5he",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Shemar Bartholomew",
-      "normalizedName": "shemarbartholomew",
-      "number": "45",
-      "position": "DB",
-      "status": "CUT",
-      "gsisId": "00-0039292",
-      "espnId": "4371336",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/oehvtzmh4uhwwsfliskq",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
