@@ -2,9 +2,9 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-10-28T17:24:47.945748+00:00",
-  "rosterRows": 94,
-  "headshotCount": 92,
+  "generatedAt": "2026-10-29T17:32:46.066732+00:00",
+  "rosterRows": 96,
+  "headshotCount": 94,
   "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
@@ -296,6 +296,18 @@
       "gsisId": "00-0034805",
       "espnId": "3120464",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ilv9md09dsuvru8vbs4k",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Jonah Laulu",
+      "normalizedName": "jonahlaulu",
+      "number": "96",
+      "position": "DL",
+      "status": "ACT",
+      "gsisId": "00-0039423",
+      "espnId": "4373956",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/kxxw0cwdafdxbsvh5un9",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
@@ -812,6 +824,18 @@
       "gsisId": "00-0037618",
       "espnId": "4036834",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/b6vrvm3sbykrka1mr9jp",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
+      "name": "Thomas Morstead",
+      "normalizedName": "thomasmorstead",
+      "number": "7",
+      "position": "P",
+      "status": "DEV",
+      "gsisId": "00-0027114",
+      "espnId": "12701",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/uicxa9bwvrenvcwnoklm",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
