@@ -1,19 +1,18 @@
 # Cloudflare deployment status
 
-- Status: **deployed + production regression failure**
-- Source commit: `80ebf328c88dbed1b989eaec44ab3d0b50d09de8`
-- Quality gate: success
+- Status: **quality gate failed before Cloudflare deploy**
+- Source commit: `ff46184dd7e21c9ec4f96aac5fc6d40be0dfc860`
+- Quality gate: failure
 - Cloudflare credentials available: true
-- Source still current main: true
-- Main SHA observed before deploy: `80ebf328c88dbed1b989eaec44ab3d0b50d09de8`
+- Source still current main: unknown
 - Neon warehouse deployment secret required: false (D1 primary)
 - YouTube Data API configured: true
 - Ticket providers staged in GitHub: SeatGeek=false, Ticketmaster=false, StubHub=false
 - Fan Event secrets staged in GitHub: Eventbrite=false, Eventbrite org IDs=false, Skiddle=false
 - Fan Event runtime readiness: see the production regression evidence below; direct Worker secrets may be configured even when GitHub staging is false
-- Deploy outcome: success
-- Canonical front door: success
-- Production regression: failure
+- Deploy outcome: skipped
+- Canonical front door: skipped
+- Production regression: skipped
 - Fan Events production regression: skipped
 - Browser navigation regression: skipped
 - Listen Watch browser regression: skipped
@@ -29,208 +28,94 @@
 - Advanced analytics browser regression: skipped
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
-- Rollback Worker URL: https://titans-command-center.alecjordanprice.workers.dev
-- Recorded: 2026-10-29T17:34:13Z
+- Rollback Worker URL: existing deployment remains unchanged
+- Recorded: 2026-10-30T17:14:34Z
 
-## Canonical front door regression
+## Quality gate failure context
 
-```json
-{
-  "ok": true,
-  "canonical": "https://titans.alecjprice.com",
-  "origin": "https://titans-command-center.alecjordanprice.workers.dev",
-  "expectedCommit": "80ebf328c88dbed1b989eaec44ab3d0b50d09de8",
-  "deployedCommit": "80ebf328c88dbed1b989eaec44ab3d0b50d09de8",
-  "rollbackCommit": "80ebf328c88dbed1b989eaec44ab3d0b50d09de8",
-  "rollbackCurrent": true,
-  "version": "1.0.0",
-  "rollbackVersion": "1.0.0",
-  "revisionAttempts": 2,
-  "shellPropagationAttempts": 1,
-  "shellPaths": [
-    "/",
-    "/index.html",
-    "/sw.js",
-    "/app.js",
-    "/tickets-price-fallback-v58.js",
-    "/tickets-tenx-v123.js",
-    "/tickets-compare-v125.js",
-    "/tickets-compare-cache-bridge-v141.js"
-  ],
-  "shellCacheControl": {
-    "/": {
-      "canonical": "no-store, max-age=0, must-revalidate",
-      "origin": "no-store, max-age=0, must-revalidate"
-    },
-    "/index.html": {
-      "canonical": "no-store, max-age=0, must-revalidate",
-      "origin": "no-store, max-age=0, must-revalidate"
-    },
-    "/sw.js": {
-      "canonical": "public, max-age=0, must-revalidate, no-store, max-age=0, must-revalidate",
-      "origin": "public, max-age=0, must-revalidate, no-store, max-age=0, must-revalidate"
-    },
-    "/app.js": {
-      "canonical": "public, max-age=0, must-revalidate",
-      "origin": "public, max-age=0, must-revalidate"
-    },
-    "/tickets-price-fallback-v58.js": {
-      "canonical": "public, max-age=0, must-revalidate",
-      "origin": "public, max-age=0, must-revalidate"
-    },
-    "/tickets-tenx-v123.js": {
-      "canonical": "public, max-age=0, must-revalidate",
-      "origin": "public, max-age=0, must-revalidate"
-    },
-    "/tickets-compare-v125.js": {
-      "canonical": "public, max-age=0, must-revalidate",
-      "origin": "public, max-age=0, must-revalidate"
-    },
-    "/tickets-compare-cache-bridge-v141.js": {
-      "canonical": "public, max-age=0, must-revalidate",
-      "origin": "public, max-age=0, must-revalidate"
-    }
-  },
-  "cloudFront": {
-    "requestId": "59H8t-3Lu-kTPZQU-kHFJHn_XhmBuoPzJbZTg-5J0PxfojqPNLGrfA==",
-    "pop": "ORD51-P2",
-    "via": "1.1 34d903d36d6ff3fb4b2de2af9b8025f0.cloudfront.net (CloudFront)",
-    "cache": "Miss from cloudfront"
-  },
-  "canonicalSecurity": {
-    "contentTypeOptions": "nosniff",
-    "frameOptions": "DENY",
-    "referrerPolicy": "strict-origin-when-cross-origin",
-    "contentSecurityPolicy": "default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com https://i.ytimg.com https://d1plawd8huk6hh.cloudfront.net; connect-src 'self' https://api.sleeper.app; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
-    "robots": "",
-    "csp": true
-  },
-  "originRobots": "noindex, nofollow",
-  "health": {
-    "status": "healthy",
-    "databaseProvider": "cloudflare-d1",
-    "databaseConfigured": true,
-    "snapshotFresh": true
-  },
-  "rollbackHealth": {
-    "status": "healthy",
-    "databaseProvider": "cloudflare-d1",
-    "databaseConfigured": true,
-    "snapshotFresh": true
-  },
-  "responseMs": {
-    "canonicalMeta": 136,
-    "originMeta": 210,
-    "canonicalRoot": 124,
-    "originRoot": 78,
-    "health": 373,
-    "originHealth": 139
-  },
-  "testedAt": "2026-10-29T17:33:43.578Z"
-}```
+```text
 
-## Production regression
+--- tail ---
+✔ all configured free ticket providers run in parallel instead of fallback order (1.278514ms)
+✔ ticket price groups always progress cheapest to most expensive (2.989914ms)
+✔ SeatGeek event summaries normalize and sort by lowest price first (1.038797ms)
+✔ ticket purchase URLs fail closed to the official SeatGeek Titans page (0.242242ms)
+✔ Ticket Center explains comparison scope instead of inventing individual seat listings (10.105306ms)
+✔ Ticket Center is first-class, searchable, PWA packaged, and in responsive production coverage (3.306885ms)
+✔ Home has a prominent Ticket Finder entry without changing the five-action mobile dock (2.125171ms)
+✔ transaction chronology is newest-first without trusting provider order (2.112257ms)
+✔ equal transaction dates keep source order stable (0.285963ms)
+✔ latest transaction requires a real date instead of promoting an undated row (0.266276ms)
+✔ shared runtime publishes the canonical transaction chronology helpers (0.353309ms)
+✔ base Home and Transactions normalize transaction truth through core ownership (0.288137ms)
+✔ Transactions enhancement sorts rows before rendering while preserving fail-soft behavior (0.217215ms)
+✔ Fantasy latest move uses shared chronology and only dated fallback rows (0.396609ms)
+✔ transaction chronology repair adds no provider persistence or lifecycle owner (0.491977ms)
+✔ transaction calendar dates preserve the supplied date instead of browser-local rollover (25.183068ms)
+✔ transaction feed refresh timestamp is explicitly Nashville time (0.308484ms)
+✔ transaction calendar formatter keeps invalid and missing dates safe (0.213718ms)
+✔ fan, player, team-room, source-activity and responsive assets are loaded (3.78666ms)
+✔ service worker keeps API responses out of cache and versions current shell (0.351204ms)
+✔ core router degrades malformed dates and render failures instead of trapping navigation (0.486046ms)
+✔ shared feed time helpers never expose NaN labels (0.462342ms)
+✔ fan-facing base pages prefer live/backup language over storage implementation jargon (0.401488ms)
+✔ roster team-room switcher has plain button semantics, keyboard cycling and safe source links (0.486988ms)
+✔ rich player pages use the server player endpoint (0.533975ms)
+✔ fan status UI uses reader-friendly coverage language instead of implementation jargon (0.235769ms)
+✔ source activity distinguishes checked rows from new rows in fan-readable language (0.391991ms)
+✔ production data runtime no longer carries the retired warehouse adapter (1.67351ms)
+✔ visual archive uses audited metadata instead of ambiguous legacy aliases (0.389045ms)
+✔ responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint (0.204421ms)
+✔ visual source registry includes official, specialist and Wikipedia cross-checks (1.515195ms)
+✔ active visual catalog never uses quarantined legacy aliases (1.361809ms)
+✔ representative and composite art cannot masquerade as exact official logos (0.576975ms)
+✔ 2018 is treated as a uniform and wordmark change, not a new primary logo (0.2463ms)
+✔ Tennessee Oilers transition preserves alternate-logo nuance (0.33779ms)
+✔ current Shield receives exact current-brand treatment (0.211174ms)
+✔ Week 1 opponent intel records a Sep 6 source audit without inventing new football facts (1.371847ms)
+✔ Sep 6 audit preserves the qualified kicker and availability truth boundaries (0.476799ms)
+✔ Sep 6 audit preserves exact Week 1 game identity and official-source bounds (1.283353ms)
+✔ Week 1 opponent intelligence matches the scheduled Jets opener (1.484568ms)
+✔ opponent roster spine uses post-cutdown active-roster evidence (1.384461ms)
+✔ source truth qualifies stale unofficial depth-chart claims (0.47716ms)
+✔ pre-game-week availability cannot masquerade as an injury designation (0.4345ms)
+✔ consumer clones cannot mutate the frozen source snapshot (0.540507ms)
+✔ external workflow actions are pinned to immutable commit SHAs (3.750091ms)
+✔ Node-powered release workflows explicitly use Node 24 without package-manager caching (0.577416ms)
+✔ security-sensitive workflows retain least-privilege repository permissions (0.566897ms)
+✔ read-only workflow checkouts do not persist repository credentials (0.537723ms)
+✔ Cloudflare status writer syncs to current main before committing its generated report (0.262139ms)
+✔ cancelled Cloudflare releases never publish generated deployment status (0.272327ms)
+✔ critical workflow dependencies stay on the reviewed pinned releases (0.598024ms)
+ℹ tests 1935
+ℹ suites 0
+ℹ pass 1934
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11113.527947
 
-```json
-{
-  "ok": false,
-  "base": "https://titans.alecjprice.com",
-  "rootStatus": 200,
-  "securityHeaders": {
-    "contentTypeOptions": "nosniff",
-    "frameOptions": "DENY",
-    "referrerPolicy": "strict-origin-when-cross-origin",
-    "contentSecurityPolicy": "default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://static.clubs.nfl.com https://static.www.nfl.com https://static.nfl.com https://a.espncdn.com https://a1.espncdn.com https://i.ytimg.com https://d1plawd8huk6hh.cloudfront.net; connect-src 'self' https://api.sleeper.app; media-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
-    "robots": "",
-    "csp": true
-  },
-  "manifestStatus": 200,
-  "serviceWorkerStatus": 200,
-  "serviceWorkerCache": "titans-cc-brand-2026-v87",
-  "precachePaths": 151,
-  "pwaIcons": {
-    "icon192": {
-      "width": 192,
-      "height": 192,
-      "bytes": 2854
-    },
-    "icon512": {
-      "width": 512,
-      "height": 512,
-      "bytes": 5724
-    }
-  },
-  "healthStatus": 200,
-  "appStatus": "healthy",
-  "databaseProvider": "cloudflare-d1",
-  "databaseConfigured": true,
-  "databaseOk": true,
-  "snapshotFresh": true,
-  "dataMode": "audited-fallback",
-  "databaseAvailable": false,
-  "dataStatus": 200,
-  "dataRosterCount": 60,
-  "transactionCount": 9,
-  "invalidTransactionDates": 0,
-  "statsStatus": 200,
-  "statsRosterCount": 60,
-  "statsRosterMode": "d1-snapshot",
-  "statsRosterSource": "Tennessee Titans official roster / transaction snapshot · Cloudflare D1",
-  "completedPreseasonGamebooks": 3,
-  "completedPreseasonGames": 3,
-  "completedPreseasonGamesWithPlayerStats": 3,
-  "completedPreseasonGamesMissingPlayerStats": 0,
-  "marketStatus": 200,
-  "marketRows": 600,
-  "marketMode": "configured-provider",
-  "buildMeta": {
-    "app": "titans-command-center",
-    "version": "1.0.0",
-    "commit": "80ebf328c88dbed1b989eaec44ab3d0b50d09de8",
-    "builtAt": "2026-10-29T17:33:21.780Z"
-  },
-  "deploymentPropagationAttempts": 1,
-  "responseMs": {
-    "root": 73,
-    "health": 126,
-    "data": 150,
-    "stats": 381,
-    "market": 1660
-  },
-  "testedAt": "2026-10-29T17:34:11.705Z",
-  "healthTruth": {
-    "ok": true,
-    "mode": "d1-snapshot",
-    "status": 200,
-    "healthStatus": "healthy",
-    "contentAudit": "2026-09-02",
-    "dataAudit": "2026-10-29",
-    "databaseProvider": "cloudflare-d1",
-    "snapshotFresh": true,
-    "edgeCacheStatus": "HIT",
-    "responseMs": 490,
-    "testedAt": "2026-10-29T17:34:12.572Z"
-  },
-  "marketEdgeCache": {
-    "ok": true,
-    "base": "https://titans.alecjprice.com",
-    "initialStatus": "HIT",
-    "finalStatus": "HIT",
-    "attempts": 1,
-    "coldOrInitialMs": 274,
-    "warmHitMs": 274,
-    "rows": 600,
-    "sequence": [
-      {
-        "status": "HIT",
-        "durationMs": 274,
-        "rows": 600
-      }
-    ],
-    "testedAt": "2026-10-29T17:34:12.872Z"
-  },
-  "analyticsError": "Personnel package analytics are missing",
-  "analyticsTestedAt": "2026-10-29T17:34:13.266Z"
-}```
+✖ failing tests:
+
+test at tests/player-headshots.test.mjs:9:1
+✖ nflreadpy headshot manifest has useful current Titans coverage (12.109196ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(names.has('jefferysimmons'))
+  
+      at TestContext.<anonymous> (file:///home/runner/work/titans-command-center/titans-command-center/tests/player-headshots.test.mjs:31:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+```
 
 Generated automatically by `.github/workflows/cloudflare-deploy.yml`.
