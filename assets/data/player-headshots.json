@@ -2,9 +2,9 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-11-04T18:52:40.341688+00:00",
-  "rosterRows": 95,
-  "headshotCount": 93,
+  "generatedAt": "2026-11-05T18:59:46.054924+00:00",
+  "rosterRows": 94,
+  "headshotCount": 92,
   "coveragePct": 97.9,
   "omittedCount": 2,
   "omissionReasons": {
@@ -548,18 +548,6 @@
       "gsisId": "00-0036511",
       "espnId": "4371940",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/rfmdcyim9q0prw56mzgw",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Mohamoud Diabate",
-      "normalizedName": "mohamouddiabate",
-      "number": "44",
-      "position": "LB",
-      "status": "CUT",
-      "gsisId": "00-0038711",
-      "espnId": "4567403",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/j39qrvxutigqitawwn91",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
