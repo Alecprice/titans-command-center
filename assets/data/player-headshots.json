@@ -2,10 +2,10 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-11-05T18:59:46.054924+00:00",
-  "rosterRows": 94,
-  "headshotCount": 92,
-  "coveragePct": 97.9,
+  "generatedAt": "2026-11-06T18:29:56.605310+00:00",
+  "rosterRows": 93,
+  "headshotCount": 91,
+  "coveragePct": 97.8,
   "omittedCount": 2,
   "omissionReasons": {
     "no-approved-headshot-url": 2
@@ -560,18 +560,6 @@
       "gsisId": "00-0040752",
       "espnId": "4876057",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/fa9mblbgbubtl0wmser0",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Owen Pappoe",
-      "normalizedName": "owenpappoe",
-      "number": "40",
-      "position": "LB",
-      "status": "CUT",
-      "gsisId": "00-0038600",
-      "espnId": "4567219",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/zv35eeyd3oxxkecrvqra",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
