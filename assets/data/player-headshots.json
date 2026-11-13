@@ -2,7 +2,7 @@
   "ok": true,
   "team": "TEN",
   "season": 2026,
-  "generatedAt": "2026-11-12T19:09:00.168413+00:00",
+  "generatedAt": "2026-11-13T18:46:50.143861+00:00",
   "rosterRows": 93,
   "headshotCount": 91,
   "coveragePct": 97.8,
@@ -552,6 +552,18 @@
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
     {
+      "name": "Mohamoud Diabate",
+      "normalizedName": "mohamouddiabate",
+      "number": "49",
+      "position": "LB",
+      "status": "ACT",
+      "gsisId": "00-0038711",
+      "espnId": "4567403",
+      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/j39qrvxutigqitawwn91",
+      "imageHost": "static.www.nfl.com",
+      "source": "nflverse roster headshot (NFL/ESPN)"
+    },
+    {
       "name": "Oluwafemi Oladejo",
       "normalizedName": "oluwafemioladejo",
       "number": "7",
@@ -728,18 +740,6 @@
       "gsisId": "00-0036866",
       "espnId": "4258181",
       "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/vuiripsrxoknaderwsuk",
-      "imageHost": "static.www.nfl.com",
-      "source": "nflverse roster headshot (NFL/ESPN)"
-    },
-    {
-      "name": "Nick Broeker",
-      "normalizedName": "nickbroeker",
-      "number": "65",
-      "position": "OL",
-      "status": "TRD",
-      "gsisId": "00-0038633",
-      "espnId": "4426498",
-      "headshotUrl": "https://static.www.nfl.com/image/upload/f_auto,q_auto/league/ho1hflkakgdwhwzj7eyu",
       "imageHost": "static.www.nfl.com",
       "source": "nflverse roster headshot (NFL/ESPN)"
     },
