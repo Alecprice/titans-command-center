@@ -14,6 +14,7 @@ import './media-affiliates-v14.js';
     const source=String(value||'').trim();
     const call=source.match(RADIO_CALLSIGN)?.[0];
     if(!call)return'';
+    if(!globalThis.TitansMediaAffiliates?.isKnownCallsign?.(call))return'';
     const exact=source.toUpperCase()===call.toUpperCase();
     const contextual=RADIO_CONTEXT.test(source)||RADIO_FREQUENCY.test(source);
     return exact||contextual?call.toUpperCase():'';

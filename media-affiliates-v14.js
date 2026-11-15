@@ -53,6 +53,12 @@
     {state:'Kentucky',call:'WAIN',frequency:'1270 AM',city:'Columbia'}
   ].map((station,index)=>({...station,index,key:`${station.state}|${station.call}|${station.frequency}|${station.city}`,search:normalize(`${station.call} ${station.frequency} ${station.city} ${station.state}`)}));
 
+  const affiliateApi=globalThis.TitansMediaAffiliates||(globalThis.TitansMediaAffiliates={});
+  affiliateApi.isKnownCallsign=value=>{
+    const canonical=String(value||'').trim().toUpperCase();
+    return Boolean(canonical)&&STATIONS.some(station=>station.call===canonical);
+  };
+
   const STATES=['Tennessee','Alabama','Kentucky'];
   let pageObserver=null;
   let observedPage=null;
