@@ -1,7 +1,7 @@
 # Cloudflare deployment status
 
 - Status: **quality gate failed before Cloudflare deploy**
-- Source commit: `e0d6908f49830c40f18017879ebd606acb9cac89`
+- Source commit: `84a37815c58f831cf1f547532a8b6474e3d836da`
 - Quality gate: failure
 - Cloudflare credentials available: true
 - Source still current main: unknown
@@ -29,64 +29,64 @@
 - Player headshot browser regression: skipped
 - Production URL: https://titans.alecjprice.com
 - Rollback Worker URL: existing deployment remains unchanged
-- Recorded: 2026-11-23T22:56:05Z
+- Recorded: 2026-11-24T21:31:59Z
 
 ## Quality gate failure context
 
 ```text
 
 --- tail ---
-✔ all configured free ticket providers run in parallel instead of fallback order (1.069762ms)
-✔ ticket price groups always progress cheapest to most expensive (3.925321ms)
-✔ SeatGeek event summaries normalize and sort by lowest price first (1.440272ms)
-✔ ticket purchase URLs fail closed to the official SeatGeek Titans page (0.219549ms)
-✔ Ticket Center explains comparison scope instead of inventing individual seat listings (10.827367ms)
-✔ Ticket Center is first-class, searchable, PWA packaged, and in responsive production coverage (2.956517ms)
-✔ Home has a prominent Ticket Finder entry without changing the five-action mobile dock (1.951976ms)
-✔ transaction chronology is newest-first without trusting provider order (2.13182ms)
-✔ equal transaction dates keep source order stable (0.314155ms)
-✔ latest transaction requires a real date instead of promoting an undated row (0.320066ms)
-✔ shared runtime publishes the canonical transaction chronology helpers (0.375539ms)
-✔ base Home and Transactions normalize transaction truth through core ownership (0.274942ms)
-✔ Transactions enhancement sorts rows before rendering while preserving fail-soft behavior (0.215ms)
-✔ Fantasy latest move uses shared chronology and only dated fallback rows (0.275272ms)
-✔ transaction chronology repair adds no provider persistence or lifecycle owner (0.437284ms)
-✔ transaction calendar dates preserve the supplied date instead of browser-local rollover (18.499387ms)
-✔ transaction feed refresh timestamp is explicitly Nashville time (0.197919ms)
-✔ transaction calendar formatter keeps invalid and missing dates safe (0.211895ms)
-✔ fan, player, team-room, source-activity and responsive assets are loaded (2.238209ms)
-✔ service worker keeps API responses out of cache and versions current shell (0.294479ms)
-✔ core router degrades malformed dates and render failures instead of trapping navigation (0.325987ms)
-✔ shared feed time helpers never expose NaN labels (0.290601ms)
-✔ fan-facing base pages prefer live/backup language over storage implementation jargon (0.30043ms)
-✔ roster team-room switcher has plain button semantics, keyboard cycling and safe source links (0.412509ms)
-✔ rich player pages use the server player endpoint (0.344121ms)
-✔ fan status UI uses reader-friendly coverage language instead of implementation jargon (0.29009ms)
-✔ source activity distinguishes checked rows from new rows in fan-readable language (0.38138ms)
-✔ production data runtime no longer carries the retired warehouse adapter (1.421618ms)
-✔ visual archive uses audited metadata instead of ambiguous legacy aliases (0.278989ms)
-✔ responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint (0.251348ms)
-✔ visual source registry includes official, specialist and Wikipedia cross-checks (1.322373ms)
-✔ active visual catalog never uses quarantined legacy aliases (1.594901ms)
-✔ representative and composite art cannot masquerade as exact official logos (0.743455ms)
-✔ 2018 is treated as a uniform and wordmark change, not a new primary logo (0.336297ms)
-✔ Tennessee Oilers transition preserves alternate-logo nuance (0.366342ms)
-✔ current Shield receives exact current-brand treatment (0.232874ms)
-✔ Week 1 opponent intel records a Sep 6 source audit without inventing new football facts (1.267851ms)
-✔ Sep 6 audit preserves the qualified kicker and availability truth boundaries (0.503588ms)
-✔ Sep 6 audit preserves exact Week 1 game identity and official-source bounds (1.720394ms)
-✔ Week 1 opponent intelligence matches the scheduled Jets opener (1.083639ms)
-✔ opponent roster spine uses post-cutdown active-roster evidence (0.786265ms)
-✔ source truth qualifies stale unofficial depth-chart claims (0.297714ms)
-✔ pre-game-week availability cannot masquerade as an injury designation (0.362946ms)
-✔ consumer clones cannot mutate the frozen source snapshot (0.422788ms)
-✔ external workflow actions are pinned to immutable commit SHAs (5.888057ms)
-✔ Node-powered release workflows explicitly use Node 24 without package-manager caching (0.410405ms)
-✔ security-sensitive workflows retain least-privilege repository permissions (0.438978ms)
-✔ read-only workflow checkouts do not persist repository credentials (0.341345ms)
-✔ Cloudflare status writer syncs to current main before committing its generated report (0.277978ms)
-✔ cancelled Cloudflare releases never publish generated deployment status (0.94539ms)
-✔ critical workflow dependencies stay on the reviewed pinned releases (0.575371ms)
+✔ all configured free ticket providers run in parallel instead of fallback order (1.282169ms)
+✔ ticket price groups always progress cheapest to most expensive (3.830516ms)
+✔ SeatGeek event summaries normalize and sort by lowest price first (1.083537ms)
+✔ ticket purchase URLs fail closed to the official SeatGeek Titans page (0.268953ms)
+✔ Ticket Center explains comparison scope instead of inventing individual seat listings (12.435778ms)
+✔ Ticket Center is first-class, searchable, PWA packaged, and in responsive production coverage (2.802562ms)
+✔ Home has a prominent Ticket Finder entry without changing the five-action mobile dock (1.66776ms)
+✔ transaction chronology is newest-first without trusting provider order (2.135755ms)
+✔ equal transaction dates keep source order stable (0.269955ms)
+✔ latest transaction requires a real date instead of promoting an undated row (0.298318ms)
+✔ shared runtime publishes the canonical transaction chronology helpers (0.337542ms)
+✔ base Home and Transactions normalize transaction truth through core ownership (0.263864ms)
+✔ Transactions enhancement sorts rows before rendering while preserving fail-soft behavior (0.248925ms)
+✔ Fantasy latest move uses shared chronology and only dated fallback rows (0.232855ms)
+✔ transaction chronology repair adds no provider persistence or lifecycle owner (0.421368ms)
+✔ transaction calendar dates preserve the supplied date instead of browser-local rollover (20.257667ms)
+✔ transaction feed refresh timestamp is explicitly Nashville time (0.258964ms)
+✔ transaction calendar formatter keeps invalid and missing dates safe (0.192571ms)
+✔ fan, player, team-room, source-activity and responsive assets are loaded (2.961269ms)
+✔ service worker keeps API responses out of cache and versions current shell (0.372487ms)
+✔ core router degrades malformed dates and render failures instead of trapping navigation (0.459359ms)
+✔ shared feed time helpers never expose NaN labels (0.34178ms)
+✔ fan-facing base pages prefer live/backup language over storage implementation jargon (0.404246ms)
+✔ roster team-room switcher has plain button semantics, keyboard cycling and safe source links (0.781291ms)
+✔ rich player pages use the server player endpoint (0.478094ms)
+✔ fan status UI uses reader-friendly coverage language instead of implementation jargon (0.349604ms)
+✔ source activity distinguishes checked rows from new rows in fan-readable language (0.361617ms)
+✔ production data runtime no longer carries the retired warehouse adapter (2.15437ms)
+✔ visual archive uses audited metadata instead of ambiguous legacy aliases (0.440995ms)
+✔ responsive layer covers phone, tablet and wide desktop and hides unverified legacy first paint (0.279964ms)
+✔ visual source registry includes official, specialist and Wikipedia cross-checks (0.9887ms)
+✔ active visual catalog never uses quarantined legacy aliases (1.477033ms)
+✔ representative and composite art cannot masquerade as exact official logos (0.676416ms)
+✔ 2018 is treated as a uniform and wordmark change, not a new primary logo (0.275795ms)
+✔ Tennessee Oilers transition preserves alternate-logo nuance (0.340627ms)
+✔ current Shield receives exact current-brand treatment (0.179847ms)
+✔ Week 1 opponent intel records a Sep 6 source audit without inventing new football facts (1.339586ms)
+✔ Sep 6 audit preserves the qualified kicker and availability truth boundaries (0.530833ms)
+✔ Sep 6 audit preserves exact Week 1 game identity and official-source bounds (1.260508ms)
+✔ Week 1 opponent intelligence matches the scheduled Jets opener (0.979021ms)
+✔ opponent roster spine uses post-cutdown active-roster evidence (0.840742ms)
+✔ source truth qualifies stale unofficial depth-chart claims (0.2939ms)
+✔ pre-game-week availability cannot masquerade as an injury designation (0.332933ms)
+✔ consumer clones cannot mutate the frozen source snapshot (0.368219ms)
+✔ external workflow actions are pinned to immutable commit SHAs (3.404669ms)
+✔ Node-powered release workflows explicitly use Node 24 without package-manager caching (0.497852ms)
+✔ security-sensitive workflows retain least-privilege repository permissions (0.715749ms)
+✔ read-only workflow checkouts do not persist repository credentials (0.639526ms)
+✔ Cloudflare status writer syncs to current main before committing its generated report (0.282849ms)
+✔ cancelled Cloudflare releases never publish generated deployment status (1.063179ms)
+✔ critical workflow dependencies stay on the reviewed pinned releases (0.666246ms)
 ℹ tests 1935
 ℹ suites 0
 ℹ pass 1934
@@ -94,12 +94,12 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 10723.048084
+ℹ duration_ms 10752.655589
 
 ✖ failing tests:
 
 test at tests/player-headshots.test.mjs:9:1
-✖ nflreadpy headshot manifest has useful current Titans coverage (26.186766ms)
+✖ nflreadpy headshot manifest has useful current Titans coverage (9.912928ms)
   AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
   
     assert.ok(names.has('amanihooker'))
